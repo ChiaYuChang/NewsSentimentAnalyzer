@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/style.css" />
+    <link rel="stylesheet" href="../../css/panal.css" />
+</head>
+
+<body>
+    <section class="background">
+        <div class="mid-card">
+            <h1>Parameters</h1>
+            <p>API: <strong>NEWSDATA.IO</strong>, Endpoint: <strong>News Archive</strong></p>
+            <form action="" method="post" class="data-form">
+                <ul class="data-list">
+                    <li class="data-field">
+                        <label for="keyword">Keywords</label>:
+                        <input type="text">
+                    </li>
+                    <li class="data-field">
+                        <label for="domains">Domains</label>:
+                        <input type="text">
+                    </li>
+                    <li class="data-field">
+                        <label for="language">Language</label>:
+                        <select name="language" id="language" class="language">
+                            <option value="">All</option>
+                            <option value="zh">Chinese</option>
+                            <option value="en">English</option>
+                            <option value="es">Spanish</option>
+                            <option value="jp">Japanese</option>
+                            <option value="ko">Korean</option>
+                        </select>
+                    </li>
+                    <!-- <li class="data-field">
+                        current not yet supported
+                        <label for="include">Include</label>:
+                        <div class="row">
+                            <div>
+                                <input type="checkbox" name="image" id="image"> image
+                            </div>
+                            <div>
+                                <input type="checkbox" name="video" id="video"> image
+                            </div>
+                            <div>
+                                <input type="checkbox" name="full-content" id="full-content"> full content
+                            </div>
+                        </div>
+                    </li> -->
+                    <li class="data-field">
+                        <label for="country">Country</label>:
+                        <select name="language" id="language" class="language">
+                            <option value="">All</option>
+                            <optgroup label="Asia">
+                                <option value="cn">China</option>
+                                <option value="jp">Japan</option>
+                                <option value="ko">Korea</option>
+                                <option value="tw">Taiwan</option>
+                            </optgroup>
+                            <optgroup label="North america">
+                                <option value="ca">Canada</option>
+                                <option value="us">United States</option>
+                            </optgroup>
+                            <optgroup label="Europe">
+                                <option value="uk">United Kingdom</option>
+                            </optgroup>
+                        </select>
+                    </li>
+                    <li class="data-field">
+                        <label for="category">Category</label>:
+                        <select name="category" id="category" class="category">
+                            <option value="business">Business</option>
+                            <option value="entertainment">Entertainment</option>
+                            <option value="environment">Environment</option>
+                            <option value="food">Food</option>
+                            <option value="health">Health</option>
+                            <option value="politics">Politics</option>
+                            <option value="science">Science</option>
+                            <option value="sports">Sports</option>
+                            <option value="technology">Technology</option>
+                            <option value="top">Top</option>
+                            <option value="tourism">Tourism</option>
+                            <option value="world">World</option>
+                        </select>
+                    </li>
+                    <li class="data-field">
+                        <label for="from">From</label>:
+                        <input type="datetime" class="date-picker" placeholder="YYYY-MM-DD">
+                    </li>
+                    <li class="data-field">
+                        <label for="from">To</label>:
+                        <input type="datetime" class="date-picker" placeholder="YYYY-MM-DD">
+                    </li>
+                </ul>
+                <input type="submit" value="Submit" class="btn">
+            </form>
+        </div>
+    </section>
+</body>
+
+</html>

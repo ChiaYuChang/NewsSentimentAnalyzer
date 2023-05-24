@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/style.css" />
+    <link rel="stylesheet" href="../../css/panal.css" />
+</head>
+
+<body>
+    <section class="background">
+        <div class="mid-card">
+            <h1>Parameters</h1>
+            <p>API: <strong>News API</strong>, Endpoint: <strong>Everything</strong></p>
+            <form action="" method="post" class="data-form">
+                <ul class="data-list">
+                    <li class="data-field">
+                        <label for="keyword">Keywords</label>:
+                        <input type="text">
+                    </li>
+                    <li class="data-field">
+                        <label for="search-in">Search in</label>:
+                        <select name="search-in" id="search-in" class="search-in">
+                            <option value="">All</option>
+                            <option value="title">Title</option>
+                            <option value="description">Description</option>
+                            <option value="content">Content</option>
+                        </select>
+                    </li>
+                    <li class="data-field">
+                        <label for="sources">Sources</label>:
+                        <input type="text">
+                    </li>
+                    <li class="data-field">
+                        <label for="domains">Domains</label>:
+                        <input type="text">
+                    </li>
+                    <li class="data-field">
+                        <label for="exclude-domains">Exculde Domains</label>:
+                        <input type="text">
+                    </li>
+                    <li class="data-field">
+                        <label for="language">Language</label>:
+                        <select name="language" id="language" class="language">
+                            <option value="">All</option>
+                            <option value="zh">Chinese</option>
+                            <option value="en">English</option>
+                            <option value="es">Spanish</option>
+                            <option value="jp">Japanese</option>
+                            <option value="ko">Korean</option>
+                        </select>
+                    </li>
+                    <li class="data-field">
+                        <label for="from">From</label>:
+                        <input type="datetime" class="date-picker" placeholder="YYYY-MM-DD">
+                    </li>
+                    <li class="data-field">
+                        <label for="from">To</label>:
+                        <input type="datetime" class="date-picker" placeholder="YYYY-MM-DD">
+                    </li>
+                </ul>
+                <input type="submit" value="Submit" class="btn">
+            </form>
+        </div>
+    </section>
+</body>
+
+</html>
