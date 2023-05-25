@@ -16,11 +16,6 @@ type JWTClaims struct {
 	jwt.RegisteredClaims
 }
 
-type UserInfo struct {
-	UserName string `json:"username"`
-	Role     Role   `json:"role"`
-}
-
 func (c JWTClaims) GetUserInfo() UserInfo {
 	return c.UserInfo
 }

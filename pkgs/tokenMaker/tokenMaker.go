@@ -13,7 +13,7 @@ func init() {
 
 var DEFAULT_SECRET = []byte("SHOULD-NEVER-USED-IN-PRODUCTION")
 
-const DEFAULT_EXPIRE_AFTER = 3 * 24 * time.Hour
+const DEFAULT_EXPIRE_AFTER = 3 * time.Hour
 const DEFAULT_VALID_AFTER = 0 * time.Second
 
 type TokenMaker interface {
@@ -56,4 +56,9 @@ type Payload interface {
 	GetUsername() string
 	GetUserInfo() UserInfo
 	fmt.Stringer
+}
+
+type UserInfo struct {
+	UserName string `json:"username"`
+	Role     Role   `json:"role"`
 }

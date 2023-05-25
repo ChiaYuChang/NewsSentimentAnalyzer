@@ -14,7 +14,7 @@ import (
 type CtxKey string
 
 const (
-	CtxUserInfo CtxKey = "user_info"
+	CtxUserInfo CtxKey = "UserInfo"
 )
 
 type BearerTokenMaker struct {
@@ -29,64 +29,31 @@ func NewJWTTokenMaker(makerOpt global.JWTOption, claimOpt ...tokenmaker.JWTClaim
 	return BearerTokenMaker{maker}
 }
 
-func (bm BearerTokenMaker) BearerAuthenticator(next http.Handler) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		bearer := r.FormValue("Authorization")
+func (bm BearerTokenMaker) BearerAuthenticator(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// validation
+		bearer := r.Header.Get("Authorization")
 		bearer = strings.TrimSpace(strings.TrimLeft(bearer, "Bearer"))
 		payload, err := bm.TokenMaker.ValidateToken(bearer)
 		if err != nil {
-			if ecErr, ok := err.(*ec.Error); ok {
-				body, _ := ecErr.ToJson()
-				w.Header().Set("Content-Type", "application/json")
-				w.WriteHeader(ecErr.HttpStatusCode)
-				w.Write(body)
-			} else {
-				ecErr := ec.MustGetErr(ec.ECUnauthorized).(*ec.Error)
+			ecErr, ok := err.(*ec.Error)
+			if !ok {
+				ecErr = ec.MustGetErr(ec.ECUnauthorized).(*ec.Error)
 				ecErr.WithDetails(err.Error())
-				w.WriteHeader(ecErr.HttpStatusCode)
-				w.Header().Set("Content-Type", "application/json")
-				body, _ := ecErr.ToJson()
-				w.Write(body)
 			}
-			return
-		}
-		r = r.WithContext(context.WithValue(r.Context(), CtxUserInfo, payload.GetUserInfo()))
-		next.ServeHTTP(w, r)
-	}
-}
-
-func (bm BearerTokenMaker) BearerSigner(next http.Handler) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		usrInfo, ok := r.Context().Value(CtxUserInfo).(tokenmaker.UserInfo)
-		if !ok {
-			ecErr := ec.MustGetErr(ec.ECServerError).(*ec.Error)
-			ecErr.WithDetails("username not found", "user role not found")
-			w.WriteHeader(ecErr.HttpStatusCode)
-			w.Header().Set("Content-Type", "application/json")
 			body, _ := ecErr.ToJson()
+			w.Header().Add("Content-Type", "application/json")
+			w.WriteHeader(ecErr.HttpStatusCode)
 			w.Write(body)
 			return
 		}
 
-		bearer, err := bm.TokenMaker.MakeToken(usrInfo.UserName, usrInfo.Role)
-		if err != nil {
-			if ecErr, ok := err.(*ec.Error); ok {
-				body, _ := ecErr.ToJson()
-				w.Header().Set("Content-Type", "application/json")
-				w.WriteHeader(ecErr.HttpStatusCode)
-				w.Write(body)
-				return
-			} else {
-				ecErr := ec.MustGetErr(ec.ECUnauthorized).(*ec.Error)
-				ecErr.WithDetails(err.Error())
-				w.WriteHeader(ecErr.HttpStatusCode)
-				w.Header().Set("Content-Type", "application/json")
-				body, _ := ecErr.ToJson()
-				w.Write(body)
-				return
-			}
-		}
+		// sign new token
+		userInfo := payload.GetUserInfo()
+		bearer, _ = bm.TokenMaker.MakeToken(userInfo.UserName, userInfo.Role)
 		w.Header().Set("Authorization", fmt.Sprintf("Bearer %s", bearer))
+		r = r.WithContext(context.WithValue(r.Context(), CtxUserInfo, userInfo))
 		next.ServeHTTP(w, r)
-	}
+		return
+	})
 }

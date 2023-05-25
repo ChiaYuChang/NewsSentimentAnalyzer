@@ -1,31 +1,24 @@
 package global
 
-import (
-	"encoding/json"
-	"fmt"
-	"io"
-	"os"
-)
-
 var Secrets Secret
 
-func init() {
-	f, err := os.Open("./secret.json")
-	if err != nil {
-		panic(fmt.Sprintf("error while opening secret.json: %s", err.Error()))
-	}
-	defer f.Close()
+// func init() {
+// 	f, err := os.Open("./secret.json")
+// 	if err != nil {
+// 		panic(fmt.Sprintf("error while opening secret.json: %s", err.Error()))
+// 	}
+// 	defer f.Close()
 
-	srcts, err := io.ReadAll(f)
-	if err != nil {
-		panic(fmt.Sprintf("error while reading secrets: %s", err.Error()))
-	}
+// 	srcts, err := io.ReadAll(f)
+// 	if err != nil {
+// 		panic(fmt.Sprintf("error while reading secrets: %s", err.Error()))
+// 	}
 
-	err = json.Unmarshal(srcts, &Secrets)
-	if err != nil {
-		panic(fmt.Sprintf("error while unmarshal secrets: %s", err.Error()))
-	}
-}
+// 	err = json.Unmarshal(srcts, &Secrets)
+// 	if err != nil {
+// 		panic(fmt.Sprintf("error while unmarshal secrets: %s", err.Error()))
+// 	}
+// }
 
 type Secret struct {
 	Database []Database `json:"db"`
