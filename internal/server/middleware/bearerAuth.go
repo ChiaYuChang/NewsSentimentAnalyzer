@@ -21,7 +21,7 @@ type BearerTokenMaker struct {
 	tokenmaker.TokenMaker
 }
 
-func NewJWTTokenMaker(makerOpt global.JWTOption, claimOpt ...tokenmaker.JWTClaimsOpt) BearerTokenMaker {
+func NewJWTTokenMaker(makerOpt global.TokenMakerOption, claimOpt ...tokenmaker.JWTClaimsOpt) BearerTokenMaker {
 	maker := tokenmaker.NewJWTMaker(
 		makerOpt.Secret, makerOpt.SignMethod,
 		makerOpt.ExpireAfter, makerOpt.ValidAfter)

@@ -1,7 +1,8 @@
 package global
 
-var AppVar appVar
+var AppVar = appVar{}
 
 type appVar struct {
-	JWTOption
+	Secret
+	TokenMakerOption
 }
