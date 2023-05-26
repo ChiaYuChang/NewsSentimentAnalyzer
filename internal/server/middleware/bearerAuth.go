@@ -23,8 +23,10 @@ type BearerTokenMaker struct {
 
 func NewJWTTokenMaker(makerOpt global.TokenMakerOption, claimOpt ...tokenmaker.JWTClaimsOpt) BearerTokenMaker {
 	maker := tokenmaker.NewJWTMaker(
-		makerOpt.Secret, makerOpt.SignMethod,
-		makerOpt.ExpireAfter, makerOpt.ValidAfter)
+		makerOpt.Secret,
+		makerOpt.SignMethod,
+		makerOpt.ExpireAfter(),
+		makerOpt.ValidAfter())
 	maker.WithOptions(claimOpt...)
 	return BearerTokenMaker{maker}
 }

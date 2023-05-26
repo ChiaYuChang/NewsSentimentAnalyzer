@@ -22,13 +22,15 @@ import (
 var opt global.TokenMakerOption
 
 func init() {
-	secret := make([]byte, 256)
+	secretLen := 256
+	secret := make([]byte, secretLen)
 	_, _ = rand.Read(secret)
 	opt = global.TokenMakerOption{
-		Secret:      secret,
-		ExpireAfter: tokenmaker.DEFAULT_EXPIRE_AFTER,
-		ValidAfter:  tokenmaker.DEFAULT_VALID_AFTER,
-		SignMethod:  tokenmaker.DEFAULT_JWT_SIGN_METHOD,
+		Secret:          secret,
+		SecretLength:    secretLen,
+		ExpireAfterHour: 3,
+		ValidAfterHour:  0,
+		SignMethod:      tokenmaker.DEFAULT_JWT_SIGN_METHOD,
 	}
 }
 
