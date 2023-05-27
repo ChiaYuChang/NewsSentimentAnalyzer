@@ -8,6 +8,8 @@ CREATE TABLE "apikeys" (
   "deleted_at"  timestamp   DEFAULT null
 );
 
+CREATE INDEX ON "apikeys" ("owner", "api_id");
+
 ALTER TABLE "apikeys" ADD FOREIGN KEY ("owner") REFERENCES "users" ("id");
 
 ALTER TABLE "apikeys" ADD FOREIGN KEY ("api_id") REFERENCES "apis" ("id");

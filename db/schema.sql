@@ -403,6 +403,13 @@ CREATE INDEX keywords_keyword_idx ON public.keywords USING btree (keyword);
 
 
 --
+-- Name: users_email_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX users_email_idx ON public.users USING btree (email);
+
+
+--
 -- Name: apikeys apikeys_api_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 

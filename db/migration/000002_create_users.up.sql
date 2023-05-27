@@ -10,3 +10,5 @@ CREATE TABLE "users" (
   "deleted_at"          timestamp       DEFAULT null,
   "password_updated_at" timestamp       NOT NULL DEFAULT (now())
 );
+
+CREATE INDEX ON "users" ("email");
