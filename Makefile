@@ -12,9 +12,10 @@ sqlc-generate:
 	sqlc generate -f ./config/sqlc.yml
 
 sqlc-clean:
-	rm ./internal/models/*.sql.go
-	rm ./internal/models/db.go
-	rm ./internal/models/models.go
+	rm ./internal/model/*.sql.go
+	rm ./internal/model/db.go
+	rm ./internal/model/querier.go
+	rm ./internal/model/model.go
 
 docker-new-psql-container:
 	@docker volume create nsa-volume

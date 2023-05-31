@@ -55,10 +55,12 @@ type Payload interface {
 	GetRole() Role
 	GetUsername() string
 	GetUserInfo() UserInfo
+	GetUserID() int32
 	fmt.Stringer
 }
 
 type UserInfo struct {
 	UserName string `json:"username"`
 	Role     Role   `json:"role"`
+	UID      int32  `json:"uid"`
 }

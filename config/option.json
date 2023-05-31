@@ -1,0 +1,16 @@
+{
+    "tokenmaker": {
+        "secret_len": 256,
+        "expire_after": 3,
+        "valid_after": 0
+    },
+    "password_validator": {
+        "ascii_only": true,
+        "min_length": 8,
+        "max_length": 30,
+        "min_digit": 1,
+        "min_upper": 1,
+        "min_lower": 1,
+        "min_special": 1
+    }
+}

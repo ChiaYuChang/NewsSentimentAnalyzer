@@ -38,6 +38,21 @@ CREATE TYPE public.api_type AS ENUM (
 ALTER TYPE public.api_type OWNER TO postgres;
 
 --
+-- Name: event_type; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public.event_type AS ENUM (
+    'sign-in',
+    'sign-out',
+    'authorization',
+    'api-key',
+    'query'
+);
+
+
+ALTER TYPE public.event_type OWNER TO postgres;
+
+--
 -- Name: job_status; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -77,9 +92,9 @@ CREATE TABLE public.apikeys (
     owner integer NOT NULL,
     api_id smallint NOT NULL,
     key text NOT NULL,
-    created_at timestamp without time zone DEFAULT now() NOT NULL,
-    updated_at timestamp without time zone DEFAULT now() NOT NULL,
-    deleted_at timestamp without time zone
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    deleted_at timestamp with time zone
 );
 
 
@@ -115,9 +130,9 @@ CREATE TABLE public.apis (
     id smallint NOT NULL,
     name character varying(20) NOT NULL,
     type public.api_type NOT NULL,
-    created_at timestamp without time zone DEFAULT now() NOT NULL,
-    updated_at timestamp without time zone DEFAULT now() NOT NULL,
-    deleted_at timestamp without time zone
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    deleted_at timestamp with time zone
 );
 
 
@@ -157,10 +172,9 @@ CREATE TABLE public.jobs (
     src_query character varying(2048) NOT NULL,
     llm_api_id smallint NOT NULL,
     llm_query character varying(2048) NOT NULL,
-    created_at timestamp without time zone DEFAULT now() NOT NULL,
-    updated_at timestamp without time zone DEFAULT now() NOT NULL,
-    deleted_at timestamp without time zone,
-    completed_at timestamp without time zone
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    deleted_at timestamp with time zone
 );
 
 
@@ -201,22 +215,57 @@ ALTER SEQUENCE public.keywords_id_seq OWNED BY public.keywords.id;
 
 
 --
+-- Name: logs; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.logs (
+    id bigint NOT NULL,
+    user_id integer NOT NULL,
+    type public.event_type NOT NULL,
+    message character varying(256) NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.logs OWNER TO postgres;
+
+--
+-- Name: logs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.logs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.logs_id_seq OWNER TO postgres;
+
+--
+-- Name: logs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.logs_id_seq OWNED BY public.logs.id;
+
+
+--
 -- Name: news; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.news (
     id bigint NOT NULL,
-    job_id integer NOT NULL,
     md5_hash character(128) NOT NULL,
     title text NOT NULL,
-    url character varying(100) NOT NULL,
+    url character varying(256) NOT NULL,
     description text NOT NULL,
     content text NOT NULL,
-    source character varying(256) NOT NULL,
-    publish_at timestamp without time zone NOT NULL,
-    created_at timestamp without time zone DEFAULT now(),
-    updated_at timestamp without time zone DEFAULT now(),
-    deleted_at timestamp without time zone
+    source character varying(256),
+    publish_at timestamp with time zone NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    deleted_at timestamp with time zone
 );
 
 
@@ -244,6 +293,40 @@ ALTER SEQUENCE public.news_id_seq OWNED BY public.news.id;
 
 
 --
+-- Name: newsjobs; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.newsjobs (
+    id bigint NOT NULL,
+    job_id bigint,
+    news_id bigint
+);
+
+
+ALTER TABLE public.newsjobs OWNER TO postgres;
+
+--
+-- Name: newsjobs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.newsjobs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.newsjobs_id_seq OWNER TO postgres;
+
+--
+-- Name: newsjobs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.newsjobs_id_seq OWNED BY public.newsjobs.id;
+
+
+--
 -- Name: schema_migrations; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -266,10 +349,11 @@ CREATE TABLE public.users (
     last_name character varying(30) NOT NULL,
     role public.role NOT NULL,
     email character varying(320) NOT NULL,
-    created_at timestamp without time zone DEFAULT now() NOT NULL,
-    updated_at timestamp without time zone DEFAULT now() NOT NULL,
-    deleted_at timestamp without time zone,
-    password_updated_at timestamp without time zone DEFAULT now() NOT NULL
+    opt character varying(128) DEFAULT NULL::character varying,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    deleted_at timestamp with time zone,
+    password_updated_at timestamp with time zone DEFAULT now() NOT NULL
 );
 
 
@@ -319,10 +403,24 @@ ALTER TABLE ONLY public.keywords ALTER COLUMN id SET DEFAULT nextval('public.key
 
 
 --
+-- Name: logs id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.logs ALTER COLUMN id SET DEFAULT nextval('public.logs_id_seq'::regclass);
+
+
+--
 -- Name: news id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.news ALTER COLUMN id SET DEFAULT nextval('public.news_id_seq'::regclass);
+
+
+--
+-- Name: newsjobs id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.newsjobs ALTER COLUMN id SET DEFAULT nextval('public.newsjobs_id_seq'::regclass);
 
 
 --
@@ -365,11 +463,35 @@ ALTER TABLE ONLY public.keywords
 
 
 --
+-- Name: logs logs_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.logs
+    ADD CONSTRAINT logs_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: news news_md5_hash_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.news
+    ADD CONSTRAINT news_md5_hash_key UNIQUE (md5_hash);
+
+
+--
 -- Name: news news_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.news
     ADD CONSTRAINT news_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: newsjobs newsjobs_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.newsjobs
+    ADD CONSTRAINT newsjobs_pkey PRIMARY KEY (id);
 
 
 --
@@ -381,11 +503,26 @@ ALTER TABLE ONLY public.schema_migrations
 
 
 --
+-- Name: users users_email_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_email_key UNIQUE (email);
+
+
+--
 -- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.users
     ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: apikeys_owner_api_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX apikeys_owner_api_id_idx ON public.apikeys USING btree (owner, api_id);
 
 
 --
@@ -400,6 +537,34 @@ CREATE INDEX jobs_owner_status_idx ON public.jobs USING btree (owner, status);
 --
 
 CREATE INDEX keywords_keyword_idx ON public.keywords USING btree (keyword);
+
+
+--
+-- Name: logs_user_id_type_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX logs_user_id_type_idx ON public.logs USING btree (user_id, type);
+
+
+--
+-- Name: news_md5_hash_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX news_md5_hash_idx ON public.news USING btree (md5_hash);
+
+
+--
+-- Name: news_publish_at_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX news_publish_at_idx ON public.news USING btree (publish_at);
+
+
+--
+-- Name: newsjobs_job_id_news_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX newsjobs_job_id_news_id_idx ON public.newsjobs USING btree (job_id, news_id);
 
 
 --
@@ -458,11 +623,27 @@ ALTER TABLE ONLY public.keywords
 
 
 --
--- Name: news news_job_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: logs logs_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.news
-    ADD CONSTRAINT news_job_id_fkey FOREIGN KEY (job_id) REFERENCES public.jobs(id);
+ALTER TABLE ONLY public.logs
+    ADD CONSTRAINT logs_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+
+--
+-- Name: newsjobs newsjobs_job_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.newsjobs
+    ADD CONSTRAINT newsjobs_job_id_fkey FOREIGN KEY (job_id) REFERENCES public.jobs(id);
+
+
+--
+-- Name: newsjobs newsjobs_news_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.newsjobs
+    ADD CONSTRAINT newsjobs_news_id_fkey FOREIGN KEY (news_id) REFERENCES public.news(id);
 
 
 --

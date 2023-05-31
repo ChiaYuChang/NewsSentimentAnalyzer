@@ -6,5 +6,4 @@ CREATE TABLE "keywords" (
 
 CREATE INDEX ON "keywords" ("keyword");
 
-ALTER TABLE "keywords" ADD FOREIGN KEY ("news_id") REFERENCES "news" ("id");
-
+ALTER TABLE "keywords" ADD FOREIGN KEY ("news_id") REFERENCES "news" ("id") ON DELETE CASCADE ON UPDATE CASCADE;

@@ -68,3 +68,13 @@ func WithServerErr() ErrorRepoOption {
 		return nil
 	}
 }
+
+func WithPgxError() ErrorRepoOption {
+	return func(repo ErrorRepo) error {
+		err := repo.RegisterErr(ECPgxError, http.StatusInternalServerError, "pgx error")
+		if err != nil {
+			return nil
+		}
+		return nil
+	}
+}

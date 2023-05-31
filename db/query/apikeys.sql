@@ -1,7 +1,25 @@
--- name: GetAPIKey :one
-SELECT id, owner, api_id, key FROM apikeys
+-- name: ListAPIKey :many 
+WITH k AS (
+  SELECT id, owner, api_id, key
+    FROM apikeys
+   WHERE owner = $1
+     AND deleted_at IS NULL
+), a AS (
+  SELECT id, name, type
+    FROM apis
+   WHERE deleted_at IS NULL
+) 
+SELECT k.id, k.owner, k.api_id, a.name, a.type, k.key 
+  FROM k
+  LEFT JOIN a
+    ON k.api_id = a.id;
+
+-- name: GetAPIKey :many
+SELECT id, owner, api_id, key 
+  FROM apikeys
  WHERE owner = $1 
-   AND api_id = $2;
+   AND api_id = $2
+   AND deleted_at IS NULL;
 
 -- name: CreateAPIKey :exec
 INSERT INTO apikeys (
@@ -13,10 +31,11 @@ INSERT INTO apikeys (
 -- name: UpdateAPIKey :exec
 UPDATE apikeys
    SET key = $1,
-       api_id = $2,
+       api_id = @old_api_id,
        updated_at = CURRENT_TIMESTAMP
- WHERE owner = $3
-   AND api_id = $4;
+ WHERE owner = $2
+   AND api_id = @new_api_id
+   AND deleted_at IS NULL;
 
 -- name: DeleteAPIKey :exec
 UPDATE apikeys
@@ -24,7 +43,6 @@ UPDATE apikeys
  WHERE owner = $1
    AND api_id = $2;
 
--- name: HardAPIKey :exec
+-- name: CleanUpAPIKey :exec
 DELETE FROM apikeys
- WHERE owner = $1
-   AND api_id = $2;
+ WHERE deleted_at IS NOT NULL;

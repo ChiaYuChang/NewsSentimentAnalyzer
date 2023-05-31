@@ -13,7 +13,41 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-type TokenMakerOption struct {
+type Option struct {
+	TokenMaker        JWTOption               `json:"tokenmaker"`
+	PasswordValidator PasswordValidatorOption `json:"password_validator"`
+}
+
+func (o Option) String() string {
+	sb := strings.Builder{}
+	sb.WriteString("Option:\n")
+	sb.WriteString("- " + o.TokenMaker.String())
+	sb.WriteString("- " + o.PasswordValidator.String())
+	return sb.String()
+}
+
+func ReadOption(path string) (*Option, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, fmt.Errorf("error while opening option.json: %w", err)
+	}
+	defer f.Close()
+
+	bs, err := io.ReadAll(f)
+	if err != nil {
+		return nil, fmt.Errorf("error while reading token maker option: %w", err)
+	}
+
+	var option Option
+	err = json.Unmarshal(bs, &option)
+	if err != nil {
+		return nil, fmt.Errorf("error while unmarshal option: %w", err)
+	}
+
+	return &option, nil
+}
+
+type JWTOption struct {
 	Secret          []byte            `json:"-"`
 	SecretLength    int               `json:"secret_len"`
 	ExpireAfterHour int               `json:"expire_after"`
@@ -21,58 +55,76 @@ type TokenMakerOption struct {
 	SignMethod      jwt.SigningMethod `json:"-"`
 }
 
-func (tmOpt TokenMakerOption) String() string {
+func (jwtOpt JWTOption) String() string {
 	sb := strings.Builder{}
+
 	sb.WriteString("JWT Opions:\n")
-	sb.WriteString(fmt.Sprintf("Secret      : %s\n", tmOpt.GetSecretString()))
-	sb.WriteString(fmt.Sprintf("Expire After: %s\n", tmOpt.ExpireAfter()))
-	sb.WriteString(fmt.Sprintf("Valid After : %s\n", tmOpt.ValidAfter()))
-	sb.WriteString(fmt.Sprintf("Sign Method : %s\n", tmOpt.SignMethod.Alg()))
+	if jwtOpt.Secret == nil || len(jwtOpt.Secret) == 0 {
+		sb.WriteString("\t- Secret           : [[:EMPTY:]]\n")
+	} else {
+		hexSrct := jwtOpt.GetHexSecretString()
+		sb.WriteString(fmt.Sprintf("\t- Secret           : %s...\n", hexSrct[:80]))
+	}
+
+	sb.WriteString(fmt.Sprintf("\t- Expire After     : %s\n", jwtOpt.ExpireAfter()))
+	sb.WriteString(fmt.Sprintf("\t- Valid After      : %s\n", jwtOpt.ValidAfter()))
+
+	if jwtOpt.SignMethod == nil {
+		sb.WriteString("\t- Sign Method      : [[:EMPTY:]]\n")
+	} else {
+		sb.WriteString(fmt.Sprintf("\t- Sign Method      : %s\n", jwtOpt.SignMethod.Alg()))
+	}
 	return sb.String()
 }
 
-func (t TokenMakerOption) ExpireAfter() time.Duration {
-	return time.Duration(t.ExpireAfterHour) * time.Hour
+func (jwtOpt JWTOption) ExpireAfter() time.Duration {
+	return time.Duration(jwtOpt.ExpireAfterHour) * time.Hour
 }
 
-func (t TokenMakerOption) ValidAfter() time.Duration {
-	return time.Duration(t.ValidAfterHour) * time.Hour
+func (jwtOpt JWTOption) ValidAfter() time.Duration {
+	return time.Duration(jwtOpt.ValidAfterHour) * time.Hour
 }
 
-func (t *TokenMakerOption) UpdateSecret() {
-	secret := make([]byte, t.SecretLength)
-	_, _ = rand.Read(secret)
-	t.Secret = secret
-}
-
-func (t TokenMakerOption) GetSecret() []byte {
-	if len(t.Secret) == 0 {
-		t.UpdateSecret()
-	}
-	return t.Secret
-}
-
-func (t TokenMakerOption) GetSecretString() string {
-	return hex.EncodeToString(t.GetSecret())
-}
-
-func ReadTokenMakerOption(path string) error {
-	f, err := os.Open(path)
+func (jwtOpt *JWTOption) UpdateSecret() error {
+	secret := make([]byte, jwtOpt.SecretLength)
+	_, err := rand.Read(secret)
 	if err != nil {
-		return fmt.Errorf("error while opening option.json: %w", err)
+		return err
 	}
-	defer f.Close()
-
-	bs, err := io.ReadAll(f)
-	if err != nil {
-		return fmt.Errorf("error while reading token maker option: %w", err)
-	}
-
-	var secret Secret
-	err = json.Unmarshal(bs, &secret)
-	if err != nil {
-		return fmt.Errorf("error while unmarshal secrets: %w", err)
-	}
-	AppVar.Secret = secret
+	jwtOpt.Secret = secret
 	return nil
+}
+
+func (jwtOpt JWTOption) GetSecret() []byte {
+	if len(jwtOpt.Secret) == 0 {
+		jwtOpt.UpdateSecret()
+	}
+	return jwtOpt.Secret
+}
+
+func (jwtOpt JWTOption) GetHexSecretString() string {
+	return hex.EncodeToString(jwtOpt.GetSecret())
+}
+
+type PasswordValidatorOption struct {
+	AcceptASCIIOnly bool `json:"ascii_only"`
+	MinLength       int  `json:"min_length"`
+	MaxLength       int  `json:"max_length"`
+	MinDigit        int  `json:"min_digit"`
+	MinUpper        int  `json:"min_upper"`
+	MinLower        int  `json:"min_lower"`
+	MinSpecial      int  `json:"min_special"`
+}
+
+func (pwdOpt PasswordValidatorOption) String() string {
+	sb := strings.Builder{}
+	sb.WriteString("Password Validator:\n")
+	sb.WriteString(fmt.Sprintf("\t- Only ASCII       : %v\n", pwdOpt.AcceptASCIIOnly))
+	sb.WriteString(fmt.Sprintf("\t- Password Len     : (%d, %d)\n",
+		pwdOpt.MinLength, pwdOpt.MaxLength))
+	sb.WriteString(fmt.Sprintf("\t- Min # of digit   : %d\n", pwdOpt.MinDigit))
+	sb.WriteString(fmt.Sprintf("\t- Min # of upper   : %d\n", pwdOpt.MinUpper))
+	sb.WriteString(fmt.Sprintf("\t- Min # of lower   : %d\n", pwdOpt.MinLower))
+	sb.WriteString(fmt.Sprintf("\t- Min # of special : %d\n", pwdOpt.MinSpecial))
+	return sb.String()
 }

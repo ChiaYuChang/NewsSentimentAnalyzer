@@ -1,3 +1,4 @@
 DROP TYPE  IF EXISTS "role"         CASCADE;
 DROP TYPE  IF EXISTS "job_status"   CASCADE;
 DROP TYPE  IF EXISTS "api_type"     CASCADE;
+DROP TYPE  IF EXISTS "event_type"   CASCADE;

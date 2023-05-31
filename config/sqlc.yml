@@ -5,8 +5,8 @@ sql:
     engine: postgresql
     gen:
       go:
-        package: models
-        out: ../internal/models
+        package: model
+        out: ../internal/server/model
         sql_package: pgx/v5
         emit_prepared_queries: true
         emit_interface: true
@@ -15,5 +15,5 @@ sql:
         emit_params_struct_pointers: true
         json_tags_case_style: none
         output_db_file_name: db.go
-        output_models_file_name: models.go
+        output_models_file_name: model.go
         output_querier_file_name: querier.go

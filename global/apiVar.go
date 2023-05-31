@@ -4,5 +4,5 @@ var AppVar = appVar{}
 
 type appVar struct {
 	Secret
-	TokenMakerOption
+	Option
 }

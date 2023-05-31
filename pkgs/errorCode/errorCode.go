@@ -29,3 +29,8 @@ const (
 	ECServerError ErrorCode = 500 + iota
 	ECServiceUnavailable
 )
+
+// PGX error
+const (
+	ECPgxError ErrorCode = 600 + iota
+)

@@ -19,13 +19,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var opt global.TokenMakerOption
+var opt global.JWTOption
 
 func init() {
 	secretLen := 256
 	secret := make([]byte, secretLen)
 	_, _ = rand.Read(secret)
-	opt = global.TokenMakerOption{
+	opt = global.JWTOption{
 		Secret:          secret,
 		SecretLength:    secretLen,
 		ExpireAfterHour: 3,

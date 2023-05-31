@@ -28,11 +28,16 @@ func (c JWTClaims) GetUsername() string {
 	return c.UserName
 }
 
+func (c JWTClaims) GetUserID() int32 {
+	return c.UID
+}
+
 func (c JWTClaims) String() string {
 	sb := strings.Builder{}
 	sb.WriteString("JWT Claims:\n")
 	sb.WriteString(fmt.Sprintf("\t - Username  : %s\n", c.UserName))
 	sb.WriteString(fmt.Sprintf("\t - Role      : %v\n", c.Role))
+	sb.WriteString(fmt.Sprintf("\t - UID       : %d\n", c.UID))
 	sb.WriteString(fmt.Sprintf("\t - Issuer    : %s\n", c.Issuer))
 	sb.WriteString(fmt.Sprintf("\t - Subject   : %s\n", c.Subject))
 	sb.WriteString(fmt.Sprintf("\t - Audience  : %v\n", c.Audience))
