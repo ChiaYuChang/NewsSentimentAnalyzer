@@ -8,8 +8,7 @@ CREATE TABLE "news" (
   "source"      varchar(256),
   "publish_at"  timestamptz   NOT NULL,
   "created_at"  timestamptz   NOT NULL DEFAULT (now()),
-  "updated_at"  timestamptz   NOT NULL DEFAULT (now()),
-  "deleted_at"  timestamptz   DEFAULT null
+  "updated_at"  timestamptz   NOT NULL DEFAULT (now())
 );
 
 CREATE INDEX ON "news" ("md5_hash");

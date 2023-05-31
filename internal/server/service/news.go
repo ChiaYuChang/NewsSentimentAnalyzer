@@ -117,7 +117,7 @@ func (srvc newsService) GetByMD5Hash(ctx context.Context, r *NewsGetByMD5HashReq
 	if err := srvc.Validate.Struct(r); err != nil {
 		return nil, err
 	}
-	return srvc.Store.GetNewsWithMD5Hash(ctx, r.MD5Hash)
+	return srvc.Store.GetNewsByMD5Hash(ctx, r.MD5Hash)
 }
 
 func (srvc newsService) ListRecentN(ctx context.Context, r *NewsListRequest) ([]*model.News, error) {

@@ -242,7 +242,6 @@ type News struct {
 	PublishAt   pgtype.Timestamptz `json:"publish_at"`
 	CreatedAt   pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt   pgtype.Timestamptz `json:"deleted_at"`
 }
 
 type Newsjob struct {

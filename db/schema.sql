@@ -264,8 +264,7 @@ CREATE TABLE public.news (
     source character varying(256),
     publish_at timestamp with time zone NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
-    updated_at timestamp with time zone DEFAULT now() NOT NULL,
-    deleted_at timestamp with time zone
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
 );
 
 
@@ -579,7 +578,7 @@ CREATE INDEX users_email_idx ON public.users USING btree (email);
 --
 
 ALTER TABLE ONLY public.apikeys
-    ADD CONSTRAINT apikeys_api_id_fkey FOREIGN KEY (api_id) REFERENCES public.apis(id);
+    ADD CONSTRAINT apikeys_api_id_fkey FOREIGN KEY (api_id) REFERENCES public.apis(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -587,7 +586,7 @@ ALTER TABLE ONLY public.apikeys
 --
 
 ALTER TABLE ONLY public.apikeys
-    ADD CONSTRAINT apikeys_owner_fkey FOREIGN KEY (owner) REFERENCES public.users(id);
+    ADD CONSTRAINT apikeys_owner_fkey FOREIGN KEY (owner) REFERENCES public.users(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -595,7 +594,7 @@ ALTER TABLE ONLY public.apikeys
 --
 
 ALTER TABLE ONLY public.jobs
-    ADD CONSTRAINT jobs_llm_api_id_fkey FOREIGN KEY (llm_api_id) REFERENCES public.apis(id);
+    ADD CONSTRAINT jobs_llm_api_id_fkey FOREIGN KEY (llm_api_id) REFERENCES public.apis(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -603,7 +602,7 @@ ALTER TABLE ONLY public.jobs
 --
 
 ALTER TABLE ONLY public.jobs
-    ADD CONSTRAINT jobs_owner_fkey FOREIGN KEY (owner) REFERENCES public.users(id);
+    ADD CONSTRAINT jobs_owner_fkey FOREIGN KEY (owner) REFERENCES public.users(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -611,7 +610,7 @@ ALTER TABLE ONLY public.jobs
 --
 
 ALTER TABLE ONLY public.jobs
-    ADD CONSTRAINT jobs_src_api_id_fkey FOREIGN KEY (src_api_id) REFERENCES public.apis(id);
+    ADD CONSTRAINT jobs_src_api_id_fkey FOREIGN KEY (src_api_id) REFERENCES public.apis(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -619,7 +618,7 @@ ALTER TABLE ONLY public.jobs
 --
 
 ALTER TABLE ONLY public.keywords
-    ADD CONSTRAINT keywords_news_id_fkey FOREIGN KEY (news_id) REFERENCES public.news(id);
+    ADD CONSTRAINT keywords_news_id_fkey FOREIGN KEY (news_id) REFERENCES public.news(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -627,7 +626,7 @@ ALTER TABLE ONLY public.keywords
 --
 
 ALTER TABLE ONLY public.logs
-    ADD CONSTRAINT logs_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id);
+    ADD CONSTRAINT logs_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON UPDATE CASCADE;
 
 
 --
@@ -635,7 +634,7 @@ ALTER TABLE ONLY public.logs
 --
 
 ALTER TABLE ONLY public.newsjobs
-    ADD CONSTRAINT newsjobs_job_id_fkey FOREIGN KEY (job_id) REFERENCES public.jobs(id);
+    ADD CONSTRAINT newsjobs_job_id_fkey FOREIGN KEY (job_id) REFERENCES public.jobs(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -643,7 +642,7 @@ ALTER TABLE ONLY public.newsjobs
 --
 
 ALTER TABLE ONLY public.newsjobs
-    ADD CONSTRAINT newsjobs_news_id_fkey FOREIGN KEY (news_id) REFERENCES public.news(id);
+    ADD CONSTRAINT newsjobs_news_id_fkey FOREIGN KEY (news_id) REFERENCES public.news(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --

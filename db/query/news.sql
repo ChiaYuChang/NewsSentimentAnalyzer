@@ -1,27 +1,37 @@
 -- name: GetNewsPublishBetween :many
-SELECT *
+SELECT id, title, description, content, url, source, publish_at
   FROM news
  WHERE publish_at BETWEEN timestamp @from_time AND @to_time
-   AND deleted_at IS NULL
  ORDER BY publish_at;
 
 -- name: GetNewsByMD5Hash :one
-SELECT *
+SELECT id, title, description, content, url, source, publish_at
   FROM news
- WHERE md5_hash = $1 
-   AND deleted_at IS NULL;
+ WHERE md5_hash = $1;
 
 -- name: GetNewsByKeywords :many
-SELECT *
+SELECT id, title, description, content, url, source, publish_at
   FROM news
  WHERE id = ANY(
-  SELECT news_id
-    FROM keywords
-   WHERE keyword = ANY(@keywords::string[])
- );
+    SELECT news_id
+      FROM keywords
+    WHERE keyword = ANY(@keywords::string[])
+ )
+ ORDER BY publish_at;
+
+-- name: GetNewsByJob :many
+SELECT id, title, description, content, url, source, publish_at
+  FROM news
+ WHERE news.id = ANY(
+    SELECT newsjobs.news_id
+      FROM jobs
+      LEFT JOIN newsjobs
+        ON jobs.id = newsjobs.jobs_id
+ )
+ ORDER BY publish_at;
 
 -- name: ListRecentNNews :many
-SELECT *
+SELECT id, title, description, content, url, source, publish_at
   FROM news
  WHERE deleted_at IS NULL
  ORDER BY publish_at
@@ -34,16 +44,10 @@ INSERT INTO news (
     $1, $2, $3, $4, $5, $6, $7
 );
 
--- name: DeleteNews :exec
-UPDATE news
-   SET deleted_at = CURRENT_TIMESTAMP
- WHERE id = $1;
-
 -- name: DeleteNewsPublishBefore :exec
-UPDATE news
-   SET deleted_at = CURRENT_TIMESTAMP
+DELETE FROM news
  WHERE publish_at < @before_time;
 
--- name: HardDeleteNews :exec
+-- name: DeleteNewsById :exec
 DELETE FROM news
- WHERE deleted_at IS NOT NULL;
+ WHERE id = $1;

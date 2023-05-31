@@ -20,6 +20,7 @@ type Querier interface {
 	CreateAPIKey(ctx context.Context, arg *CreateAPIKeyParams) error
 	CreateJob(ctx context.Context, arg *CreateJobParams) error
 	CreateKeyword(ctx context.Context, arg *CreateKeywordParams) error
+	CreateLog(ctx context.Context, arg *CreateLogParams) error
 	CreateNews(ctx context.Context, arg *CreateNewsParams) error
 	CreateUser(ctx context.Context, arg *CreateUserParams) error
 	DeleteAPI(ctx context.Context, id int16) error
@@ -27,20 +28,22 @@ type Querier interface {
 	DeleteJob(ctx context.Context, arg *DeleteJobParams) error
 	DeleteKeyword(ctx context.Context, keyword string) error
 	DeleteKeywordByNewsId(ctx context.Context, newsID int64) error
-	DeleteNews(ctx context.Context, id int64) error
+	DeleteNewsById(ctx context.Context, id int64) error
 	DeleteNewsPublishBefore(ctx context.Context, beforeTime pgtype.Timestamptz) error
 	DeleteUser(ctx context.Context, id int32) error
 	GetAPIKey(ctx context.Context, arg *GetAPIKeyParams) ([]*GetAPIKeyRow, error)
 	GetJobsByOwner(ctx context.Context, arg *GetJobsByOwnerParams) ([]*GetJobsByOwnerRow, error)
 	GetKeywordsByNewsId(ctx context.Context, newsID []int32) ([]string, error)
-	GetNewsByKeywords(ctx context.Context, keywords []string) ([]*News, error)
-	GetNewsByMD5Hash(ctx context.Context, md5Hash string) (*News, error)
-	GetNewsPublishBetween(ctx context.Context, arg *GetNewsPublishBetweenParams) ([]*News, error)
+	GetLogByUserId(ctx context.Context, arg *GetLogByUserIdParams) ([]*Log, error)
+	GetLogByUserIdNext(ctx context.Context, arg *GetLogByUserIdNextParams) ([]*Log, error)
+	GetNewsByJob(ctx context.Context) ([]*GetNewsByJobRow, error)
+	GetNewsByKeywords(ctx context.Context, keywords []string) ([]*GetNewsByKeywordsRow, error)
+	GetNewsByMD5Hash(ctx context.Context, md5Hash string) (*GetNewsByMD5HashRow, error)
+	GetNewsPublishBetween(ctx context.Context, arg *GetNewsPublishBetweenParams) ([]*GetNewsPublishBetweenRow, error)
 	GetUserAuth(ctx context.Context, email string) (*GetUserAuthRow, error)
-	HardDeleteNews(ctx context.Context) error
 	ListAPI(ctx context.Context, n int32) ([]*ListAPIRow, error)
 	ListAPIKey(ctx context.Context, owner int32) ([]*ListAPIKeyRow, error)
-	ListRecentNNews(ctx context.Context, n int32) ([]*News, error)
+	ListRecentNNews(ctx context.Context, n int32) ([]*ListRecentNNewsRow, error)
 	UpdateAPI(ctx context.Context, arg *UpdateAPIParams) error
 	UpdateAPIKey(ctx context.Context, arg *UpdateAPIKeyParams) error
 	UpdateJobStatus(ctx context.Context, arg *UpdateJobStatusParams) error
