@@ -37,17 +37,18 @@ SELECT id, title, description, content, url, source, publish_at
  ORDER BY publish_at
  LIMIT @n;
 
--- name: CreateNews :exec
+-- name: CreateNews :one
 INSERT INTO news (
     md5_hash, title, url, description, content, source, publish_at
 ) VALUES (
     $1, $2, $3, $4, $5, $6, $7
-);
+)
+RETURNING id;
 
--- name: DeleteNewsPublishBefore :exec
+-- name: DeleteNewsPublishBefore :execrows
 DELETE FROM news
  WHERE publish_at < @before_time;
 
--- name: DeleteNewsById :exec
+-- name: DeleteNews :execrows
 DELETE FROM news
  WHERE id = $1;

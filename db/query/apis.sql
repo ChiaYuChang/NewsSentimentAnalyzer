@@ -7,14 +7,15 @@ SELECT id, name, type
        name ASC
  LIMIT @n::int;
 
--- name: CreateAPI :exec
+-- name: CreateAPI :one
 INSERT INTO apis (
     name, type
 ) VALUES (
     $1, $2
-);
+)
+RETURNING id;
 
--- name: UpdateAPI :exec
+-- name: UpdateAPI :execrows
 UPDATE apis
    SET name = $1,
        type = $2,
@@ -22,11 +23,11 @@ UPDATE apis
  WHERE id = $3
    AND deleted_at IS NULL;
 
--- name: DeleteAPI :exec
+-- name: DeleteAPI :execrows
 UPDATE apis
    SET deleted_at = CURRENT_TIMESTAMP
  WHERE id = $1;
 
--- name: CleanUpAPIs :exec
+-- name: CleanUpAPIs :execrows
 DELETE FROM apis
  WHERE deleted_at IS NOT NULL;

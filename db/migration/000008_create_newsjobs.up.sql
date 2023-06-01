@@ -1,7 +1,7 @@
 CREATE TABLE "newsjobs" (
   "id"      BIGSERIAL PRIMARY KEY,
-  "job_id"  bigint,
-  "news_id" bigint
+  "job_id"  bigint    NOT NULL,
+  "news_id" bigint    NOT NULL
 );
 
 CREATE INDEX ON "newsjobs" ("job_id", "news_id");

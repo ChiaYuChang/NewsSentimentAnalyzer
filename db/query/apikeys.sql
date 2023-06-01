@@ -21,14 +21,15 @@ SELECT id, owner, api_id, key
    AND api_id = $2
    AND deleted_at IS NULL;
 
--- name: CreateAPIKey :exec
+-- name: CreateAPIKey :one
 INSERT INTO apikeys (
     owner, api_id, key
 ) VALUES (
     $1, $2, $3
-);
+)
+RETURNING id;
 
--- name: UpdateAPIKey :exec
+-- name: UpdateAPIKey :execrows
 UPDATE apikeys
    SET key = $1,
        api_id = @old_api_id,
@@ -37,12 +38,12 @@ UPDATE apikeys
    AND api_id = @new_api_id
    AND deleted_at IS NULL;
 
--- name: DeleteAPIKey :exec
+-- name: DeleteAPIKey :execrows
 UPDATE apikeys
    SET deleted_at = CURRENT_TIMESTAMP
  WHERE owner = $1
    AND api_id = $2;
 
--- name: CleanUpAPIKey :exec
+-- name: CleanUpAPIKey :execrows
 DELETE FROM apikeys
  WHERE deleted_at IS NOT NULL;

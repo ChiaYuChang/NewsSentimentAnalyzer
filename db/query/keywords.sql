@@ -4,23 +4,14 @@ SELECT keyword
  WHERE news_id = ANY(@news_id::int[]) 
    AND deleted_at IS NULL;
 
--- name: CreateKeyword :exec
+-- name: CreateKeyword :one
 INSERT INTO keywords (
     news_id, keyword
 ) VALUES (
     $1, $2
-);
+)
+RETURNING id;
 
--- name: DeleteKeyword :exec
-UPDATE keywords
-   SET deleted_at = CURRENT_TIMESTAMP
- WHERE keyword = $1;
-
--- name: DeleteKeywordByNewsId :exec
-UPDATE keywords
-   SET deleted_at = CURRENT_TIMESTAMP
- WHERE news_id = $1;
-
--- name: CleanUpKeywords :exec
+-- name: DeleteKeyword :execrows
 DELETE FROM keywords
- WHERE deleted_at IS NOT NULL;
+ WHERE keyword = $1;

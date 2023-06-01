@@ -169,9 +169,9 @@ CREATE TABLE public.jobs (
     owner integer NOT NULL,
     status public.job_status NOT NULL,
     src_api_id smallint NOT NULL,
-    src_query character varying(2048) NOT NULL,
+    src_query text NOT NULL,
     llm_api_id smallint NOT NULL,
-    llm_query character varying(2048) NOT NULL,
+    llm_query text NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     deleted_at timestamp with time zone
@@ -258,10 +258,10 @@ CREATE TABLE public.news (
     id bigint NOT NULL,
     md5_hash character(128) NOT NULL,
     title text NOT NULL,
-    url character varying(256) NOT NULL,
+    url text NOT NULL,
     description text NOT NULL,
     content text NOT NULL,
-    source character varying(256),
+    source text,
     publish_at timestamp with time zone NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL
@@ -297,8 +297,8 @@ ALTER SEQUENCE public.news_id_seq OWNED BY public.news.id;
 
 CREATE TABLE public.newsjobs (
     id bigint NOT NULL,
-    job_id bigint,
-    news_id bigint
+    job_id bigint NOT NULL,
+    news_id bigint NOT NULL
 );
 
 

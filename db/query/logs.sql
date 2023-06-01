@@ -19,9 +19,10 @@ SELECT *
        type       DESC
  LIMIT @n::int;
 
--- name: CreateLog :exec
+-- name: CreateLog :one
 INSERT INTO logs (
     user_id, type, message
 ) VALUES (
     $1, $2, $3
-);
+)
+RETURNING id;

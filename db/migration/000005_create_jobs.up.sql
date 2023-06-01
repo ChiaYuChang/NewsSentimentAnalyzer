@@ -3,9 +3,9 @@ CREATE TABLE "jobs" (
   "owner"           integer         NOT NULL,
   "status"          job_status      NOT NULL,
   "src_api_id"      smallint        NOT NULL,
-  "src_query"       varchar(2048)   NOT NULL,
+  "src_query"       text            NOT NULL,
   "llm_api_id"      smallint        NOT NULL,
-  "llm_query"       varchar(2048)   NOT NULL,
+  "llm_query"       text            NOT NULL,
   "created_at"      timestamptz     NOT NULL DEFAULT (now()),
   "updated_at"      timestamptz     NOT NULL DEFAULT (now()),
   "deleted_at"      timestamptz     DEFAULT null
