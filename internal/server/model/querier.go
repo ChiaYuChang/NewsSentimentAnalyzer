@@ -11,26 +11,25 @@ import (
 )
 
 type Querier interface {
-	CleanUpAPIKey(ctx context.Context) error
-	CleanUpAPIs(ctx context.Context) error
-	CleanUpJobs(ctx context.Context) error
-	CleanUpKeywords(ctx context.Context) error
-	CleanUpUsers(ctx context.Context) error
-	CreateAPI(ctx context.Context, arg *CreateAPIParams) error
-	CreateAPIKey(ctx context.Context, arg *CreateAPIKeyParams) error
-	CreateJob(ctx context.Context, arg *CreateJobParams) error
-	CreateKeyword(ctx context.Context, arg *CreateKeywordParams) error
-	CreateLog(ctx context.Context, arg *CreateLogParams) error
-	CreateNews(ctx context.Context, arg *CreateNewsParams) error
-	CreateUser(ctx context.Context, arg *CreateUserParams) error
-	DeleteAPI(ctx context.Context, id int16) error
-	DeleteAPIKey(ctx context.Context, arg *DeleteAPIKeyParams) error
-	DeleteJob(ctx context.Context, arg *DeleteJobParams) error
-	DeleteKeyword(ctx context.Context, keyword string) error
-	DeleteKeywordByNewsId(ctx context.Context, newsID int64) error
-	DeleteNewsById(ctx context.Context, id int64) error
-	DeleteNewsPublishBefore(ctx context.Context, beforeTime pgtype.Timestamptz) error
-	DeleteUser(ctx context.Context, id int32) error
+	CleanUpAPIKey(ctx context.Context) (int64, error)
+	CleanUpAPIs(ctx context.Context) (int64, error)
+	CleanUpJobs(ctx context.Context) (int64, error)
+	CleanUpUsers(ctx context.Context) (int64, error)
+	CreateAPI(ctx context.Context, arg *CreateAPIParams) (int16, error)
+	CreateAPIKey(ctx context.Context, arg *CreateAPIKeyParams) (int32, error)
+	CreateJob(ctx context.Context, arg *CreateJobParams) (int32, error)
+	CreateKeyword(ctx context.Context, arg *CreateKeywordParams) (int64, error)
+	CreateLog(ctx context.Context, arg *CreateLogParams) (int64, error)
+	CreateNews(ctx context.Context, arg *CreateNewsParams) (int64, error)
+	CreateNewsJob(ctx context.Context, arg *CreateNewsJobParams) (int64, error)
+	CreateUser(ctx context.Context, arg *CreateUserParams) (int32, error)
+	DeleteAPI(ctx context.Context, id int16) (int64, error)
+	DeleteAPIKey(ctx context.Context, arg *DeleteAPIKeyParams) (int64, error)
+	DeleteJob(ctx context.Context, arg *DeleteJobParams) (int64, error)
+	DeleteKeyword(ctx context.Context, keyword string) (int64, error)
+	DeleteNews(ctx context.Context, id int64) (int64, error)
+	DeleteNewsPublishBefore(ctx context.Context, beforeTime pgtype.Timestamptz) (int64, error)
+	DeleteUser(ctx context.Context, id int32) (int64, error)
 	GetAPIKey(ctx context.Context, arg *GetAPIKeyParams) ([]*GetAPIKeyRow, error)
 	GetJobsByOwner(ctx context.Context, arg *GetJobsByOwnerParams) ([]*GetJobsByOwnerRow, error)
 	GetKeywordsByNewsId(ctx context.Context, newsID []int32) ([]string, error)
@@ -44,10 +43,10 @@ type Querier interface {
 	ListAPI(ctx context.Context, n int32) ([]*ListAPIRow, error)
 	ListAPIKey(ctx context.Context, owner int32) ([]*ListAPIKeyRow, error)
 	ListRecentNNews(ctx context.Context, n int32) ([]*ListRecentNNewsRow, error)
-	UpdateAPI(ctx context.Context, arg *UpdateAPIParams) error
-	UpdateAPIKey(ctx context.Context, arg *UpdateAPIKeyParams) error
-	UpdateJobStatus(ctx context.Context, arg *UpdateJobStatusParams) error
-	UpdatePassword(ctx context.Context, arg *UpdatePasswordParams) error
+	UpdateAPI(ctx context.Context, arg *UpdateAPIParams) (int64, error)
+	UpdateAPIKey(ctx context.Context, arg *UpdateAPIKeyParams) (int64, error)
+	UpdateJobStatus(ctx context.Context, arg *UpdateJobStatusParams) (int64, error)
+	UpdatePassword(ctx context.Context, arg *UpdatePasswordParams) (int64, error)
 }
 
 var _ Querier = (*Queries)(nil)

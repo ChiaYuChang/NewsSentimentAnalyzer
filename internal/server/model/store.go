@@ -95,23 +95,25 @@ func (s PGXStore) DoCheckAndUpdateUserPasswordTx(ctx context.Context, params *Ch
 	return s.CheckAndUpdateUserPasswordTx(ctx, params)
 }
 
-func (s PGXStore) CheckAndUpdateUserPasswordTx(ctx context.Context, params *CheckAndUpdateUserPasswordTxParams) error {
+func (s PGXStore) CheckAndUpdateUserPasswordTx(
+	ctx context.Context, params *CheckAndUpdateUserPasswordTxParams) error {
 	err := s.exectTx(ctx, func(q *Queries) error {
 		auth, err := s.Querier.GetUserAuth(ctx, params.Email)
 		if err != nil {
 			return err
 		}
 
-		if err := bcrypt.CompareHashAndPassword(auth.Password, params.OldPassword); err != nil {
+		if err = bcrypt.CompareHashAndPassword(auth.Password, params.OldPassword); err != nil {
 			ecErr := ec.MustGetErr(ec.ECUnauthorized).(*ec.Error)
 			ecErr.WithDetails(err.Error())
 			return ecErr
 		}
 
-		return s.Querier.UpdatePassword(ctx, &UpdatePasswordParams{
+		_, err = s.Querier.UpdatePassword(ctx, &UpdatePasswordParams{
 			ID:       auth.ID,
 			Password: params.NewPassword,
 		})
+		return err
 	})
 	return err
 }

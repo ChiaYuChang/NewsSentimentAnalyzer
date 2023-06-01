@@ -8,13 +8,13 @@ import (
 )
 
 type NewsCreateRequest struct {
-	Md5Hash     string `validate:"required,md5"`
-	Title       string `validate:"required,min=1"`
-	Url         string `validate:"required,min=1,max=256"`
-	Description string `validate:"required,min=1"`
-	Content     string `validate:"required,min=1"`
-	Source      string
-	PublishAt   time.Time `validate:"required"`
+	Md5Hash     string    `validate:"required,md5"`
+	Title       string    `validate:"required,min=1"`
+	Url         string    `validate:"required,url"`
+	Description string    `validate:"required,min=1"`
+	Content     string    `validate:"required,min=1"`
+	Source      string    `validate:"-"`
+	PublishAt   time.Time `validate:"required,before_now"`
 }
 
 func (r NewsCreateRequest) RequestName() string {
@@ -66,12 +66,12 @@ func (r NewsListRequest) RequestName() string {
 	return "news-list-req"
 }
 
-func (srvc newsService) Create(ctx context.Context, r *NewsCreateRequest) error {
-	if err := srvc.Validate.Struct(srvc); err != nil {
-		return err
+func (srvc newsService) Create(ctx context.Context, r *NewsCreateRequest) (id int64, err error) {
+	if err := srvc.validate.Struct(srvc); err != nil {
+		return 0, err
 	}
 
-	return srvc.Store.CreateNews(ctx, &model.CreateNewsParams{
+	return srvc.store.CreateNews(ctx, &model.CreateNewsParams{
 		Md5Hash:     r.Md5Hash,
 		Title:       r.Title,
 		Url:         r.Url,
@@ -82,47 +82,49 @@ func (srvc newsService) Create(ctx context.Context, r *NewsCreateRequest) error 
 	})
 }
 
-func (srvc newsService) Delete(ctx context.Context, r *NewsDeleteRequest) error {
-	if err := srvc.Validate.Struct(r); err != nil {
-		return err
+func (srvc newsService) Delete(
+	ctx context.Context, r *NewsDeleteRequest) (n int64, err error) {
+	if err := srvc.validate.Struct(r); err != nil {
+		return 0, err
 	}
-	return srvc.DeleteNews(ctx, r.ID)
+	return srvc.store.DeleteNews(ctx, r.ID)
 }
 
-func (srvc newsService) DeletePublishBefore(ctx context.Context, r *NewsDeletePublishBeforeRequest) error {
-	if err := srvc.Validate.Struct(r); err != nil {
-		return err
+func (srvc newsService) DeletePublishBefore(
+	ctx context.Context, r *NewsDeletePublishBeforeRequest) (n int64, err error) {
+	if err := srvc.validate.Struct(r); err != nil {
+		return 0, err
 	}
-	return srvc.Store.DeleteNewsPublishBefore(ctx, TimeToTimestamptz(r.Before))
+	return srvc.store.DeleteNewsPublishBefore(ctx, TimeToTimestamptz(r.Before))
 }
 
-func (srvc newsService) GetByKeywords(ctx context.Context, r *NewsGetByKeywordsRequest) ([]*model.News, error) {
-	if err := srvc.Validate.Struct(r); err != nil {
+func (srvc newsService) GetByKeywords(ctx context.Context, r *NewsGetByKeywordsRequest) ([]*model.GetNewsByKeywordsRow, error) {
+	if err := srvc.validate.Struct(r); err != nil {
 		return nil, err
 	}
-	return srvc.Store.GetNewsByKeywords(ctx, r.keywords)
+	return srvc.store.GetNewsByKeywords(ctx, r.keywords)
 }
 
-func (srvc newsService) GetByPublishBetween(ctx context.Context, r *NewsGetByPublishBetweenRequest) ([]*model.News, error) {
-	if err := srvc.Validate.Struct(r); err != nil {
+func (srvc newsService) GetByPublishBetween(ctx context.Context, r *NewsGetByPublishBetweenRequest) ([]*model.GetNewsPublishBetweenRow, error) {
+	if err := srvc.validate.Struct(r); err != nil {
 		return nil, err
 	}
-	return srvc.Store.GetNewsPublishBetween(ctx, &model.GetNewsPublishBetweenParams{
+	return srvc.store.GetNewsPublishBetween(ctx, &model.GetNewsPublishBetweenParams{
 		FromTime: TimeToTimestamptz(r.From),
 		ToTime:   TimeToTimestamptz(r.To),
 	})
 }
 
-func (srvc newsService) GetByMD5Hash(ctx context.Context, r *NewsGetByMD5HashRequest) (*model.News, error) {
-	if err := srvc.Validate.Struct(r); err != nil {
+func (srvc newsService) GetByMD5Hash(ctx context.Context, r *NewsGetByMD5HashRequest) (*model.GetNewsByMD5HashRow, error) {
+	if err := srvc.validate.Struct(r); err != nil {
 		return nil, err
 	}
-	return srvc.Store.GetNewsByMD5Hash(ctx, r.MD5Hash)
+	return srvc.store.GetNewsByMD5Hash(ctx, r.MD5Hash)
 }
 
-func (srvc newsService) ListRecentN(ctx context.Context, r *NewsListRequest) ([]*model.News, error) {
-	if err := srvc.Validate.Struct(r); err != nil {
+func (srvc newsService) ListRecentN(ctx context.Context, r *NewsListRequest) ([]*model.ListRecentNNewsRow, error) {
+	if err := srvc.validate.Struct(r); err != nil {
 		return nil, err
 	}
-	return srvc.Store.ListRecentNNews(ctx, r.N)
+	return srvc.store.ListRecentNNews(ctx, r.N)
 }

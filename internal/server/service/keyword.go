@@ -31,26 +31,29 @@ func (r KeywordDeleteRequest) RequestName() string {
 	return "key-delete-req"
 }
 
-func (srvc keywordService) Create(ctx context.Context, r *KeywordCreateRequest) error {
-	if err := srvc.Validate.Struct(r); err != nil {
-		return err
+func (srvc keywordService) Create(
+	ctx context.Context, r *KeywordCreateRequest) (n int64, err error) {
+	if err := srvc.validate.Struct(r); err != nil {
+		return 0, err
 	}
-	return srvc.Store.CreateKeyword(ctx, &model.CreateKeywordParams{
+	return srvc.store.CreateKeyword(ctx, &model.CreateKeywordParams{
 		NewsID:  r.NewsID,
 		Keyword: r.Keyword,
 	})
 }
 
-func (srvc keywordService) GetByNewsId(ctx context.Context, r *KeywordsGetByNewsIdRequest) ([]string, error) {
-	if err := srvc.Validate.Struct(r); err != nil {
+func (srvc keywordService) GetByNewsId(
+	ctx context.Context, r *KeywordsGetByNewsIdRequest) ([]string, error) {
+	if err := srvc.validate.Struct(r); err != nil {
 		return nil, err
 	}
-	return srvc.Store.GetKeywordsByNewsId(ctx, r.NewsID)
+	return srvc.store.GetKeywordsByNewsId(ctx, r.NewsID)
 }
 
-func (srvc keywordService) Delete(ctx context.Context, r *KeywordDeleteRequest) error {
-	if err := srvc.Validate.Struct(r); err != nil {
-		return err
+func (srvc keywordService) Delete(
+	ctx context.Context, r *KeywordDeleteRequest) (n int64, err error) {
+	if err := srvc.validate.Struct(r); err != nil {
+		return 0, err
 	}
-	return srvc.Store.DeleteKeyword(ctx, r.Keyword)
+	return srvc.store.DeleteKeyword(ctx, r.Keyword)
 }

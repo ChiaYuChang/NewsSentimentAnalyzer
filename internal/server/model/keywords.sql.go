@@ -9,22 +9,13 @@ import (
 	"context"
 )
 
-const cleanUpKeywords = `-- name: CleanUpKeywords :exec
-DELETE FROM keywords
- WHERE deleted_at IS NOT NULL
-`
-
-func (q *Queries) CleanUpKeywords(ctx context.Context) error {
-	_, err := q.db.Exec(ctx, cleanUpKeywords)
-	return err
-}
-
-const createKeyword = `-- name: CreateKeyword :exec
+const createKeyword = `-- name: CreateKeyword :one
 INSERT INTO keywords (
     news_id, keyword
 ) VALUES (
     $1, $2
 )
+RETURNING id
 `
 
 type CreateKeywordParams struct {
@@ -32,31 +23,24 @@ type CreateKeywordParams struct {
 	Keyword string `json:"keyword"`
 }
 
-func (q *Queries) CreateKeyword(ctx context.Context, arg *CreateKeywordParams) error {
-	_, err := q.db.Exec(ctx, createKeyword, arg.NewsID, arg.Keyword)
-	return err
+func (q *Queries) CreateKeyword(ctx context.Context, arg *CreateKeywordParams) (int64, error) {
+	row := q.db.QueryRow(ctx, createKeyword, arg.NewsID, arg.Keyword)
+	var id int64
+	err := row.Scan(&id)
+	return id, err
 }
 
-const deleteKeyword = `-- name: DeleteKeyword :exec
-UPDATE keywords
-   SET deleted_at = CURRENT_TIMESTAMP
+const deleteKeyword = `-- name: DeleteKeyword :execrows
+DELETE FROM keywords
  WHERE keyword = $1
 `
 
-func (q *Queries) DeleteKeyword(ctx context.Context, keyword string) error {
-	_, err := q.db.Exec(ctx, deleteKeyword, keyword)
-	return err
-}
-
-const deleteKeywordByNewsId = `-- name: DeleteKeywordByNewsId :exec
-UPDATE keywords
-   SET deleted_at = CURRENT_TIMESTAMP
- WHERE news_id = $1
-`
-
-func (q *Queries) DeleteKeywordByNewsId(ctx context.Context, newsID int64) error {
-	_, err := q.db.Exec(ctx, deleteKeywordByNewsId, newsID)
-	return err
+func (q *Queries) DeleteKeyword(ctx context.Context, keyword string) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteKeyword, keyword)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }
 
 const getKeywordsByNewsId = `-- name: GetKeywordsByNewsId :many

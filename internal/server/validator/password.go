@@ -15,7 +15,7 @@ type password struct {
 	nNotASCII int
 }
 
-func NewPassword(s string) password {
+func newPassword(s string) password {
 	pwd := password{text: s}
 
 	for _, r := range s {
@@ -48,6 +48,10 @@ type PasswordValidator struct {
 	MinSpecial      int
 }
 
+func NewDefaultPasswordValidator() PasswordValidator {
+	return NewPasswordValidator(true, 8, 30, 1, 1, 1, 1)
+}
+
 func NewPasswordValidator(ASCIIOnly bool, minLen, maxLen, minDigit,
 	minUpper, minLower, minSpecial int) PasswordValidator {
 	return PasswordValidator{
@@ -72,22 +76,22 @@ func (pv PasswordValidator) IsValid(p password) bool {
 		return false
 	}
 
-	if p.nDigit <= pv.MinDigit ||
-		p.nUpper <= pv.MinUpper ||
-		p.nLower <= pv.MinLower ||
-		p.nSpecial <= pv.MinSpecial {
+	if p.nDigit < pv.MinDigit ||
+		p.nUpper < pv.MinUpper ||
+		p.nLower < pv.MinLower ||
+		p.nSpecial < pv.MinSpecial {
 		return false
 	}
 	return true
 }
 
-func (pv PasswordValidator) PasswordValFun() val.Func {
+func (pv PasswordValidator) ValFun() val.Func {
 	return func(fl val.FieldLevel) bool {
 		password, ok := fl.Field().Interface().(string)
 		if !ok {
 			return false
 		}
-		return pv.IsValid(NewPassword(password))
+		return pv.IsValid(newPassword(password))
 	}
 }
 

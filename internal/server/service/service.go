@@ -13,8 +13,8 @@ var ErrEndOfData = errors.New("end of data")
 var ErrInvalidParams = errors.New("invalid parameters")
 
 type Service struct {
-	model.Store
-	*val.Validate
+	store    model.Store
+	validate *val.Validate
 }
 
 type Request interface {
@@ -22,7 +22,7 @@ type Request interface {
 }
 
 func NewService(store model.Store, val *val.Validate) Service {
-	return Service{Store: store, Validate: val}
+	return Service{store: store, validate: val}
 }
 
 func NewServiceWithDefautlVal(store model.Store) Service {
@@ -75,4 +75,10 @@ type adminService Service
 
 func (srvc Service) Admin() adminService {
 	return adminService(srvc)
+}
+
+type otherService Service
+
+func (srvc Service) NewsJob() otherService {
+	return otherService(srvc)
 }

@@ -1,18 +1,19 @@
-package main
+package randangenerator
 
 import (
-	"crypto/rand"
+	"bytes"
+	crand "crypto/rand"
 	"errors"
 	"math"
 	"unicode/utf8"
 )
 
 type CharSet struct {
-	setSize  uint8
-	setChars []rune
-	setBytes [][]byte
-	setMap   map[rune]bool
-	Check    bool
+	setSize         uint8
+	setChars        []rune
+	setBytes        [][]byte
+	setMap          map[rune]bool
+	IsAllSingleByte bool
 }
 
 var (
@@ -52,20 +53,24 @@ func NewCharSet(rn []rune) (CharSet, error) {
 		setSize:  uint8(len(set)),
 		setChars: noDuplicatedRunes,
 		setMap:   nil,
-		Check:    false,
 	}
-	cs.setBytes = cs.genByteSliceFromRunes(rn)
+	cs.setBytes, cs.IsAllSingleByte = cs.genByteSliceFromRunes(rn)
 	return cs, nil
 }
 
-func (c CharSet) genByteSliceFromRunes(rs []rune) [][]byte {
+func (c CharSet) genByteSliceFromRunes(rs []rune) ([][]byte, bool) {
 	bs := make([][]byte, len(rs))
+	isAllSingleByte := true
+
 	for i, r := range rs {
 		b := make([]byte, utf8.RuneLen(r))
 		utf8.EncodeRune(b, r)
 		bs[i] = b
+		if len(b) > 1 {
+			isAllSingleByte = false
+		}
 	}
-	return bs
+	return bs, isAllSingleByte
 }
 
 func (c CharSet) SetSize() uint8 {
@@ -109,16 +114,39 @@ func (c1 CharSet) Merge(c2 CharSet) (CharSet, error) {
 	return NewCharSet(setChars)
 }
 
-func (c CharSet) GenerateRandomString(length int) (string, error) {
+func (c CharSet) GenRdmBytes(length int) ([]byte, error) {
+	if !c.IsAllSingleByte {
+		return nil, ErrContainsMultibyteChar
+	}
+
+	index := make([]uint8, length)
+	if _, err := crand.Read(index); err != nil {
+		return nil, err
+	}
+
+	randomBytes := make([][]byte, length)
+	for i, j := range index {
+		randomBytes[i] = c.GetByte(j)
+	}
+
+	return bytes.Join(randomBytes, []byte{}), nil
+}
+
+func (c CharSet) GenRdmRunes(length int) ([]rune, error) {
 	index := make([]uint8, length)
 
-	if _, err := rand.Read(index); err != nil {
-		return "", err
+	if _, err := crand.Read(index); err != nil {
+		return nil, err
 	}
 
 	randomRunes := make([]rune, length)
 	for i, j := range index {
 		randomRunes[i] = c.GetRune(j)
 	}
-	return string(randomRunes), nil
+	return randomRunes, nil
+}
+
+func (c CharSet) GenRdmString(length int) (string, error) {
+	rns, err := c.GenRdmRunes(length)
+	return string(rns), err
 }

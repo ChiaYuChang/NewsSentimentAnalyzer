@@ -11,22 +11,26 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const cleanUpAPIKey = `-- name: CleanUpAPIKey :exec
+const cleanUpAPIKey = `-- name: CleanUpAPIKey :execrows
 DELETE FROM apikeys
  WHERE deleted_at IS NOT NULL
 `
 
-func (q *Queries) CleanUpAPIKey(ctx context.Context) error {
-	_, err := q.db.Exec(ctx, cleanUpAPIKey)
-	return err
+func (q *Queries) CleanUpAPIKey(ctx context.Context) (int64, error) {
+	result, err := q.db.Exec(ctx, cleanUpAPIKey)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }
 
-const createAPIKey = `-- name: CreateAPIKey :exec
+const createAPIKey = `-- name: CreateAPIKey :one
 INSERT INTO apikeys (
     owner, api_id, key
 ) VALUES (
     $1, $2, $3
 )
+RETURNING id
 `
 
 type CreateAPIKeyParams struct {
@@ -35,12 +39,14 @@ type CreateAPIKeyParams struct {
 	Key   string `json:"key"`
 }
 
-func (q *Queries) CreateAPIKey(ctx context.Context, arg *CreateAPIKeyParams) error {
-	_, err := q.db.Exec(ctx, createAPIKey, arg.Owner, arg.ApiID, arg.Key)
-	return err
+func (q *Queries) CreateAPIKey(ctx context.Context, arg *CreateAPIKeyParams) (int32, error) {
+	row := q.db.QueryRow(ctx, createAPIKey, arg.Owner, arg.ApiID, arg.Key)
+	var id int32
+	err := row.Scan(&id)
+	return id, err
 }
 
-const deleteAPIKey = `-- name: DeleteAPIKey :exec
+const deleteAPIKey = `-- name: DeleteAPIKey :execrows
 UPDATE apikeys
    SET deleted_at = CURRENT_TIMESTAMP
  WHERE owner = $1
@@ -52,9 +58,12 @@ type DeleteAPIKeyParams struct {
 	ApiID int16 `json:"api_id"`
 }
 
-func (q *Queries) DeleteAPIKey(ctx context.Context, arg *DeleteAPIKeyParams) error {
-	_, err := q.db.Exec(ctx, deleteAPIKey, arg.Owner, arg.ApiID)
-	return err
+func (q *Queries) DeleteAPIKey(ctx context.Context, arg *DeleteAPIKeyParams) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteAPIKey, arg.Owner, arg.ApiID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }
 
 const getAPIKey = `-- name: GetAPIKey :many
@@ -155,7 +164,7 @@ func (q *Queries) ListAPIKey(ctx context.Context, owner int32) ([]*ListAPIKeyRow
 	return items, nil
 }
 
-const updateAPIKey = `-- name: UpdateAPIKey :exec
+const updateAPIKey = `-- name: UpdateAPIKey :execrows
 UPDATE apikeys
    SET key = $1,
        api_id = $3,
@@ -172,12 +181,15 @@ type UpdateAPIKeyParams struct {
 	NewApiID int16  `json:"new_api_id"`
 }
 
-func (q *Queries) UpdateAPIKey(ctx context.Context, arg *UpdateAPIKeyParams) error {
-	_, err := q.db.Exec(ctx, updateAPIKey,
+func (q *Queries) UpdateAPIKey(ctx context.Context, arg *UpdateAPIKeyParams) (int64, error) {
+	result, err := q.db.Exec(ctx, updateAPIKey,
 		arg.Key,
 		arg.Owner,
 		arg.OldApiID,
 		arg.NewApiID,
 	)
-	return err
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }

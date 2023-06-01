@@ -9,22 +9,26 @@ import (
 	"context"
 )
 
-const cleanUpUsers = `-- name: CleanUpUsers :exec
+const cleanUpUsers = `-- name: CleanUpUsers :execrows
 DELETE FROM users
  WHERE deleted_at IS NOT NULL
 `
 
-func (q *Queries) CleanUpUsers(ctx context.Context) error {
-	_, err := q.db.Exec(ctx, cleanUpUsers)
-	return err
+func (q *Queries) CleanUpUsers(ctx context.Context) (int64, error) {
+	result, err := q.db.Exec(ctx, cleanUpUsers)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }
 
-const createUser = `-- name: CreateUser :exec
+const createUser = `-- name: CreateUser :one
 INSERT INTO users (
     password, first_name, last_name, role, email
 ) VALUES (
     $1, $2, $3, $4, $5
 )
+RETURNING id
 `
 
 type CreateUserParams struct {
@@ -35,26 +39,31 @@ type CreateUserParams struct {
 	Email     string `json:"email"`
 }
 
-func (q *Queries) CreateUser(ctx context.Context, arg *CreateUserParams) error {
-	_, err := q.db.Exec(ctx, createUser,
+func (q *Queries) CreateUser(ctx context.Context, arg *CreateUserParams) (int32, error) {
+	row := q.db.QueryRow(ctx, createUser,
 		arg.Password,
 		arg.FirstName,
 		arg.LastName,
 		arg.Role,
 		arg.Email,
 	)
-	return err
+	var id int32
+	err := row.Scan(&id)
+	return id, err
 }
 
-const deleteUser = `-- name: DeleteUser :exec
+const deleteUser = `-- name: DeleteUser :execrows
 UPDATE users
    SET deleted_at = CURRENT_TIMESTAMP
  WHERE id = $1
 `
 
-func (q *Queries) DeleteUser(ctx context.Context, id int32) error {
-	_, err := q.db.Exec(ctx, deleteUser, id)
-	return err
+func (q *Queries) DeleteUser(ctx context.Context, id int32) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteUser, id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }
 
 const getUserAuth = `-- name: GetUserAuth :one
@@ -76,7 +85,7 @@ func (q *Queries) GetUserAuth(ctx context.Context, email string) (*GetUserAuthRo
 	return &i, err
 }
 
-const updatePassword = `-- name: UpdatePassword :exec
+const updatePassword = `-- name: UpdatePassword :execrows
 UPDATE users
    SET password = $1,
        password_updated_at = CURRENT_TIMESTAMP
@@ -89,7 +98,10 @@ type UpdatePasswordParams struct {
 	ID       int32  `json:"id"`
 }
 
-func (q *Queries) UpdatePassword(ctx context.Context, arg *UpdatePasswordParams) error {
-	_, err := q.db.Exec(ctx, updatePassword, arg.Password, arg.ID)
-	return err
+func (q *Queries) UpdatePassword(ctx context.Context, arg *UpdatePasswordParams) (int64, error) {
+	result, err := q.db.Exec(ctx, updatePassword, arg.Password, arg.ID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }

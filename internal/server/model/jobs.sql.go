@@ -11,22 +11,26 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const cleanUpJobs = `-- name: CleanUpJobs :exec
+const cleanUpJobs = `-- name: CleanUpJobs :execrows
 DELETE FROM jobs
  WHERE deleted_at IS NOT NULL
 `
 
-func (q *Queries) CleanUpJobs(ctx context.Context) error {
-	_, err := q.db.Exec(ctx, cleanUpJobs)
-	return err
+func (q *Queries) CleanUpJobs(ctx context.Context) (int64, error) {
+	result, err := q.db.Exec(ctx, cleanUpJobs)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }
 
-const createJob = `-- name: CreateJob :exec
+const createJob = `-- name: CreateJob :one
 INSERT INTO jobs (
   owner, status, src_api_id, src_query, llm_api_id, llm_query
 ) VALUES (
     $1, $2, $3, $4, $5, $6
-)
+) 
+RETURNING id
 `
 
 type CreateJobParams struct {
@@ -38,8 +42,8 @@ type CreateJobParams struct {
 	LlmQuery string    `json:"llm_query"`
 }
 
-func (q *Queries) CreateJob(ctx context.Context, arg *CreateJobParams) error {
-	_, err := q.db.Exec(ctx, createJob,
+func (q *Queries) CreateJob(ctx context.Context, arg *CreateJobParams) (int32, error) {
+	row := q.db.QueryRow(ctx, createJob,
 		arg.Owner,
 		arg.Status,
 		arg.SrcApiID,
@@ -47,10 +51,12 @@ func (q *Queries) CreateJob(ctx context.Context, arg *CreateJobParams) error {
 		arg.LlmApiID,
 		arg.LlmQuery,
 	)
-	return err
+	var id int32
+	err := row.Scan(&id)
+	return id, err
 }
 
-const deleteJob = `-- name: DeleteJob :exec
+const deleteJob = `-- name: DeleteJob :execrows
 UPDATE jobs
    SET deleted_at = CURRENT_TIMESTAMP
  WHERE id = $1
@@ -62,9 +68,12 @@ type DeleteJobParams struct {
 	Owner int32 `json:"owner"`
 }
 
-func (q *Queries) DeleteJob(ctx context.Context, arg *DeleteJobParams) error {
-	_, err := q.db.Exec(ctx, deleteJob, arg.ID, arg.Owner)
-	return err
+func (q *Queries) DeleteJob(ctx context.Context, arg *DeleteJobParams) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteJob, arg.ID, arg.Owner)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }
 
 const getJobsByOwner = `-- name: GetJobsByOwner :many
@@ -125,7 +134,7 @@ func (q *Queries) GetJobsByOwner(ctx context.Context, arg *GetJobsByOwnerParams)
 	return items, nil
 }
 
-const updateJobStatus = `-- name: UpdateJobStatus :exec
+const updateJobStatus = `-- name: UpdateJobStatus :execrows
 UPDATE jobs
    SET status = $1,
        updated_at = CURRENT_TIMESTAMP
@@ -140,7 +149,10 @@ type UpdateJobStatusParams struct {
 	Owner  int32     `json:"owner"`
 }
 
-func (q *Queries) UpdateJobStatus(ctx context.Context, arg *UpdateJobStatusParams) error {
-	_, err := q.db.Exec(ctx, updateJobStatus, arg.Status, arg.ID, arg.Owner)
-	return err
+func (q *Queries) UpdateJobStatus(ctx context.Context, arg *UpdateJobStatusParams) (int64, error) {
+	result, err := q.db.Exec(ctx, updateJobStatus, arg.Status, arg.ID, arg.Owner)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }

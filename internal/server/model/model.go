@@ -245,9 +245,9 @@ type News struct {
 }
 
 type Newsjob struct {
-	ID     int64       `json:"id"`
-	JobID  pgtype.Int8 `json:"job_id"`
-	NewsID pgtype.Int8 `json:"news_id"`
+	ID     int64 `json:"id"`
+	JobID  int64 `json:"job_id"`
+	NewsID int64 `json:"news_id"`
 }
 
 type SchemaMigration struct {

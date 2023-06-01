@@ -1,6 +1,7 @@
 package validator
 
 import (
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
 	val "github.com/go-playground/validator/v10"
 )
 
@@ -34,3 +35,33 @@ func (e Enmus[T]) ValFun() val.Func {
 func (e Enmus[T]) Tag() string {
 	return e.tag
 }
+
+var EnmusRole = NewEnmus(
+	"role",
+	model.RoleUser,
+	model.RoleAdmin,
+)
+
+var EnmusJobStatus = NewEnmus(
+	"job_status",
+	model.JobStatusCreated,
+	model.JobStatusRunning,
+	model.JobStatusDone,
+	model.JobStatusFailure,
+	model.JobStatusCanceled,
+)
+
+var EnmusApiType = NewEnmus(
+	"api_type",
+	model.ApiTypeLanguageModel,
+	model.ApiTypeSource,
+)
+
+var EnmusEventType = NewEnmus(
+	"event_type",
+	model.EventTypeSignIn,
+	model.EventTypeSignOut,
+	model.EventTypeAuthorization,
+	model.EventTypeApiKey,
+	model.EventTypeQuery,
+)

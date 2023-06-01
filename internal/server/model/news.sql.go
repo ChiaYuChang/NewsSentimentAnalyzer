@@ -11,12 +11,13 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createNews = `-- name: CreateNews :exec
+const createNews = `-- name: CreateNews :one
 INSERT INTO news (
     md5_hash, title, url, description, content, source, publish_at
 ) VALUES (
     $1, $2, $3, $4, $5, $6, $7
 )
+RETURNING id
 `
 
 type CreateNewsParams struct {
@@ -29,8 +30,8 @@ type CreateNewsParams struct {
 	PublishAt   pgtype.Timestamptz `json:"publish_at"`
 }
 
-func (q *Queries) CreateNews(ctx context.Context, arg *CreateNewsParams) error {
-	_, err := q.db.Exec(ctx, createNews,
+func (q *Queries) CreateNews(ctx context.Context, arg *CreateNewsParams) (int64, error) {
+	row := q.db.QueryRow(ctx, createNews,
 		arg.Md5Hash,
 		arg.Title,
 		arg.Url,
@@ -39,27 +40,35 @@ func (q *Queries) CreateNews(ctx context.Context, arg *CreateNewsParams) error {
 		arg.Source,
 		arg.PublishAt,
 	)
-	return err
+	var id int64
+	err := row.Scan(&id)
+	return id, err
 }
 
-const deleteNewsById = `-- name: DeleteNewsById :exec
+const deleteNews = `-- name: DeleteNews :execrows
 DELETE FROM news
  WHERE id = $1
 `
 
-func (q *Queries) DeleteNewsById(ctx context.Context, id int64) error {
-	_, err := q.db.Exec(ctx, deleteNewsById, id)
-	return err
+func (q *Queries) DeleteNews(ctx context.Context, id int64) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteNews, id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }
 
-const deleteNewsPublishBefore = `-- name: DeleteNewsPublishBefore :exec
+const deleteNewsPublishBefore = `-- name: DeleteNewsPublishBefore :execrows
 DELETE FROM news
  WHERE publish_at < $1
 `
 
-func (q *Queries) DeleteNewsPublishBefore(ctx context.Context, beforeTime pgtype.Timestamptz) error {
-	_, err := q.db.Exec(ctx, deleteNewsPublishBefore, beforeTime)
-	return err
+func (q *Queries) DeleteNewsPublishBefore(ctx context.Context, beforeTime pgtype.Timestamptz) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteNewsPublishBefore, beforeTime)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }
 
 const getNewsByJob = `-- name: GetNewsByJob :many

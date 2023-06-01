@@ -1,5 +1,6 @@
 include .env
 
+APP_REPOSITORY='github.com/ChiaYuChang/NewsSentimentAnalyzer'
 POSTGRESQL_URL="postgres://${POSTGRES_USERNAME}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT}/${POSTGRES_DB_NAME}?sslmode=disable"
 
 build:
@@ -48,6 +49,10 @@ migrate-down:
 
 db-dump:
 	pg_dump  ${POSTGRESQL_URL} -f ${SQL_SCHEME_PATH}/schema.sql --schema-only
+
+mockgen-store:
+	@mockgen -destination internal/server/model/mockdb/store.go \
+	${APP_REPOSITORY}/internal/server/model Store
 
 about: ## Display info related to the build
 	@echo "- Protoc version  : $(shell protoc --version)"

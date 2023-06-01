@@ -9,12 +9,13 @@ import (
 	"context"
 )
 
-const createLog = `-- name: CreateLog :exec
+const createLog = `-- name: CreateLog :one
 INSERT INTO logs (
     user_id, type, message
 ) VALUES (
     $1, $2, $3
 )
+RETURNING id
 `
 
 type CreateLogParams struct {
@@ -23,9 +24,11 @@ type CreateLogParams struct {
 	Message string    `json:"message"`
 }
 
-func (q *Queries) CreateLog(ctx context.Context, arg *CreateLogParams) error {
-	_, err := q.db.Exec(ctx, createLog, arg.UserID, arg.Type, arg.Message)
-	return err
+func (q *Queries) CreateLog(ctx context.Context, arg *CreateLogParams) (int64, error) {
+	row := q.db.QueryRow(ctx, createLog, arg.UserID, arg.Type, arg.Message)
+	var id int64
+	err := row.Scan(&id)
+	return id, err
 }
 
 const getLogByUserId = `-- name: GetLogByUserId :many

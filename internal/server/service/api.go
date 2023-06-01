@@ -1,12 +1,47 @@
 package service
 
 import (
+	"context"
+
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
-	"golang.org/x/net/context"
 )
 
 func (srvc apiService) Service() Service {
 	return Service(srvc)
+}
+
+func (srvc apiService) Create(ctx context.Context, req *APICreateRequest) (id int16, err error) {
+	if err := srvc.validate.Struct(req); err != nil {
+		return 0, err
+	}
+	params, _ := req.ToParams()
+	return srvc.store.CreateAPI(ctx, params)
+}
+
+func (srvc apiService) List(ctx context.Context, limit int32) ([]*model.ListAPIRow, error) {
+	if err := srvc.validate.Var(limit, "required,min=1,max=100"); err != nil {
+		return nil, err
+	}
+	return srvc.store.ListAPI(ctx, limit)
+}
+
+func (srvc apiService) Update(ctx context.Context, req *APIUpdateRequeset) (n int64, err error) {
+	if err := srvc.validate.Struct(req); err != nil {
+		return 0, err
+	}
+	params, _ := req.ToParams()
+	return srvc.store.UpdateAPI(ctx, params)
+}
+
+func (srvc apiService) Delete(ctx context.Context, id int16) (n int64, err error) {
+	if err := srvc.validate.Var(id, "required,min=1"); err != nil {
+		return 0, err
+	}
+	return srvc.store.DeleteAPI(ctx, id)
+}
+
+func (srvc apiService) CleanUp(ctx context.Context) (n int64, err error) {
+	return srvc.store.CleanUpAPIs(ctx)
 }
 
 type APICreateRequest struct {
@@ -14,16 +49,15 @@ type APICreateRequest struct {
 	Type string `validate:"required,api_type"`
 }
 
-func (r APICreateRequest) RequestName() string {
+func (req APICreateRequest) RequestName() string {
 	return "admin-api-create-req"
 }
 
-type APIListRequest struct {
-	N int `validate:"required,min=1,max=100"`
-}
-
-func (r APIListRequest) RequestName() string {
-	return "admin-api-list-req"
+func (req APICreateRequest) ToParams() (*model.CreateAPIParams, error) {
+	return &model.CreateAPIParams{
+		Name: req.Name,
+		Type: model.ApiType(req.Type),
+	}, nil
 }
 
 type APIUpdateRequeset struct {
@@ -32,62 +66,14 @@ type APIUpdateRequeset struct {
 	ID   int16  `validate:"required,min=1"`
 }
 
-func (r APIUpdateRequeset) RequestName() string {
+func (req APIUpdateRequeset) RequestName() string {
 	return "admin-api-update-req"
 }
 
-type APIDeleteReqiest struct {
-	ID int16 `validate:"required,min=1"`
-}
-
-func (r APIDeleteReqiest) RequestName() string {
-	return "admin-api-delete-req"
-}
-
-type APICleanUpReqiest struct{}
-
-func (r APICleanUpReqiest) RequestName() string {
-	return "admin-api-clearn-up-req"
-}
-
-func (srvc apiService) Create(ctx context.Context, r *APICreateRequest) error {
-	if err := srvc.Validate.Struct(r); err != nil {
-		return err
-	}
-
-	return srvc.Store.CreateAPI(ctx, &model.CreateAPIParams{
-		Name: r.Name, Type: model.ApiType(r.Type),
-	})
-}
-
-func (srvc apiService) List(ctx context.Context, r *APIListRequest) ([]*model.ListAPIRow, error) {
-	if err := srvc.Validate.Struct(r); err != nil {
-		return nil, err
-	}
-	return srvc.Store.ListAPI(ctx, int32(r.N))
-}
-
-func (srvc apiService) Update(ctx context.Context, r *APIUpdateRequeset) error {
-	if err := srvc.Validate.Struct(r); err != nil {
-		return err
-	}
-	return srvc.Store.UpdateAPI(ctx, &model.UpdateAPIParams{
-		Name: r.Name,
-		Type: model.ApiType(r.Type),
-		ID:   r.ID,
-	})
-}
-
-func (srvc apiService) Delete(ctx context.Context, r *APIDeleteReqiest) error {
-	if err := srvc.Validate.Struct(r); err != nil {
-		return err
-	}
-	return srvc.Store.DeleteAPI(ctx, r.ID)
-}
-
-func (srvc apiService) CleanUp(ctx context.Context, r *APICleanUpReqiest) error {
-	if err := srvc.Validate.Struct(r); err != nil {
-		return err
-	}
-	return srvc.CleanUpAPIs(ctx)
+func (req APIUpdateRequeset) ToParams() (*model.UpdateAPIParams, error) {
+	return &model.UpdateAPIParams{
+		Name: req.Name,
+		Type: model.ApiType(req.Type),
+		ID:   req.ID,
+	}, nil
 }

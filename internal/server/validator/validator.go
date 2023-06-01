@@ -1,67 +1,55 @@
 package validator
 
 import (
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
+	"time"
+
 	val "github.com/go-playground/validator/v10"
 )
 
-var Validate *val.Validate
-
-func init() {
-	Validate = val.New()
+type Validator interface {
+	Tag() string
+	ValFun() val.Func
 }
 
-func RegisterEnmusValidator(val *val.Validate) {
-	enmusRole := NewEnmus(
-		"role",
-		model.RoleUser,
-		model.RoleAdmin,
-	)
-	val.RegisterValidation(
-		enmusRole.Tag(),
-		enmusRole.ValFun(),
-	)
-
-	enmusJobStatus := NewEnmus(
-		"job_status",
-		model.JobStatusCreated,
-		model.JobStatusRunning,
-		model.JobStatusDone,
-		model.JobStatusFailure,
-		model.JobStatusCanceled,
-	)
-	val.RegisterValidation(
-		enmusJobStatus.Tag(),
-		enmusJobStatus.ValFun(),
-	)
-
-	enmusApiType := NewEnmus(
-		"api_type",
-		model.ApiTypeLanguageModel,
-		model.ApiTypeSource,
-	)
-	val.RegisterValidation(
-		enmusApiType.Tag(),
-		enmusApiType.ValFun(),
-	)
-
-	enmusEventType := NewEnmus(
-		"event_type",
-		model.EventTypeSignIn,
-		model.EventTypeSignOut,
-		model.EventTypeAuthorization,
-		model.EventTypeApiKey,
-		model.EventTypeQuery,
-	)
-	val.RegisterValidation(
-		enmusEventType.Tag(),
-		enmusEventType.ValFun(),
-	)
+func RegisterValidator(val *val.Validate, validators ...Validator) error {
+	var err error
+	for _, v := range validators {
+		err = val.RegisterValidation(v.Tag(), v.ValFun())
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
-func RegisterPasswordValidator(pv PasswordValidator, val *val.Validate) {
-	val.RegisterValidation(
-		pv.Tag(),
-		pv.PasswordValFun(),
-	)
+type TimeValidator struct {
+	tag     string
+	valFunc val.Func
 }
+
+func (tv TimeValidator) Tag() string {
+	return tv.tag
+}
+
+func (tv TimeValidator) ValFun() val.Func {
+	return tv.valFunc
+}
+
+func NotBeforeTime(tag string, when func() time.Time) TimeValidator {
+	return TimeValidator{
+		tag: tag,
+		valFunc: func(fl val.FieldLevel) bool {
+			t, ok := fl.Field().Interface().(time.Time)
+			if !ok {
+				return false
+			}
+
+			if t.After(when()) {
+				return false
+			}
+			return true
+		},
+	}
+}
+
+var NotBeforeNow = NotBeforeTime("before_now", time.Now)
