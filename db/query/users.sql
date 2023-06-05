@@ -23,6 +23,10 @@ UPDATE users
    SET deleted_at = CURRENT_TIMESTAMP
  WHERE id = $1;
 
+-- name: HardDeleteUser :execrows
+DELETE FROM users
+ WHERE id = $1;
+
 -- name: CleanUpUsers :execrows
 DELETE FROM users
  WHERE deleted_at IS NOT NULL;

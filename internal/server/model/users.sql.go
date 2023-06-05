@@ -85,6 +85,19 @@ func (q *Queries) GetUserAuth(ctx context.Context, email string) (*GetUserAuthRo
 	return &i, err
 }
 
+const hardDeleteUser = `-- name: HardDeleteUser :execrows
+DELETE FROM users
+ WHERE id = $1
+`
+
+func (q *Queries) HardDeleteUser(ctx context.Context, id int32) (int64, error) {
+	result, err := q.db.Exec(ctx, hardDeleteUser, id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const updatePassword = `-- name: UpdatePassword :execrows
 UPDATE users
    SET password = $1,

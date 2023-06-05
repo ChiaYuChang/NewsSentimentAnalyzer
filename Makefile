@@ -1,7 +1,8 @@
 include .env
 
-APP_REPOSITORY='github.com/ChiaYuChang/NewsSentimentAnalyzer'
-POSTGRESQL_URL="postgres://${POSTGRES_USERNAME}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT}/${POSTGRES_DB_NAME}?sslmode=disable"
+STATE=testing
+APP_REPOSITORY="github.com/ChiaYuChang/NewsSentimentAnalyzer"
+POSTGRESQL_URL="postgres://${POSTGRES_USERNAME}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT}/${POSTGRES_DB_NAME}_${STATE}?sslmode=disable"
 
 build:
 	@go build -o ${BIN_PATH} ./main.go
@@ -13,10 +14,10 @@ sqlc-generate:
 	sqlc generate -f ./config/sqlc.yml
 
 sqlc-clean:
-	rm ./internal/model/*.sql.go
-	rm ./internal/model/db.go
-	rm ./internal/model/querier.go
-	rm ./internal/model/model.go
+	rm ./internal/server/model/*.sql.go
+	rm ./internal/server/model/db.go
+	rm ./internal/server/model/querier.go
+	rm ./internal/server/model/model.go
 
 docker-new-psql-container:
 	@docker volume create nsa-volume
@@ -29,7 +30,7 @@ docker-new-psql-container:
 	postgres:14.6
 
 docker-create-db:
-	docker exec nsa-postgres psql -U postgres -c "CREATE DATABASE ${POSTGRES_DB_NAME};"
+	docker exec nsa-postgres psql -U postgres -c "CREATE DATABASE ${POSTGRES_DB_NAME}_${STATE};"
 
 docker-flush-db:
 	docker container rm nsa-postgres
@@ -44,8 +45,18 @@ docker-up-db:
 migrate-up:
 	migrate -path ${MIGRATION_PATH}/ -database ${POSTGRESQL_URL} -verbose up 1
 
+migrate-up-all:
+	migrate -path ${MIGRATION_PATH}/ -database ${POSTGRESQL_URL} -verbose up
+
 migrate-down:
 	migrate -path ${MIGRATION_PATH}/ -database ${POSTGRESQL_URL} -verbose down 1
+
+migrate-down-all:
+	migrate -path ${MIGRATION_PATH}/ -database ${POSTGRESQL_URL} -verbose down
+
+migrate-drop:
+	migrate -path ${MIGRATION_PATH}/ -database ${POSTGRESQL_URL} -verbose goto 1
+	migrate -path ${MIGRATION_PATH}/ -database ${POSTGRESQL_URL} -verbose drop
 
 db-dump:
 	pg_dump  ${POSTGRESQL_URL} -f ${SQL_SCHEME_PATH}/schema.sql --schema-only

@@ -7,6 +7,12 @@ SELECT id, name, type
        name ASC
  LIMIT @n::int;
 
+-- name: GetAPI :one
+SELECT *
+  FROM apis
+ WHERE id = $1
+   AND deleted_at IS NULL;
+
 -- name: CreateAPI :one
 INSERT INTO apis (
     name, type

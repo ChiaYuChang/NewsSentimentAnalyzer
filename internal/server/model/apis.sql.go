@@ -57,6 +57,27 @@ func (q *Queries) DeleteAPI(ctx context.Context, id int16) (int64, error) {
 	return result.RowsAffected(), nil
 }
 
+const getAPI = `-- name: GetAPI :one
+SELECT id, name, type, created_at, updated_at, deleted_at
+  FROM apis
+ WHERE id = $1
+   AND deleted_at IS NULL
+`
+
+func (q *Queries) GetAPI(ctx context.Context, id int16) (*Api, error) {
+	row := q.db.QueryRow(ctx, getAPI, id)
+	var i Api
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Type,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return &i, err
+}
+
 const listAPI = `-- name: ListAPI :many
 SELECT id, name, type 
   FROM apis

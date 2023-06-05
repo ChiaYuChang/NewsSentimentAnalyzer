@@ -16,6 +16,7 @@ import (
 type Option struct {
 	TokenMaker        JWTOption               `json:"tokenmaker"`
 	PasswordValidator PasswordValidatorOption `json:"password_validator"`
+	Server            ServerOption            `json:"server"`
 }
 
 func (o Option) String() string {
@@ -23,6 +24,7 @@ func (o Option) String() string {
 	sb.WriteString("Option:\n")
 	sb.WriteString("- " + o.TokenMaker.String())
 	sb.WriteString("- " + o.PasswordValidator.String())
+	sb.WriteString("- " + o.Server.String())
 	return sb.String()
 }
 
@@ -126,5 +128,18 @@ func (pwdOpt PasswordValidatorOption) String() string {
 	sb.WriteString(fmt.Sprintf("\t- Min # of upper   : %d\n", pwdOpt.MinUpper))
 	sb.WriteString(fmt.Sprintf("\t- Min # of lower   : %d\n", pwdOpt.MinLower))
 	sb.WriteString(fmt.Sprintf("\t- Min # of special : %d\n", pwdOpt.MinSpecial))
+	return sb.String()
+}
+
+type ServerOption struct {
+	TemplatePath   string `json:"template_path"`
+	StaticFilePath string `json:"static_file_path"`
+}
+
+func (srvOpt ServerOption) String() string {
+	sb := strings.Builder{}
+	sb.WriteString("Server Options:\n")
+	sb.WriteString(fmt.Sprintf("\t- Templates        : %v\n", srvOpt.TemplatePath))
+	sb.WriteString(fmt.Sprintf("\t- Static Files     : %v\n", srvOpt.StaticFilePath))
 	return sb.String()
 }

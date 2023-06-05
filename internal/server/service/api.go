@@ -40,6 +40,13 @@ func (srvc apiService) Delete(ctx context.Context, id int16) (n int64, err error
 	return srvc.store.DeleteAPI(ctx, id)
 }
 
+func (srvc apiService) Get(ctx context.Context, id int16) (*model.Api, error) {
+	if err := srvc.validate.Var(id, "required,min=1"); err != nil {
+		return nil, err
+	}
+	return srvc.store.GetAPI(ctx, id)
+}
+
 func (srvc apiService) CleanUp(ctx context.Context) (n int64, err error) {
 	return srvc.store.CleanUpAPIs(ctx)
 }

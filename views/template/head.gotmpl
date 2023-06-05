@@ -1,0 +1,8 @@
+{{define "head"}}
+    {{range $e:=.Meta.Element}}{{$e.ToHTML}}
+    {{end}}
+    {{range $e:=.Link.Element}}{{$e.ToHTML}}
+    {{end}}
+    {{range $e:=.Script.Element}}{{$e.ToHTML}}
+    {{end}}
+{{end}}

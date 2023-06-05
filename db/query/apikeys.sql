@@ -11,10 +11,10 @@ WITH k AS (
 ) 
 SELECT k.id, k.owner, k.api_id, a.name, a.type, k.key 
   FROM k
-  LEFT JOIN a
+ RIGHT JOIN a
     ON k.api_id = a.id;
 
--- name: GetAPIKey :many
+-- name: GetAPIKey :one
 SELECT id, owner, api_id, key 
   FROM apikeys
  WHERE owner = $1 

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {{template "head" .Page.HeadConent}}
+    <title>{{.Page.Title}}</title>
+</head>
+
+<body>
+    <section class="background">
+        <div class="mid-card">
+            <h1>Please select your query endpoint</h1>
+            {{range .APIEndpoints}}
+            <ul class="data-list">
+                <li>
+                    <img {{.Image.ToHTMLAttr}} class="api-logo api-logo-large">
+                    <div class="row">
+                    {{range .Endpoints.Element}}    {{.ToHTML}}
+                    {{end}}
+                    </div>
+                    <div class="footer">
+                        For more information, visit <a href="{{.DocumentURL}}">here</a>.
+                    </div>
+                </li>
+            </ul>
+           {{end}}
+            <ul class="data-list">
+                <li>
+                    <div class="row">
+                        <button class="btn" onclick="location.href='endpoints/all.html'">Query All</button>
+                    </div>
+                </li>
+            </ul>
+            <ul class="data-list">
+                <li>
+                    <div class="row">
+                        <button class="btn" onclick="location.href='endpoints/local.html'">Query Local Database</button>
+                    </div>
+                </li>
+            </ul>
+            <p class="footer">
+                back to <a href="welcome.html" class=" url">welcome</a> page
+            </p>
+        </div>
+    </section>
+</body>
+
+</html>

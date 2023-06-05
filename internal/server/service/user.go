@@ -33,6 +33,18 @@ func (srvc userService) GetAuthInfo(
 	return srvc.store.GetUserAuth(ctx, email)
 }
 
+func (srvc userService) Login(ctx context.Context, email, password string) error {
+	if len(password) < 1 {
+		return bcrypt.ErrMismatchedHashAndPassword
+	}
+
+	auth, err := srvc.GetAuthInfo(ctx, email)
+	if err != nil {
+		return err
+	}
+	return bcrypt.CompareHashAndPassword(auth.Password, []byte(password))
+}
+
 func (srvc userService) UpdatePassword(
 	ctx context.Context, req *UserUpdatePasswordRequest) (n int64, err error) {
 	if err := srvc.validate.Struct(req); err != nil {
@@ -52,6 +64,14 @@ func (srvc userService) Delete(
 		return 0, err
 	}
 	return srvc.store.DeleteUser(ctx, Id)
+}
+
+func (srvc userService) HardDelete(
+	ctx context.Context, Id int32) (n int64, err error) {
+	if err := srvc.validate.Var(Id, "required,min=1"); err != nil {
+		return 0, err
+	}
+	return srvc.store.HardDeleteUser(ctx, Id)
 }
 
 func (srvc userService) CleanUp(ctx context.Context) (n int64, err error) {

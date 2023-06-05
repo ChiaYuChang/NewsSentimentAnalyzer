@@ -66,7 +66,7 @@ func (q *Queries) DeleteAPIKey(ctx context.Context, arg *DeleteAPIKeyParams) (in
 	return result.RowsAffected(), nil
 }
 
-const getAPIKey = `-- name: GetAPIKey :many
+const getAPIKey = `-- name: GetAPIKey :one
 SELECT id, owner, api_id, key 
   FROM apikeys
  WHERE owner = $1 
@@ -86,29 +86,16 @@ type GetAPIKeyRow struct {
 	Key   string `json:"key"`
 }
 
-func (q *Queries) GetAPIKey(ctx context.Context, arg *GetAPIKeyParams) ([]*GetAPIKeyRow, error) {
-	rows, err := q.db.Query(ctx, getAPIKey, arg.Owner, arg.ApiID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []*GetAPIKeyRow
-	for rows.Next() {
-		var i GetAPIKeyRow
-		if err := rows.Scan(
-			&i.ID,
-			&i.Owner,
-			&i.ApiID,
-			&i.Key,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, &i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
+func (q *Queries) GetAPIKey(ctx context.Context, arg *GetAPIKeyParams) (*GetAPIKeyRow, error) {
+	row := q.db.QueryRow(ctx, getAPIKey, arg.Owner, arg.ApiID)
+	var i GetAPIKeyRow
+	err := row.Scan(
+		&i.ID,
+		&i.Owner,
+		&i.ApiID,
+		&i.Key,
+	)
+	return &i, err
 }
 
 const listAPIKey = `-- name: ListAPIKey :many

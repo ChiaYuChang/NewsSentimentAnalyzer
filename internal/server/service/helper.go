@@ -1,8 +1,10 @@
 package service
 
 import (
+	"errors"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -18,4 +20,13 @@ func TimeToTimestamp(t time.Time) pgtype.Timestamp {
 
 func StringToText(s string) pgtype.Text {
 	return pgtype.Text{String: s, Valid: len(s) > 0}
+}
+
+func ToPgError(err error) (*pgconn.PgError, bool) {
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) {
+		return pgErr, true
+	} else {
+		return nil, false
+	}
 }

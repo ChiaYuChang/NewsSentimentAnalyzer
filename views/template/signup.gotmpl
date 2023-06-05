@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {{template "head" .Page.HeadConent}}
+    <title>{{.Page.Title}}</title>
+</head>
+
+<body>
+    <section class="background">
+        <div class="mid-card">
+            <h1>Sign up</h1>
+            <form action="post" class="data-form">
+                <ul class="data-list">
+                    <li>
+                        <div class="data-field">
+                            <img src="image/user.svg" alt="username" class="form-icon">
+                            <input type="text" placeholder="First name" id="first-name" name="first-name"
+                                class="form-input" required>
+                            <input type="text" placeholder="Last name" id="last-name" name="last-name"
+                                class="form-input" required>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="data-field">
+                            <img src="image/email.svg" alt="username" class="form-icon">
+                            <input type="email" placeholder="Email address" id="username" name="username"
+                                class="form-input" required>
+                        </div>
+                        {{if .ShowUsernameHasUsedAlert}}
+                        <div class="alert">
+                            <img src="image/alert.svg" alt="alert" class="alert-icon">
+                            <span>Username already used</span>
+                        </div>
+                        {{end}}
+                    </li>
+                    <li>
+                        <div class="data-field">
+                            <img src="image/password.svg" alt="username" class="form-icon">
+                            <input type="password" placeholder="Password" id="password" name="password" minlength="8"
+                                class="form-input" required>
+                            <button type="button" class="password-visibility" onclick="showPassword('')">
+                                <img src="image/eye-no.svg" id="hide" alt="hide password" class="btn">
+                                <img src="image/eye-yes.svg" id="show" alt="show password" class="hide">
+                            </button>
+                        </div>
+                    </li>
+                </ul>
+                <input type="submit" value="Sign Up" class="btn">
+            </form>
+            <p class="footer">
+                Already have an account? <a href="login.html" class=" url">Login</a>
+            </p>
+
+        </div>
+    </section>
+</body>
+
+</html>

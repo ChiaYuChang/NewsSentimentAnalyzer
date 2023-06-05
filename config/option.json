@@ -12,5 +12,9 @@
         "min_upper": 1,
         "min_lower": 1,
         "min_special": 1
+    },
+    "server": {
+        "template_path": "views/template/*.gotmpl",
+        "static_file_path": "views/static/"
     }
 }

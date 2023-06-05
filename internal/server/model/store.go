@@ -34,13 +34,13 @@ func (s PGXPoolStore) Close() error {
 	return s.Close()
 }
 
-func NewDBConnection(ctx context.Context, config *pgx.ConnConfig) (*pgx.Conn, error) {
+func NewDBConnection(ctx context.Context, connStr string) (*pgx.Conn, error) {
 	conn, err := pgx.Connect(
 		context.Background(),
-		config.ConnString())
+		connStr)
 
 	if err != nil {
-		return nil, fmt.Errorf("Unable to connect to database: %w", err)
+		return nil, err
 	}
 	return conn, nil
 }
@@ -49,8 +49,8 @@ func NewPGXStore(conn *pgx.Conn) Store {
 	return PGXStore{New(conn), conn}
 }
 
-func NewDBConnectionPools(ctx context.Context, config *pgx.ConnConfig) (*pgxpool.Pool, error) {
-	dbPool, err := pgxpool.New(ctx, config.ConnString())
+func NewDBConnectionPools(ctx context.Context, connStr string) (*pgxpool.Pool, error) {
+	dbPool, err := pgxpool.New(ctx, connStr)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to create connection pool: %w", err)
 	}
@@ -58,9 +58,9 @@ func NewDBConnectionPools(ctx context.Context, config *pgx.ConnConfig) (*pgxpool
 	return dbPool, nil
 }
 
-// func NewPGXPoolStore(pool *pgxpool.Pool) Store {
-// 	return PGXPoolStore{New(pool), pool}
-// }
+func NewPGXPoolStore(pool *pgxpool.Pool) Store {
+	return PGXPoolStore{New(pool), pool}
+}
 
 type CheckAndUpdateUserPasswordTxParams struct {
 	ID          int32  `json:"id"`
@@ -116,4 +116,20 @@ func (s PGXStore) CheckAndUpdateUserPasswordTx(
 		return err
 	})
 	return err
+}
+
+// TODO
+func (s PGXPoolStore) exectTx(ctx context.Context, fn QueryCallBackFun) error {
+	return nil
+}
+
+// TODO
+func (s PGXPoolStore) DoCheckAndUpdateUserPasswordTx(ctx context.Context, params *CheckAndUpdateUserPasswordTxParams) error {
+	return nil
+}
+
+// TODO
+func (s PGXPoolStore) CheckAndUpdateUserPasswordTx(
+	ctx context.Context, params *CheckAndUpdateUserPasswordTxParams) error {
+	return nil
 }

@@ -349,11 +349,26 @@ func (mr *MockStoreMockRecorder) DoCheckAndUpdateUserPasswordTx(arg0, arg1 inter
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DoCheckAndUpdateUserPasswordTx", reflect.TypeOf((*MockStore)(nil).DoCheckAndUpdateUserPasswordTx), arg0, arg1)
 }
 
+// GetAPI mocks base method.
+func (m *MockStore) GetAPI(arg0 context.Context, arg1 int16) (*model.Api, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAPI", arg0, arg1)
+	ret0, _ := ret[0].(*model.Api)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAPI indicates an expected call of GetAPI.
+func (mr *MockStoreMockRecorder) GetAPI(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAPI", reflect.TypeOf((*MockStore)(nil).GetAPI), arg0, arg1)
+}
+
 // GetAPIKey mocks base method.
-func (m *MockStore) GetAPIKey(arg0 context.Context, arg1 *model.GetAPIKeyParams) ([]*model.GetAPIKeyRow, error) {
+func (m *MockStore) GetAPIKey(arg0 context.Context, arg1 *model.GetAPIKeyParams) (*model.GetAPIKeyRow, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAPIKey", arg0, arg1)
-	ret0, _ := ret[0].([]*model.GetAPIKeyRow)
+	ret0, _ := ret[0].(*model.GetAPIKeyRow)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -497,6 +512,21 @@ func (m *MockStore) GetUserAuth(arg0 context.Context, arg1 string) (*model.GetUs
 func (mr *MockStoreMockRecorder) GetUserAuth(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserAuth", reflect.TypeOf((*MockStore)(nil).GetUserAuth), arg0, arg1)
+}
+
+// HardDeleteUser mocks base method.
+func (m *MockStore) HardDeleteUser(arg0 context.Context, arg1 int32) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "HardDeleteUser", arg0, arg1)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// HardDeleteUser indicates an expected call of HardDeleteUser.
+func (mr *MockStoreMockRecorder) HardDeleteUser(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HardDeleteUser", reflect.TypeOf((*MockStore)(nil).HardDeleteUser), arg0, arg1)
 }
 
 // ListAPI mocks base method.

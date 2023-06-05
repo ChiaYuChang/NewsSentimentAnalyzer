@@ -42,3 +42,69 @@ func GenRdmUser() (*model.User, error) {
 		Email:     email,
 	}, nil
 }
+
+func CloneUser(u *model.User) *model.User {
+	pwd := make([]byte, len(u.Password))
+	copy(pwd, u.Password)
+	return &model.User{
+		ID:        u.ID,
+		Password:  pwd,
+		FirstName: u.FirstName,
+		LastName:  u.LastName,
+		Role:      u.Role,
+		Email:     u.Email,
+	}
+}
+
+func GenRdmAPI() (*model.Api, error) {
+	name, err := rg.Alphabet.GenRdmString(rand.Intn(18) + 3)
+	if err != nil {
+		return nil, err
+	}
+
+	apiType := model.ApiTypeSource
+	if rand.Float64() > 0.8 {
+		apiType = model.ApiTypeLanguageModel
+	}
+
+	return &model.Api{
+		ID:   int16(rand.Intn(10_000)),
+		Name: name,
+		Type: apiType,
+	}, nil
+}
+
+// generate a random apikey model. if 'owner', and 'api_id' <= 0, they will
+// be generated randomly.
+func GenRdmAPIKey(owner int32, api_id int16) (*model.Apikey, error) {
+	if owner <= 0 {
+		owner = rand.Int31n(1_000_000)
+	}
+
+	if api_id <= 0 {
+		api_id = int16(rand.Intn(1_000))
+	}
+
+	keyLen := rand.Intn(30) + 30
+	if key, err := rg.Password.GenRdmString(keyLen); err != nil {
+		return nil, err
+	} else {
+		return &model.Apikey{
+			ID:    rand.Int31n(100_000_000),
+			Owner: owner,
+			ApiID: api_id,
+			Key:   key,
+		}, nil
+	}
+}
+
+func CloneAPI(a *model.Api) *model.Api {
+	return &model.Api{
+		ID:        a.ID,
+		Name:      a.Name,
+		Type:      a.Type,
+		CreatedAt: a.CreatedAt,
+		UpdatedAt: a.UpdatedAt,
+		DeletedAt: a.DeletedAt,
+	}
+}

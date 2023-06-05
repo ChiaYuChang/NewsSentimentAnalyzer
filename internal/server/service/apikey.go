@@ -26,21 +26,24 @@ func (srvc apikeyService) Delete(ctx context.Context, req *APIKeyDeleteRequest) 
 	return srvc.store.DeleteAPIKey(ctx, params)
 }
 
-func (srvc apikeyService) Get(ctx context.Context, r *APIKeyGetRequest) ([]*model.GetAPIKeyRow, error) {
+func (srvc apikeyService) Get(ctx context.Context, r *APIKeyGetRequest) (*model.GetAPIKeyRow, error) {
 	if err := srvc.validate.Struct(r); err != nil {
 		return nil, err
 	}
 
-	return srvc.store.GetAPIKey(ctx, &model.GetAPIKeyParams{
-		Owner: r.Owner, ApiID: r.ApiID,
-	})
+	return srvc.store.GetAPIKey(
+		ctx,
+		&model.GetAPIKeyParams{
+			Owner: r.Owner,
+			ApiID: r.ApiID,
+		})
 }
 
-func (srvc apikeyService) List(ctx context.Context, r *APIKeyListRequest) ([]*model.ListAPIKeyRow, error) {
-	if err := srvc.validate.Struct(r); err != nil {
+func (srvc apikeyService) List(ctx context.Context, owner int32) ([]*model.ListAPIKeyRow, error) {
+	if err := srvc.validate.Var(owner, "required,min=1"); err != nil {
 		return nil, err
 	}
-	return srvc.store.ListAPIKey(ctx, r.Owner)
+	return srvc.store.ListAPIKey(ctx, owner)
 }
 
 func (srvc apikeyService) CleanUp(ctx context.Context) (n int64, err error) {
@@ -48,9 +51,9 @@ func (srvc apikeyService) CleanUp(ctx context.Context) (n int64, err error) {
 }
 
 type APIKeyCreateRequest struct {
-	Owner int32  `validate:"required,min=1"`
-	ApiID int16  `validate:"required,min=1"`
-	Key   string `validate:"required,min=1"`
+	Owner int32  `validate:"required"`
+	ApiID int16  `validate:"required"`
+	Key   string `validate:"required"`
 }
 
 func (req APIKeyCreateRequest) RequestName() string {
@@ -82,27 +85,19 @@ func (req APIKeyDeleteRequest) ToParams() (*model.DeleteAPIKeyParams, error) {
 }
 
 type APIKeyGetRequest struct {
-	ID    int32  `validate:"required,min=1"`
-	Owner int32  `validate:"required,min=1"`
-	ApiID int16  `validate:"required,min=1"`
-	Key   string `validate:"required,min=1"`
+	Owner int32 `validate:"required,min=1"`
+	ApiID int16 `validate:"required,min=1"`
 }
 
-func (r APIKeyGetRequest) RequestName() string {
+func (req APIKeyGetRequest) RequestName() string {
 	return "apikey-get-req"
 }
 
-type APIKeyListRequest struct {
-	ID    int32  `validate:"required,min=1"`
-	Owner int32  `validate:"required,min=1"`
-	ApiID int16  `validate:"required,min=1"`
-	Name  string `validate:"required,min=1"`
-	Type  string `validate:"required,api_type"`
-	Key   string `validate:"required"`
-}
-
-func (r APIKeyListRequest) RequestName() string {
-	return "apikey-list-req"
+func (req APIKeyGetRequest) ToParams() *APIKeyGetRequest {
+	return &APIKeyGetRequest{
+		Owner: req.Owner,
+		ApiID: req.ApiID,
+	}
 }
 
 type APIKeyUpdateRequest struct {

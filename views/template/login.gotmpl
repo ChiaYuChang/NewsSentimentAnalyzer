@@ -2,14 +2,8 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css" />
+    {{template "head" .Page.HeadConent}}
+    <title>{{.Page.Title}}</title>
 </head>
 
 <body>
@@ -20,14 +14,26 @@
                 <ul class="data-list">
                     <li class="data-field">
                         <img src="image/email.svg" alt="username" class="form-icon">
-                        <input type="email" placeholder="Email" id="username" name="username" class="form-input"
+                        <input type="email" placeholder="Email" id="email" name="email" class="form-input"
                             required>
                     </li>
+                    {{if .ShowUsernameNotFountAlert}}
+                    <div class="alert">
+                        <img src="image/alert.svg" alt="alert" class="alert-icon">
+                        <span>Couldn’t find your Account</span>
+                    </div>
+                    {{end}}
                     <li class="data-field">
                         <img src="image/password.svg" alt="username" class="form-icon">
                         <input type="password" placeholder="Password" id="password" name="password" minlength="8"
                             class="form-input" required>
                     </li>
+                    {{if .ShowPasswordMismatchAlert}}
+                    <div class="alert">
+                        <img src="image/alert.svg" alt="alert" class="alert-icon">
+                        <span>Wrong password. Please try again.</span>
+                    </div>
+                    </span>{{end}}
                 </ul>
                 <input type="submit" value="Login" class="btn">
                 <p class="footer">

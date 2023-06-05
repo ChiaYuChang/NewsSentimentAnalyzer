@@ -110,6 +110,20 @@ header {
     display: none;
 }
 
+.alert {
+    display: flex;
+    font-size: .5rem;
+    align-items: center;
+    color: red;
+    gap: 2px;
+    padding-top: 3px;
+}
+
+.alert-icon {
+    height: .5rem;
+    border: red;
+}
+
 .btn:hover {
     background-color: #146C94;
 }

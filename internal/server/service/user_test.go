@@ -548,7 +548,7 @@ func TestDeleteUserService(t *testing.T) {
 	var Validate *val.Validate
 	tcs := []testCase{
 		{
-			Name: "Create User OK",
+			Name: "Delete User OK",
 			Init: func() {
 				Validate = val.New()
 				validator.RegisterValidator(
