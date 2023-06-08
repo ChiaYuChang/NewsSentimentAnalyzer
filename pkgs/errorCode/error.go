@@ -82,3 +82,8 @@ func (e Error) IsEqual(err error) bool {
 func (e Error) ToJson() ([]byte, error) {
 	return json.MarshalIndent(e, "", "    ")
 }
+
+func (e Error) MustToJson() []byte {
+	b, _ := json.MarshalIndent(e, "", "    ")
+	return b
+}

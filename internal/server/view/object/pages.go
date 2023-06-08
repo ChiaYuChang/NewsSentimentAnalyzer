@@ -49,20 +49,18 @@ func APIKeyFromDBModel(page Page, rows []*model.ListAPIKeyRow) APIKeyPage {
 
 	for _, row := range rows {
 		var which *[]*APIKey
-		if !row.Type.Valid {
-			continue
-		} else if row.Type.ApiType == model.ApiTypeSource {
+		if row.Type == model.ApiTypeSource {
 			which = &(APIKeyPage.NewsAPIs)
-		} else if row.Type.ApiType == model.ApiTypeLanguageModel {
+		} else if row.Type == model.ApiTypeLanguageModel {
 			which = &(APIKeyPage.AnalyzerAPIs)
 		}
 		(*which) = append((*which), &APIKey{
 			Image: NewHTMLElement("img").
-				AddPair("alt", row.Name.String),
+				AddPair("alt", row.Name),
 			Input: NewHTMLElement("input").
-				AddPair("name", strings.ToLower(row.Name.String)+"-apikey").
-				AddPair("id", strings.ToLower(row.Name.String)+"-apikey").
-				AddPair("value", row.Key),
+				AddPair("name", strings.ToLower(row.Name)+"-apikey").
+				AddPair("id", strings.ToLower(row.Name)+"-apikey").
+				AddPair("value", row.Key.String),
 		})
 	}
 	return APIKeyPage

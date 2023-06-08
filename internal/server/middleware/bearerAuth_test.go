@@ -13,6 +13,7 @@ import (
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/middleware"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/cookieMaker"
 	ec "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/errorCode"
 	tokenmaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/tokenMaker"
 	"github.com/go-chi/chi/v5"
@@ -38,8 +39,10 @@ func TestBearerAuthenticator(t *testing.T) {
 	username := "username"
 	password := "password"
 	role := tokenmaker.RUser
+	uid := int32(1)
 
 	maker := middleware.NewJWTTokenMaker(opt, tokenmaker.WithIssuer("[[:Issuer:]]"))
+	maker.AllowFromHTTPCookie = true
 
 	r := chi.NewRouter()
 	r.Get("/login", func(w http.ResponseWriter, r *http.Request) {
@@ -54,7 +57,7 @@ func TestBearerAuthenticator(t *testing.T) {
 		ecErr := ec.MustGetErr(ec.ECUnauthorized).(*ec.Error)
 		if usr == username && pwd == password {
 			ecErr = ec.MustGetErr(ec.Success).(*ec.Error)
-			bearer, _ := maker.MakeToken(username, role)
+			bearer, _ := maker.MakeToken(username, uid, role)
 			w.Header().Set("Authorization", fmt.Sprintf("Bearer %s", bearer))
 		}
 
@@ -173,7 +176,7 @@ func TestBearerAuthenticator(t *testing.T) {
 	t.Run(
 		"Get user page with ok bearer token",
 		func(t *testing.T) {
-			bearer, err := maker.MakeToken(username, role)
+			bearer, err := maker.MakeToken(username, uid, role)
 			require.NoError(t, err)
 
 			req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/%s", srv.URL, "user/welcome"), nil)
@@ -189,6 +192,33 @@ func TestBearerAuthenticator(t *testing.T) {
 
 			require.NotEmpty(t, resp.Header.Get("Authorization"))
 			require.Contains(t, string(body), "welcome!")
+		},
+	)
+
+	t.Run(
+		"Get token form cookie",
+		func(t *testing.T) {
+			bearer, err := maker.MakeToken(username, uid, role)
+			require.NoError(t, err)
+
+			cm := cookieMaker.NewTestCookieMaker()
+			req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/%s", srv.URL, "user/welcome"), nil)
+			req.AddCookie(cm.NewCookie(cookieMaker.AUTH_COOKIE_KEY, bearer))
+			resp, err := cli.Do(req)
+
+			require.NoError(t, err)
+			require.Equal(t, http.StatusOK, resp.StatusCode)
+			body, err := io.ReadAll(resp.Body)
+			require.NoError(t, err)
+			defer resp.Body.Close()
+
+			require.NotEmpty(t, resp.Header.Get("Authorization"))
+			require.Contains(t, string(body), "welcome!")
+
+			t.Log("Cookie")
+			for _, c := range resp.Cookies() {
+				t.Logf("%s: %s\n", c.Name, c.Value)
+			}
 		},
 	)
 }

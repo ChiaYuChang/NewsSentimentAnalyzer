@@ -17,7 +17,7 @@ const DEFAULT_EXPIRE_AFTER = 3 * time.Hour
 const DEFAULT_VALID_AFTER = 0 * time.Second
 
 type TokenMaker interface {
-	MakeToken(username string, role Role) (string, error)
+	MakeToken(username string, uid int32, role Role) (string, error)
 	ValidateToken(tokenStr string) (Payload, error)
 	fmt.Stringer
 }
@@ -29,6 +29,27 @@ const (
 	RAdmin
 	RUser
 )
+
+func ParseRole(role any) Role {
+	var roleStr string
+	switch val := role.(type) {
+	case []byte:
+		roleStr = string(val)
+	case string:
+		roleStr = val
+	default:
+		return RUnknown
+	}
+
+	if roleStr == RAdmin.String() {
+		return RAdmin
+	}
+
+	if roleStr == RUser.String() {
+		return RUser
+	}
+	return RUnknown
+}
 
 func (r Role) String() string {
 	var s string

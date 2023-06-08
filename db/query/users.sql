@@ -1,5 +1,5 @@
 -- name: GetUserAuth :one
-SELECT id, email, password FROM users
+SELECT id, email, password, role FROM users
  WHERE email = $1
    AND deleted_at IS NULl;
 

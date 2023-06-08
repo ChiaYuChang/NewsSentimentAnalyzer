@@ -65,6 +65,10 @@ mockgen-store:
 	@mockgen -destination internal/server/model/mockdb/store.go \
 	${APP_REPOSITORY}/internal/server/model Store
 
+mockgen-tokenmaker:
+	@mockgen -destination pkgs/tokenMaker/mockTokenMaker/tokenMaker.go \
+	${APP_REPOSITORY}/pkgs/tokenMaker TokenMaker,Payload
+
 about: ## Display info related to the build
 	@echo "- Protoc version  : $(shell protoc --version)"
 	@echo "- Go version      : $(shell go version)"

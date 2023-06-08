@@ -21,33 +21,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type userCreateReqMatcher struct {
-	param *model.CreateUserParams
-}
-
-func newUserCreateReqMatcher(req *service.UserCreateRequest) (gomock.Matcher, error) {
-	if param, err := req.ToParams(); err != nil {
-		return nil, err
-	} else {
-		return userCreateReqMatcher{
-			param: param,
-		}, nil
-	}
-}
-
-func (m userCreateReqMatcher) Matches(x interface{}) bool {
-	if p, ok := x.(*model.CreateUserParams); !ok {
-		return false
-	} else {
-		p.Password = m.param.Password
-		return gomock.Eq(m.param).Matches(p)
-	}
-}
-
-func (m userCreateReqMatcher) String() string {
-	return "matcher ofr user create request"
-}
-
 func TestCreateUserService(t *testing.T) {
 	type testCase struct {
 		Name        string
@@ -82,7 +55,7 @@ func TestCreateUserService(t *testing.T) {
 				}
 				require.NotEmpty(t, req.RequestName())
 
-				matcher, err := newUserCreateReqMatcher(req)
+				matcher, err := testtool.NewUserCreateReqMatcher(req)
 				require.NoError(t, err)
 
 				store := mock_model.NewMockStore(ctl)
@@ -354,33 +327,6 @@ func TestGetUserAuthInfoPassword(t *testing.T) {
 	}
 }
 
-type userUpdatePasswordReqMatcher struct {
-	param *model.UpdatePasswordParams
-}
-
-func newUserUpdatePasswordReqMatcher(req *service.UserUpdatePasswordRequest) (gomock.Matcher, error) {
-	if param, err := req.ToParams(); err != nil {
-		return nil, err
-	} else {
-		return userUpdatePasswordReqMatcher{
-			param: param,
-		}, nil
-	}
-}
-
-func (m userUpdatePasswordReqMatcher) Matches(x interface{}) bool {
-	if p, ok := x.(*model.UpdatePasswordParams); !ok {
-		return false
-	} else {
-		p.Password = m.param.Password
-		return gomock.Eq(m.param).Matches(p)
-	}
-}
-
-func (m userUpdatePasswordReqMatcher) String() string {
-	return "matcher ofr user update password request"
-}
-
 func TestUpdateUserPasswordService(t *testing.T) {
 	type testCase struct {
 		Name        string
@@ -409,7 +355,7 @@ func TestUpdateUserPasswordService(t *testing.T) {
 				}
 				require.NotEmpty(t, req.RequestName())
 
-				matcher, err := newUserUpdatePasswordReqMatcher(req)
+				matcher, err := testtool.NewUserUpdatePasswordReqMatcher(req)
 				require.NoError(t, err)
 
 				store := mock_model.NewMockStore(ctl)

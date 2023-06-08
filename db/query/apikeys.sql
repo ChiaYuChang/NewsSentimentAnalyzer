@@ -1,18 +1,15 @@
--- name: ListAPIKey :many 
+-- name: ListAPIKey :many
 WITH k AS (
   SELECT id, owner, api_id, key
     FROM apikeys
    WHERE owner = $1
      AND deleted_at IS NULL
-), a AS (
-  SELECT id, name, type
-    FROM apis
-   WHERE deleted_at IS NULL
-) 
-SELECT k.id, k.owner, k.api_id, a.name, a.type, k.key 
-  FROM k
- RIGHT JOIN a
-    ON k.api_id = a.id;
+)
+SELECT k.id AS api_key_id, k.owner, k.key, a.id AS api_id, a.type, a.name
+  FROM apis AS a
+  LEFT JOIN k
+    ON a.id = k.api_id
+ WHERE a.deleted_at IS NULL;
 
 -- name: GetAPIKey :one
 SELECT id, owner, api_id, key 

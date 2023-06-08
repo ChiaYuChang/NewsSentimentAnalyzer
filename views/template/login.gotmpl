@@ -14,8 +14,7 @@
                 <ul class="data-list">
                     <li class="data-field">
                         <img src="image/email.svg" alt="username" class="form-icon">
-                        <input type="email" placeholder="Email" id="email" name="email" class="form-input"
-                            required>
+                        <input type="email" placeholder="Email" id="email" name="email" class="form-input" required>
                     </li>
                     {{if .ShowUsernameNotFountAlert}}
                     <div class="alert">
@@ -25,8 +24,7 @@
                     {{end}}
                     <li class="data-field">
                         <img src="image/password.svg" alt="username" class="form-icon">
-                        <input type="password" placeholder="Password" id="password" name="password" minlength="8"
-                            class="form-input" required>
+                        <input type="password" placeholder="Password" id="password" name="password" minlength="8" class="form-input" required>
                     </li>
                     {{if .ShowPasswordMismatchAlert}}
                     <div class="alert">

@@ -158,12 +158,12 @@ func TestListAPIKeyService(t *testing.T) {
 					for api_id, api := range apis {
 						if apikey, ok := apikeys[key{owner, api_id}]; ok {
 							aks = append(aks, &model.ListAPIKeyRow{
-								ID:    apikey.ID,
-								Owner: owner,
-								ApiID: api_id,
-								Name:  service.StringToText(api.Name),
-								Type:  model.NullApiType{ApiType: api.Type, Valid: true},
-								Key:   apikey.Key,
+								ApiKeyID: service.ToPgTypeInt4(apikey.ID),
+								Owner:    service.ToPgTypeInt4(owner),
+								Key:      service.StringToText(apikey.Key),
+								ApiID:    api_id,
+								Name:     api.Name,
+								Type:     api.Type,
 							})
 						}
 					}
@@ -176,10 +176,10 @@ func TestListAPIKeyService(t *testing.T) {
 			aks, err := srvc.APIKey().List(context.Background(), user.ID)
 			require.NoError(t, err)
 			for _, ak := range aks {
-				require.Equal(t, user.ID, ak.Owner)
-				require.Equal(t, apis[ak.ApiID].Name, ak.Name.String)
-				require.Equal(t, apis[ak.ApiID].Type, ak.Type.ApiType)
-				require.Equal(t, apikeys[key{ak.Owner, ak.ApiID}].Key, ak.Key)
+				require.Equal(t, user.ID, ak.Owner.Int32)
+				require.Equal(t, apis[ak.ApiID].Name, ak.Name)
+				require.Equal(t, apis[ak.ApiID].Type, ak.Type)
+				require.Equal(t, apikeys[key{ak.Owner.Int32, ak.ApiID}].Key, ak.Key.String)
 			}
 		}(user)
 	}

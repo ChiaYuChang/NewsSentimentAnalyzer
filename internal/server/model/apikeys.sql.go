@@ -104,24 +104,21 @@ WITH k AS (
     FROM apikeys
    WHERE owner = $1
      AND deleted_at IS NULL
-), a AS (
-  SELECT id, name, type
-    FROM apis
-   WHERE deleted_at IS NULL
-) 
-SELECT k.id, k.owner, k.api_id, a.name, a.type, k.key 
-  FROM k
-  LEFT JOIN a
-    ON k.api_id = a.id
+)
+SELECT k.id AS api_key_id, k.owner, k.key, a.id AS api_id, a.type, a.name
+  FROM apis AS a
+  LEFT JOIN k
+    ON a.id = k.api_id
+ WHERE a.deleted_at IS NULL
 `
 
 type ListAPIKeyRow struct {
-	ID    int32       `json:"id"`
-	Owner int32       `json:"owner"`
-	ApiID int16       `json:"api_id"`
-	Name  pgtype.Text `json:"name"`
-	Type  NullApiType `json:"type"`
-	Key   string      `json:"key"`
+	ApiKeyID pgtype.Int4 `json:"api_key_id"`
+	Owner    pgtype.Int4 `json:"owner"`
+	Key      pgtype.Text `json:"key"`
+	ApiID    int16       `json:"api_id"`
+	Type     ApiType     `json:"type"`
+	Name     string      `json:"name"`
 }
 
 func (q *Queries) ListAPIKey(ctx context.Context, owner int32) ([]*ListAPIKeyRow, error) {
@@ -134,12 +131,12 @@ func (q *Queries) ListAPIKey(ctx context.Context, owner int32) ([]*ListAPIKeyRow
 	for rows.Next() {
 		var i ListAPIKeyRow
 		if err := rows.Scan(
-			&i.ID,
+			&i.ApiKeyID,
 			&i.Owner,
-			&i.ApiID,
-			&i.Name,
-			&i.Type,
 			&i.Key,
+			&i.ApiID,
+			&i.Type,
+			&i.Name,
 		); err != nil {
 			return nil, err
 		}

@@ -141,7 +141,7 @@ func (jm *JWTMaker) WithOptions(options ...JWTClaimsOpt) *JWTMaker {
 	return jm
 }
 
-func (jm JWTMaker) MakeToken(username string, role Role) (string, error) {
+func (jm JWTMaker) MakeToken(username string, uid int32, role Role) (string, error) {
 	currTime := time.Now()
 	valideAt := currTime.Add(jm.ValidAfter)
 	expireAt := valideAt.Add(jm.ExpireAfter)
@@ -150,6 +150,7 @@ func (jm JWTMaker) MakeToken(username string, role Role) (string, error) {
 		UserInfo: UserInfo{
 			UserName: username,
 			Role:     role,
+			UID:      uid,
 		},
 	}
 

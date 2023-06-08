@@ -67,7 +67,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id int32) (int64, error) {
 }
 
 const getUserAuth = `-- name: GetUserAuth :one
-SELECT id, email, password FROM users
+SELECT id, email, password, role FROM users
  WHERE email = $1
    AND deleted_at IS NULl
 `
@@ -76,12 +76,18 @@ type GetUserAuthRow struct {
 	ID       int32  `json:"id"`
 	Email    string `json:"email"`
 	Password []byte `json:"password"`
+	Role     Role   `json:"role"`
 }
 
 func (q *Queries) GetUserAuth(ctx context.Context, email string) (*GetUserAuthRow, error) {
 	row := q.db.QueryRow(ctx, getUserAuth, email)
 	var i GetUserAuthRow
-	err := row.Scan(&i.ID, &i.Email, &i.Password)
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.Password,
+		&i.Role,
+	)
 	return &i, err
 }
 

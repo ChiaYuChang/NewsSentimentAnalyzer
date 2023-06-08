@@ -30,3 +30,17 @@ func ToPgError(err error) (*pgconn.PgError, bool) {
 		return nil, false
 	}
 }
+
+func ToPgTypeInt4(i int32) pgtype.Int4 {
+	return pgtype.Int4{
+		Int32: i,
+		Valid: true,
+	}
+}
+
+func ToPgTypeInt2(i int16) pgtype.Int2 {
+	return pgtype.Int2{
+		Int16: i,
+		Valid: true,
+	}
+}

@@ -102,6 +102,7 @@ func TestJWTMakerWithOptions(t *testing.T) {
 
 	username := "user"
 	role := tm.RAdmin
+	uid := int32(1)
 	for i := range tcs {
 		tc := tcs[i]
 		t.Run(
@@ -109,7 +110,7 @@ func TestJWTMakerWithOptions(t *testing.T) {
 			func(t *testing.T) {
 				maker := tm.NewJWTMakerWithDefaultVal()
 				maker.WithOptions(tc.options...)
-				tokenStr, err := maker.MakeToken(username, role)
+				tokenStr, err := maker.MakeToken(username, uid, role)
 				require.NoError(t, err)
 
 				_, err = maker.ValidateToken(tokenStr)
@@ -134,7 +135,8 @@ func TestJWTMakerErrors(t *testing.T) {
 
 	username := "user"
 	role := tm.RAdmin
-	tokenStr, _ := maker.MakeToken(username, role)
+	uid := int32(1)
+	tokenStr, _ := maker.MakeToken(username, uid, role)
 	_, err = maker.ValidateToken(tokenStr)
 	require.ErrorContains(t, err, jwt.ErrTokenUnverifiable.Error())
 	require.ErrorContains(t, err, ec.MustGetErr(tm.JWTErrNotValidYet).Error())
@@ -160,11 +162,13 @@ func TestJWTMakerAsMaker(t *testing.T) {
 
 	username := "user"
 	role := tm.RAdmin
-	tokenStr, err := maker.MakeToken(username, role)
+	uid := int32(1)
+	tokenStr, err := maker.MakeToken(username, uid, role)
 	require.NoError(t, err)
 	payload, err := maker.ValidateToken(tokenStr)
 	require.NoError(t, err)
 
 	require.Equal(t, username, payload.GetUsername())
 	require.Equal(t, role, payload.GetRole())
+	require.Equal(t, uid, payload.GetUserID())
 }

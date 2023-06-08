@@ -39,8 +39,16 @@ func GetErr(code ErrorCode) (error, bool) {
 	return defaultErrorRepo.GetErr(code)
 }
 
+func GetEcErr(code ErrorCode) (*Error, bool) {
+	return defaultErrorRepo.GetEcErr(code)
+}
+
 func MustGetErr(code ErrorCode) error {
 	return defaultErrorRepo.MustGetErr(code)
+}
+
+func MustGetEcErr(code ErrorCode) *Error {
+	return defaultErrorRepo.MustGetEcErr(code)
 }
 
 type ErrorRepo map[ErrorCode]*Error
@@ -73,6 +81,10 @@ func (er ErrorRepo) RegisterErrFromErr(err error, code ErrorCode, httpStatusCode
 }
 
 func (er ErrorRepo) GetErr(code ErrorCode) (error, bool) {
+	return er.GetEcErr(code)
+}
+
+func (er ErrorRepo) GetEcErr(code ErrorCode) (*Error, bool) {
 	err, ok := er[code]
 	if !ok {
 		return err, false
@@ -81,6 +93,10 @@ func (er ErrorRepo) GetErr(code ErrorCode) (error, bool) {
 }
 
 func (er ErrorRepo) MustGetErr(code ErrorCode) error {
-	e, _ := er.GetErr(code)
+	return er.MustGetEcErr(code)
+}
+
+func (er ErrorRepo) MustGetEcErr(code ErrorCode) *Error {
+	e, _ := er.GetEcErr(code)
 	return e
 }

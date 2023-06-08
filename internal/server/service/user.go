@@ -15,7 +15,7 @@ func (srvc userService) Service() Service {
 func (srvc userService) Create(
 	ctx context.Context, req *UserCreateRequest) (id int32, err error) {
 	if err := srvc.validate.Struct(req); err != nil {
-		return 0, fmt.Errorf("validation error: %w", err)
+		return 0, err
 	}
 
 	if params, err := req.ToParams(); err != nil {
@@ -33,16 +33,18 @@ func (srvc userService) GetAuthInfo(
 	return srvc.store.GetUserAuth(ctx, email)
 }
 
-func (srvc userService) Login(ctx context.Context, email, password string) error {
+func (srvc userService) Login(ctx context.Context, email, password string) (err error, uid int32, role string) {
 	if len(password) < 1 {
-		return bcrypt.ErrMismatchedHashAndPassword
+		return bcrypt.ErrMismatchedHashAndPassword, 0, ""
 	}
 
-	auth, err := srvc.GetAuthInfo(ctx, email)
+	var auth *model.GetUserAuthRow
+	auth, err = srvc.GetAuthInfo(ctx, email)
 	if err != nil {
-		return err
+		return err, 0, ""
 	}
-	return bcrypt.CompareHashAndPassword(auth.Password, []byte(password))
+
+	return bcrypt.CompareHashAndPassword(auth.Password, []byte(password)), auth.ID, string(auth.Role)
 }
 
 func (srvc userService) UpdatePassword(
