@@ -2,35 +2,31 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../../css/style.css" />
-    <link rel="stylesheet" href="../../css/panal.css" />
+    {{template "head" .Page.HeadConent}}
+    <title>{{.Page.Title}}</title>
 </head>
 
 <body>
     <section class="background">
         <div class="mid-card">
             <h1>Parameters</h1>
-            <p>API: <strong>News API</strong>, Endpoint: <strong>Top Headlines</strong></p>
+            <p>API: <strong>{{.API}}</strong>, Endpoint: <strong>{{.Endpoint}}</strong></p>
             <form action="" method="post" class="data-form">
                 <ul class="data-list">
                     <li class="data-field">
-                        <label for="keyword">Keywords</label>:
-                        <input type="text">
-                    </li>
-                    <li class="data-field">
-                        <label for="sources">Sources</label>:
-                        <input type="text">
+                        <label for="language">Language</label>:
+                        <select name="language" id="language">
+                            <option value="">All</option>
+                            <option value="zh">Chinese</option>
+                            <option value="en">English</option>
+                            <option value="es">Spanish</option>
+                            <option value="jp">Japanese</option>
+                            <option value="ko">Korean</option>
+                        </select>
                     </li>
                     <li class="data-field">
                         <label for="country">Country</label>:
-                        <select name="language" id="language" class="language">
+                        <select name="country" id="country">
                             <option value="">All</option>
                             <optgroup label="Asia">
                                 <option value="cn">China</option>
@@ -49,7 +45,7 @@
                     </li>
                     <li class="data-field">
                         <label for="category">Category</label>:
-                        <select name="category" id="category" class="category">
+                        <select name="category" id="category">
                             <option value="general">General</option>
                             <option value="business">Business</option>
                             <option value="entertaiment">Entertaiment</option>

@@ -15,25 +15,24 @@
                     {{range $apikey:=.NewsAPIs}}
                     <li>
                         <img {{$apikey.Image.ToHTMLAttr}} class="api-logo-small api-logo">
-                        <input {{$apikey.Input.ToHTMLAttr}} type="text" placeholder="API Key" class="form-input">
+                        <input {{$apikey.Input.ToHTMLAttr}} type="password" placeholder="API Key" class="form-input">
                     </li>
                     {{end}}
                 </ul>
 
                 <h1>Analyzer API Key</h1>
                 <ul class="data-list">
-                <ul class="data-list">
                     {{range $apikey:=.AnalyzerAPIs}}
                     <li>
                         <img {{$apikey.Image.ToHTMLAttr}} class="api-logo-small api-logo">
-                        <input {{$apikey.Input.ToHTMLAttr}} type="text" placeholder="API Key" class="form-input">
+                        <input {{$apikey.Input.ToHTMLAttr}} type="password" placeholder="API Key" class="form-input">
                     </li>
                     {{end}}
                 </ul>
                 <input type="submit" value="Submit" class="btn">
             </form>
             <p class="footer">
-                back to <a href="welcome.html" class=" url">welcome</a> page
+                back to <a href="welcome" class=" url">welcome</a> page
             </p>
         </div>
     </section>

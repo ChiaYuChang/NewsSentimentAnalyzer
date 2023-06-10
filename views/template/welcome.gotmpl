@@ -10,11 +10,12 @@
     <section class="background">
         <div class="mid-card">
             <h1>Welcome {{.Name}}</h1>
-            <button class="btn" onclick="location.href='endpoint.html'">Make queries</button>
-            <button class="btn" onclick="location.href='chang_password.html'">Change password</button>
-            <button class="btn" onclick="location.href='apikey.html'">Manage API key</button>
+            <button class="btn" onclick="location.href='#'">Make queries</button>
+            <button class="btn" onclick="location.href='#'">Change password</button>
+            <button class="btn" onclick="location.href='/v1/apikey'">Manage API key</button>
             <button class="btn" onclick="location.href='#'">See Results</button>
             {{if eq .Role "admin"}}<button class="btn" onclick="location.href='admin.html'">Admin</button>{{end}}
+            <button class="btn" onclick="location.href='/logout'">Log out</button>
         </div>
     </section>
 </body>
