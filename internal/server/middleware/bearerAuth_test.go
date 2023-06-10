@@ -56,24 +56,27 @@ func TestBearerAuthenticator(t *testing.T) {
 
 		ecErr := ec.MustGetErr(ec.ECUnauthorized).(*ec.Error)
 		if usr == username && pwd == password {
-			ecErr = ec.MustGetErr(ec.Success).(*ec.Error)
+			ecErr = ec.MustGetEcErr(ec.Success)
 			bearer, _ := maker.MakeToken(username, uid, role)
 			w.Header().Set("Authorization", fmt.Sprintf("Bearer %s", bearer))
+			w.WriteHeader(ecErr.HttpStatusCode)
+			w.Write(ecErr.MustToJson())
+			return
 		}
 
 		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(ecErr.HttpStatusCode)
-		body, _ := ecErr.ToJson()
-		w.Write(body)
+		w.Write(ecErr.MustToJson())
 		return
 	})
 
 	r.Route("/user", func(r chi.Router) {
 		r.Use(maker.BearerAuthenticator)
 		r.Get("/welcome", func(w http.ResponseWriter, r *http.Request) {
-			user := r.Context().Value(middleware.CtxUserInfo).(tokenmaker.UserInfo)
+			user := r.Context().Value(global.CtxUserInfo).(tokenmaker.Payload)
 			w.Header().Add("Content-Type", "text/html; charset=utf-8")
-			w.Write([]byte(fmt.Sprintf("welcome! %s (%s)", user.UserName, user.Role)))
+			msg := fmt.Sprintf("welcome! %s (%s)", user.GetUsername(), user.GetRole())
+			w.Write([]byte(msg))
 			return
 		})
 	})
@@ -121,7 +124,9 @@ func TestBearerAuthenticator(t *testing.T) {
 			require.Equal(t, http.StatusOK, resp.StatusCode)
 			require.NotEmpty(t, resp.Header.Get("Authorization"))
 
-			req, _ = http.NewRequest(http.MethodGet, fmt.Sprintf("%s/%s", srv.URL, "user/welcome"), nil)
+			req, err = http.NewRequest(http.MethodGet, fmt.Sprintf("%s/%s", srv.URL, "user/welcome"), nil)
+			require.NoError(t, err)
+
 			req.Header.Add("Authorization", resp.Header.Get("Authorization"))
 
 			resp, err = cli.Do(req)
@@ -185,6 +190,8 @@ func TestBearerAuthenticator(t *testing.T) {
 			resp, err := cli.Do(req)
 
 			require.NoError(t, err)
+
+			t.Log(err)
 			require.Equal(t, http.StatusOK, resp.StatusCode)
 			body, err := io.ReadAll(resp.Body)
 			require.NoError(t, err)

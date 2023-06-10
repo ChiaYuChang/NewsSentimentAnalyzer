@@ -81,7 +81,7 @@ func TestAuthLogin(t *testing.T) {
 			}
 
 			mux := chi.NewMux()
-			mux.Get("/login", authReup.ShowLoginPage)
+			mux.Get("/login", authReup.GetLogin)
 
 			srv := httptest.NewTLSServer(mux)
 			srvcUrl := srv.URL
@@ -137,7 +137,7 @@ func TestAuthLogin(t *testing.T) {
 			}
 
 			mux := chi.NewMux()
-			mux.Post("/login", authReup.Login)
+			mux.Post("/login", authReup.PostLogin)
 			mux.Get("/v1/welcome", func(w http.ResponseWriter, req *http.Request) {
 				bearer := "TOKEN"
 				if err != nil {
@@ -205,7 +205,7 @@ func TestAuthLogin(t *testing.T) {
 			}
 
 			mux := chi.NewMux()
-			mux.Post("/login", authReup.Login)
+			mux.Post("/login", authReup.PostLogin)
 			srv := httptest.NewTLSServer(mux)
 			srvcUrl := srv.URL
 
@@ -252,7 +252,7 @@ func TestAuthLogin(t *testing.T) {
 			}
 
 			mux := chi.NewMux()
-			mux.Post("/login", authReup.Login)
+			mux.Post("/login", authReup.PostLogin)
 			srv := httptest.NewTLSServer(mux)
 			srvcUrl := srv.URL
 
@@ -299,7 +299,7 @@ func TestAuthLogin(t *testing.T) {
 			}
 
 			mux := chi.NewMux()
-			mux.Post("/login", authReup.Login)
+			mux.Post("/login", authReup.PostLogin)
 			srv := httptest.NewTLSServer(mux)
 			srvcUrl := srv.URL
 
@@ -358,7 +358,7 @@ func TestAuthLogin(t *testing.T) {
 			}
 
 			mux := chi.NewMux()
-			mux.Post("/login", authReup.Login)
+			mux.Post("/login", authReup.PostLogin)
 
 			srv := httptest.NewTLSServer(mux)
 			srvcUrl := srv.URL
@@ -425,7 +425,7 @@ func TestAuthSignUp(t *testing.T) {
 			}
 
 			mux := chi.NewMux()
-			mux.Get("/signup", authReup.ShowSignUpPage)
+			mux.Get("/signup", authReup.GetSignUp)
 
 			srv := httptest.NewTLSServer(mux)
 			srvcUrl := srv.URL
@@ -489,7 +489,7 @@ func TestAuthSignUp(t *testing.T) {
 			}
 
 			mux := chi.NewMux()
-			mux.Post("/signup", authRepo.SignUp)
+			mux.Post("/signup", authRepo.PostSignUp)
 
 			srv := httptest.NewTLSServer(mux)
 			srvcUrl := srv.URL
@@ -546,7 +546,7 @@ func TestAuthSignUp(t *testing.T) {
 			}
 
 			mux := chi.NewMux()
-			mux.Post("/signup", authRepo.SignUp)
+			mux.Post("/signup", authRepo.PostSignUp)
 
 			srv := httptest.NewTLSServer(mux)
 			srvcUrl := srv.URL
@@ -601,7 +601,7 @@ func TestAuthSignUp(t *testing.T) {
 			}
 
 			mux := chi.NewMux()
-			mux.Post("/signup", authRepo.SignUp)
+			mux.Post("/signup", authRepo.PostSignUp)
 
 			srv := httptest.NewTLSServer(mux)
 			srvcUrl := srv.URL

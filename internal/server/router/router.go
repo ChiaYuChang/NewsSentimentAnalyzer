@@ -1,86 +1,47 @@
 package router
 
 import (
-	"context"
-	"errors"
-	"fmt"
 	"html/template"
 	"net/http"
 
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/middleware"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/api/v1"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/auth"
+	cookiemaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/cookieMaker"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view"
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view/object"
+	tokenmaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/tokenMaker"
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/jackc/pgx/v5"
-	"golang.org/x/crypto/bcrypt"
+	chimiddleware "github.com/go-chi/chi/v5/middleware"
 )
 
-type Router struct {
-	*chi.Mux
-	*template.Template
-	service.Service
-}
+func NewRouter(srvc service.Service, tmpl *template.Template, filesystem http.FileSystem,
+	tokenmaker tokenmaker.TokenMaker, cookiemaker *cookiemaker.CookieMaker) *chi.Mux {
+	auth := auth.NewAuthRepo(srvc, tmpl, tokenmaker, cookiemaker)
 
-func NewRouter(srvc service.Service) *chi.Mux {
-	var err error
-	r := Router{}
-	r.Template, err = template.ParseGlob(global.AppVar.Server.TemplatePath)
-	if err != nil {
-		panic("error while parsing template")
+	r := chi.NewRouter()
+	r.Use(chimiddleware.Logger)
+	r.Use(chimiddleware.Recoverer)
+
+	r.Get("/favicon.ico", http.NotFound)
+	r.Handle("/static/*", http.StripPrefix("/static", http.FileServer(filesystem)))
+	r.Get("/login", auth.GetLogin)
+	r.Post("/login", auth.PostLogin)
+
+	r.Get("/sign-up", auth.GetSignUp)
+	r.Post("/sign-up", auth.PostSignUp)
+
+	r.Get("/logout", auth.Logout)
+
+	bearerTokenMaker := middleware.BearerTokenMaker{
+		AllowFromHTTPCookie: true,
+		TokenMaker:          tokenmaker,
 	}
 
-	r.Mux = chi.NewRouter()
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
-	r.Get("/login", func(w http.ResponseWriter, req *http.Request) {
-		r.Template.ExecuteTemplate(w, "login.gotmpl", object.LoginPage{
-			Page: object.Page{
-				HeadConent: view.NewHeadContent(),
-				Title:      "Login",
-			},
-			ShowUsernameNotFountAlert: false,
-			ShowPasswordMismatchAlert: false,
-		})
-		w.WriteHeader(http.StatusOK)
-	})
-
-	r.Post("/login", func(w http.ResponseWriter, req *http.Request) {
-		err := req.ParseForm()
-		if err != nil {
-			w.Write([]byte("Client error"))
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-		pform := req.PostForm
-		email, password := pform.Get("email"), pform.Get("password")
-		if err := r.Service.User().
-			Login(context.Background(), email, password); err != nil {
-			data := object.LoginPage{
-				Page: object.Page{
-					HeadConent: view.NewHeadContent(),
-					Title:      "Login",
-				}}
-
-			if errors.Is(err, pgx.ErrNoRows) {
-				data.ShowUsernameNotFountAlert = true
-			} else if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
-				data.ShowPasswordMismatchAlert = true
-			} else {
-				w.Write([]byte(fmt.Sprintf("Unknown error: %s", err)))
-				w.WriteHeader(http.StatusBadRequest)
-			}
-			r.Template.ExecuteTemplate(w, "login.gotmpl", data)
-			w.WriteHeader(http.StatusOK)
-		} else {
-			http.Redirect(w, req, "/v1/welcome", http.StatusSeeOther)
-		}
-		return
-	})
-
+	api := api.NewAPIRepo("v1", srvc, tmpl, tokenmaker, cookiemaker)
 	r.Route("/v1", func(r chi.Router) {
-
+		r.Use(bearerTokenMaker.BearerAuthenticator)
+		r.Get("/welcome", api.GetWelcome)
+		r.Get("/apikey", api.GetAPIKey)
 	})
 
 	return r

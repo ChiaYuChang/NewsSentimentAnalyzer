@@ -56,7 +56,11 @@ func CloneUser(u *model.User) *model.User {
 	}
 }
 
-func GenRdmAPI() (*model.Api, error) {
+func GenRdmAPI(id int16) (*model.Api, error) {
+	if id < 1 {
+		id = int16(rand.Intn(10_000))
+	}
+
 	name, err := rg.Alphabet.GenRdmString(rand.Intn(18) + 3)
 	if err != nil {
 		return nil, err
@@ -68,7 +72,7 @@ func GenRdmAPI() (*model.Api, error) {
 	}
 
 	return &model.Api{
-		ID:   int16(rand.Intn(10_000)),
+		ID:   id,
 		Name: name,
 		Type: apiType,
 	}, nil

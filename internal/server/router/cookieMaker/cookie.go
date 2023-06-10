@@ -5,7 +5,8 @@ import (
 	"time"
 )
 
-const AUTH_COOKIE_KEY string = "__Secure-JWT-Token"
+// const AUTH_COOKIE_KEY string = "__Secure-JWT-Token"
+const AUTH_COOKIE_KEY string = "JWT-Token"
 
 var maker *CookieMaker
 

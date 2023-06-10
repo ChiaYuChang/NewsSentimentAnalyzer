@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
 	errorcode "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/errorCode"
 )
 
@@ -37,18 +38,25 @@ func ParseRole(role any) Role {
 		roleStr = string(val)
 	case string:
 		roleStr = val
+	case model.Role:
+		if val == model.RoleAdmin {
+			return RAdmin
+		} else if val == model.RoleUser {
+			return RUser
+		} else {
+			return RUnknown
+		}
 	default:
 		return RUnknown
 	}
 
 	if roleStr == RAdmin.String() {
 		return RAdmin
-	}
-
-	if roleStr == RUser.String() {
+	} else if roleStr == RUser.String() {
 		return RUser
+	} else {
+		return RUnknown
 	}
-	return RUnknown
 }
 
 func (r Role) String() string {

@@ -7,15 +7,10 @@ import (
 	"strings"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
+
 	cookiemaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/cookieMaker"
 	ec "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/errorCode"
 	tokenmaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/tokenMaker"
-)
-
-type CtxKey string
-
-const (
-	CtxUserInfo CtxKey = "UserInfo"
 )
 
 type BearerTokenMaker struct {
@@ -34,17 +29,16 @@ func NewJWTTokenMaker(makerOpt global.JWTOption, claimOpt ...tokenmaker.JWTClaim
 }
 
 func (bm BearerTokenMaker) BearerAuthenticator(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var isNotFromHeader bool
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		// var isNotFromHeader bool
 		var cookie *http.Cookie
 		var err error
 
 		// validation
-		bearer := r.Header.Get("Authorization")
+		bearer := req.Header.Get("Authorization")
 		bearer = strings.TrimSpace(strings.TrimLeft(bearer, "Bearer"))
 		if bearer == "" && bm.AllowFromHTTPCookie {
-			isNotFromHeader = true
-			cookie, err = r.Cookie(cookiemaker.AUTH_COOKIE_KEY)
+			cookie, err = req.Cookie(cookiemaker.AUTH_COOKIE_KEY)
 			if err != nil {
 				ecErr := ec.MustGetErr(ec.ECUnauthorized).(*ec.Error)
 				ecErr.WithDetails(err.Error())
@@ -70,21 +64,27 @@ func (bm BearerTokenMaker) BearerAuthenticator(next http.Handler) http.Handler {
 		}
 
 		// sign new token
-		userInfo := payload.GetUserInfo()
+		// userInfo := payload.GetUserInfo()
 		w.Header().Add("Authorization", "Trailer-JWT")
-		r = r.WithContext(context.WithValue(r.Context(), CtxUserInfo, userInfo))
+		ctx := context.WithValue(
+			req.Context(),
+			global.CtxUserInfo,
+			payload,
+		)
 
-		bearer, _ = bm.TokenMaker.MakeToken(userInfo.UserName, userInfo.UID, userInfo.Role)
-		if isNotFromHeader {
-			fmt.Println("Set Cookie")
-			http.SetCookie(w, &http.Cookie{
-				Name:  cookiemaker.AUTH_COOKIE_KEY,
-				Value: bearer,
-				Path:  cookie.Path,
-			})
-		}
+		bearer, _ = bm.TokenMaker.MakeToken(
+			payload.GetUsername(),
+			payload.GetUserID(),
+			payload.GetRole(),
+		)
 
-		next.ServeHTTP(w, r)
+		http.SetCookie(w, &http.Cookie{
+			Name:  cookiemaker.AUTH_COOKIE_KEY,
+			Value: bearer,
+			Path:  "/ ",
+		})
+
+		next.ServeHTTP(w, req.WithContext(ctx))
 		// update JWT
 		w.Header().Set("Trailer-JWT", fmt.Sprintf("Bearer %s", bearer))
 		return

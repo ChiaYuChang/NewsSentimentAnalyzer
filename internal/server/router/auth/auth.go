@@ -28,7 +28,18 @@ type AuthRepo struct {
 	FormDecoder *form.Decoder
 }
 
-func (repo AuthRepo) ShowLoginPage(w http.ResponseWriter, req *http.Request) {
+func NewAuthRepo(srvc service.Service, tmpl *template.Template,
+	tokenmaker tokenmaker.TokenMaker, cookiemaker *cookiemaker.CookieMaker) AuthRepo {
+	return AuthRepo{
+		Service:     srvc,
+		Template:    tmpl,
+		TokenMaker:  tokenmaker,
+		CookieMaker: cookiemaker,
+		FormDecoder: form.NewDecoder(),
+	}
+}
+
+func (repo AuthRepo) GetLogin(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	repo.Template.ExecuteTemplate(w, "login.gotmpl", object.LoginPage{
 		Page: object.Page{
@@ -41,7 +52,7 @@ func (repo AuthRepo) ShowLoginPage(w http.ResponseWriter, req *http.Request) {
 	return
 }
 
-func (repo AuthRepo) Login(w http.ResponseWriter, req *http.Request) {
+func (repo AuthRepo) PostLogin(w http.ResponseWriter, req *http.Request) {
 	err := req.ParseForm()
 	if err != nil {
 		ecErr := ec.MustGetEcErr(ec.ECBadRequest)
@@ -70,6 +81,7 @@ func (repo AuthRepo) Login(w http.ResponseWriter, req *http.Request) {
 			data.ShowPasswordMismatchAlert = true
 		} else {
 			ecErr := ec.MustGetEcErr(ec.ECServerError)
+			ecErr.WithDetails(err.Error())
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(ecErr.HttpStatusCode)
 			w.Write(ecErr.MustToJson())
@@ -98,7 +110,7 @@ func (repo AuthRepo) Login(w http.ResponseWriter, req *http.Request) {
 	return
 }
 
-func (repo AuthRepo) ShowSignUpPage(w http.ResponseWriter, req *http.Request) {
+func (repo AuthRepo) GetSignUp(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	repo.Template.ExecuteTemplate(w, "signup.gotmpl", object.SignUpPage{
 		Page: object.Page{
@@ -110,7 +122,7 @@ func (repo AuthRepo) ShowSignUpPage(w http.ResponseWriter, req *http.Request) {
 	return
 }
 
-func (repo AuthRepo) SignUp(w http.ResponseWriter, req *http.Request) {
+func (repo AuthRepo) PostSignUp(w http.ResponseWriter, req *http.Request) {
 	err := req.ParseForm()
 	if err != nil {
 		ecErr := ec.MustGetEcErr(ec.ECBadRequest)
@@ -189,12 +201,16 @@ func (repo AuthRepo) SignUp(w http.ResponseWriter, req *http.Request) {
 			w.Write(ecErr.MustToJson())
 		}
 
-		if req.Header.Get("User-Agent") != "" {
-			cookie := repo.CookieMaker.NewCookie(
-				cookiemaker.AUTH_COOKIE_KEY,
-				bearer)
-			http.SetCookie(w, cookie)
-		}
+		// if req.Header.Get("User-Agent") != "" {
+		cookie := repo.CookieMaker.NewCookie(
+			cookiemaker.AUTH_COOKIE_KEY, bearer)
+		http.SetCookie(w, cookie)
+		// }
 		http.Redirect(w, req, "/v1/welcome", http.StatusSeeOther)
 	}
+}
+
+func (repo AuthRepo) Logout(w http.ResponseWriter, req *http.Request) {
+	http.SetCookie(w, repo.CookieMaker.DeleteCookie(cookiemaker.AUTH_COOKIE_KEY))
+	http.Redirect(w, req, "/login", http.StatusSeeOther)
 }

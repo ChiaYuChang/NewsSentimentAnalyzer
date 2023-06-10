@@ -41,7 +41,7 @@ func TestCreateAPIService(t *testing.T) {
 				)
 			},
 			SetupFunc: func(ctl *gomock.Controller) (*service.APICreateRequest, *mock_model.MockStore, int16) {
-				api, err := testtool.GenRdmAPI()
+				api, err := testtool.GenRdmAPI(-1)
 				require.NoError(t, err)
 
 				req := &service.APICreateRequest{
@@ -80,7 +80,7 @@ func TestCreateAPIService(t *testing.T) {
 				)
 			},
 			SetupFunc: func(ctl *gomock.Controller) (*service.APICreateRequest, *mock_model.MockStore, int16) {
-				api, err := testtool.GenRdmAPI()
+				api, err := testtool.GenRdmAPI(-1)
 				require.NoError(t, err)
 
 				req := &service.APICreateRequest{
@@ -122,7 +122,7 @@ func TestCreateAPIService(t *testing.T) {
 				)
 			},
 			SetupFunc: func(ctl *gomock.Controller) (*service.APICreateRequest, *mock_model.MockStore, int16) {
-				api, err := testtool.GenRdmAPI()
+				api, err := testtool.GenRdmAPI(-1)
 				require.NoError(t, err)
 
 				l := mrand.Int63n(3)
@@ -211,7 +211,7 @@ func TestListAPIService(t *testing.T) {
 		} else {
 			apis = make([]*model.ListAPIRow, limit)
 			for i := range apis {
-				tmp, _ := testtool.GenRdmAPI()
+				tmp, _ := testtool.GenRdmAPI(-1)
 				apis[i] = &model.ListAPIRow{
 					ID:   tmp.ID,
 					Name: tmp.Name,

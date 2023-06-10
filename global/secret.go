@@ -5,63 +5,74 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 )
 
 var Secrets Secret
 
 type Secret struct {
-	Database []Database `json:"db"`
-	API      []APIKey   `json:"api"`
+	Database map[string]Database `json:"db"`
+	API      API                 `json:"api"`
+}
+
+type API struct {
+	NewsSource    map[string]string `json:"news_source"`
+	LanguageModel map[string]string `json:"language_model"`
+}
+
+func (api API) toString(indent string) string {
+	sb := strings.Builder{}
+	sb.WriteString(indent + "News Source:\n")
+	for k, v := range api.NewsSource {
+		sb.WriteString(fmt.Sprintf("%s - %-12s: %s\n", indent, k, v))
+	}
+	sb.WriteString(indent + "Language Model:\n")
+	for k, v := range api.LanguageModel {
+		sb.WriteString(fmt.Sprintf("%s - %-12s: %s\n", indent, k, v))
+	}
+	return sb.String()
+}
+
+func (api API) String() string {
+	return api.toString("")
 }
 
 func (s Secret) String() string {
-	jsm, _ := json.MarshalIndent(s, "", "\t")
-	return string(jsm)
+	sb := strings.Builder{}
+	sb.WriteString("Secrets:\n")
+	sb.WriteString("DataBase:\n")
+	for dbName, db := range s.Database {
+		sb.WriteString("    - " + dbName + "\n")
+		sb.WriteString(db.toString("        "))
+	}
+	sb.WriteString("APIs:\n")
+	sb.WriteString(s.API.toString("    "))
+	return sb.String()
 }
 
 type Database struct {
-	Name     string `json:"name"`
-	UserName string `json:"username"`
-	Password string `json:"password"`
+	UserName string            `json:"username"`
+	Password string            `json:"password"`
+	DBName   string            `json:"db_name"`
+	Host     string            `json:"host"`
+	Port     int               `json:"port"`
+	Options  map[string]string `json:"options"`
 }
 
-type APIType int8
-
-const (
-	NewsSource APIType = iota + 1
-	LanguageModel
-)
-
-func (t APIType) String() string {
-	switch t {
-	case NewsSource:
-		return "NewsSource"
-	case LanguageModel:
-		return "LanguageModel"
+func (db Database) toString(indent string) string {
+	sb := strings.Builder{}
+	sb.WriteString(fmt.Sprintf("%sUsername   : %s\n", indent, db.UserName))
+	sb.WriteString(fmt.Sprintf("%sPassword   : %s\n", indent, db.Password))
+	sb.WriteString(fmt.Sprintf("%sDB name    : %s\n", indent, db.DBName))
+	sb.WriteString(indent + "Options    :\n")
+	for optName, optValue := range db.Options {
+		sb.WriteString(fmt.Sprintf("%s   - %-7s: %s\n", indent, optName, optValue))
 	}
-	panic("unknown API type")
+	return sb.String()
 }
 
-func (t *APIType) UnmarshalJSON(data []byte) error {
-	switch string(data[1 : len(data)-1]) {
-	case "NewsSource", "src", "source":
-		*t = NewsSource
-	case "LanguageModel", "lm", "language model":
-		*t = LanguageModel
-	default:
-		return fmt.Errorf("unknown api type %s", string(data))
-	}
-	return nil
-}
-
-func (t *APIType) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf("\"%s\"", t.String())), nil
-}
-
-type APIKey struct {
-	Name string  `json:"name"`
-	Type APIType `json:"type"`
-	Key  string  `json:"key"`
+func (db Database) String() string {
+	return db.toString("")
 }
 
 func ReadSecret(path string) error {

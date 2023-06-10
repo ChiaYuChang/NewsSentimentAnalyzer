@@ -126,7 +126,7 @@ func TestListAPIKeyService(t *testing.T) {
 
 	apis := make(map[int16]*model.Api, nAPI)
 	for i := 0; i < nAPI; i++ {
-		api, _ := testtool.GenRdmAPI()
+		api, _ := testtool.GenRdmAPI(-1)
 		apis[api.ID] = api
 	}
 

@@ -41,12 +41,12 @@ func NewHeadContent() object.HeadConent {
 
 	head.Link.
 		NewHTMLElement().
-		AddPair("ref", "stylesheet").
-		AddPair("href", "css/style.css")
+		AddPair("rel", "stylesheet").
+		AddPair("href", "/static/css/style.css")
 
 	head.Script.
 		NewHTMLElement().
-		AddPair("src", "js/func.js")
+		AddPair("src", "/static/js/func.js")
 
 	return head
 }

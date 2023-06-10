@@ -13,9 +13,8 @@ type Page struct {
 
 type WelcomePage struct {
 	Page
-	Title string
-	Name  string
-	Role  string
+	Name string
+	Role string
 }
 
 type LoginPage struct {
