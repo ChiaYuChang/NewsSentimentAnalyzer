@@ -18,10 +18,14 @@ import (
 )
 
 func main() {
-	if err := global.ReadSecret("./secret.json"); err != nil {
+	if err := global.ReadAppVar(
+		"./secret.json",
+		"./config/option.json",
+		"./config/endpoint.json",
+	); err != nil {
 		panic(fmt.Sprintf("error while reading secret: %s", err.Error()))
 	}
-	fmt.Println(global.AppVar.Secret)
+	fmt.Println(global.AppVar)
 
 	db := global.AppVar.Secret.Database["postgres"]
 

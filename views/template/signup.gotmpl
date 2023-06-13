@@ -14,7 +14,7 @@
                 <ul class="data-list">
                     <li>
                         <div class="data-field">
-                            <img src="static/image/user.svg" alt="first-name" class="form-icon">
+                            <img src="/static/image/icon_user.svg" alt="first-name" class="form-icon">
                             <input type="text" placeholder="First name" id="first-name" name="first-name"
                                 class="form-input" required>
                             <input type="text" placeholder="Last name" id="last-name" name="last-name"
@@ -23,25 +23,30 @@
                     </li>
                     <li>
                         <div class="data-field">
-                            <img src="static/image/email.svg" alt="username" class="form-icon">
+                            <img src="/static/image/icon_email.svg" alt="username" class="form-icon">
+                            {{if .ShowUsernameHasUsedAlert}}
+                            <input type="email" placeholder="Email address" id="email" name="email"
+                                class="form-input highlight-alert" required>
+                            {{else}}
                             <input type="email" placeholder="Email address" id="email" name="email"
                                 class="form-input" required>
+                            {{end}}
                         </div>
                         {{if .ShowUsernameHasUsedAlert}}
                         <div class="alert">
-                            <img src="static/image/alert.svg" alt="alert" class="alert-icon">
+                            <img src="/static/image/symbol_alert.svg" alt="alert" class="alert-icon">
                             <span>Username already used</span>
                         </div>
                         {{end}}
                     </li>
                     <li>
                         <div class="data-field">
-                            <img src="static/image/password.svg" alt="username" class="form-icon">
+                            <img src="/static/image/icon_password.svg" alt="username" class="form-icon">
                             <input type="password" placeholder="Password" id="password" name="password" minlength="8"
                                 class="form-input" required>
                             <button type="button" class="password-visibility" onclick="showPassword('')">
-                                <img src="static/image/eye-no.svg" id="hide" alt="hide password" class="btn">
-                                <img src="static/image/eye-yes.svg" id="show" alt="show password" class="hide">
+                                <img src="/static/image/icon_eye-no.svg" id="hide" alt="hide password" class="btn">
+                                <img src="/static/image/icon_eye-yes.svg" id="show" alt="show password" class="hide">
                             </button>
                         </div>
                     </li>

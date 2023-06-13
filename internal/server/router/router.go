@@ -16,7 +16,7 @@ import (
 
 func NewRouter(srvc service.Service, tmpl *template.Template, filesystem http.FileSystem,
 	tokenmaker tokenmaker.TokenMaker, cookiemaker *cookiemaker.CookieMaker) *chi.Mux {
-	auth := auth.NewAuthRepo(srvc, tmpl, tokenmaker, cookiemaker)
+	auth := auth.NewAuthRepo("v1", srvc, tmpl, tokenmaker, cookiemaker)
 
 	r := chi.NewRouter()
 	r.Use(chimiddleware.Logger)
@@ -31,6 +31,9 @@ func NewRouter(srvc service.Service, tmpl *template.Template, filesystem http.Fi
 	r.Post("/sign-up", auth.PostSignUp)
 
 	r.Get("/logout", auth.Logout)
+	r.Get("/*", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+	})
 
 	bearerTokenMaker := middleware.BearerTokenMaker{
 		AllowFromHTTPCookie: true,
@@ -42,6 +45,10 @@ func NewRouter(srvc service.Service, tmpl *template.Template, filesystem http.Fi
 		r.Use(bearerTokenMaker.BearerAuthenticator)
 		r.Get("/welcome", api.GetWelcome)
 		r.Get("/apikey", api.GetAPIKey)
+		r.Post("/apikey", api.PostAPIKey)
+		r.Get("/change_password", auth.GetChangePassword)
+		r.Post("/change_password", auth.PostChangPassword)
+		r.Get("/endpoints", api.GetEndpoints)
 	})
 
 	return r

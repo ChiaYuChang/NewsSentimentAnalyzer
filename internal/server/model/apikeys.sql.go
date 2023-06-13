@@ -105,20 +105,23 @@ WITH k AS (
    WHERE owner = $1
      AND deleted_at IS NULL
 )
-SELECT k.id AS api_key_id, k.owner, k.key, a.id AS api_id, a.type, a.name
+SELECT k.id AS api_key_id, k.owner, k.key, 
+       a.id AS api_id, a.type, a.name, a.image, a.icon
   FROM apis AS a
-  LEFT JOIN k
+ INNER JOIN k
     ON a.id = k.api_id
  WHERE a.deleted_at IS NULL
 `
 
 type ListAPIKeyRow struct {
-	ApiKeyID pgtype.Int4 `json:"api_key_id"`
-	Owner    pgtype.Int4 `json:"owner"`
-	Key      pgtype.Text `json:"key"`
+	ApiKeyID int32       `json:"api_key_id"`
+	Owner    int32       `json:"owner"`
+	Key      string      `json:"key"`
 	ApiID    int16       `json:"api_id"`
 	Type     ApiType     `json:"type"`
 	Name     string      `json:"name"`
+	Image    pgtype.Text `json:"image"`
+	Icon     pgtype.Text `json:"icon"`
 }
 
 func (q *Queries) ListAPIKey(ctx context.Context, owner int32) ([]*ListAPIKeyRow, error) {
@@ -137,6 +140,8 @@ func (q *Queries) ListAPIKey(ctx context.Context, owner int32) ([]*ListAPIKeyRow
 			&i.ApiID,
 			&i.Type,
 			&i.Name,
+			&i.Image,
+			&i.Icon,
 		); err != nil {
 			return nil, err
 		}

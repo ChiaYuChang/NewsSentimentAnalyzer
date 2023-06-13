@@ -10,28 +10,27 @@
     <section class="background">
         <div class="mid-card">
             <h1>Please select your query endpoint</h1>
-            {{range .APIEndpoints}}
             <ul class="data-list">
+            {{if not .NoAvailableEndpoint}}
+                {{range $ep:=.Endpoints}}
                 <li>
-                    <img {{.Image.ToHTMLAttr}} class="api-logo api-logo-large">
+                    {{$ep.Image.ToHTML}}
                     <div class="row">
-                    {{range .Endpoints.Element}}    {{.ToHTML}}
-                    {{end}}
+                        {{range $ep.Endpoints.Element}}
+                            {{.ToHTML}}
+                        {{end}}
                     </div>
                     <div class="footer">
                         For more information, visit <a href="{{.DocumentURL}}">here</a>.
                     </div>
                 </li>
-            </ul>
+               {{end}}
            {{end}}
-            <ul class="data-list">
                 <li>
                     <div class="row">
                         <button class="btn" onclick="location.href='endpoints/all.html'">Query All</button>
                     </div>
                 </li>
-            </ul>
-            <ul class="data-list">
                 <li>
                     <div class="row">
                         <button class="btn" onclick="location.href='endpoints/local.html'">Query Local Database</button>
@@ -39,7 +38,7 @@
                 </li>
             </ul>
             <p class="footer">
-                back to <a href="welcome.html" class=" url">welcome</a> page
+                back to <a href="/v1/welcome" class=" url">welcome</a> page
             </p>
         </div>
     </section>

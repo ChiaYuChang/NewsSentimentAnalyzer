@@ -14,7 +14,10 @@
         "min_special": 1
     },
     "server": {
-        "template_path": "views/template/*.gotmpl",
+        "template_path": [
+            "views/template/*.gotmpl",
+            "views/template/endpoints/*.gotmpl"
+        ],
         "static_file_path": "views/static/"
     }
 }

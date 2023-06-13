@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {{template "head" .Page.HeadConent}}
+    <title>{{.Page.Title}}</title>
+</head>
+
+<body>
+    <section class="background">
+        <div class="mid-card">
+                <h1>News API Key</h1>
+                <ul class="data-list">
+                    {{range $apikey:=.NewsAPIs}}
+                    <li>
+                        <form method="POST" action="/v1/update">
+                            <img {{$apikey.Image.ToHTMLAttr}} class="api-logo-small api-logo">
+                            <div class="row">
+                                <input {{$apikey.Input.ToHTMLAttr}} type="password" placeholder="API Key" class="form-input">
+                                {{/* <input type="submit" value="Submit" class="btn btn-small"> */}}
+                                <button class="btn btn-small" onclick="updateAPIKey('{{$apikey.InputID}}')">Submit</button>
+                            </div>
+                        </form>
+                    </li>
+                    {{end}}
+                </ul>
+
+                <h1>Analyzer API Key</h1>
+                <ul class="data-list">
+                    {{range $apikey:=.AnalyzerAPIs}}
+                    <li>
+                        <form method="POST">
+                            <img {{$apikey.Image.ToHTMLAttr}} class="api-logo-small api-logo">
+                            <div class="row">
+                                <input {{$apikey.Input.ToHTMLAttr}} type="password" placeholder="API Key" class="form-input">
+                                {{/* <input type="submit" value="Submit" class="btn btn-small"> */}}
+                                <button class="btn btn-small" onclick="updateAPIKey('{{$apikey.InputID}}')">Submit</button>
+                            </div>
+                        </form>
+                    </li>
+                    {{end}}
+                </ul>
+            <p class="footer">
+                back to <a href="welcome" class=" url">welcome</a> page
+            </p>
+        </div>
+    </section>
+</body>
+
+</html>

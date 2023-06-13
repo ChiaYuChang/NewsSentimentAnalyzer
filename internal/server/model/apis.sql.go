@@ -58,7 +58,7 @@ func (q *Queries) DeleteAPI(ctx context.Context, id int16) (int64, error) {
 }
 
 const getAPI = `-- name: GetAPI :one
-SELECT id, name, type, created_at, updated_at, deleted_at
+SELECT id, name, type, image, icon, document_url, created_at, updated_at, deleted_at
   FROM apis
  WHERE id = $1
    AND deleted_at IS NULL
@@ -71,6 +71,9 @@ func (q *Queries) GetAPI(ctx context.Context, id int16) (*Api, error) {
 		&i.ID,
 		&i.Name,
 		&i.Type,
+		&i.Image,
+		&i.Icon,
+		&i.DocumentUrl,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
@@ -103,6 +106,40 @@ func (q *Queries) ListAPI(ctx context.Context, n int32) ([]*ListAPIRow, error) {
 	var items []*ListAPIRow
 	for rows.Next() {
 		var i ListAPIRow
+		if err := rows.Scan(&i.ID, &i.Name, &i.Type); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listAPIByType = `-- name: ListAPIByType :many
+SELECT id, name, type
+  FROM apis
+ WHERE type = $1
+   AND deleted_at IS NULL
+ ORDER BY name ASC
+`
+
+type ListAPIByTypeRow struct {
+	ID   int16   `json:"id"`
+	Name string  `json:"name"`
+	Type ApiType `json:"type"`
+}
+
+func (q *Queries) ListAPIByType(ctx context.Context, apitype ApiType) ([]*ListAPIByTypeRow, error) {
+	rows, err := q.db.Query(ctx, listAPIByType, apitype)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*ListAPIByTypeRow
+	for rows.Next() {
+		var i ListAPIByTypeRow
 		if err := rows.Scan(&i.ID, &i.Name, &i.Type); err != nil {
 			return nil, err
 		}

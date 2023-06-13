@@ -1,11 +1,12 @@
 package api
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"html/template"
+	"io"
 	"net/http"
-	"strings"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
@@ -93,29 +94,93 @@ func (repo APIRepo) GetAPIKey(w http.ResponseWriter, req *http.Request) {
 	}
 
 	for _, a := range apikey {
-		img := object.NewHTMLElement("img").
-			AddPair("alt", a.Name)
-		if true {
-			img.AddPair("src", "/static/image/api_default.svg")
+		obj := &object.APIKey{
+			ID:   a.ApiID,
+			Name: a.Name,
+			Key:  a.Key,
+			Icon: "/static/image/logo_API_Default.svg",
 		}
 
-		input := object.NewHTMLElement("input").
-			AddPair("id", fmt.Sprintf("apikey-%s", strings.ToLower(a.Name))).
-			AddPair("name", fmt.Sprintf("apikey[%d]", a.ApiID))
-
-		if a.Key.Valid {
-			input.AddPair("value", a.Key.String)
+		if a.Image.Valid {
+			obj.Icon = a.Image.String
 		}
 
 		switch a.Type {
 		case model.ApiTypeSource:
-			pageData.NewsAPIs = append(pageData.NewsAPIs, &object.APIKey{Image: img, Input: input})
+			pageData.NewsAPIs = append(pageData.NewsAPIs, obj)
 		case model.ApiTypeLanguageModel:
-			pageData.AnalyzerAPIs = append(pageData.AnalyzerAPIs, &object.APIKey{Image: img, Input: input})
+			pageData.AnalyzerAPIs = append(pageData.AnalyzerAPIs, obj)
 		}
 	}
 
 	w.WriteHeader(http.StatusOK)
-	_ = repo.Template.ExecuteTemplate(w, "apikey.gotmpl", pageData)
+	err = repo.Template.ExecuteTemplate(w, "apikey.gotmpl", pageData)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return
+}
+
+func (repo APIRepo) PostAPIKey(w http.ResponseWriter, req *http.Request) {
+	// userInfo, ok := req.Context().Value(global.CtxUserInfo).(tokenmaker.Payload)
+	// if !ok {
+	// 	ecErr := ec.MustGetEcErr(ec.ECServerError)
+	// 	ecErr.WithDetails("user information not found")
+	// 	w.WriteHeader(ecErr.HttpStatusCode)
+	// 	w.Write(ecErr.MustToJson())
+	// 	return
+	// }
+
+	body, _ := io.ReadAll(req.Body)
+	m := make(map[string]string)
+	_ = json.Unmarshal(body, &m)
+	fmt.Println("map :", m)
+	fmt.Println("Body:", string(body))
+
+	bs, _ := json.Marshal(m)
+	// w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(bs)
+	// repo.Service.APIKey().Get(req.Context(), &service.APIKeyGetRequest{
+	// 	Owner: userInfo.GetUserID(), A
+	// })
+
+	// repo.Service.APIKey().Create()
+
+}
+
+func (repo APIRepo) GetEndpoints(w http.ResponseWriter, req *http.Request) {
+	userInfo, ok := req.Context().Value(global.CtxUserInfo).(tokenmaker.Payload)
+	if !ok {
+		ecErr := ec.MustGetEcErr(ec.ECServerError)
+		ecErr.WithDetails("user information not found")
+		w.WriteHeader(ecErr.HttpStatusCode)
+		w.Write(ecErr.MustToJson())
+		return
+	}
+
+	eps, err := repo.Service.Endpoint().
+		ListEndpointByOwner(req.Context(), userInfo.GetUserID())
+
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+		ecErr := ec.MustGetEcErr(ec.ECServerError)
+		ecErr.WithDetails("user information not found")
+		w.WriteHeader(ecErr.HttpStatusCode)
+		w.Write(ecErr.MustToJson())
+		return
+	}
+
+	pageData := object.APIEndpointFromDBModel(
+		object.Page{
+			HeadConent: view.NewHeadContent(),
+			Title:      "Endpoints",
+		}, eps,
+	)
+
+	w.WriteHeader(http.StatusOK)
+	err = repo.Template.ExecuteTemplate(w, "endpoint.gotmpl", pageData)
+	if err != nil {
+		fmt.Println(err)
+	}
 	return
 }

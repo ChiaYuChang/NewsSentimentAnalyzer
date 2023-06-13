@@ -77,6 +77,12 @@ func (srvc Service) Admin() adminService {
 	return adminService(srvc)
 }
 
+type endpointService Service
+
+func (srvc Service) Endpoint() endpointService {
+	return endpointService(srvc)
+}
+
 type otherService Service
 
 func (srvc Service) NewsJob() otherService {

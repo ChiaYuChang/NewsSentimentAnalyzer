@@ -17,7 +17,6 @@ import (
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model/testtool"
 	tokenmaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/tokenMaker"
 	"github.com/go-chi/chi/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/api/v1"
 	cookiemaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/cookieMaker"
@@ -135,9 +134,9 @@ func TestGetWelcome(t *testing.T) {
 					require.NoError(t, err)
 
 					apikeyrow = append(apikeyrow, &model.ListAPIKeyRow{
-						ApiKeyID: pgtype.Int4{Int32: key.ID, Valid: true},
-						Owner:    pgtype.Int4{Int32: user.ID, Valid: true},
-						Key:      pgtype.Text{String: key.Key, Valid: true},
+						ApiKeyID: key.ID,
+						Owner:    user.ID,
+						Key:      key.Key,
 						ApiID:    int16(i),
 						Type:     api.Type,
 						Name:     api.Name,

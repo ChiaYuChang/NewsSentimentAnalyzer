@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"net/http"
 
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
 	cookiemaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/cookieMaker"
 	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
@@ -21,6 +22,7 @@ import (
 )
 
 type AuthRepo struct {
+	APIVersion  string
 	Service     service.Service
 	Template    *template.Template
 	TokenMaker  tokenmaker.TokenMaker
@@ -28,9 +30,10 @@ type AuthRepo struct {
 	FormDecoder *form.Decoder
 }
 
-func NewAuthRepo(srvc service.Service, tmpl *template.Template,
+func NewAuthRepo(version string, srvc service.Service, tmpl *template.Template,
 	tokenmaker tokenmaker.TokenMaker, cookiemaker *cookiemaker.CookieMaker) AuthRepo {
 	return AuthRepo{
+		APIVersion:  version,
 		Service:     srvc,
 		Template:    tmpl,
 		TokenMaker:  tokenmaker,
@@ -40,6 +43,10 @@ func NewAuthRepo(srvc service.Service, tmpl *template.Template,
 }
 
 func (repo AuthRepo) GetLogin(w http.ResponseWriter, req *http.Request) {
+	if _, err := req.Cookie(cookiemaker.AUTH_COOKIE_KEY); err == nil {
+		http.Redirect(w, req, fmt.Sprintf("/%s/welcome", repo.APIVersion), http.StatusSeeOther)
+	}
+
 	w.WriteHeader(http.StatusOK)
 	repo.Template.ExecuteTemplate(w, "login.gotmpl", object.LoginPage{
 		Page: object.Page{
@@ -73,7 +80,9 @@ func (repo AuthRepo) PostLogin(w http.ResponseWriter, req *http.Request) {
 			Page: object.Page{
 				HeadConent: view.NewHeadContent(),
 				Title:      "Login",
-			}}
+			},
+			Username: auth.Email,
+		}
 
 		if errors.Is(err, pgx.ErrNoRows) {
 			data.ShowUsernameNotFountAlert = true
@@ -106,7 +115,7 @@ func (repo AuthRepo) PostLogin(w http.ResponseWriter, req *http.Request) {
 		repo.CookieMaker.NewCookie(
 			cookiemaker.AUTH_COOKIE_KEY,
 			bearer))
-	http.Redirect(w, req, "/v1/welcome", http.StatusSeeOther)
+	http.Redirect(w, req, fmt.Sprintf("/%s/welcome", repo.APIVersion), http.StatusSeeOther)
 	return
 }
 
@@ -206,11 +215,107 @@ func (repo AuthRepo) PostSignUp(w http.ResponseWriter, req *http.Request) {
 			cookiemaker.AUTH_COOKIE_KEY, bearer)
 		http.SetCookie(w, cookie)
 		// }
-		http.Redirect(w, req, "/v1/welcome", http.StatusSeeOther)
+		http.Redirect(w, req, fmt.Sprintf("/%s/welcome", repo.APIVersion), http.StatusSeeOther)
 	}
 }
 
 func (repo AuthRepo) Logout(w http.ResponseWriter, req *http.Request) {
 	http.SetCookie(w, repo.CookieMaker.DeleteCookie(cookiemaker.AUTH_COOKIE_KEY))
 	http.Redirect(w, req, "/login", http.StatusSeeOther)
+}
+
+func (repo AuthRepo) GetChangePassword(w http.ResponseWriter, req *http.Request) {
+	pageData := object.ChangePasswordPage{
+		Page: object.Page{
+			HeadConent: view.NewHeadContent(),
+			Title:      "API Key",
+		},
+		ShowPasswordNotMatchAlert:         false,
+		ShowShouldNotUsedOldPasswordAlert: false,
+	}
+	w.WriteHeader(http.StatusOK)
+	_ = repo.Template.ExecuteTemplate(w, "change_password.gotmpl", pageData)
+	return
+}
+
+func (repo AuthRepo) PostChangPassword(w http.ResponseWriter, req *http.Request) {
+	userInfo, ok := req.Context().Value(global.CtxUserInfo).(tokenmaker.Payload)
+	if !ok {
+		ecErr := ec.MustGetEcErr(ec.ECServerError)
+		ecErr.WithDetails("user information not found")
+		w.WriteHeader(ecErr.HttpStatusCode)
+		w.Write(ecErr.MustToJson())
+		return
+	}
+
+	err := req.ParseForm()
+	if err != nil {
+		ecErr := ec.MustGetEcErr(ec.ECBadRequest)
+		ecErr.WithDetails(fmt.Sprintf("client error: %s", err))
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(ecErr.HttpStatusCode)
+		w.Write(ecErr.MustToJson())
+		return
+	}
+
+	var changePasswordInfo pageform.ChangePassword
+	if err := repo.FormDecoder.Decode(&changePasswordInfo, req.PostForm); err != nil {
+		ecErr := ec.MustGetEcErr(ec.ECBadRequest)
+		ecErr.WithDetails(fmt.Sprintf("error while get auth info: %s", err))
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(ecErr.HttpStatusCode)
+		w.Write(ecErr.MustToJson())
+		return
+	}
+
+	fmt.Println("UserID  :", userInfo.GetUserID())
+	fmt.Println("Username:", userInfo.GetUsername())
+	fmt.Println(changePasswordInfo)
+
+	if err, _, _ := repo.Service.User().Login(
+		req.Context(), userInfo.GetUsername(),
+		changePasswordInfo.OldPassword); err != nil {
+		pageData := object.ChangePasswordPage{
+			Page: object.Page{
+				HeadConent: view.NewHeadContent(),
+				Title:      "API Key",
+			},
+			ShowPasswordNotMatchAlert:         true,
+			ShowShouldNotUsedOldPasswordAlert: false,
+		}
+		fmt.Println(err)
+		w.WriteHeader(http.StatusOK)
+		_ = repo.Template.ExecuteTemplate(w, "change_password.gotmpl", pageData)
+		return
+	}
+
+	if changePasswordInfo.OldPassword == changePasswordInfo.NewPassword {
+		pageData := object.ChangePasswordPage{
+			Page: object.Page{
+				HeadConent: view.NewHeadContent(),
+				Title:      "API Key",
+			},
+			ShowPasswordNotMatchAlert:         false,
+			ShowShouldNotUsedOldPasswordAlert: true,
+		}
+		w.WriteHeader(http.StatusOK)
+		_ = repo.Template.ExecuteTemplate(w, "change_password.gotmpl", pageData)
+		return
+	}
+
+	if _, err := repo.Service.User().UpdatePassword(
+		req.Context(), &service.UserUpdatePasswordRequest{
+			ID:       userInfo.GetUserID(),
+			Password: changePasswordInfo.NewPassword,
+		},
+	); err != nil {
+		ecErr := ec.MustGetEcErr(ec.ECServerError)
+		ecErr.WithDetails(err.Error())
+		w.WriteHeader(ecErr.HttpStatusCode)
+		w.Write(ecErr.MustToJson())
+		return
+	}
+
+	http.Redirect(w, req, fmt.Sprintf("/%s/welcome", repo.APIVersion), http.StatusSeeOther)
+	return
 }

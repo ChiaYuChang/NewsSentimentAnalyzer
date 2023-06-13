@@ -42,6 +42,11 @@ docker-down-db:
 docker-up-db:
 	docker start nsa-postgres
 
+migrate-create:
+	@echo "Name of .sql?: "; \
+    read FILENAME; \
+	migrate create -ext sql -dir ./db/migration -seq $${FILENAME} 
+
 migrate-up:
 	migrate -path ${MIGRATION_PATH}/ -database ${POSTGRESQL_URL} -verbose up 1
 

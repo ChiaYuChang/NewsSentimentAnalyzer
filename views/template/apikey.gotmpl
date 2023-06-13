@@ -9,30 +9,57 @@
 <body>
     <section class="background">
         <div class="mid-card">
-            <form action="POST" class="data-form">
-                <h1>News API Key</h1>
-                <ul class="data-list">
-                    {{range $apikey:=.NewsAPIs}}
-                    <li>
-                        <img {{$apikey.Image.ToHTMLAttr}} class="api-logo-small api-logo">
-                        <input {{$apikey.Input.ToHTMLAttr}} type="password" placeholder="API Key" class="form-input">
-                    </li>
-                    {{end}}
-                </ul>
-
-                <h1>Analyzer API Key</h1>
-                <ul class="data-list">
-                    {{range $apikey:=.AnalyzerAPIs}}
-                    <li>
-                        <img {{$apikey.Image.ToHTMLAttr}} class="api-logo-small api-logo">
-                        <input {{$apikey.Input.ToHTMLAttr}} type="password" placeholder="API Key" class="form-input">
-                    </li>
-                    {{end}}
-                </ul>
-                <input type="submit" value="Submit" class="btn">
+            <h1>Manage API Keys</h1>
+            <h2>Add/Update API Key</h2>
+            <form method="post" class="data-form">
+                <div class="row">
+                    <select name="api-id" id="api-id" class="form-input btn-small">
+                        <optgroup label="Source">
+                            <option value="1">API1</option>
+                            <option value="2">API2</option>
+                        </optgroup>
+                        <optgroup label="Analyzer">
+                            <option value="3">API3</option>
+                            <option value="4">API4</option>
+                        </optgroup>
+                    </select>
+                    <input type="text" name="apikey" class="form-input">
+                    <input type="submit" value="submit" class="btn btn-small ">
+                </div>
+                <div class="row">
+                </div>
             </form>
+            <h2>API Keys</h2>
+            <table class="api-table">
+                <thead>
+                    <tr>
+                        <th class="col1">API</th>
+                        <th class="col2">Key</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="col1">
+                            <div class="row">
+                                <img src="/static/image/icon_Default.svg" alt="OpenAI" class="api-logo-icon">
+                                <span>NEWSDATA.IO</span>
+                            </div>
+                        </td>
+                        <td class="col2">sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</td>
+                    </tr>
+
+                    <tr>
+                        <td class="col1">
+                            <div class="row">
+                                <img src="https://chat.openai.com/favicon.ico" alt="OpenAI" class="api-logo-icon">
+                                <span>ChatGPT</span>
+                        </td>
+                        <td class="col2">sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</td>
+                    </tr>
+                </tbody>
+            </table>
             <p class="footer">
-                back to <a href="welcome" class=" url">welcome</a> page
+                back to <a href="/v1/welcome" class=" url">welcome</a> page
             </p>
         </div>
     </section>

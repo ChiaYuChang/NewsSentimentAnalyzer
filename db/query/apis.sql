@@ -7,6 +7,13 @@ SELECT id, name, type
        name ASC
  LIMIT @n::int;
 
+-- name: ListAPIByType :many
+SELECT id, name, type
+  FROM apis
+ WHERE type = @APIType
+   AND deleted_at IS NULL
+ ORDER BY name ASC;
+
 -- name: GetAPI :one
 SELECT *
   FROM apis

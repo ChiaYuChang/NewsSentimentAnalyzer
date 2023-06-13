@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/convert"
 )
 
 type NewsCreateRequest struct {
@@ -77,8 +78,8 @@ func (srvc newsService) Create(ctx context.Context, r *NewsCreateRequest) (id in
 		Url:         r.Url,
 		Description: r.Description,
 		Content:     r.Content,
-		Source:      StringToText(r.Source),
-		PublishAt:   TimeToTimestamptz(r.PublishAt),
+		Source:      convert.StrTo(r.Source).PgText(),
+		PublishAt:   convert.TimeTo(r.PublishAt).ToPgTimeStampZ(),
 	})
 }
 
@@ -95,7 +96,7 @@ func (srvc newsService) DeletePublishBefore(
 	if err := srvc.validate.Struct(r); err != nil {
 		return 0, err
 	}
-	return srvc.store.DeleteNewsPublishBefore(ctx, TimeToTimestamptz(r.Before))
+	return srvc.store.DeleteNewsPublishBefore(ctx, convert.TimeTo(r.Before).ToPgTimeStampZ())
 }
 
 func (srvc newsService) GetByKeywords(ctx context.Context, r *NewsGetByKeywordsRequest) ([]*model.GetNewsByKeywordsRow, error) {
@@ -110,8 +111,8 @@ func (srvc newsService) GetByPublishBetween(ctx context.Context, r *NewsGetByPub
 		return nil, err
 	}
 	return srvc.store.GetNewsPublishBetween(ctx, &model.GetNewsPublishBetweenParams{
-		FromTime: TimeToTimestamptz(r.From),
-		ToTime:   TimeToTimestamptz(r.To),
+		FromTime: convert.TimeTo(r.From).ToPgTimeStampZ(),
+		ToTime:   convert.TimeTo(r.To).ToPgTimeStampZ(),
 	})
 }
 

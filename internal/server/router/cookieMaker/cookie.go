@@ -49,7 +49,7 @@ func NewCookieMaker(path, domain string, maxAge int,
 func (cm CookieMaker) DeleteCookie(key string) *http.Cookie {
 	return &http.Cookie{
 		Name:   key,
-		MaxAge: 0,
+		MaxAge: -1,
 	}
 }
 

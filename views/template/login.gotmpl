@@ -13,27 +13,28 @@
             <form method="post" class="data-form">
                 <ul class="data-list">
                     <li class="data-field">
-                        <img src="static/image/email.svg" alt="username" class="form-icon">
-                        <input type="email" placeholder="Email" id="email" name="email" class="form-input" required>
+                        <img src="/static/image/icon_email.svg" alt="username" class="form-icon">
+                        <input type="email" placeholder="Email" id="email" name="email" class="form-input" 
+                         value="{{.Username}}" required>
                     </li>
                     {{if .ShowUsernameNotFountAlert}}
                     <div class="alert">
-                        <img src="static/image/alert.svg" alt="alert" class="alert-icon">
+                        <img src="/static/image/symbol_alert.svg" alt="alert" class="alert-icon">
                         <span>Couldn’t find your Account</span>
                     </div>
                     {{end}}
                     <li class="data-field">
-                        <img src="static/image/password.svg" alt="username" class="form-icon">
+                        <img src="/static/image/icon_password.svg" alt="username" class="form-icon">
                         <input type="password" placeholder="Password" id="password" name="password" minlength="8" class="form-input" required>
                     </li>
                     {{if .ShowPasswordMismatchAlert}}
                     <div class="alert">
-                        <img src="static/image/alert.svg" alt="alert" class="alert-icon">
+                        <img src="/static/image/symbol_alert.svg" alt="alert" class="alert-icon">
                         <span>Wrong password. Please try again.</span>
                     </div>
                     </span>{{end}}
                 </ul>
-                <input type="submit" value="Login" class="btn">
+                <input type="submit" value="login" class="btn">
                 <p class="footer">
                     New to analyzer? <a href="sign-up" class=" url">Create a account</a>
                 </p>

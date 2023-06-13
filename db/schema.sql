@@ -130,6 +130,9 @@ CREATE TABLE public.apis (
     id smallint NOT NULL,
     name character varying(20) NOT NULL,
     type public.api_type NOT NULL,
+    image character varying(128),
+    icon character varying(128),
+    document_url character varying(128) NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     deleted_at timestamp with time zone
@@ -158,6 +161,45 @@ ALTER TABLE public.apis_id_seq OWNER TO postgres;
 --
 
 ALTER SEQUENCE public.apis_id_seq OWNED BY public.apis.id;
+
+
+--
+-- Name: endpoints; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.endpoints (
+    id integer NOT NULL,
+    name character varying(32) NOT NULL,
+    api_id smallint NOT NULL,
+    template_name character varying(32) NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    deleted_at timestamp with time zone
+);
+
+
+ALTER TABLE public.endpoints OWNER TO postgres;
+
+--
+-- Name: endpoints_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.endpoints_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.endpoints_id_seq OWNER TO postgres;
+
+--
+-- Name: endpoints_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.endpoints_id_seq OWNED BY public.endpoints.id;
 
 
 --
@@ -395,6 +437,13 @@ ALTER TABLE ONLY public.apis ALTER COLUMN id SET DEFAULT nextval('public.apis_id
 
 
 --
+-- Name: endpoints id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.endpoints ALTER COLUMN id SET DEFAULT nextval('public.endpoints_id_seq'::regclass);
+
+
+--
 -- Name: keywords id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -443,6 +492,14 @@ ALTER TABLE ONLY public.apikeys
 
 ALTER TABLE ONLY public.apis
     ADD CONSTRAINT apis_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: endpoints endpoints_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.endpoints
+    ADD CONSTRAINT endpoints_pkey PRIMARY KEY (id);
 
 
 --
@@ -587,6 +644,14 @@ ALTER TABLE ONLY public.apikeys
 
 ALTER TABLE ONLY public.apikeys
     ADD CONSTRAINT apikeys_owner_fkey FOREIGN KEY (owner) REFERENCES public.users(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: endpoints endpoints_api_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.endpoints
+    ADD CONSTRAINT endpoints_api_id_fkey FOREIGN KEY (api_id) REFERENCES public.apis(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --

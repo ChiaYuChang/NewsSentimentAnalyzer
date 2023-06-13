@@ -10,6 +10,11 @@ type AuthInfo struct {
 	Password string `form:"password"`
 }
 
+type ChangePassword struct {
+	OldPassword string `form:"old-password"`
+	NewPassword string `form:"new-password"`
+}
+
 type SignUpInfo struct {
 	AuthInfo
 	FirstName string `form:"first-name"`

@@ -5,9 +5,10 @@ WITH k AS (
    WHERE owner = $1
      AND deleted_at IS NULL
 )
-SELECT k.id AS api_key_id, k.owner, k.key, a.id AS api_id, a.type, a.name
+SELECT k.id AS api_key_id, k.owner, k.key, 
+       a.id AS api_id, a.type, a.name, a.image, a.icon
   FROM apis AS a
-  LEFT JOIN k
+ INNER JOIN k
     ON a.id = k.api_id
  WHERE a.deleted_at IS NULL;
 

@@ -75,23 +75,23 @@ func (db Database) String() string {
 	return db.toString("")
 }
 
-func ReadSecret(path string) error {
+func ReadSecret(path string) (*Secret, error) {
 	f, err := os.Open(path)
 	if err != nil {
-		return fmt.Errorf("error while opening secret.json: %w", err)
+		return nil, fmt.Errorf("error while opening secret.json: %w", err)
 	}
 	defer f.Close()
 
 	bs, err := io.ReadAll(f)
 	if err != nil {
-		return fmt.Errorf("error while reading secrets: %w", err)
+		return nil, fmt.Errorf("error while reading secrets: %w", err)
 	}
 
 	var secret Secret
 	err = json.Unmarshal(bs, &secret)
 	if err != nil {
-		return fmt.Errorf("error while unmarshal secrets: %w", err)
+		return nil, fmt.Errorf("error while unmarshal secrets: %w", err)
 	}
-	AppVar.Secret = secret
-	return nil
+
+	return &secret, nil
 }

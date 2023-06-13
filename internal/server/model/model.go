@@ -186,12 +186,15 @@ func (ns NullRole) Value() (driver.Value, error) {
 }
 
 type Api struct {
-	ID        int16              `json:"id"`
-	Name      string             `json:"name"`
-	Type      ApiType            `json:"type"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt pgtype.Timestamptz `json:"deleted_at"`
+	ID          int16              `json:"id"`
+	Name        string             `json:"name"`
+	Type        ApiType            `json:"type"`
+	Image       pgtype.Text        `json:"image"`
+	Icon        pgtype.Text        `json:"icon"`
+	DocumentUrl string             `json:"document_url"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt   pgtype.Timestamptz `json:"deleted_at"`
 }
 
 type Apikey struct {
@@ -202,6 +205,16 @@ type Apikey struct {
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 	DeletedAt pgtype.Timestamptz `json:"deleted_at"`
+}
+
+type Endpoint struct {
+	ID           int32              `json:"id"`
+	Name         string             `json:"name"`
+	ApiID        int16              `json:"api_id"`
+	TemplateName string             `json:"template_name"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt    pgtype.Timestamptz `json:"deleted_at"`
 }
 
 type Job struct {

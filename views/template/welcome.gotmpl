@@ -10,8 +10,8 @@
     <section class="background">
         <div class="mid-card">
             <h1>Welcome {{.Name}}</h1>
-            <button class="btn" onclick="location.href='#'">Make queries</button>
-            <button class="btn" onclick="location.href='#'">Change password</button>
+            <button class="btn" onclick="location.href='/v1/endpoints'">Make queries</button>
+            <button class="btn" onclick="location.href='/v1/change_password'">Change password</button>
             <button class="btn" onclick="location.href='/v1/apikey'">Manage API key</button>
             <button class="btn" onclick="location.href='#'">See Results</button>
             {{if eq .Role "admin"}}<button class="btn" onclick="location.href='admin.html'">Admin</button>{{end}}

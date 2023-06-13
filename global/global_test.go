@@ -9,9 +9,14 @@ import (
 )
 
 func TestReadOption(t *testing.T) {
-	opt, err := global.ReadOption("../config/option.json")
+	err := global.ReadAppVar(
+		"../secret.json",
+		"../config/option.json",
+		"../config/endpoint.json",
+	)
 	require.NoError(t, err)
 
+	opt := global.AppVar
 	err = opt.TokenMaker.UpdateSecret()
 	require.NoError(t, err)
 	opt.TokenMaker.SignMethod = jwt.SigningMethodHS512
@@ -22,5 +27,5 @@ func TestReadOption(t *testing.T) {
 	newSrc := opt.TokenMaker.GetHexSecretString()
 	require.NotEqual(t, oldSrc, newSrc)
 
-	t.Log(opt)
+	t.Log(global.AppVar)
 }

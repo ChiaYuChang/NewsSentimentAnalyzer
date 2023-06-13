@@ -12,3 +12,4 @@ function showPassword(prefix) {
         hide.className = "hide"
     }
 }
+

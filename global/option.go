@@ -132,14 +132,17 @@ func (pwdOpt PasswordValidatorOption) String() string {
 }
 
 type ServerOption struct {
-	TemplatePath   string `json:"template_path"`
-	StaticFilePath string `json:"static_file_path"`
+	TemplatePath   []string `json:"template_path"`
+	StaticFilePath string   `json:"static_file_path"`
 }
 
 func (srvOpt ServerOption) String() string {
 	sb := strings.Builder{}
 	sb.WriteString("Server Options:\n")
-	sb.WriteString(fmt.Sprintf("\t- Templates        : %v\n", srvOpt.TemplatePath))
-	sb.WriteString(fmt.Sprintf("\t- Static Files     : %v\n", srvOpt.StaticFilePath))
+	sb.WriteString(fmt.Sprintf("\t- Templates :\n"))
+	for _, tmpl := range srvOpt.TemplatePath {
+		sb.WriteString(fmt.Sprintf("\t  - %s\n", tmpl))
+	}
+	sb.WriteString(fmt.Sprintf("\t- Static Files : %v\n", srvOpt.StaticFilePath))
 	return sb.String()
 }
