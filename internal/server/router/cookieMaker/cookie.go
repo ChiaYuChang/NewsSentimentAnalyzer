@@ -10,12 +10,6 @@ const AUTH_COOKIE_KEY string = "JWT-Token"
 
 var maker *CookieMaker
 
-func init() {
-	if maker == nil {
-		maker = NewTestCookieMaker()
-	}
-}
-
 type CookieMaker struct {
 	Path     string
 	Domain   string
@@ -44,6 +38,10 @@ func NewCookieMaker(path, domain string, maxAge int,
 		HttpOnly: httpOnly,
 		SameSite: http.SameSiteLaxMode,
 	}
+}
+
+func SetDefaultCookieMaker(cm *CookieMaker) {
+	maker = cm
 }
 
 func (cm CookieMaker) DeleteCookie(key string) *http.Cookie {

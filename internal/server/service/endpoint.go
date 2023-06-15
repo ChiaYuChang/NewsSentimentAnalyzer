@@ -2,8 +2,10 @@ package service
 
 import (
 	"context"
+	"errors"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
+	"github.com/jackc/pgx/v5"
 )
 
 func (srvc endpointService) Service() Service {
@@ -48,4 +50,33 @@ func (srvc endpointService) Delete(ctx context.Context, endpointId int32) (int64
 		return 0, err
 	}
 	return srvc.store.DeleteEndpoint(ctx, endpointId)
+}
+
+func (srvc endpointService) ListAll(ctx context.Context, limit int32, rowChan chan<- *model.ListAllEndpointRow) error {
+	defer close(rowChan)
+	params := model.ListAllEndpointParams{
+		Limit: limit,
+		Next:  0,
+	}
+
+	for {
+		rows, err := srvc.store.ListAllEndpoint(ctx, &params)
+		if err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				break
+			}
+			return err
+		}
+		if len(rows) > 0 {
+			params.Next = rows[len(rows)-1].EndpointID
+		} else {
+			break
+		}
+
+		for _, row := range rows {
+			rowChan <- row
+		}
+
+	}
+	return nil
 }

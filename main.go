@@ -46,15 +46,16 @@ func main() {
 
 	storage := model.NewPGXStore(conn)
 	service := service.NewService(storage, validator.Validate)
-	templates, err := view.ParseTemplates("views/template/*.gotmpl", nil)
+	vw, err := view.NewViewWithDefaultTemplateFuncs(global.AppVar.Server.TemplatePath...)
 	if err != nil {
 		panic(err)
 	}
+
 	fs := http.Dir("views/static/")
 	tm := tokenmaker.NewJWTMakerWithDefaultVal()
 	cm := cookieMaker.NewTestCookieMaker()
 
-	mux := router.NewRouter(service, templates, fs, tm, cm)
+	mux := router.NewRouter(service, vw, fs, tm, cm)
 
 	errCh := make(chan error)
 	go func(chan<- error) {

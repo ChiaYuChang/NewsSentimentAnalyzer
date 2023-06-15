@@ -14,10 +14,27 @@
         "min_special": 1
     },
     "server": {
+        "api_version": "v1",
         "template_path": [
             "views/template/*.gotmpl",
-            "views/template/endpoints/*.gotmpl"
+            "views/template/endpoint/*.gotmpl"
         ],
-        "static_file_path": "views/static/"
+        "static_file_path": "views/static/",
+        "route_pattern": {
+            "pages": {
+                "login": "/login",
+                "sign-up": "/sign-up",
+                "logout": "/logout",
+                "welcome": "/welcome",
+                "apikey": "/apikey",
+                "change_password": "/change_password",
+                "endpoints": "/endpoints"
+            },
+            "static_files": {
+                "img": "/image",
+                "js": "/js",
+                "css": "/css"
+            }
+        }
     }
 }

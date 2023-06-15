@@ -11,6 +11,17 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countEndpoint = `-- name: CountEndpoint :one
+SELECT count(*) FROM endpoints
+`
+
+func (q *Queries) CountEndpoint(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, countEndpoint)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createEndpoint = `-- name: CreateEndpoint :one
 INSERT INTO endpoints (
     name, api_id, template_name
@@ -46,29 +57,48 @@ func (q *Queries) DeleteEndpoint(ctx context.Context, id int32) (int64, error) {
 	return result.RowsAffected(), nil
 }
 
-const listEndpointByAPIID = `-- name: ListEndpointByAPIID :many
-SELECT name, api_id, template_name
-  FROM endpoints
- WHERE api_id = ANY($1::int[]) 
-   AND deleted_at IS NULL
+const listAllEndpoint = `-- name: ListAllEndpoint :many
+SELECT e.id AS endpoint_id, e.name AS endpoint_name, e.api_id, 
+       a.name AS api_name, e.template_name
+  FROM endpoints AS e
+ INNER JOIN apis AS a
+    ON e.api_id = a.id
+ WHERE e.id > $2
+   AND e.deleted_at IS NULL
+   AND a.deleted_at IS NULL
+ ORDER BY e.api_id, e.name
+ LIMIT $1
 `
 
-type ListEndpointByAPIIDRow struct {
-	Name         string `json:"name"`
+type ListAllEndpointParams struct {
+	Limit int32 `json:"limit"`
+	Next  int32 `json:"next"`
+}
+
+type ListAllEndpointRow struct {
+	EndpointID   int32  `json:"endpoint_id"`
+	EndpointName string `json:"endpoint_name"`
 	ApiID        int16  `json:"api_id"`
+	ApiName      string `json:"api_name"`
 	TemplateName string `json:"template_name"`
 }
 
-func (q *Queries) ListEndpointByAPIID(ctx context.Context, apiID []int32) ([]*ListEndpointByAPIIDRow, error) {
-	rows, err := q.db.Query(ctx, listEndpointByAPIID, apiID)
+func (q *Queries) ListAllEndpoint(ctx context.Context, arg *ListAllEndpointParams) ([]*ListAllEndpointRow, error) {
+	rows, err := q.db.Query(ctx, listAllEndpoint, arg.Limit, arg.Next)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []*ListEndpointByAPIIDRow
+	var items []*ListAllEndpointRow
 	for rows.Next() {
-		var i ListEndpointByAPIIDRow
-		if err := rows.Scan(&i.Name, &i.ApiID, &i.TemplateName); err != nil {
+		var i ListAllEndpointRow
+		if err := rows.Scan(
+			&i.EndpointID,
+			&i.EndpointName,
+			&i.ApiID,
+			&i.ApiName,
+			&i.TemplateName,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, &i)

@@ -2,9 +2,12 @@ package testtool
 
 import (
 	"math/rand"
+	"time"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/convert"
 	rg "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/randanGenerator"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func GenRdmUser() (*model.User, error) {
@@ -110,5 +113,40 @@ func CloneAPI(a *model.Api) *model.Api {
 		CreatedAt: a.CreatedAt,
 		UpdatedAt: a.UpdatedAt,
 		DeletedAt: a.DeletedAt,
+	}
+}
+
+func GenRdmAPIEndpoints(epId int32, apiId int16) (*model.Endpoint, error) {
+	if epId < 1 {
+		epId = rand.Int31n(10_000) + 1
+	}
+
+	if apiId < 1 {
+		apiId = int16(rand.Int31n(100) + 1)
+	}
+
+	now := time.Now()
+	ep := &model.Endpoint{
+		ID:           epId,
+		Name:         rg.Must[string](rg.AlphaNum.GenRdmString(rand.Intn(25) + 5)),
+		ApiID:        apiId,
+		TemplateName: rg.Must[string](rg.AlphaNum.GenRdmString(rand.Intn(20)+5)) + ".gotmpl",
+		CreatedAt:    convert.TimeTo(now).ToPgTimeStampZ(),
+		UpdatedAt:    convert.TimeTo(now.Add(time.Duration(rand.Intn(24*10)+1) * time.Hour)).ToPgTimeStampZ(),
+		DeletedAt:    pgtype.Timestamptz{Valid: false},
+	}
+
+	return ep, nil
+}
+
+func CloneEndpoint(ep *model.Endpoint) *model.Endpoint {
+	return &model.Endpoint{
+		ID:           ep.ID,
+		Name:         ep.Name,
+		ApiID:        ep.ApiID,
+		TemplateName: ep.TemplateName,
+		CreatedAt:    ep.CreatedAt,
+		UpdatedAt:    ep.UpdatedAt,
+		DeletedAt:    ep.DeletedAt,
 	}
 }

@@ -15,15 +15,15 @@
                 <ul class="data-list">
                     <li class="data-field">
                         <label for="keyword">Keywords</label>:
-                        <input type="text" name="keyword" id="keyword">
+                        <input type="text" name="keyword" id="keyword" class="form-input">
                     </li>
                     <li class="data-field">
                         <label for="domains">Domains</label>:
-                        <input type="text" name="domains" id="domains">
+                        <input type="text" name="domains" id="domains" class="form-input">
                     </li>
                     <li class="data-field">
                         <label for="language">Language</label>:
-                        <select name="language" id="language">
+                        <select name="language" id="language" class="form-input">
                             <option value="">All</option>
                             <option value="zh">Chinese</option>
                             <option value="en">English</option>
@@ -49,7 +49,7 @@
                     </li> -->
                     <li class="data-field">
                         <label for="country">Country</label>:
-                        <select name="country" id="country">
+                        <select name="country" id="country" class="form-input">
                             <option value="">All</option>
                             <optgroup label="Asia">
                                 <option value="cn">China</option>
@@ -68,7 +68,7 @@
                     </li>
                     <li class="data-field">
                         <label for="category">Category</label>:
-                        <select name="category" id="category">
+                        <select name="category" id="category" class="form-input">
                             <option value="business">Business</option>
                             <option value="entertainment">Entertainment</option>
                             <option value="environment">Environment</option>
@@ -85,14 +85,17 @@
                     </li>
                     <li class="data-field">
                         <label for="from-time">From</label>:
-                        <input type="datetime" name="from-time" id="from-time" class="date-picker" placeholder="YYYY-MM-DD">
+                        <input type="date" name="from-time" id="from-time" class="form-input" max={{now "2006-01-02"}}>
                     </li>
                     <li class="data-field">
                         <label for="to-time">From</label>:
-                        <input type="datetime" name="to-time" id="to-time" class="date-picker" placeholder="YYYY-MM-DD">
+                        <input type="date" name="to-time" id="to-time" class="form-input" max={{now "2006-01-02"}}>
                     </li>
                 </ul>
                 <input type="submit" value="Submit" class="btn">
+                <p class="footer">
+                    back to <a href="/v1/endpoints" class=" url">endpoints</a> page
+                </p>
             </form>
         </div>
     </section>

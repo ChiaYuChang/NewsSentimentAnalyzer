@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"html/template"
 	"net/http"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
@@ -24,18 +23,18 @@ import (
 type AuthRepo struct {
 	APIVersion  string
 	Service     service.Service
-	Template    *template.Template
+	View        view.View
 	TokenMaker  tokenmaker.TokenMaker
 	CookieMaker *cookiemaker.CookieMaker
 	FormDecoder *form.Decoder
 }
 
-func NewAuthRepo(version string, srvc service.Service, tmpl *template.Template,
+func NewAuthRepo(version string, srvc service.Service, view view.View,
 	tokenmaker tokenmaker.TokenMaker, cookiemaker *cookiemaker.CookieMaker) AuthRepo {
 	return AuthRepo{
 		APIVersion:  version,
 		Service:     srvc,
-		Template:    tmpl,
+		View:        view,
 		TokenMaker:  tokenmaker,
 		CookieMaker: cookiemaker,
 		FormDecoder: form.NewDecoder(),
@@ -48,7 +47,7 @@ func (repo AuthRepo) GetLogin(w http.ResponseWriter, req *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	repo.Template.ExecuteTemplate(w, "login.gotmpl", object.LoginPage{
+	repo.View.ExecuteTemplate(w, "login.gotmpl", object.LoginPage{
 		Page: object.Page{
 			HeadConent: view.NewHeadContent(),
 			Title:      "Login",
@@ -96,7 +95,7 @@ func (repo AuthRepo) PostLogin(w http.ResponseWriter, req *http.Request) {
 			w.Write(ecErr.MustToJson())
 			return
 		}
-		repo.Template.ExecuteTemplate(w, "login.gotmpl", data)
+		repo.View.ExecuteTemplate(w, "login.gotmpl", data)
 		return
 	}
 
@@ -121,7 +120,7 @@ func (repo AuthRepo) PostLogin(w http.ResponseWriter, req *http.Request) {
 
 func (repo AuthRepo) GetSignUp(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	repo.Template.ExecuteTemplate(w, "signup.gotmpl", object.SignUpPage{
+	repo.View.ExecuteTemplate(w, "signup.gotmpl", object.SignUpPage{
 		Page: object.Page{
 			HeadConent: view.NewHeadContent(),
 			Title:      "Sign up",
@@ -157,7 +156,7 @@ func (repo AuthRepo) PostSignUp(w http.ResponseWriter, req *http.Request) {
 		GetAuthInfo(context.Background(), signUpInfo.Email)
 	if err == nil {
 		w.WriteHeader(http.StatusOK)
-		repo.Template.ExecuteTemplate(w, "signup.gotmpl", object.SignUpPage{
+		repo.View.ExecuteTemplate(w, "signup.gotmpl", object.SignUpPage{
 			Page: object.Page{
 				HeadConent: view.NewHeadContent(),
 				Title:      "Sign up",
@@ -234,7 +233,7 @@ func (repo AuthRepo) GetChangePassword(w http.ResponseWriter, req *http.Request)
 		ShowShouldNotUsedOldPasswordAlert: false,
 	}
 	w.WriteHeader(http.StatusOK)
-	_ = repo.Template.ExecuteTemplate(w, "change_password.gotmpl", pageData)
+	_ = repo.View.ExecuteTemplate(w, "change_password.gotmpl", pageData)
 	return
 }
 
@@ -285,7 +284,7 @@ func (repo AuthRepo) PostChangPassword(w http.ResponseWriter, req *http.Request)
 		}
 		fmt.Println(err)
 		w.WriteHeader(http.StatusOK)
-		_ = repo.Template.ExecuteTemplate(w, "change_password.gotmpl", pageData)
+		_ = repo.View.ExecuteTemplate(w, "change_password.gotmpl", pageData)
 		return
 	}
 
@@ -299,7 +298,7 @@ func (repo AuthRepo) PostChangPassword(w http.ResponseWriter, req *http.Request)
 			ShowShouldNotUsedOldPasswordAlert: true,
 		}
 		w.WriteHeader(http.StatusOK)
-		_ = repo.Template.ExecuteTemplate(w, "change_password.gotmpl", pageData)
+		_ = repo.View.ExecuteTemplate(w, "change_password.gotmpl", pageData)
 		return
 	}
 

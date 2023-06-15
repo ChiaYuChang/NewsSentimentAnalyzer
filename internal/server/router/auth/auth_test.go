@@ -39,7 +39,7 @@ const VIEWS_PATH = "../../../../views"
 const AUTH_TOKEN = "[[::AUTH_TOKEN::]]"
 
 func TestAuthLogin(t *testing.T) {
-	tmpl, err := view.ParseTemplates(VIEWS_PATH+"/template/*.gotmpl", nil)
+	vw, err := view.NewView(nil, VIEWS_PATH+"/template/*.gotmpl")
 	require.NoError(t, err)
 	user, _ := testtool.GenRdmUser()
 
@@ -74,7 +74,7 @@ func TestAuthLogin(t *testing.T) {
 
 			authReup := auth.AuthRepo{
 				Service:     srvc,
-				Template:    tmpl,
+				View:        vw,
 				TokenMaker:  tm,
 				CookieMaker: cm,
 				FormDecoder: form.NewDecoder(),
@@ -130,7 +130,7 @@ func TestAuthLogin(t *testing.T) {
 
 			authReup := auth.AuthRepo{
 				Service:     srvc,
-				Template:    tmpl,
+				View:        vw,
 				TokenMaker:  tm,
 				CookieMaker: cm,
 				FormDecoder: form.NewDecoder(),
@@ -198,7 +198,7 @@ func TestAuthLogin(t *testing.T) {
 
 			authReup := auth.AuthRepo{
 				Service:     srvc,
-				Template:    tmpl,
+				View:        vw,
 				TokenMaker:  tm,
 				CookieMaker: cm,
 				FormDecoder: form.NewDecoder(),
@@ -245,7 +245,7 @@ func TestAuthLogin(t *testing.T) {
 
 			authReup := auth.AuthRepo{
 				Service:     srvc,
-				Template:    tmpl,
+				View:        vw,
 				TokenMaker:  tm,
 				CookieMaker: cm,
 				FormDecoder: form.NewDecoder(),
@@ -292,7 +292,7 @@ func TestAuthLogin(t *testing.T) {
 
 			authReup := auth.AuthRepo{
 				Service:     srvc,
-				Template:    tmpl,
+				View:        vw,
 				TokenMaker:  tm,
 				CookieMaker: cm,
 				FormDecoder: form.NewDecoder(),
@@ -351,7 +351,7 @@ func TestAuthLogin(t *testing.T) {
 
 			authReup := auth.AuthRepo{
 				Service:     srvc,
-				Template:    tmpl,
+				View:        vw,
 				TokenMaker:  tm,
 				CookieMaker: cm,
 				FormDecoder: form.NewDecoder(),
@@ -382,7 +382,7 @@ func TestAuthLogin(t *testing.T) {
 }
 
 func TestAuthSignUp(t *testing.T) {
-	tmpl, err := view.ParseTemplates(VIEWS_PATH+"/template/*.gotmpl", nil)
+	vw, err := view.NewView(nil, VIEWS_PATH+"/template/*.gotmpl")
 	require.NoError(t, err)
 	user, _ := testtool.GenRdmUser()
 	user.Role = model.RoleUser
@@ -418,7 +418,7 @@ func TestAuthSignUp(t *testing.T) {
 
 			authReup := auth.AuthRepo{
 				Service:     srvc,
-				Template:    tmpl,
+				View:        vw,
 				TokenMaker:  tm,
 				CookieMaker: cm,
 				FormDecoder: form.NewDecoder(),
@@ -482,7 +482,7 @@ func TestAuthSignUp(t *testing.T) {
 
 			authRepo := auth.AuthRepo{
 				Service:     srvc,
-				Template:    tmpl,
+				View:        vw,
 				TokenMaker:  tm,
 				CookieMaker: cm,
 				FormDecoder: form.NewDecoder(),
@@ -539,7 +539,7 @@ func TestAuthSignUp(t *testing.T) {
 
 			authRepo := auth.AuthRepo{
 				Service:     srvc,
-				Template:    tmpl,
+				View:        vw,
 				TokenMaker:  tm,
 				CookieMaker: cm,
 				FormDecoder: form.NewDecoder(),
@@ -594,7 +594,7 @@ func TestAuthSignUp(t *testing.T) {
 
 			authRepo := auth.AuthRepo{
 				Service:     srvc,
-				Template:    tmpl,
+				View:        vw,
 				TokenMaker:  tm,
 				CookieMaker: cm,
 				FormDecoder: form.NewDecoder(),

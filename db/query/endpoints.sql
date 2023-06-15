@@ -13,11 +13,20 @@ SELECT ep.id AS endpoint_id,ep.name AS endpoint_name, ep.api_id, ep.template_nam
     AND a.type = 'source'
   ORDER BY a.name, ep.id;
 
--- name: ListEndpointByAPIID :many
-SELECT name, api_id, template_name
-  FROM endpoints
- WHERE api_id = ANY(@api_id::int[]) 
-   AND deleted_at IS NULL;
+-- name: CountEndpoint :one
+SELECT count(*) FROM endpoints;
+
+-- name: ListAllEndpoint :many
+SELECT e.id AS endpoint_id, e.name AS endpoint_name, e.api_id, 
+       a.name AS api_name, e.template_name
+  FROM endpoints AS e
+ INNER JOIN apis AS a
+    ON e.api_id = a.id
+ WHERE e.id > @next
+   AND e.deleted_at IS NULL
+   AND a.deleted_at IS NULL
+ ORDER BY e.api_id, e.name
+ LIMIT $1;
 
 -- name: CreateEndpoint :one
 INSERT INTO endpoints (

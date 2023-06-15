@@ -52,7 +52,7 @@ func init() {
 }
 
 func TestGetWelcome(t *testing.T) {
-	tmpl, err := view.ParseTemplates(VIEWS_PATH+"/template/*.gotmpl", nil)
+	view, err := view.NewView(nil, VIEWS_PATH+"/template/*.gotmpl")
 	require.NoError(t, err)
 
 	cli := &http.Client{
@@ -94,7 +94,7 @@ func TestGetWelcome(t *testing.T) {
 				apiRepo := api.APIRepo{
 					Version:     "v1",
 					Service:     srvc,
-					Template:    tmpl,
+					View:        view,
 					TokenMaker:  tm,
 					CookieMaker: cm,
 					FormDecoder: form.NewDecoder(),
@@ -157,7 +157,7 @@ func TestGetWelcome(t *testing.T) {
 				apiRepo := api.APIRepo{
 					Version:     "v1",
 					Service:     srvc,
-					Template:    tmpl,
+					View:        view,
 					TokenMaker:  tm,
 					CookieMaker: cm,
 					FormDecoder: form.NewDecoder(),

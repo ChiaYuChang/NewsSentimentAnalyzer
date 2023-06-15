@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"html/template"
 	"io"
 	"net/http"
 
@@ -23,19 +22,19 @@ import (
 type APIRepo struct {
 	Version     string
 	Service     service.Service
-	Template    *template.Template
+	View        view.View
 	TokenMaker  tokenmaker.TokenMaker
 	CookieMaker *cookiemaker.CookieMaker
 	FormDecoder *form.Decoder
 }
 
 func NewAPIRepo(ver string, srvc service.Service,
-	tmpl *template.Template, tokenmaker tokenmaker.TokenMaker,
+	view view.View, tokenmaker tokenmaker.TokenMaker,
 	cookiemaker *cookiemaker.CookieMaker) APIRepo {
 	return APIRepo{
 		Version:     ver,
 		Service:     srvc,
-		Template:    tmpl,
+		View:        view,
 		TokenMaker:  tokenmaker,
 		CookieMaker: cookiemaker,
 		FormDecoder: form.NewDecoder(),
@@ -61,7 +60,7 @@ func (repo APIRepo) GetWelcome(w http.ResponseWriter, req *http.Request) {
 		Role: payload.GetRole().String(),
 	}
 
-	_ = repo.Template.ExecuteTemplate(w, "welcome.gotmpl", pageData)
+	_ = repo.View.ExecuteTemplate(w, "welcome.gotmpl", pageData)
 	return
 }
 
@@ -114,7 +113,7 @@ func (repo APIRepo) GetAPIKey(w http.ResponseWriter, req *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	err = repo.Template.ExecuteTemplate(w, "apikey.gotmpl", pageData)
+	err = repo.View.ExecuteTemplate(w, "apikey.gotmpl", pageData)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -174,11 +173,13 @@ func (repo APIRepo) GetEndpoints(w http.ResponseWriter, req *http.Request) {
 		object.Page{
 			HeadConent: view.NewHeadContent(),
 			Title:      "Endpoints",
-		}, eps,
+		},
+		repo.Version,
+		eps,
 	)
 
 	w.WriteHeader(http.StatusOK)
-	err = repo.Template.ExecuteTemplate(w, "endpoint.gotmpl", pageData)
+	err = repo.View.ExecuteTemplate(w, "endpoint.gotmpl", pageData)
 	if err != nil {
 		fmt.Println(err)
 	}

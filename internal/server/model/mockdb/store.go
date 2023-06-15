@@ -110,6 +110,21 @@ func (mr *MockStoreMockRecorder) Close() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockStore)(nil).Close))
 }
 
+// CountEndpoint mocks base method.
+func (m *MockStore) CountEndpoint(arg0 context.Context) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CountEndpoint", arg0)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CountEndpoint indicates an expected call of CountEndpoint.
+func (mr *MockStoreMockRecorder) CountEndpoint(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountEndpoint", reflect.TypeOf((*MockStore)(nil).CountEndpoint), arg0)
+}
+
 // CreateAPI mocks base method.
 func (m *MockStore) CreateAPI(arg0 context.Context, arg1 *model.CreateAPIParams) (int16, error) {
 	m.ctrl.T.Helper()
@@ -604,19 +619,19 @@ func (mr *MockStoreMockRecorder) ListAPIKey(arg0, arg1 interface{}) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListAPIKey", reflect.TypeOf((*MockStore)(nil).ListAPIKey), arg0, arg1)
 }
 
-// ListEndpointByAPIID mocks base method.
-func (m *MockStore) ListEndpointByAPIID(arg0 context.Context, arg1 []int32) ([]*model.ListEndpointByAPIIDRow, error) {
+// ListAllEndpoint mocks base method.
+func (m *MockStore) ListAllEndpoint(arg0 context.Context, arg1 *model.ListAllEndpointParams) ([]*model.ListAllEndpointRow, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListEndpointByAPIID", arg0, arg1)
-	ret0, _ := ret[0].([]*model.ListEndpointByAPIIDRow)
+	ret := m.ctrl.Call(m, "ListAllEndpoint", arg0, arg1)
+	ret0, _ := ret[0].([]*model.ListAllEndpointRow)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ListEndpointByAPIID indicates an expected call of ListEndpointByAPIID.
-func (mr *MockStoreMockRecorder) ListEndpointByAPIID(arg0, arg1 interface{}) *gomock.Call {
+// ListAllEndpoint indicates an expected call of ListAllEndpoint.
+func (mr *MockStoreMockRecorder) ListAllEndpoint(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListEndpointByAPIID", reflect.TypeOf((*MockStore)(nil).ListEndpointByAPIID), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListAllEndpoint", reflect.TypeOf((*MockStore)(nil).ListAllEndpoint), arg0, arg1)
 }
 
 // ListEndpointByOwner mocks base method.

@@ -1,22 +1,28 @@
 package router
 
 import (
-	"html/template"
+	"context"
+	"fmt"
 	"net/http"
+	"strings"
 
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/middleware"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/api/v1"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/auth"
 	cookiemaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/cookieMaker"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view/object"
 	tokenmaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/tokenMaker"
 	"github.com/go-chi/chi/v5"
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
 )
 
-func NewRouter(srvc service.Service, tmpl *template.Template, filesystem http.FileSystem,
+func NewRouter(srvc service.Service, vw view.View, filesystem http.FileSystem,
 	tokenmaker tokenmaker.TokenMaker, cookiemaker *cookiemaker.CookieMaker) *chi.Mux {
-	auth := auth.NewAuthRepo("v1", srvc, tmpl, tokenmaker, cookiemaker)
+	auth := auth.NewAuthRepo("v1", srvc, vw, tokenmaker, cookiemaker)
 
 	r := chi.NewRouter()
 	r.Use(chimiddleware.Logger)
@@ -40,15 +46,50 @@ func NewRouter(srvc service.Service, tmpl *template.Template, filesystem http.Fi
 		TokenMaker:          tokenmaker,
 	}
 
-	api := api.NewAPIRepo("v1", srvc, tmpl, tokenmaker, cookiemaker)
-	r.Route("/v1", func(r chi.Router) {
+	api := api.NewAPIRepo("v1", srvc, vw, tokenmaker, cookiemaker)
+
+	eps := make(chan *model.ListAllEndpointRow)
+	go func(chan *model.ListAllEndpointRow) {
+		api.Service.Endpoint().ListAll(context.Background(), 100, eps)
+	}(eps)
+
+	r.Route(fmt.Sprintf("/%s", api.Version), func(r chi.Router) {
 		r.Use(bearerTokenMaker.BearerAuthenticator)
-		r.Get("/welcome", api.GetWelcome)
-		r.Get("/apikey", api.GetAPIKey)
-		r.Post("/apikey", api.PostAPIKey)
-		r.Get("/change_password", auth.GetChangePassword)
-		r.Post("/change_password", auth.PostChangPassword)
-		r.Get("/endpoints", api.GetEndpoints)
+		r.Get(global.AppVar.Server.RoutePattern.Pages["welcome"], api.GetWelcome)
+		r.Get(global.AppVar.Server.RoutePattern.Pages["apikey"], api.GetAPIKey)
+		r.Post(global.AppVar.Server.RoutePattern.Pages["apikey"], api.PostAPIKey)
+		r.Get(global.AppVar.Server.RoutePattern.Pages["change_password"], auth.GetChangePassword)
+		r.Post(global.AppVar.Server.RoutePattern.Pages["change_password"], auth.PostChangPassword)
+
+		r.Route(
+			global.AppVar.Server.RoutePattern.Pages["endpoints"],
+			func(r chi.Router) {
+				r.Get("/", api.GetEndpoints)
+				for ep := range eps {
+					apiName, endpointName, templateName := ep.ApiName, ep.EndpointName, ep.TemplateName
+
+					r.Get(
+						strings.TrimSuffix("/"+templateName, ".gotmpl"),
+						func(w http.ResponseWriter, r *http.Request) {
+							pageData := object.APIEndpointPage{
+								Page: object.Page{
+									HeadConent: view.NewHeadContent(),
+									Title:      endpointName,
+								},
+								API:      apiName,
+								Endpoint: endpointName,
+							}
+							w.WriteHeader(http.StatusOK)
+							err := api.View.ExecuteTemplate(w, templateName, pageData)
+							if err != nil {
+								fmt.Println(err)
+							}
+						},
+					)
+				}
+
+			})
+
 	})
 
 	return r

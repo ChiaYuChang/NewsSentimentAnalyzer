@@ -15,32 +15,32 @@
                 <ul class="data-list">
                     <li class="data-field">
                         <label for="keyword">Keywords</label>:
-                        <input type="text" name="keyword" id="keyword">
+                        <input type="text" name="keyword" id="keyword" class="form-input">
                     </li>
                     <li class="data-field">
                         <label for="search-in">Search in</label>:
-                        <select name="search-in" id="search-in">
+                        <select name="search-in" id="search-in" class="form-input">
                             <option value="">All</option>
-                            <option value="title">Title</option>
-                            <option value="description">Description</option>
-                            <option value="content">Content</option>
+                            <option value="in-title">Title</option>
+                            <option value="in-description">Description</option>
+                            <option value="in-content">Content</option>
                         </select>
                     </li>
                     <li class="data-field">
                         <label for="sources">Sources</label>:
-                        <input type="text" name="sources" id="sources">
+                        <input type="text" name="sources" id="sources" class="form-input">
                     </li>
                     <li class="data-field">
                         <label for="domains">Domains</label>:
-                        <input type="text" name="domains" id="domains">
+                        <input type="text" name="domains" id="domains" class="form-input">
                     </li>
                     <li class="data-field">
                         <label for="exclude-domains">Exculde Domains</label>:
-                        <input type="text" name="exclude-domains" id="exclude-domains">
+                        <input type="text" name="exclude-domains" id="exclude-domains" class="form-input">
                     </li>
                     <li class="data-field">
                         <label for="language">Language</label>:
-                        <select name="language" id="language">
+                        <select name="language" id="language" class="form-input">
                             <option value="">All</option>
                             <option value="zh">Chinese</option>
                             <option value="en">English</option>
@@ -51,14 +51,17 @@
                     </li>
                     <li class="data-field">
                         <label for="from-time">From</label>:
-                        <input type="datetime" name="from-time" id="from-time" class="date-picker" placeholder="YYYY-MM-DD">
+                        <input type="date" name="from-time" id="from-time" class="form-input" max={{now "2006-01-02"}}>
                     </li>
                     <li class="data-field">
                         <label for="to-time">To</label>:
-                        <input type="datetime" name="to-time" id="to-time" class="date-picker" placeholder="YYYY-MM-DD">
+                        <input type="date" name="to-time" id="to-time" class="form-input" max={{now "2006-01-02"}}>
                     </li>
                 </ul>
                 <input type="submit" value="Submit" class="btn">
+                <p class="footer">
+                    back to <a href="/v1/endpoints" class=" url">endpoints</a> page
+                </p>
             </form>
         </div>
     </section>

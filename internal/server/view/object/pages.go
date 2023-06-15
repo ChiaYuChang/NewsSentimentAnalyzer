@@ -3,7 +3,10 @@ package object
 import (
 	"fmt"
 	"html/template"
+	"path"
+	"strings"
 
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
 )
 
@@ -84,7 +87,7 @@ type ChangePasswordPage struct {
 	ShowShouldNotUsedOldPasswordAlert bool
 }
 
-type APIEndpointPage struct {
+type APIEndpointSelectionPage struct {
 	Page
 	Endpoints           map[string]*APIEndpoint
 	NoAvailableEndpoint bool
@@ -97,8 +100,8 @@ type APIEndpoint struct {
 	Endpoints   *HTMLElementList
 }
 
-func APIEndpointFromDBModel(page Page, rows []*model.ListEndpointByOwnerRow) APIEndpointPage {
-	apiEndpointPage := APIEndpointPage{
+func APIEndpointFromDBModel(page Page, apiVer string, rows []*model.ListEndpointByOwnerRow) APIEndpointSelectionPage {
+	apiEndpointPage := APIEndpointSelectionPage{
 		Page:      page,
 		Endpoints: make(map[string]*APIEndpoint, len(rows)),
 	}
@@ -120,7 +123,11 @@ func APIEndpointFromDBModel(page Page, rows []*model.ListEndpointByOwnerRow) API
 		apiEndpointPage.
 			Endpoints[row.ApiName].
 			Image.
-			AddPair("src", "/static/image/"+row.Image.String).
+			AddPair("src", path.Join(
+				"/static",
+				global.AppVar.Server.RoutePattern.StaticFiles.Image,
+				row.Image.String,
+			)).
 			AddPair("alt", row.ApiName).
 			AddPair("class", "api-logo api-logo-large")
 
@@ -130,9 +137,18 @@ func APIEndpointFromDBModel(page Page, rows []*model.ListEndpointByOwnerRow) API
 			NewHTMLElement().
 			AddPair("type", "button").
 			AddPair("class", "btn").
-			AddPair("oneclick", "#").
+			AddPair("onclick", fmt.Sprintf(
+				"location.href='.%s/%s'",
+				global.AppVar.Server.RoutePattern.Pages["endpoints"],
+				strings.TrimSuffix(row.TemplateName, ".gotmpl"))).
 			ToOpeningElement(template.HTML(row.EndpointName))
 	}
 
 	return apiEndpointPage
+}
+
+type APIEndpointPage struct {
+	Page
+	API      string
+	Endpoint string
 }
