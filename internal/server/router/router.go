@@ -21,8 +21,8 @@ import (
 )
 
 func NewRouter(srvc service.Service, vw view.View, filesystem http.FileSystem,
-	tokenmaker tokenmaker.TokenMaker, cookiemaker *cookiemaker.CookieMaker) *chi.Mux {
-	auth := auth.NewAuthRepo("v1", srvc, vw, tokenmaker, cookiemaker)
+	tmaker tokenmaker.TokenMaker, cmaker *cookiemaker.CookieMaker) *chi.Mux {
+	auth := auth.NewAuthRepo("v1", srvc, vw, tmaker, cmaker)
 
 	r := chi.NewRouter()
 	r.Use(chimiddleware.Logger)
@@ -40,13 +40,21 @@ func NewRouter(srvc service.Service, vw view.View, filesystem http.FileSystem,
 	r.Get("/*", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	})
+	r.Get("/unauthorized", func(w http.ResponseWriter, r *http.Request) {
+		http.SetCookie(w, &http.Cookie{
+			Name:   cookiemaker.AUTH_COOKIE_KEY,
+			MaxAge: -1,
+		})
+		w.WriteHeader(http.StatusUnauthorized)
+		_ = vw.ExecuteTemplate(w, "errorpage.gotmpl", view.ErrorPage401)
+	})
 
 	bearerTokenMaker := middleware.BearerTokenMaker{
 		AllowFromHTTPCookie: true,
-		TokenMaker:          tokenmaker,
+		TokenMaker:          tmaker,
 	}
 
-	api := api.NewAPIRepo("v1", srvc, vw, tokenmaker, cookiemaker)
+	api := api.NewAPIRepo("v1", srvc, vw, tmaker, cmaker)
 
 	eps := make(chan *model.ListAllEndpointRow)
 	go func(chan *model.ListAllEndpointRow) {
@@ -58,8 +66,10 @@ func NewRouter(srvc service.Service, vw view.View, filesystem http.FileSystem,
 		r.Get(global.AppVar.Server.RoutePattern.Pages["welcome"], api.GetWelcome)
 		r.Get(global.AppVar.Server.RoutePattern.Pages["apikey"], api.GetAPIKey)
 		r.Post(global.AppVar.Server.RoutePattern.Pages["apikey"], api.PostAPIKey)
+		r.Delete(global.AppVar.Server.RoutePattern.Pages["apikey"]+"/{id}", api.DeleteAPIKey)
 		r.Get(global.AppVar.Server.RoutePattern.Pages["change_password"], auth.GetChangePassword)
 		r.Post(global.AppVar.Server.RoutePattern.Pages["change_password"], auth.PostChangPassword)
+		r.Get(global.AppVar.Server.RoutePattern.Pages["admin"], api.GetAdmin)
 
 		r.Route(
 			global.AppVar.Server.RoutePattern.Pages["endpoints"],
@@ -77,6 +87,7 @@ func NewRouter(srvc service.Service, vw view.View, filesystem http.FileSystem,
 									Title:      endpointName,
 								},
 								API:      apiName,
+								Version:  global.AppVar.Server.APIVersion,
 								Endpoint: endpointName,
 							}
 							w.WriteHeader(http.StatusOK)
@@ -89,7 +100,15 @@ func NewRouter(srvc service.Service, vw view.View, filesystem http.FileSystem,
 				}
 
 			})
+		r.Get("/forbidden", func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusForbidden)
+			api.View.ExecuteTemplate(w, "errorpage.gotmpl", view.ErrorPage403)
+		})
 
+		r.Get("/*", func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusNotFound)
+			api.View.ExecuteTemplate(w, "errorpage.gotmpl", view.ErrorPage404)
+		})
 	})
 
 	return r

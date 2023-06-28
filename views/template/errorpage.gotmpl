@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {{template "head" .Page.HeadConent}}
+    <title>{{.Page.Title}}</title>
+</head>
+
+
+<body>
+    <section class="background">
+        <div class="mid-card">
+            <h2>{{.ErrorCode}}</h2>
+            <h3>{{.ErrorMessage}}</h3>
+            <p>{{.ErrorDetail}}</p>
+            {{if .ShouldAutoRedirect}}
+            <h5>You will be redirected to the <a href="{{.RedirectPageUrl}}">{{.RedirectPageName}}</a> in <strong id="seconds"></strong> seconds.
+            {{else}}
+            <h5>Back to the <a href="javascript:history.back(-1)">previous</a> page.
+            {{end}}
+        </div>
+    </section>
+</body>
+
+</html>
+
+{{if .ShouldAutoRedirect}}
+<script>
+    const timer = document.getElementById('seconds');
+    timer.textContent = {{.CountDownFrom}} //sec
+    let resTime = parseInt(timer.innerHTML);
+    timeInterval = setInterval(function () {
+        resTime = --resTime;
+        timer.textContent = resTime;
+        if (resTime <= 0) {
+            clearInterval(timeInterval);
+            window.location = "{{.RedirectPageUrl}}";
+        }
+    }, 1000);
+</script>
+{{end}}

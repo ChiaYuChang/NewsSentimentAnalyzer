@@ -1,6 +1,9 @@
 package view
 
-import "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view/object"
+import (
+	newsdata "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/NEWSDATA"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view/object"
+)
 
 func NewHeadContent() object.HeadConent {
 	head := object.HeadConent{
@@ -44,9 +47,102 @@ func NewHeadContent() object.HeadConent {
 		AddPair("rel", "stylesheet").
 		AddPair("href", "/static/css/style.css")
 
+	// pure css
+	head.Link.
+		NewHTMLElement().
+		AddPair("rel", "stylesheet").
+		AddPair("href", "https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/pure-min.css").
+		AddPair("integrity", "sha384-X38yfunGUhNzHpBaEBsWLO+A0HDYOQi8ufWDkZ0k9e0eXz/tH3II7uKZ9msv++Ls").
+		AddPair("crossorigin", "anonymous")
+
+	head.Link.
+		NewHTMLElement().
+		AddPair("rel", "stylesheet").
+		AddPair("href", "/static/css/fontawesome.css")
+
+	head.Link.
+		NewHTMLElement().
+		AddPair("rel", "stylesheet").
+		AddPair("href", "/static/css/brands.css")
+
+	head.Link.
+		NewHTMLElement().
+		AddPair("rel", "stylesheet").
+		AddPair("href", "/static/css/solid.css")
+
 	head.Script.
 		NewHTMLElement().
 		AddPair("src", "/static/js/func.js")
 
 	return head
+}
+
+var SharedHeadContent = NewHeadContent()
+
+var ErrorPage500 = object.ErrorPage{
+	Page:               object.Page{HeadConent: SharedHeadContent, Title: "500 error"},
+	ErrorCode:          500,
+	ErrorMessage:       "Sorry, unexpected error",
+	ErrorDetail:        "The server encountered an internal error or misconfiguration and was unable to complete your request.",
+	ShouldAutoRedirect: false,
+}
+
+var ErrorPage401 = object.ErrorPage{
+	Page:               object.Page{HeadConent: SharedHeadContent, Title: "401 error"},
+	ErrorCode:          401,
+	ErrorMessage:       "Unauthorized",
+	ErrorDetail:        "You are not authorized to access this page.",
+	ShouldAutoRedirect: true,
+	RedirectPageUrl:    "/login",
+	RedirectPageName:   "log in page",
+	CountDownFrom:      5,
+}
+
+var ErrorPage403 = object.ErrorPage{
+	Page:               object.Page{HeadConent: SharedHeadContent, Title: "403 error"},
+	ErrorCode:          403,
+	ErrorMessage:       "Access denied",
+	ErrorDetail:        "You do not have premission to access this page.",
+	ShouldAutoRedirect: false,
+}
+
+var ErrorPage404 = object.ErrorPage{
+	Page:               object.Page{HeadConent: SharedHeadContent, Title: "404 error"},
+	ErrorCode:          404,
+	ErrorMessage:       "Page not found",
+	ErrorDetail:        "The page you are looking for may have been moved, deleted, or possibly never existed.",
+	ShouldAutoRedirect: false,
+}
+
+var NEWSDATASelectOpts = []object.SelectOpts{
+	{
+		OptMap:         newsdata.CatList,
+		MaxDiv:         5,
+		DefaultValue:   "",
+		DefaultText:    "All",
+		InsertButtonId: "iCatBtn",
+		DeleteButtonId: "dCatBtn",
+		PositionId:     "category",
+		AlertMessage:   "You can only add up to 5 categories in a single query",
+	},
+	{
+		OptMap:         newsdata.CtryList,
+		MaxDiv:         5,
+		DefaultValue:   "",
+		DefaultText:    "All",
+		InsertButtonId: "iCtryBtn",
+		DeleteButtonId: "dCtryBtn",
+		PositionId:     "country",
+		AlertMessage:   "You can only add up to 5 countries in a single query",
+	},
+	{
+		OptMap:         newsdata.LangList,
+		MaxDiv:         5,
+		DefaultValue:   "",
+		DefaultText:    "All",
+		InsertButtonId: "iLangBtn",
+		DeleteButtonId: "dLangBtn",
+		PositionId:     "language",
+		AlertMessage:   "You can only add up to 5 languages in a single query",
+	},
 }

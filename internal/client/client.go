@@ -7,7 +7,6 @@ import (
 )
 
 type Query interface {
-	SetAPIKey(apiKey string)
 	ToHTTPRequest(ctx context.Context) (*http.Request, error)
 }
 

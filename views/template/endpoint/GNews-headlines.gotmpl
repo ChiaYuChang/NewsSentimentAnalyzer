@@ -3,6 +3,7 @@
 
 <head>
     {{template "head" .Page.HeadConent}}
+    <script src="/static/js/selector.js"></script>
     <title>{{.Page.Title}}</title>
 </head>
 
@@ -19,50 +20,36 @@
                     </li>
                     <li class="data-field">
                         <label for="language">Language</label>:
-                        <select name="language" id="language" class="form-input">
-                            <option value="">All</option>
-                            <option value="zh">Chinese</option>
-                            <option value="en">English</option>
-                            <option value="es">Spanish</option>
-                            <option value="jp">Japanese</option>
-                            <option value="ko">Korean</option>
-                        </select>
+                        <div class="row" id="language">
+                        </div>
+                        <button type="button" id="iLangBtn" class="btn btn-small">
+                            <i class="fa-regular fa-plus"></i>
+                        </button>
+                        <button type="button" id="dLangBtn" class="btn btn-small">
+                            <i class="fa-regular fa-minus"></i>
+                        </button>
                     </li>
                     <li class="data-field">
                         <label for="country">Country</label>:
-                        <select name="country" id="country" class="form-input">
-                            <option value="">All</option>
-                            <optgroup label="Asia">
-                                <option value="cn">China</option>
-                                <option value="jp">Japan</option>
-                                <option value="ko">Korea</option>
-                                <option value="tw">Taiwan</option>
-                            </optgroup>
-                            <optgroup label="North america">
-                                <option value="ca">Canada</option>
-                                <option value="us">United States</option>
-                            </optgroup>
-                            <optgroup label="Europe">
-                                <option value="uk">United Kingdom</option>
-                            </optgroup>
-                        </select>
+                        <div class="row" id="country">
+                        </div>
+                        <button type="button" id="iCtryBtn" class="btn btn-small">
+                            <i class="fa-regular fa-plus"></i>
+                        </button>
+                        <button type="button" id="dCtryBtn" class="btn btn-small">
+                            <i class="fa-regular fa-minus"></i>
+                        </button>
                     </li>
                     <li class="data-field">
                         <label for="category">Category</label>:
-                        <select name="category" id="category" class="form-input">
-                            <option value="business">Business</option>
-                            <option value="entertainment">Entertainment</option>
-                            <option value="environment">Environment</option>
-                            <option value="food">Food</option>
-                            <option value="health">Health</option>
-                            <option value="politics">Politics</option>
-                            <option value="science">Science</option>
-                            <option value="sports">Sports</option>
-                            <option value="technology">Technology</option>
-                            <option value="top">Top</option>
-                            <option value="tourism">Tourism</option>
-                            <option value="world">World</option>
-                        </select>
+                        <div class="row" id="category">
+                        </div>
+                        <button type="button" id="iCatBtn" class="btn btn-small">
+                            <i class="fa-regular fa-plus"></i>
+                        </button>
+                        <button type="button" id="dCatBtn" class="btn btn-small">
+                            <i class="fa-regular fa-minus"></i>
+                        </button>
                     </li>
                     <li class="data-field">
                         <label for="from-time">From</label>:
@@ -75,7 +62,7 @@
                 </ul>
                 <input type="submit" value="Submit" class="btn">
                 <p class="footer">
-                    back to <a href="/v1/endpoints" class=" url">endpoints</a> page
+                    back to <a href="/{{.Version}}/endpoints" class=" url">endpoints</a> page
                 </p>
             </form>
         </div>

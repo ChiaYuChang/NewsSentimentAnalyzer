@@ -50,6 +50,14 @@ func (srvc apikeyService) CleanUp(ctx context.Context) (n int64, err error) {
 	return srvc.store.CleanUpAPIKey(ctx)
 }
 
+func (srvc apikeyService) CreateOrUpdate(ctx context.Context, r *APIKeyCreateOrUpdateRequest) (*model.CreateOrUpdateAPIKeyTxResults, error) {
+	if err := srvc.validate.Struct(r); err != nil {
+		return nil, err
+	}
+	params, _ := r.ToParams()
+	return srvc.store.DoCreateOrUpdateAPIKeyTx(ctx, params)
+}
+
 type APIKeyCreateRequest struct {
 	Owner int32  `validate:"required"`
 	ApiID int16  `validate:"required"`
@@ -107,6 +115,24 @@ type APIKeyUpdateRequest struct {
 	NewApiID int16  `validate:"required,min=1"`
 }
 
-func (r APIKeyUpdateRequest) RequestName() string {
+func (req APIKeyUpdateRequest) RequestName() string {
 	return "apikey-update-req"
+}
+
+type APIKeyCreateOrUpdateRequest struct {
+	Owner int32  `validate:"required,min=1"`
+	ApiID int16  `validate:"required,min=1"`
+	Key   string `validate:"required,min=32,max=64"`
+}
+
+func (req APIKeyCreateOrUpdateRequest) RequestName() string {
+	return "apikey-update/create-req"
+}
+
+func (req APIKeyCreateOrUpdateRequest) ToParams() (*model.CreateOrUpdateAPIKeyTxParams, error) {
+	return &model.CreateOrUpdateAPIKeyTxParams{
+		Owner: req.Owner,
+		ApiID: req.ApiID,
+		Key:   req.Key,
+	}, nil
 }

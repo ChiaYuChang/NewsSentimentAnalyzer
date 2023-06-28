@@ -9,7 +9,6 @@ import (
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
 
 	cookiemaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/cookieMaker"
-	ec "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/errorCode"
 	tokenmaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/tokenMaker"
 )
 
@@ -40,11 +39,13 @@ func (bm BearerTokenMaker) BearerAuthenticator(next http.Handler) http.Handler {
 		if bearer == "" && bm.AllowFromHTTPCookie {
 			cookie, err = req.Cookie(cookiemaker.AUTH_COOKIE_KEY)
 			if err != nil {
-				ecErr := ec.MustGetErr(ec.ECUnauthorized).(*ec.Error)
-				ecErr.WithDetails(err.Error())
-				w.Header().Add("Content-Type", "application/json")
-				w.WriteHeader(ecErr.HttpStatusCode)
-				w.Write(ecErr.MustToJson())
+				// ecErr := ec.MustGetErr(ec.ECUnauthorized).(*ec.Error)
+				// ecErr.WithDetails(err.Error())
+				// w.Header().Add("Content-Type", "application/json")
+				// w.WriteHeader(ecErr.HttpStatusCode)
+				// w.Write(ecErr.MustToJson())
+				// ecErr, ok := err.(*ec.Error)
+				http.Redirect(w, req, "/unauthorized", http.StatusSeeOther)
 				return
 			}
 			bearer = cookie.Value
@@ -52,14 +53,15 @@ func (bm BearerTokenMaker) BearerAuthenticator(next http.Handler) http.Handler {
 
 		payload, err := bm.TokenMaker.ValidateToken(bearer)
 		if err != nil {
-			ecErr, ok := err.(*ec.Error)
-			if !ok {
-				ecErr = ec.MustGetErr(ec.ECUnauthorized).(*ec.Error)
-				ecErr.WithDetails(err.Error())
-			}
-			w.Header().Add("Content-Type", "application/json")
-			w.WriteHeader(ecErr.HttpStatusCode)
-			w.Write(ecErr.MustToJson())
+			// ecErr, ok := err.(*ec.Error)
+			// if !ok {
+			// 	ecErr = ec.MustGetErr(ec.ECUnauthorized).(*ec.Error)
+			// 	ecErr.WithDetails(err.Error())
+			// }
+			// w.Header().Add("Content-Type", "application/json")
+			// w.WriteHeader(ecErr.HttpStatusCode)
+			// w.Write(ecErr.MustToJson())
+			http.Redirect(w, req, "/unauthorized", http.StatusSeeOther)
 			return
 		}
 

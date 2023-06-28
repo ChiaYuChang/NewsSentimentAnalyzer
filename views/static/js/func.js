@@ -4,12 +4,15 @@ function showPassword(prefix) {
     const show = document.getElementById(prefix + "hide");
     if (password.type === "password") {
         password.type = "text";
-        show.className = "hide"
-        hide.className = "btn"
+        show.classList.remove("btn")
+        show.classList.add("hide")
+        hide.classList.remove("hide")
+        hide.classList.add("btn")
     } else {
         password.type = "password";
-        show.className = "btn"
-        hide.className = "hide"
+        show.classList.add("btn")
+        show.classList.remove("hide")
+        hide.classList.add("hide")
+        hide.classList.remove("btn")
     }
 }
-

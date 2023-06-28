@@ -17,6 +17,9 @@ func NewEnmus[T ~string](tag string, es ...T) Enmus[T] {
 	}
 	return Enmus[T]{tag: tag, eMap: eMap}
 }
+func (e Enmus[T]) Map() map[T]struct{} {
+	return e.eMap
+}
 
 func (e Enmus[T]) ValFun() val.Func {
 	return func(fl val.FieldLevel) bool {

@@ -10,10 +10,12 @@
     <section class="background">
         <div class="mid-card">
             <h1>User Login</h1>
-            <form method="post" class="data-form">
+            <form method="post" id="auth-info" class="data-form">
                 <ul class="data-list">
                     <li class="data-field">
-                        <img src="/static/image/icon_email.svg" alt="username" class="form-icon">
+                        <div class="form-icon">
+                            <i class="fa-regular fa-envelope" style="color:white;"></i>
+                        </div>
                         <input type="email" placeholder="Email" id="email" name="email" class="form-input" 
                          value="{{.Username}}" required>
                     </li>
@@ -24,7 +26,9 @@
                     </div>
                     {{end}}
                     <li class="data-field">
-                        <img src="/static/image/icon_password.svg" alt="username" class="form-icon">
+                        <div class="form-icon">
+                            <i class="fa-regular fa-lock" style="color:white;"></i>
+                        </div>
                         <input type="password" placeholder="Password" id="password" name="password" minlength="8" class="form-input" required>
                     </li>
                     {{if .ShowPasswordMismatchAlert}}
@@ -34,7 +38,9 @@
                     </div>
                     </span>{{end}}
                 </ul>
-                <input type="submit" value="login" class="btn">
+                <button type="submit" form="auth-info" class="btn">
+                    <i class="fa-regular fa-right-to-bracket"></i>&ensp;login
+                </button>
                 <p class="footer">
                     New to analyzer? <a href="sign-up" class=" url">Create a account</a>
                 </p>

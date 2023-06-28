@@ -10,11 +10,14 @@
     <section class="background">
         <div class="mid-card">
             <h1>Sign up</h1>
-            <form method="post" class="data-form">
+            <form method="post" class="data-form" id="user-info">
                 <ul class="data-list">
                     <li>
                         <div class="data-field">
-                            <img src="/static/image/icon_user.svg" alt="first-name" class="form-icon">
+                            {{/* <img src="/static/image/icon_user.svg" alt="first-name" class="form-icon"> */}}
+                            <div class="form-icon">
+                                <i class="fa-regular fa-user" style="color:white;"></i>
+                            </div>
                             <input type="text" placeholder="First name" id="first-name" name="first-name"
                                 class="form-input" required>
                             <input type="text" placeholder="Last name" id="last-name" name="last-name"
@@ -23,7 +26,9 @@
                     </li>
                     <li>
                         <div class="data-field">
-                            <img src="/static/image/icon_email.svg" alt="username" class="form-icon">
+                            <div class="form-icon">
+                                <i class="fa-regular fa-envelope" style="color:white;"></i>
+                            </div>
                             {{if .ShowUsernameHasUsedAlert}}
                             <input type="email" placeholder="Email address" id="email" name="email"
                                 class="form-input highlight-alert" required>
@@ -41,17 +46,25 @@
                     </li>
                     <li>
                         <div class="data-field">
-                            <img src="/static/image/icon_password.svg" alt="username" class="form-icon">
+                            <div class="form-icon">
+                                <i class="fa-regular fa-lock" style="color:white;"></i>
+                            </div>
                             <input type="password" placeholder="Password" id="password" name="password" minlength="8"
                                 class="form-input" required>
                             <button type="button" class="password-visibility" onclick="showPassword('')">
-                                <img src="/static/image/icon_eye-no.svg" id="hide" alt="hide password" class="btn">
-                                <img src="/static/image/icon_eye-yes.svg" id="show" alt="show password" class="hide">
+                                <div class="form-icon btn" id="hide">
+                                    <i class="fa-regular fa-eye" style="color:white;"></i>
+                                </div>
+                                <div class="form-icon hide" id="show">
+                                    <i class="fa-regular fa-eye-slash" style="color:white;"></i>
+                                </div>
                             </button>
                         </div>
                     </li>
                 </ul>
-                <input type="submit" value="Sign Up" class="btn">
+                <button type="submit" form="user-info" class="btn">
+                    <i class="fa-regular fa-user-plus"></i>&ensp;sign up
+                </button>
             </form>
             <p class="footer">
                 Already have an account? <a href="login" class=" url">Login</a>

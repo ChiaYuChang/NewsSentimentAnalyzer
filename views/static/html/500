@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    </meta>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    </meta>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </meta>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    </link>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    </link>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap">
+    </link>
+    <link rel="stylesheet" href="/static/css/style.css">
+    </link>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/pure-min.css"
+        integrity="sha384-X38yfunGUhNzHpBaEBsWLO+A0HDYOQi8ufWDkZ0k9e0eXz/tH3II7uKZ9msv++Ls" crossorigin="anonymous">
+    </link>
+    <link rel="stylesheet" href="/static/css/fontawesome.css">
+    </link>
+    <link rel="stylesheet" href="/static/css/brands.css">
+    </link>
+    <link rel="stylesheet" href="/static/css/solid.css">
+    </link>
+
+    <script src="/static/js/func.js">  </script>
+
+</head>
+
+<body>
+    <section class="background">
+        <div class="mid-card">
+            <h2>500</h2>
+            <h3>Sorry, unexpected error</h3>
+            <p>The server encountered an internal error or misconfiguration and was unable to complete your request.</p>
+            <!-- <h5><i class="fa-regular fa-triangle-exclamation"></i>&ensp;You will be redirected to the <a
+                    href="/login">login
+                    page</a> in <strong id="seconds"></strong> seconds.
+            </h5> -->
+            <h5>Back to the <a href="javascript:history.back(-1)">previous</a> page.
+        </div>
+    </section>
+</body>
+
+</html>
+
+<script>
+    const timer = document.getElementById('seconds');
+    timer.textContent = 3 //sec
+
+    let resTime = parseInt(timer.innerHTML);
+    timeInterval = setInterval(function () {
+        resTime = --resTime;
+        timer.textContent = resTime;
+        if (resTime <= 0) {
+            clearInterval(timeInterval);
+            // window.location = '/login';
+            // window.history.go(-1)
+        }
+    }, 1000);
+</script>

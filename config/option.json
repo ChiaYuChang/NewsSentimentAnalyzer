@@ -25,6 +25,7 @@
                 "login": "/login",
                 "sign-up": "/sign-up",
                 "logout": "/logout",
+                "admin": "/admin",
                 "welcome": "/welcome",
                 "apikey": "/apikey",
                 "change_password": "/change_password",

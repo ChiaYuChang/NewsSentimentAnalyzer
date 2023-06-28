@@ -1,7 +1,9 @@
 package newsapi
 
 import (
+	"fmt"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/code"
@@ -22,10 +24,10 @@ func (c Category) IsEmpty() bool {
 
 type SortBy string
 
-var API_URL = "https://newsapi.org"
+var API_HOST = "https://newsapi.org"
 var API_VERSION = "v2"
 var API_METHOD = http.MethodGet
-var API_KEY = ""
+var API_URL, _ = url.Parse(fmt.Sprintf("%s/%s/", API_HOST, API_VERSION))
 
 const API_TIME_FORMAT = "2006-01-02T15:04:05Z"
 const API_DEFAULT_PAGE_SIZE = 100
@@ -64,19 +66,15 @@ const (
 )
 const API_DEFAULT_SORTBY = ByPublishedAt
 
-func SetDefaultAPIKey(key string) {
-	API_KEY = key
-}
-
 type Client struct {
 	ApiKey string
 	*http.Client
 }
 
-func NewDefaultClient() Client {
-	// using default client
-	return NewClient(API_KEY, http.DefaultClient)
-}
+// func NewDefaultClient() Client {
+// 	// using default client
+// 	return NewClient(API_KEY, http.DefaultClient)
+// }
 
 func NewClient(apiKey string, cli *http.Client) Client {
 	return Client{apiKey, cli}

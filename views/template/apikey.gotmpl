@@ -3,6 +3,15 @@
 
 <head>
     {{template "head" .Page.HeadConent}}
+    <script>
+    function deleteAPIKey(id) {
+        fetch(`apikey/${id}`, {
+            method: "DELETE",
+        }).then(() => {
+            window.location.reload();
+        })
+    }
+    </script>
     <title>{{.Page.Title}}</title>
 </head>
 
@@ -10,56 +19,83 @@
     <section class="background">
         <div class="mid-card">
             <h1>Manage API Keys</h1>
-            <h2>Add/Update API Key</h2>
-            <form method="post" class="data-form">
-                <div class="row">
-                    <select name="api-id" id="api-id" class="form-input btn-small">
-                        <optgroup label="Source">
-                            <option value="1">API1</option>
-                            <option value="2">API2</option>
-                        </optgroup>
-                        <optgroup label="Analyzer">
-                            <option value="3">API3</option>
-                            <option value="4">API4</option>
-                        </optgroup>
-                    </select>
-                    <input type="text" name="apikey" class="form-input">
-                    <input type="submit" value="submit" class="btn btn-small ">
-                </div>
-                <div class="row">
-                </div>
+            <h4>Add/Update API Key</h4>
+            <form method="post" class="data-form" id="apikey-form">
+                <ul class="data-list">
+                    <li class="data-field">
+                        <div class="row">
+                            <select name="api-id" id="api-id" class="form-input btn-medium">
+                                <optgroup label="Source">
+                                    {{range $key, $val := .APIOption.Source}}
+                                    <option value="{{$key}}">{{$val}}</option>
+                                    {{end}}
+                                </optgroup>
+                                <optgroup label="Analyzer">
+                                    {{range $key, $val := .APIOption.Analyzer}}
+                                    <option value="{{$key}}">{{$val}}</option>
+                                    {{end}}
+                                </optgroup>
+                            </select>
+                            <input type="text" name="api-key" class="form-input" maxlength="64" size="32" required>
+                        </div>
+                    </li>
+                </ul>
+                <button type="submit" class="btn" form="apikey-form">
+                    <i class="fa-regular fa-cloud-arrow-up"></i>&ensp;Submit
+                </button>
             </form>
-            <h2>API Keys</h2>
-            <table class="api-table">
+            <h4>API Keys</h4>
+            <table class="pure-table pure-table-horizontal api-table" id="api-table">
                 <thead>
                     <tr>
-                        <th class="col1">API</th>
-                        <th class="col2">Key</th>
+                        <th>API</th>
+                        <th>Key&ensp;<i class="fa-regular fa-key"></i></th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
+                    {{range $api := .NewsAPIs}}
                     <tr>
-                        <td class="col1">
+                        <td>
                             <div class="row">
+                                {{if eq $api.Icon ""}}
                                 <img src="/static/image/icon_Default.svg" alt="OpenAI" class="api-logo-icon">
-                                <span>NEWSDATA.IO</span>
+                                {{else}}
+                                <img src="{{$api.Icon}}" alt="{{$api.Name}}" class="api-logo-icon">
+                                {{end}}
+                                <span>{{$api.Name}}</span>
                             </div>
                         </td>
-                        <td class="col2">sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</td>
-                    </tr>
-
-                    <tr>
-                        <td class="col1">
-                            <div class="row">
-                                <img src="https://chat.openai.com/favicon.ico" alt="OpenAI" class="api-logo-icon">
-                                <span>ChatGPT</span>
+                        <td>{{$api.Key}}</td>
+                        <td>
+                            <button type="button" id="{{$api.ID}}" class="btn btn-tiny" 
+                            onclick="deleteAPIKey(id)">-</button>
                         </td>
-                        <td class="col2">sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</td>
                     </tr>
+                    {{end}}
+                    {{range $api := .AnalyzerAPIs}}
+                    <tr>
+                        <td>
+                            <div class="row">
+                                {{if eq $api.Icon ""}}
+                                <img src="/static/image/icon_Default.svg" alt="OpenAI" class="api-logo-icon">
+                                {{else}}
+                                <img src="{{$api.Icon}}" alt="{{$api.Name}}" class="api-logo-icon">
+                                {{end}}
+                                <span>{{$api.Name}}</span>
+                            </div>
+                        </td>
+                        <td>{{$api.Key}}</td>
+                        <td>
+                            <button type="button" id="{{$api.ID}}" class="btn btn-tiny" 
+                            onclick="deleteAPIKey(id)">-</button>
+                        </td>
+                    </tr>
+                    {{end}}
                 </tbody>
             </table>
             <p class="footer">
-                back to <a href="/v1/welcome" class=" url">welcome</a> page
+                back to <a href="welcome" class=" url">welcome</a> page
             </p>
         </div>
     </section>

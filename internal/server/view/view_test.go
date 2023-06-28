@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	newsdata "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/NEWSDATA"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view/object"
 	"github.com/stretchr/testify/require"
 )
@@ -237,6 +238,51 @@ func TestPageLogin(t *testing.T) {
 			},
 		)
 	}
+}
+
+func TestJS(t *testing.T) {
+	tmpl, err := template.
+		New("head").
+		ParseFiles(VIEWS_PATH + "/template/js/selector.gotmpl")
+	require.NoError(t, err)
+	require.NotNil(t, tmpl)
+
+	opts := []object.SelectOpts{
+		{
+			OptMap:         newsdata.CatList,
+			MaxDiv:         5,
+			DefaultValue:   "",
+			DefaultText:    "All",
+			InsertButtonId: "iCatBtn",
+			DeleteButtonId: "dCatBtn",
+			PositionId:     "category",
+			AlertMessage:   "haha",
+		},
+		{
+			OptMap:         newsdata.CtryList,
+			MaxDiv:         5,
+			DefaultValue:   "",
+			DefaultText:    "All",
+			InsertButtonId: "iCtryBtn",
+			DeleteButtonId: "dCtryBtn",
+			PositionId:     "country",
+			AlertMessage:   "haha",
+		},
+		{
+			OptMap:         newsdata.LangList,
+			MaxDiv:         5,
+			DefaultValue:   "",
+			DefaultText:    "All",
+			InsertButtonId: "iLangBtn",
+			DeleteButtonId: "dLangBtn",
+			PositionId:     "language",
+			AlertMessage:   "haha",
+		},
+	}
+
+	sb := &strings.Builder{}
+	tmpl.ExecuteTemplate(sb, "selector.gotmpl", opts)
+	t.Log(sb.String())
 }
 
 // func TestAPIEndpointsPage(t *testing.T) {

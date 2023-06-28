@@ -394,6 +394,35 @@ func (mr *MockStoreMockRecorder) DoCheckAndUpdateUserPasswordTx(arg0, arg1 inter
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DoCheckAndUpdateUserPasswordTx", reflect.TypeOf((*MockStore)(nil).DoCheckAndUpdateUserPasswordTx), arg0, arg1)
 }
 
+// DoCreateOrUpdateAPIKeyTx mocks base method.
+func (m *MockStore) DoCreateOrUpdateAPIKeyTx(arg0 context.Context, arg1 *model.CreateOrUpdateAPIKeyTxParams) (*model.CreateOrUpdateAPIKeyTxResults, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DoCreateOrUpdateAPIKeyTx", arg0, arg1)
+	ret0, _ := ret[0].(*model.CreateOrUpdateAPIKeyTxResults)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DoCreateOrUpdateAPIKeyTx indicates an expected call of DoCreateOrUpdateAPIKeyTx.
+func (mr *MockStoreMockRecorder) DoCreateOrUpdateAPIKeyTx(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DoCreateOrUpdateAPIKeyTx", reflect.TypeOf((*MockStore)(nil).DoCreateOrUpdateAPIKeyTx), arg0, arg1)
+}
+
+// ExecTx mocks base method.
+func (m *MockStore) ExecTx(arg0 context.Context, arg1 model.QueryCallBackFun) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExecTx", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ExecTx indicates an expected call of ExecTx.
+func (mr *MockStoreMockRecorder) ExecTx(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExecTx", reflect.TypeOf((*MockStore)(nil).ExecTx), arg0, arg1)
+}
+
 // GetAPI mocks base method.
 func (m *MockStore) GetAPI(arg0 context.Context, arg1 int16) (*model.Api, error) {
 	m.ctrl.T.Helper()

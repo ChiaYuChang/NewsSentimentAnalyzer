@@ -10,15 +10,16 @@ import (
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
 )
 
-type Page struct {
-	HeadConent
-	Title string
-}
-
 type WelcomePage struct {
 	Page
-	Name string
-	Role string
+	Name             string
+	Role             string
+	PageChangePWD    string
+	PageEndpoint     string
+	PageManageAPIKey string
+	PageSeeResult    string
+	PageAdmin        string
+	PageLogout       string
 }
 
 type LoginPage struct {
@@ -33,9 +34,14 @@ type SignUpPage struct {
 	ShowUsernameHasUsedAlert bool
 }
 
+type APIAdminPage struct {
+	Page
+}
+
 type APIKeyPage struct {
 	Page
 	APIOption
+	APIVersion   string
 	NewsAPIs     []*APIKey
 	AnalyzerAPIs []*APIKey
 }
@@ -150,5 +156,6 @@ func APIEndpointFromDBModel(page Page, apiVer string, rows []*model.ListEndpoint
 type APIEndpointPage struct {
 	Page
 	API      string
+	Version  string
 	Endpoint string
 }

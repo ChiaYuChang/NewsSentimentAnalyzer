@@ -10,12 +10,12 @@
     <section class="background">
         <div class="mid-card">
             <h1>Welcome {{.Name}}</h1>
-            <button class="btn" onclick="location.href='/v1/endpoints'">Make queries</button>
-            <button class="btn" onclick="location.href='/v1/change_password'">Change password</button>
-            <button class="btn" onclick="location.href='/v1/apikey'">Manage API key</button>
-            <button class="btn" onclick="location.href='#'">See Results</button>
-            {{if eq .Role "admin"}}<button class="btn" onclick="location.href='admin.html'">Admin</button>{{end}}
-            <button class="btn" onclick="location.href='/logout'">Log out</button>
+            <button type="button" class="btn" onclick="location.href='{{.PageEndpoint}}'"><i class="fa-regular fa-magnifying-glass"></i>&ensp;Make queries</button>
+            <button type="button" class="btn" onclick="location.href='{{.PageChangePWD}}'"><i class="fa-regular fa-lock"></i>&ensp;Change password</button>
+            <button type="button" class="btn" onclick="location.href='{{.PageManageAPIKey}}'"><i class="fa-regular fa-key"></i>&ensp;Manage API key</button>
+            <button type="button" class="btn" onclick="location.href='{{.PageSeeResult}}'"><i class="fa-regular fa-square-poll-vertical"></i>&ensp;See Results</button>
+            {{if eq .Role "admin"}}<button type="button" class="btn" onclick="location.href='{{.PageAdmin}}'"><i class="fa-regular fa-screwdriver-wrench"></i>&ensp;Admin</button>{{end}}
+            <button type="button" class="btn" onclick="location.href='{{.PageLogout}}'"><i class="fa-regular fa-arrow-right-from-bracket fa-rotate-180"></i>&ensp;Log out</button>
         </div>
     </section>
 </body>
