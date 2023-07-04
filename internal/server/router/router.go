@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"strings"
+	"sync"
+	"time"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/middleware"
@@ -12,17 +13,50 @@ import (
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/api/v1"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/auth"
 	cookiemaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/cookieMaker"
+	errorhandler "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/errorHandler"
+	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/GNews"
+	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/NEWSDATA"
+	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/newsapi"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view"
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view/object"
 	tokenmaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/tokenMaker"
 	"github.com/go-chi/chi/v5"
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
+	"github.com/go-playground/form"
 )
 
 func NewRouter(srvc service.Service, vw view.View, filesystem http.FileSystem,
 	tmaker tokenmaker.TokenMaker, cmaker *cookiemaker.CookieMaker) *chi.Mux {
-	auth := auth.NewAuthRepo("v1", srvc, vw, tmaker, cmaker)
+	errHandlerRepo, _ := errorhandler.NewErrorHandlerRepo(vw.Template.Lookup("errorpage.gotmpl"))
+
+	formDecoder := form.NewDecoder()
+	formDecoder.RegisterCustomTypeFunc(func(vals []string) (interface{}, error) {
+		return time.Parse("2006-01-02", vals[0])
+	}, time.Time{})
+
+	auth := auth.NewAuthRepo("v1", srvc, vw, tmaker, cmaker, formDecoder)
+	apiRepo := api.NewAPIRepo("v1", srvc, vw, tmaker, cmaker, formDecoder)
+
+	epRepo := apiRepo.EndpointRepo()
+	epChan := make(chan *model.ListAllEndpointRow)
+	go func(chan *model.ListAllEndpointRow) {
+		apiRepo.Service.Endpoint().ListAll(context.Background(), 100, epChan)
+	}(epChan)
+
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go func(epRepo api.EndpointRepo, epChan chan *model.ListAllEndpointRow, wg *sync.WaitGroup) {
+		for ep := range epChan {
+			apiName, endpointName, templateName := ep.ApiName, ep.EndpointName, ep.TemplateName
+			_ = epRepo.RegisterEndpointsPageView(apiName, endpointName, templateName)
+		}
+		wg.Done()
+	}(epRepo, epChan, wg)
+
+	bearerTokenMaker := middleware.BearerTokenMaker{
+		AllowFromHTTPCookie: true,
+		TokenMaker:          tmaker,
+	}
 
 	r := chi.NewRouter()
 	r.Use(chimiddleware.Logger)
@@ -30,85 +64,53 @@ func NewRouter(srvc service.Service, vw view.View, filesystem http.FileSystem,
 
 	r.Get("/favicon.ico", http.NotFound)
 	r.Handle("/static/*", http.StripPrefix("/static", http.FileServer(filesystem)))
-	r.Get("/login", auth.GetLogin)
-	r.Post("/login", auth.PostLogin)
 
-	r.Get("/sign-up", auth.GetSignUp)
-	r.Post("/sign-up", auth.PostSignUp)
+	r.Get(global.AppVar.Server.RoutePattern.Pages["login"], auth.GetLogin)
+	r.Post(global.AppVar.Server.RoutePattern.Pages["login"], auth.PostLogin)
 
-	r.Get("/logout", auth.Logout)
-	r.Get("/*", func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-	})
-	r.Get("/unauthorized", func(w http.ResponseWriter, r *http.Request) {
-		http.SetCookie(w, &http.Cookie{
-			Name:   cookiemaker.AUTH_COOKIE_KEY,
-			MaxAge: -1,
-		})
-		w.WriteHeader(http.StatusUnauthorized)
-		_ = vw.ExecuteTemplate(w, "errorpage.gotmpl", view.ErrorPage401)
-	})
+	r.Get(global.AppVar.Server.RoutePattern.Pages["sign-up"], auth.GetSignUp)
+	r.Post(global.AppVar.Server.RoutePattern.Pages["sign-up"], auth.PostSignUp)
 
-	bearerTokenMaker := middleware.BearerTokenMaker{
-		AllowFromHTTPCookie: true,
-		TokenMaker:          tmaker,
-	}
+	r.Get(global.AppVar.Server.RoutePattern.Pages["logout"], auth.Logout)
+	r.Get(global.AppVar.Server.RoutePattern.ErrorPages["unauthorized"], errHandlerRepo.Unauthorized)
+	r.Get(global.AppVar.Server.RoutePattern.ErrorPages["badrequest"], errHandlerRepo.BadRequest)
+	r.Get("/*", errHandlerRepo.SeeOther("/login"))
 
-	api := api.NewAPIRepo("v1", srvc, vw, tmaker, cmaker)
-
-	eps := make(chan *model.ListAllEndpointRow)
-	go func(chan *model.ListAllEndpointRow) {
-		api.Service.Endpoint().ListAll(context.Background(), 100, eps)
-	}(eps)
-
-	r.Route(fmt.Sprintf("/%s", api.Version), func(r chi.Router) {
+	r.Route(fmt.Sprintf("/%s", apiRepo.Version), func(r chi.Router) {
 		r.Use(bearerTokenMaker.BearerAuthenticator)
-		r.Get(global.AppVar.Server.RoutePattern.Pages["welcome"], api.GetWelcome)
-		r.Get(global.AppVar.Server.RoutePattern.Pages["apikey"], api.GetAPIKey)
-		r.Post(global.AppVar.Server.RoutePattern.Pages["apikey"], api.PostAPIKey)
-		r.Delete(global.AppVar.Server.RoutePattern.Pages["apikey"]+"/{id}", api.DeleteAPIKey)
+		r.Get(global.AppVar.Server.RoutePattern.Pages["welcome"], apiRepo.GetWelcome)
+
+		r.Get(global.AppVar.Server.RoutePattern.Pages["apikey"], apiRepo.GetAPIKey)
+		r.Post(global.AppVar.Server.RoutePattern.Pages["apikey"], apiRepo.PostAPIKey)
+		r.Delete(global.AppVar.Server.RoutePattern.Pages["apikey"]+"/{id}", apiRepo.DeleteAPIKey)
+
 		r.Get(global.AppVar.Server.RoutePattern.Pages["change_password"], auth.GetChangePassword)
 		r.Post(global.AppVar.Server.RoutePattern.Pages["change_password"], auth.PostChangPassword)
-		r.Get(global.AppVar.Server.RoutePattern.Pages["admin"], api.GetAdmin)
+
+		r.Get(global.AppVar.Server.RoutePattern.Pages["admin"], apiRepo.GetAdmin)
 
 		r.Route(
 			global.AppVar.Server.RoutePattern.Pages["endpoints"],
 			func(r chi.Router) {
-				r.Get("/", api.GetEndpoints)
-				for ep := range eps {
-					apiName, endpointName, templateName := ep.ApiName, ep.EndpointName, ep.TemplateName
+				r.Get("/", apiRepo.GetEndpoints)
+				wg.Wait()
+				for key := range epRepo.PageView {
+					if epGetHandlerFun, err := epRepo.GetAPIEndpoints(key); err == nil {
+						r.Get("/"+key.String(), epGetHandlerFun)
+					} else {
+						fmt.Println(err)
+					}
 
-					r.Get(
-						strings.TrimSuffix("/"+templateName, ".gotmpl"),
-						func(w http.ResponseWriter, r *http.Request) {
-							pageData := object.APIEndpointPage{
-								Page: object.Page{
-									HeadConent: view.NewHeadContent(),
-									Title:      endpointName,
-								},
-								API:      apiName,
-								Version:  global.AppVar.Server.APIVersion,
-								Endpoint: endpointName,
-							}
-							w.WriteHeader(http.StatusOK)
-							err := api.View.ExecuteTemplate(w, templateName, pageData)
-							if err != nil {
-								fmt.Println(err)
-							}
-						},
-					)
+					if epPostHandlerFun, err := epRepo.PostAPIEndpoints(key); err == nil {
+						r.Post("/"+key.String(), epPostHandlerFun)
+					} else {
+						fmt.Println(err)
+					}
 				}
-
+				r.Get("/*", errHandlerRepo.NotFound)
 			})
-		r.Get("/forbidden", func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusForbidden)
-			api.View.ExecuteTemplate(w, "errorpage.gotmpl", view.ErrorPage403)
-		})
-
-		r.Get("/*", func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusNotFound)
-			api.View.ExecuteTemplate(w, "errorpage.gotmpl", view.ErrorPage404)
-		})
+		r.Get(global.AppVar.Server.RoutePattern.ErrorPages["forbidden"], errHandlerRepo.Forbidden)
+		r.Get("/*", errHandlerRepo.NotFound)
 	})
 
 	return r

@@ -1,7 +1,11 @@
 package view
 
 import (
-	newsdata "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/NEWSDATA"
+	"net/http"
+
+	gnews "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/GNews"
+	newsdata "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/NEWSDATA"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/newsapi"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view/object"
 )
 
@@ -86,10 +90,17 @@ var ErrorPage500 = object.ErrorPage{
 	ErrorDetail:        "The server encountered an internal error or misconfiguration and was unable to complete your request.",
 	ShouldAutoRedirect: false,
 }
+var ErrorPage400 = object.ErrorPage{
+	Page:               object.Page{HeadConent: SharedHeadContent, Title: "400 error"},
+	ErrorCode:          http.StatusBadRequest,
+	ErrorMessage:       "Bad request",
+	ErrorDetail:        "There was a problem with your request.",
+	ShouldAutoRedirect: false,
+}
 
 var ErrorPage401 = object.ErrorPage{
 	Page:               object.Page{HeadConent: SharedHeadContent, Title: "401 error"},
-	ErrorCode:          401,
+	ErrorCode:          http.StatusUnauthorized,
 	ErrorMessage:       "Unauthorized",
 	ErrorDetail:        "You are not authorized to access this page.",
 	ShouldAutoRedirect: true,
@@ -100,7 +111,7 @@ var ErrorPage401 = object.ErrorPage{
 
 var ErrorPage403 = object.ErrorPage{
 	Page:               object.Page{HeadConent: SharedHeadContent, Title: "403 error"},
-	ErrorCode:          403,
+	ErrorCode:          http.StatusForbidden,
 	ErrorMessage:       "Access denied",
 	ErrorDetail:        "You do not have premission to access this page.",
 	ShouldAutoRedirect: false,
@@ -108,7 +119,7 @@ var ErrorPage403 = object.ErrorPage{
 
 var ErrorPage404 = object.ErrorPage{
 	Page:               object.Page{HeadConent: SharedHeadContent, Title: "404 error"},
-	ErrorCode:          404,
+	ErrorCode:          http.StatusNotFound,
 	ErrorMessage:       "Page not found",
 	ErrorDetail:        "The page you are looking for may have been moved, deleted, or possibly never existed.",
 	ShouldAutoRedirect: false,
@@ -116,32 +127,98 @@ var ErrorPage404 = object.ErrorPage{
 
 var NEWSDATASelectOpts = []object.SelectOpts{
 	{
-		OptMap:         newsdata.CatList,
+		OptMap:         newsdata.Country,
 		MaxDiv:         5,
 		DefaultValue:   "",
 		DefaultText:    "All",
-		InsertButtonId: "iCatBtn",
-		DeleteButtonId: "dCatBtn",
+		InsertButtonId: "insert-category-btn",
+		DeleteButtonId: "delete-category-btn",
 		PositionId:     "category",
 		AlertMessage:   "You can only add up to 5 categories in a single query",
 	},
 	{
-		OptMap:         newsdata.CtryList,
+		OptMap:         newsdata.Category,
 		MaxDiv:         5,
 		DefaultValue:   "",
 		DefaultText:    "All",
-		InsertButtonId: "iCtryBtn",
-		DeleteButtonId: "dCtryBtn",
+		InsertButtonId: "insert-country-btn",
+		DeleteButtonId: "delete-country-btn",
 		PositionId:     "country",
 		AlertMessage:   "You can only add up to 5 countries in a single query",
 	},
 	{
-		OptMap:         newsdata.LangList,
+		OptMap:         newsdata.Language,
 		MaxDiv:         5,
 		DefaultValue:   "",
 		DefaultText:    "All",
-		InsertButtonId: "iLangBtn",
-		DeleteButtonId: "dLangBtn",
+		InsertButtonId: "insert-lang-btn",
+		DeleteButtonId: "delete-lang-btn",
+		PositionId:     "language",
+		AlertMessage:   "You can only add up to 5 languages in a single query",
+	},
+}
+
+var GnewsSelectOpts = []object.SelectOpts{
+	{
+		OptMap:         gnews.Category,
+		MaxDiv:         5,
+		DefaultValue:   "",
+		DefaultText:    "All",
+		InsertButtonId: "insert-category-btn",
+		DeleteButtonId: "delete-category-btn",
+		PositionId:     "category",
+		AlertMessage:   "You can only add up to 5 categories in a single query",
+	},
+	{
+		OptMap:         gnews.Country,
+		MaxDiv:         5,
+		DefaultValue:   "",
+		DefaultText:    "All",
+		InsertButtonId: "insert-country-btn",
+		DeleteButtonId: "delete-country-btn",
+		PositionId:     "country",
+		AlertMessage:   "You can only add up to 5 countries in a single query",
+	},
+	{
+		OptMap:         gnews.Language,
+		MaxDiv:         5,
+		DefaultValue:   "",
+		DefaultText:    "All",
+		InsertButtonId: "insert-lang-btn",
+		DeleteButtonId: "delete-lang-btn",
+		PositionId:     "language",
+		AlertMessage:   "You can only add up to 5 languages in a single query",
+	},
+}
+
+var NewsAPISelectOpts = []object.SelectOpts{
+	{
+		OptMap:         newsapi.Category,
+		MaxDiv:         5,
+		DefaultValue:   "",
+		DefaultText:    "All",
+		InsertButtonId: "insert-category-btn",
+		DeleteButtonId: "delete-category-btn",
+		PositionId:     "category",
+		AlertMessage:   "You can only add up to 5 categories in a single query",
+	},
+	{
+		OptMap:         newsapi.Country,
+		MaxDiv:         5,
+		DefaultValue:   "",
+		DefaultText:    "All",
+		InsertButtonId: "insert-country-btn",
+		DeleteButtonId: "delete-country-btn",
+		PositionId:     "country",
+		AlertMessage:   "You can only add up to 5 countries in a single query",
+	},
+	{
+		OptMap:         newsapi.Language,
+		MaxDiv:         5,
+		DefaultValue:   "",
+		DefaultText:    "All",
+		InsertButtonId: "insert-lang-btn",
+		DeleteButtonId: "delete-lang-btn",
 		PositionId:     "language",
 		AlertMessage:   "You can only add up to 5 languages in a single query",
 	},

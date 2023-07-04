@@ -1,9 +1,9 @@
-package pageform_test
+package newsapi_test
 
 import (
 	"testing"
 
-	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/newsapi"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/validator"
 	val "github.com/go-playground/validator/v10"
 	"github.com/stretchr/testify/require"
@@ -13,9 +13,9 @@ func TestNEWSAPIFormValidationStruct(t *testing.T) {
 	val := val.New()
 	err := validator.RegisterValidator(
 		val,
-		pageform.NEWSAPICatVal,
-		pageform.NEWSAPICtryVal,
-		pageform.NEWSAPILangVal,
+		newsapi.CategoryValidator,
+		newsapi.CountryValidator,
+		newsapi.LanguageValidator,
 	)
 	require.NoError(t, err)
 
@@ -31,18 +31,18 @@ func TestNEWSAPIFormValidationStruct(t *testing.T) {
 		Language string `validate:"newsapi_lang"`
 	}
 
-	require.NoError(t, val.Var("business", pageform.NEWSAPICatVal.Tag()))
+	require.NoError(t, val.Var("business", newsapi.CategoryValidator.Tag()))
 	require.NoError(t, val.Struct(valCatStruct{Category: "business"}))
-	require.Error(t, val.Var("xx", pageform.NEWSAPICatVal.Tag()))
+	require.Error(t, val.Var("xx", newsapi.CategoryValidator.Tag()))
 	require.Error(t, val.Struct(valCatStruct{Category: "xx"}))
 
-	require.NoError(t, val.Var("tw", pageform.NEWSAPICtryVal.Tag()))
+	require.NoError(t, val.Var("tw", newsapi.CountryValidator.Tag()))
 	require.NoError(t, val.Struct(valCtryStruct{Country: "tw"}))
-	require.Error(t, val.Var("xx", pageform.NEWSAPICtryVal.Tag()))
+	require.Error(t, val.Var("xx", newsapi.CountryValidator.Tag()))
 	require.Error(t, val.Struct(valCtryStruct{Country: "xx"}))
 
-	require.NoError(t, val.Var("en", pageform.NEWSAPILangVal.Tag()))
+	require.NoError(t, val.Var("en", newsapi.LanguageValidator.Tag()))
 	require.NoError(t, val.Struct(valLangStruct{Language: "en"}))
-	require.Error(t, val.Var("xx", pageform.NEWSAPILangVal.Tag()))
+	require.Error(t, val.Var("xx", newsapi.LanguageValidator.Tag()))
 	require.Error(t, val.Struct(valLangStruct{Language: "xx"}))
 }

@@ -28,7 +28,6 @@ func main() {
 	fmt.Println(global.AppVar)
 
 	db := global.AppVar.Secret.Database["postgres"]
-
 	options := make([]string, 0, len(db.Options))
 	// for optName, optValue := range db.Options {
 	// 	options = append(options, fmt.Sprintf("%s=%s", optName, optValue))
@@ -44,14 +43,13 @@ func main() {
 		panic(err)
 	}
 
-	storage := model.NewPGXStore(conn)
-	service := service.NewService(storage, validator.Validate)
+	service := service.NewService(model.NewPGXStore(conn), validator.Validate)
 	vw, err := view.NewViewWithDefaultTemplateFuncs(global.AppVar.Server.TemplatePath...)
 	if err != nil {
 		panic(err)
 	}
 
-	fs := http.Dir("views/static/")
+	fs := http.Dir(global.AppVar.Server.StaticFilePath)
 	tm := tokenmaker.NewJWTMakerWithDefaultVal()
 	cm := cookieMaker.NewTestCookieMaker()
 
@@ -59,7 +57,11 @@ func main() {
 
 	errCh := make(chan error)
 	go func(chan<- error) {
-		errCh <- http.ListenAndServe("localhost:8000", mux)
+		errCh <- http.ListenAndServe(fmt.Sprintf(
+			"%s:%d",
+			global.AppVar.Server.Binding.Host,
+			global.AppVar.Server.Binding.Port,
+		), mux)
 	}(errCh)
 
 	err = <-errCh

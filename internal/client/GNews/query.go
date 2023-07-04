@@ -1,35 +1,39 @@
-package newsdata
+package gnews
 
 import (
 	"errors"
 	"net/url"
+	"strconv"
 	"time"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client"
 	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm"
-	newsdata "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/NEWSDATA"
+	srv "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/GNews"
 )
 
 const (
-	qKeyword        = "q"
-	qKeywordInTitle = "qInTitle"
-	qCountry        = "country"
-	qCategory       = "category"
-	qLanguage       = "language"
-	qDomain         = "domain"
-	qFromTime       = "from"
-	qToTime         = "to"
-	// qWithImage       = "image"        // currently not support
-	// qWithVideo       = "video"        // currently not support
-	// qWithFullContent = "full_content" // currently not support
+	qKeyword  = "q"
+	qLanguage = "lang"
+	qCountry  = "country"
+	qCategory = "category"
+	qMax      = "max"
+	qIn       = "in"
+	qNullable = "nullable"
+	qFromTime = "from"
+	qToTime   = "to"
+	qSortBy   = "sortby"
+)
+
+// These parameters will only work for paid account
+const (
+	qPage   = "page"
+	qExpand = "expand"
 )
 
 type Query struct {
 	Apikey   string
 	Endpoint string
 	client.Params
-	Page     string
-	NextPage string
 }
 
 func newQuery(apikey string) *Query {
@@ -39,8 +43,8 @@ func newQuery(apikey string) *Query {
 	}
 }
 
-func HandleLatestNewsQuery(apikey string, pf pageform.PageForm) (*Query, error) {
-	data, ok := pf.(newsdata.NEWSDATAIOLatestNews)
+func HandleHeadlines(apikey string, pf pageform.PageForm) (*Query, error) {
+	data, ok := pf.(srv.GNewsHeadlines)
 	if !ok {
 		return nil, client.ErrTypeAssertionFailure
 	}
@@ -52,48 +56,31 @@ func HandleLatestNewsQuery(apikey string, pf pageform.PageForm) (*Query, error) 
 	}
 
 	q.WithKeywords(data.Keyword).
-		WithDomain(data.Domains).
-		WithLanguage(data.Language...).
-		WithCountry(data.Country...).
-		WithCategory(data.Category...)
-
-	return q, nil
-}
-
-func HandleNewsArchive(apikey string, pf pageform.PageForm) (*Query, error) {
-	data, ok := pf.(newsdata.NEWSDATAIONewsArchive)
-	if !ok {
-		return nil, client.ErrTypeAssertionFailure
-	}
-
-	q, err := newQuery(apikey).
-		SetEndpoint(data.Endpoint())
-	if err != nil {
-		return nil, err
-	}
-
-	q.WithKeywords(data.Keyword).
-		WithDomain(data.Domains).
 		WithLanguage(data.Language...).
 		WithCountry(data.Country...).
 		WithCategory(data.Category...).
 		WithFrom(data.Form).
 		WithTo(data.To)
-
 	return q, nil
 }
 
-func HandleNewsSources(apikey string, pf pageform.PageForm) (*Query, error) {
-	data := pf.(newsdata.NEWSDATAIONewsSources)
+func HandleSearch(apikey string, pf pageform.PageForm) (*Query, error) {
+	data, ok := pf.(srv.GNewsSearch)
+	if !ok {
+		return nil, client.ErrTypeAssertionFailure
+	}
 
-	q, err := newQuery(apikey).SetEndpoint(data.Endpoint())
+	q, err := newQuery(apikey).
+		SetEndpoint(data.Endpoint())
 	if err != nil {
 		return nil, err
 	}
 
-	q.WithLanguage(data.Language...).
+	q.WithKeywords(data.Keyword).
+		WithLanguage(data.Language...).
 		WithCountry(data.Country...).
-		WithCategory(data.Category...)
+		WithFrom(data.Form).
+		WithTo(data.To)
 
 	return q, nil
 }
@@ -103,9 +90,12 @@ func (q *Query) WithKeywords(keyword string) *Query {
 	return q
 }
 
-func (q *Query) WithKeywordsInTitle(keyword string) *Query {
-	q.Params.Add(qKeywordInTitle, keyword)
+func (q *Query) WithCategory(category ...string) *Query {
+	for _, c := range category {
+		q.Params.Add(qCategory, c)
+	}
 	return q
+
 }
 
 func (q *Query) WithCountry(country ...string) *Query {
@@ -122,20 +112,38 @@ func (q *Query) WithLanguage(lang ...string) *Query {
 	return q
 }
 
-func (q *Query) WithDomain(domain string) *Query {
-	q.Params.Add(qDomain, domain)
+func (q *Query) WithMaxArticles(i int) *Query {
+	if i > API_MAX_NUM_ARTICLE {
+		i = API_MAX_NUM_ARTICLE
+	}
+	if i < 0 {
+		i = 10
+	}
+	q.Params.Set(qMax, strconv.Itoa(i))
 	return q
 }
 
-func (q *Query) WithCategory(category ...string) *Query {
-	for _, c := range category {
-		q.Params.Add(qCategory, c)
+func (q *Query) In(where ...string) *Query {
+	for _, w := range where {
+		q.Params.Add(qIn, w)
 	}
 	return q
 }
 
-func (q *Query) WithNextPage(next string) *Query {
-	q.NextPage = next
+func (q *Query) NullableIn(where ...string) *Query {
+	for _, w := range where {
+		q.Params.Add(qNullable, w)
+	}
+	return q
+}
+
+func (q *Query) SortByTime() *Query {
+	q.Params.Set(qSortBy, "publishedAt")
+	return q
+}
+
+func (q *Query) SortByRelevance() *Query {
+	q.Params.Set(qSortBy, "relevance")
 	return q
 }
 
@@ -154,16 +162,22 @@ func (q *Query) WithTo(t time.Time) *Query {
 	return q
 }
 
+func (q *Query) WithPage(n int) *Query {
+	q.Params.Set(qPage, strconv.Itoa(n))
+	return q
+}
+
+func (q *Query) WithExpand() *Query {
+	q.Params.Set(q.Endpoint, "content")
+	return q
+}
+
 func (q *Query) SetEndpoint(ep string) (*Query, error) {
 	switch ep {
-	case newsdata.EPLatestNews:
-		q.Endpoint = EPLatestNews
-	case newsdata.EPNewsArchive:
-		q.Endpoint = EPNewsArchive
-	case newsdata.EPNewsSources:
-		q.Endpoint = EPNewsSources
-	case newsdata.EPCrypto:
-		q.Endpoint = EPCrypto
+	case srv.EPTopHeadlines:
+		q.Endpoint = EPTopHeadlines
+	case srv.EPSearch:
+		q.Endpoint = EPSearch
 	default:
 		return nil, errors.New("unknown endpoint")
 	}

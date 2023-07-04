@@ -3,6 +3,7 @@
 
 <head>
     {{template "head" .Page.HeadConent}}
+    <script src="/static/js/selector.js"></script>
     <title>{{.Page.Title}}</title>
 </head>
 
@@ -23,14 +24,14 @@
                     </li>
                     <li class="data-field">
                         <label for="language">Language</label>:
-                        <select name="language" id="language" class="form-input">
-                            <option value="">All</option>
-                            <option value="zh">Chinese</option>
-                            <option value="en">English</option>
-                            <option value="es">Spanish</option>
-                            <option value="jp">Japanese</option>
-                            <option value="ko">Korean</option>
-                        </select>
+                        <div name="language" id="language" class="row">
+                        </div>
+                        <button type="button" title="insert-lang" id="insert-lang-btn" class="btn btn-small">
+                            <i class="fa-regular fa-plus"></i>
+                        </button>
+                        <button type="button" title="delete-lang" id="delete-lang-btn" class="btn btn-small">
+                            <i class="fa-regular fa-minus"></i>
+                        </button>
                     </li>
                     <!-- <li class="data-field">
                         current not yet supported
@@ -49,49 +50,38 @@
                     </li> -->
                     <li class="data-field">
                         <label for="country">Country</label>:
-                        <select name="country" id="country" class="form-input">
-                            <option value="">All</option>
-                            <optgroup label="Asia">
-                                <option value="cn">China</option>
-                                <option value="jp">Japan</option>
-                                <option value="ko">Korea</option>
-                                <option value="tw">Taiwan</option>
-                            </optgroup>
-                            <optgroup label="North america">
-                                <option value="ca">Canada</option>
-                                <option value="us">United States</option>
-                            </optgroup>
-                            <optgroup label="Europe">
-                                <option value="uk">United Kingdom</option>
-                            </optgroup>
-                        </select>
+                        <div name="country" id="country" class="row">
+                        </div>
+                        <button type="button" title="insert-country" id="insert-country-btn" class="btn btn-small">
+                            <i class="fa-regular fa-plus"></i>
+                        </button>
+                        <button type="button" title="delete-country" id="delete-country-btn" class="btn btn-small">
+                            <i class="fa-regular fa-minus"></i>
+                        </button>
                     </li>
                     <li class="data-field">
                         <label for="category">Category</label>:
-                        <select name="category" id="category" class="form-input">
-                            <option value="business">Business</option>
-                            <option value="entertainment">Entertainment</option>
-                            <option value="environment">Environment</option>
-                            <option value="food">Food</option>
-                            <option value="health">Health</option>
-                            <option value="politics">Politics</option>
-                            <option value="science">Science</option>
-                            <option value="sports">Sports</option>
-                            <option value="technology">Technology</option>
-                            <option value="top">Top</option>
-                            <option value="tourism">Tourism</option>
-                            <option value="world">World</option>
-                        </select>
+                        <div name="category" id="category" class="row">
+                        </div>
+                        <button type="button" title="insert-category" id="insert-category-btn" class="btn btn-small">
+                            <i class="fa-regular fa-plus"></i>
+                        </button>
+                        <button type="button" title="delete-category" id="delete-category-btn" class="btn btn-small">
+                            <i class="fa-regular fa-minus"></i>
+                        </button>
                     </li>
                     <li class="data-field">
                         <label for="from-time">From</label>:
                         <input type="date" name="from-time" id="from-time" class="form-input" max={{now "2006-01-02"}}>
+                        <div id="from-time-tz"></div>
                     </li>
                     <li class="data-field">
-                        <label for="to-time">From</label>:
+                        <label for="to-time">To</label>:
                         <input type="date" name="to-time" id="to-time" class="form-input" max={{now "2006-01-02"}}>
+                        <div id="to-time-tz"></div>
                     </li>
                 </ul>
+                <input type="hidden" id="timezone" name="timezone">
                 <input type="submit" value="Submit" class="btn">
                 <p class="footer">
                     back to <a href="/{{.Version}}/endpoints" class=" url">endpoints</a> page

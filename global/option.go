@@ -133,13 +133,20 @@ func (pwdOpt PasswordValidatorOption) String() string {
 
 type ServerOption struct {
 	APIVersion     string       `json:"api_version"`
+	Binding        Binding      `json:"binding"`
 	TemplatePath   []string     `json:"template_path"`
 	StaticFilePath string       `json:"static_file_path"`
 	RoutePattern   RoutePattern `json:"route_pattern"`
 }
 
+type Binding struct {
+	Host string `json:"host"`
+	Port int    `json:"port"`
+}
+
 type RoutePattern struct {
 	Pages       map[string]string `json:"pages"`
+	ErrorPages  map[string]string `json:"error_pages"`
 	StaticFiles StaticFiles       `json:"static_files"`
 }
 
@@ -163,6 +170,7 @@ func (srvOpt ServerOption) String() string {
 	for pageName, pagePath := range srvOpt.RoutePattern.Pages {
 		sb.WriteString(fmt.Sprintf("\t\t- %s: %s\n", pageName, pagePath))
 	}
+
 	sb.WriteString("\t\t- Static Files:\n")
 	sb.WriteString(fmt.Sprintf("\t\t\t- Image: %s\n", srvOpt.RoutePattern.StaticFiles.Image))
 	sb.WriteString(fmt.Sprintf("\t\t\t- CSS  : %s\n", srvOpt.RoutePattern.StaticFiles.CSS))

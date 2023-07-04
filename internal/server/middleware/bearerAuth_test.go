@@ -70,6 +70,11 @@ func TestBearerAuthenticator(t *testing.T) {
 		return
 	})
 
+	r.Get("/unauthorized", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte("401 Unauthorized"))
+	})
+
 	r.Route("/user", func(r chi.Router) {
 		r.Use(maker.BearerAuthenticator)
 		r.Get("/welcome", func(w http.ResponseWriter, r *http.Request) {

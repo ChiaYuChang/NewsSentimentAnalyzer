@@ -1,4 +1,4 @@
-package pageform_test
+package gnews_test
 
 import (
 	"crypto/tls"
@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm"
+	gnews "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/GNews"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/validator"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/form"
@@ -27,16 +27,16 @@ func RequestWithForm(method, url string, formVal url.Values) (*http.Request, err
 func TestGnewsFormValidation(t *testing.T) {
 	val := validator.Validate
 	val.RegisterValidation(
-		pageform.GnewsCatVal.Tag(),
-		pageform.GnewsCatVal.ValFun())
+		gnews.LanguageValidator.Tag(),
+		gnews.LanguageValidator.ValFun())
 
 	val.RegisterValidation(
-		pageform.GNewsCtryVal.Tag(),
-		pageform.GNewsCtryVal.ValFun())
+		gnews.CountryValidator.Tag(),
+		gnews.CountryValidator.ValFun())
 
 	val.RegisterValidation(
-		pageform.GNewsLangVal.Tag(),
-		pageform.GNewsLangVal.ValFun())
+		gnews.CategoryValidator.Tag(),
+		gnews.CategoryValidator.ValFun())
 
 	decoder := form.NewDecoder()
 	decoder.RegisterCustomTypeFunc(func(vals []string) (interface{}, error) {
@@ -45,7 +45,7 @@ func TestGnewsFormValidation(t *testing.T) {
 
 	r := chi.NewRouter()
 	r.Post("/test", func(w http.ResponseWriter, r *http.Request) {
-		var headlines pageform.GNewsHeadlines
+		var headlines gnews.GNewsHeadlines
 		w.Header().Add("Content-Type", "application/json")
 
 		m := map[string]string{}
@@ -80,9 +80,9 @@ func TestGnewsFormValidation(t *testing.T) {
 		m["status"] = strconv.Itoa(http.StatusOK)
 		m["message"] = "ok"
 		m["keyword"] = headlines.Keyword
-		m["category"] = headlines.Category
-		m["country"] = headlines.Country
-		m["language"] = headlines.Language
+		m["category"] = strings.Join(headlines.Category, ",")
+		m["country"] = strings.Join(headlines.Country, ",")
+		m["language"] = strings.Join(headlines.Language, ",")
 		m["from"] = headlines.TimeRange.Form.Format(time.DateOnly)
 		m["to"] = headlines.TimeRange.To.Format(time.DateOnly)
 		bs, _ := json.Marshal(m)
@@ -106,9 +106,9 @@ func TestGnewsFormValidation(t *testing.T) {
 
 			formVal := url.Values{}
 			formVal.Add("keyword", "")
-			formVal.Add("language", "en")
-			formVal.Add("country", "tw")
-			formVal.Add("category", "world")
+			formVal.Add("language[0]", "en")
+			formVal.Add("country[0]", "tw")
+			formVal.Add("category[0]", "world")
 			formVal.Add("from-time", fTime.Format(time.DateOnly))
 			formVal.Add("to-time", tTime.Format(time.DateOnly))
 
@@ -143,8 +143,8 @@ func TestGnewsFormValidation(t *testing.T) {
 			formVal := url.Values{}
 			formVal.Add("keyword", "")
 			formVal.Add("language", "en")
-			formVal.Add("country", "tw")
-			formVal.Add("category", "world")
+			formVal.Add("country[0]", "tw")
+			formVal.Add("category[0]", "world")
 			formVal.Add("from-time", fTime.Format(time.DateOnly))
 			formVal.Add("to-time", tTime.Format(time.DateOnly))
 			req, err := RequestWithForm(
@@ -175,9 +175,9 @@ func TestGnewsFormValidation(t *testing.T) {
 
 			formVal := url.Values{}
 			formVal.Add("keyword", "")
-			formVal.Add("language", "xx")
-			formVal.Add("country", "tw")
-			formVal.Add("category", "world")
+			formVal.Add("language[0]", "xx")
+			formVal.Add("country[0]", "tw")
+			formVal.Add("category[0]", "world")
 			formVal.Add("from-time", fTime.Format(time.DateOnly))
 			formVal.Add("to-time", tTime.Format(time.DateOnly))
 
@@ -209,9 +209,9 @@ func TestGnewsFormValidation(t *testing.T) {
 
 			formVal := url.Values{}
 			formVal.Add("keyword", "")
-			formVal.Add("language", "en")
-			formVal.Add("country", "xx")
-			formVal.Add("category", "world")
+			formVal.Add("language[0]", "en")
+			formVal.Add("country[0]", "xx")
+			formVal.Add("category[0]", "world")
 			formVal.Add("from-time", fTime.Format(time.DateOnly))
 			formVal.Add("to-time", tTime.Format(time.DateOnly))
 
@@ -240,9 +240,9 @@ func TestGnewsFormValidationStruct(t *testing.T) {
 	val := validator.Validate
 	err := validator.RegisterValidator(
 		val,
-		pageform.GnewsCatVal,
-		pageform.GNewsCtryVal,
-		pageform.GNewsLangVal,
+		gnews.LanguageValidator,
+		gnews.CountryValidator,
+		gnews.CategoryValidator,
 	)
 	require.NoError(t, err)
 
@@ -258,18 +258,18 @@ func TestGnewsFormValidationStruct(t *testing.T) {
 		Language string `validate:"gnews_lang"`
 	}
 
-	require.NoError(t, val.Var("business", pageform.GnewsCatVal.Tag()))
+	require.NoError(t, val.Var("business", gnews.CategoryValidator.Tag()))
 	require.NoError(t, val.Struct(valCatStruct{Category: "business"}))
-	require.Error(t, val.Var("xx", pageform.GnewsCatVal.Tag()))
+	require.Error(t, val.Var("xx", gnews.CategoryValidator.Tag()))
 	require.Error(t, val.Struct(valCatStruct{Category: "xx"}))
 
-	require.NoError(t, val.Var("tw", pageform.GNewsCtryVal.Tag()))
+	require.NoError(t, val.Var("tw", gnews.CountryValidator.Tag()))
 	require.NoError(t, val.Struct(valCtryStruct{Country: "tw"}))
-	require.Error(t, val.Var("xx", pageform.GNewsCtryVal.Tag()))
+	require.Error(t, val.Var("xx", gnews.CountryValidator.Tag()))
 	require.Error(t, val.Struct(valCtryStruct{Country: "xx"}))
 
-	require.NoError(t, val.Var("en", pageform.GNewsLangVal.Tag()))
+	require.NoError(t, val.Var("en", gnews.LanguageValidator.Tag()))
 	require.NoError(t, val.Struct(valLangStruct{Language: "en"}))
-	require.Error(t, val.Var("xx", pageform.GNewsLangVal.Tag()))
+	require.Error(t, val.Var("xx", gnews.LanguageValidator.Tag()))
 	require.Error(t, val.Struct(valLangStruct{Language: "xx"}))
 }

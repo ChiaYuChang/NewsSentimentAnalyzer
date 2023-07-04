@@ -17,18 +17,44 @@ func NewEnmus[T ~string](tag string, es ...T) Enmus[T] {
 	}
 	return Enmus[T]{tag: tag, eMap: eMap}
 }
+
+func NewEnmusFromMap[T ~string](tag string, m map[T]T, which string) Enmus[T] {
+	es := make([]T, 0, len(m))
+	for key, val := range m {
+		if which == "val" {
+			es = append(es, T(val))
+		} else {
+			es = append(es, T(key))
+		}
+	}
+	return NewEnmus[T](tag, es...)
+}
+
 func (e Enmus[T]) Map() map[T]struct{} {
 	return e.eMap
 }
 
 func (e Enmus[T]) ValFun() val.Func {
 	return func(fl val.FieldLevel) bool {
-		v, ok := fl.Field().Interface().(string)
-		if !ok {
-			return false
-		}
-		_, ok = e.eMap[T(v)]
-		if !ok {
+		switch val := fl.Field().Interface().(type) {
+		case string:
+			if val != "" {
+				_, ok := e.eMap[T(val)]
+				if !ok {
+					return false
+				}
+			}
+		case []string:
+			for _, v := range val {
+				if v == "" {
+					continue
+				}
+				_, ok := e.eMap[T(v)]
+				if !ok {
+					return false
+				}
+			}
+		default:
 			return false
 		}
 		return true

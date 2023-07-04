@@ -1,9 +1,39 @@
 package object
 
+import (
+	"bytes"
+	"html/template"
+	"sort"
+)
+
 type HeadConent struct {
-	Meta   *HTMLElementList
-	Link   *HTMLElementList
-	Script *HTMLElementList
+	Meta    *HTMLElementList
+	Link    *HTMLElementList
+	Script  *HTMLElementList
+	hasExec bool
+	content template.HTML
+}
+
+func (hc *HeadConent) Execute(tmpl *template.Template) error {
+	if hc.hasExec {
+		return nil
+	}
+
+	bf := bytes.NewBufferString("")
+	if err := tmpl.Execute(bf, hc); err != nil {
+		return err
+	}
+	hc.hasExec = true
+	hc.content = template.HTML(bf.String())
+	return nil
+}
+
+func (hc HeadConent) HasExec() bool {
+	return hc.hasExec
+}
+
+func (hc HeadConent) Content() template.HTML {
+	return hc.content
 }
 
 type Page struct {
@@ -29,7 +59,7 @@ type EndPoint struct {
 }
 
 type SelectOpts struct {
-	OptMap         [][2]string
+	OptMap         map[string]string
 	MaxDiv         int
 	DefaultValue   string
 	DefaultText    string
@@ -37,4 +67,13 @@ type SelectOpts struct {
 	DeleteButtonId string
 	PositionId     string
 	AlertMessage   string
+}
+
+func (sopt SelectOpts) SortedOptKey() []string {
+	keys := make([]string, 0, len(sopt.OptMap))
+	for key := range sopt.OptMap {
+		keys = append(keys, key)
+	}
+	sort.Sort(sort.StringSlice(keys))
+	return keys
 }

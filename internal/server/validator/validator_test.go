@@ -72,6 +72,51 @@ func TestValidateEnmus(t *testing.T) {
 	}
 }
 
+func TestValidateEnmusList(t *testing.T) {
+	type testCase struct {
+		validator.Validator
+		Name       string
+		OKCase     []string
+		ErrorCases [][]string
+	}
+
+	tcs := []testCase{
+		{
+			Name:      "Role",
+			Validator: validator.EnmusRole,
+			OKCase:    []string{"user", "admin"},
+			ErrorCases: [][]string{
+				{"user", "visitor", "admin"},
+				{"user", "user", "admin", "admin", "admin"},
+			},
+		},
+	}
+
+	for i := range tcs {
+		tc := tcs[i]
+		t.Run(
+			fmt.Sprintf("case %d-%s", i+1, tc.Name),
+			func(t *testing.T) {
+				var err error
+				validate := val.New()
+				err = validate.RegisterValidation(
+					tc.Validator.Tag(),
+					tc.Validator.ValFun(),
+				)
+				require.NoError(t, err)
+
+				err = validate.Var(tc.OKCase, fmt.Sprintf("max=%d,%s", 5, tc.Tag()))
+				require.NoError(t, err)
+
+				for _, ec := range tc.ErrorCases {
+					err = validate.Var(ec, fmt.Sprintf("max=%d,%s", 3, tc.Tag()))
+					require.Error(t, err)
+				}
+			},
+		)
+	}
+}
+
 func TestValidateLeakyPassword(t *testing.T) {
 	validate := val.New()
 	leakeyPwdVal := validator.NewPasswordValidator(false, 0, 80, 0, 0, 0, 0)

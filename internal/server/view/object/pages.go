@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"html/template"
 	"path"
-	"strings"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
@@ -146,7 +145,11 @@ func APIEndpointFromDBModel(page Page, apiVer string, rows []*model.ListEndpoint
 			AddPair("onclick", fmt.Sprintf(
 				"location.href='.%s/%s'",
 				global.AppVar.Server.RoutePattern.Pages["endpoints"],
-				strings.TrimSuffix(row.TemplateName, ".gotmpl"))).
+				fmt.Sprintf("%s-%s", row.ApiName, row.EndpointName))).
+			// AddPair("onclick", fmt.Sprintf(
+			// 	"location.href='.%s/%s'",
+			// 	global.AppVar.Server.RoutePattern.Pages["endpoints"],
+			// 	strings.TrimSuffix(row.TemplateName, ".gotmpl"))).
 			ToOpeningElement(template.HTML(row.EndpointName))
 	}
 

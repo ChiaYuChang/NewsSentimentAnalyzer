@@ -1,6 +1,7 @@
 function insertSelectElement(where, name, classes, opts) {
     let newSelect = document.createElement("select");
     newSelect.name = name
+    newSelect.setAttribute("aria-label", where.id)
     newSelect.classList = classes
     opts.forEach(o => {
         newOpt = document.createElement("option")
@@ -47,7 +48,25 @@ function addListenerToBtn(iPosId, iBtnId, dBtnId, maxDiv, opts, alertMsg) {
     }
 }
 
+function getTimeZone() {
+    const fTimeTZ = document.getElementById("from-time-tz");
+    const tTimeTZ = document.getElementById("to-time-tz");
+    const hiddenTZFormField = document.getElementById("timezone");
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    if (!!hiddenTZFormField) {
+        hiddenTZFormField.value = tz;
+    }
+    if (!!fTimeTZ) {
+        fTimeTZ.innerText = tz;
+    }
+    if (!!tTimeTZ) {
+        tTimeTZ.innerText = tz;
+    }
+}
+
 document.addEventListener("DOMContentLoaded", function () {
+    getTimeZone();
 
     let categoryOpts = [
         { value: "", txt: "All" },
@@ -65,7 +84,6 @@ document.addEventListener("DOMContentLoaded", function () {
         { value: "tourism", txt: "Tourism" },
         { value: "world", txt: "World" },
     ];
-    addListenerToBtn("category", "iCatBtn", "dCatBtn", 5, categoryOpts, "haha");
 
     let countryOpts = [
         { value: "", txt: "All" },
@@ -225,7 +243,6 @@ document.addEventListener("DOMContentLoaded", function () {
         { value: "zm", txt: "Zambia" },
         { value: "zw", txt: "Zimbabwe" },
     ];
-    addListenerToBtn("country", "iCtryBtn", "dCtryBtn", 5, countryOpts, "haha");
 
     let languageOpts = [
         { value: "", txt: "All" },
@@ -308,6 +325,9 @@ document.addEventListener("DOMContentLoaded", function () {
         { value: "uz", txt: "Uzbek" },
         { value: "vi", txt: "Vietnamese" },
     ];
-    addListenerToBtn("language", "iLangBtn", "dLangBtn", 5, languageOpts, "haha");
+
+    addListenerToBtn("category", "insert-category-btn", "delete-category-btn", 5, categoryOpts, "haha");
+    addListenerToBtn("country", "insert-country-btn", "delete-country-btn", 5, countryOpts, "haha");
+    addListenerToBtn("language", "insert-lang-btn", "delete-lang-btn", 5, languageOpts, "haha");
 
 })

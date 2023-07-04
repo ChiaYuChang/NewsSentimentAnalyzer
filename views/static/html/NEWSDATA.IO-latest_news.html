@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    
+    <meta charset="UTF-8">  </meta>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">  </meta>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  </meta>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">  </link>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>  </link>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap">  </link>
+    <link rel="stylesheet" href="/static/css/style.css">  </link>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/pure-min.css" integrity="sha384-X38yfunGUhNzHpBaEBsWLO+A0HDYOQi8ufWDkZ0k9e0eXz/tH3II7uKZ9msv++Ls" crossorigin="anonymous">  </link>
+    <link rel="stylesheet" href="/static/css/fontawesome.css">  </link>
+    <link rel="stylesheet" href="/static/css/brands.css">  </link>
+    <link rel="stylesheet" href="/static/css/solid.css">  </link>
+    
+    <script src="/static/js/func.js">  </script>
+    
+
+    <script src="/static/js/selector.js"></script>
+    <title>Latest News</title>
+</head>
+
+<body>
+    <section class="background">
+        <div class="mid-card">
+            <h1>Parameters</h1>
+            <p>API: <strong>NEWSDATA.IO</strong>, Endpoint: <strong>Latest News</strong></p>
+            <form action="" method="post" class="data-form">
+                <ul class="data-list">
+                    <li class="data-field">
+                        <label for="keyword">Keywords</label>:
+                        <input type="text" name="keyword" id="keyword" class="form-input">
+                    </li>
+                    <li class="data-field">
+                        <label for="domains">Domains</label>:
+                        <input type="text" name="domains" id="domains" class="form-input">
+                    </li>
+                    <li class="data-field">
+                        <label for="language">Language</label>:
+                        <div name="language" id="language" class="row">
+                        </div>
+                        <button type="button" title="insert-lang" id="insert-lang-btn" class="btn btn-small">
+                            <i class="fa-regular fa-plus"></i>
+                        </button>
+                        <button type="button" title="delete-lang" id="delete-lang-btn" class="btn btn-small">
+                            <i class="fa-regular fa-minus"></i>
+                        </button>
+                    </li>
+                    
+                    <li class="data-field">
+                        <label for="country">Country</label>:
+                        <div name="country" id="country" class="row">
+                        </div>
+                        <button type="button" title="insert-country" id="insert-country-btn" class="btn btn-small">
+                            <i class="fa-regular fa-plus"></i>
+                        </button>
+                        <button type="button" title="delete-country" id="delete-country-btn" class="btn btn-small">
+                            <i class="fa-regular fa-minus"></i>
+                        </button>
+                    </li>
+                    <li class="data-field">
+                        <label for="category">Category</label>:
+                        <div name="category" id="category" class="row">
+                        </div>
+                        <button type="button" title="insert-category" id="insert-category-btn" class="btn btn-small">
+                            <i class="fa-regular fa-plus"></i>
+                        </button>
+                        <button type="button" title="delete-category" id="delete-category-btn" class="btn btn-small">
+                            <i class="fa-regular fa-minus"></i>
+                        </button>
+                    </li>
+                </ul>
+                <input type="submit" value="Submit" class="btn">
+                <p class="footer">
+                    back to <a href="/v1/endpoints" class=" url">endpoints</a> page
+                </p>
+            </form>
+        </div>
+    </section>
+</body>
+
+</html>

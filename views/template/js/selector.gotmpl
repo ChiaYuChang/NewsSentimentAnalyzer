@@ -49,10 +49,10 @@ function addListenerToBtn(iPosId, iBtnId, dBtnId, maxDiv, opts, alertMsg) {
 
 document.addEventListener("DOMContentLoaded", function () {
 {{range .}}
-    let {{.PositionId}}Opts = [
+        {{$optMap := .OptMap}}
         { value: "{{.DefaultValue}}", txt: "{{.DefaultText}}"},
-        {{range $i, $e := .OptMap}}
-        { value: "{{index $e 1}}", txt: "{{index $e 0}}" },{{end}}
+        {{range $key := .SortedOptKey}}
+        { value: "{{$key}}", txt: "{{index $optMap $key}}" },{{end}}
     ];
     addListenerToBtn("{{.PositionId}}", "{{.InsertButtonId}}", "{{.DeleteButtonId}}", {{.MaxDiv}}, {{.PositionId}}Opts, "{{.AlertMessage}}");
 {{end}}

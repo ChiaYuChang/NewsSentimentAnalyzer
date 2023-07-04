@@ -15,6 +15,10 @@
     },
     "server": {
         "api_version": "v1",
+        "binding": {
+            "host": "localhost",
+            "port": 8000
+        },
         "template_path": [
             "views/template/*.gotmpl",
             "views/template/endpoint/*.gotmpl"
@@ -35,6 +39,11 @@
                 "img": "/image",
                 "js": "/js",
                 "css": "/css"
+            },
+            "error_pages": {
+                "unauthorized": "/unauthorized",
+                "badrequest": "/badrequest",
+                "forbidden": "/forbidden"
             }
         }
     }

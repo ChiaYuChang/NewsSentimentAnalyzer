@@ -20,46 +20,49 @@
                     </li>
                     <li class="data-field">
                         <label for="language">Language</label>:
-                        <div class="row" id="language">
+                        <div name="language" id="language" class="row">
                         </div>
-                        <button type="button" id="iLangBtn" class="btn btn-small">
+                        <button type="button" title="insert-lang" id="insert-lang-btn" class="btn btn-small">
                             <i class="fa-regular fa-plus"></i>
                         </button>
-                        <button type="button" id="dLangBtn" class="btn btn-small">
+                        <button type="button" title="delete-lang" id="delete-lang-btn" class="btn btn-small">
                             <i class="fa-regular fa-minus"></i>
                         </button>
                     </li>
                     <li class="data-field">
                         <label for="country">Country</label>:
-                        <div class="row" id="country">
+                        <div name="country" id="country" class="row">
                         </div>
-                        <button type="button" id="iCtryBtn" class="btn btn-small">
+                        <button type="button" title="insert-country" id="insert-country-btn" class="btn btn-small">
                             <i class="fa-regular fa-plus"></i>
                         </button>
-                        <button type="button" id="dCtryBtn" class="btn btn-small">
+                        <button type="button" title="delete-country" id="delete-country-btn" class="btn btn-small">
                             <i class="fa-regular fa-minus"></i>
                         </button>
                     </li>
                     <li class="data-field">
                         <label for="category">Category</label>:
-                        <div class="row" id="category">
+                        <div name="category" id="category" class="row">
                         </div>
-                        <button type="button" id="iCatBtn" class="btn btn-small">
+                        <button type="button" title="insert-category" id="insert-category-btn" class="btn btn-small">
                             <i class="fa-regular fa-plus"></i>
                         </button>
-                        <button type="button" id="dCatBtn" class="btn btn-small">
+                        <button type="button" title="delete-category" id="delete-category-btn" class="btn btn-small">
                             <i class="fa-regular fa-minus"></i>
                         </button>
                     </li>
                     <li class="data-field">
                         <label for="from-time">From</label>:
                         <input type="date" name="from-time" id="from-time" class="form-input" max={{now "2006-01-02"}}>
+                        <div id="from-time-tz"></div>
                     </li>
                     <li class="data-field">
                         <label for="to-time">To</label>:
                         <input type="date" name="to-time" id="to-time" class="form-input" max={{now "2006-01-02"}}>
+                        <div id="to-time-tz"></div>
                     </li>
                 </ul>
+                <input type="hidden" id="timezone" name="timezone">
                 <input type="submit" value="Submit" class="btn">
                 <p class="footer">
                     back to <a href="/{{.Version}}/endpoints" class=" url">endpoints</a> page

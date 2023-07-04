@@ -11,36 +11,20 @@
     <section class="background">
         <div class="mid-card">
             <h1>Parameters</h1>
-            <h5>API: <strong>{{.API}}</strong>, Endpoint: <strong>{{.Endpoint}}</strong></h5>
+            <p>API: <strong>{{.API}}</strong>, Endpoint: <strong>{{.Endpoint}}</strong></p>
             <form action="" method="post" class="data-form">
                 <ul class="data-list">
                     <li class="data-field">
                         <label for="keyword">Keywords</label>:
-                        <input name="keyword" id="keyword" type="text" class="form-input">
+                        <input type="text" name="keyword" id="keyword" class="form-input">
                     </li>
                     <li class="data-field">
-                        <label for="search-in">Search in</label>:
-                        <div class="row">
-                            <div>
-                                <label class="pure-checkbox">
-                                    <input type="checkbox" name="in-title" id="in-title" checked> Title
-                                </label>
-                            </div>
-                            <div>
-                                <label class="pure-checkbox">
-                                    <input type="checkbox" name="in-description" id="in-description" checked> Description
-                                </label>
-                            </div>
-                            <div>
-                                <label class="pure-checkbox">
-                                    <input type="checkbox" name="in-content" id="in-content" checked> Content
-                                </label>
-                            </div>
-                        </div>
+                        <label for="domains">Domains</label>:
+                        <input type="text" name="domains" id="domains" class="form-input">
                     </li>
                     <li class="data-field">
                         <label for="language">Language</label>:
-                        <div class="row" id="language">
+                        <div name="language" id="language" class="row">
                         </div>
                         <button type="button" title="insert-lang" id="insert-lang-btn" class="btn btn-small">
                             <i class="fa-regular fa-plus"></i>
@@ -49,9 +33,24 @@
                             <i class="fa-regular fa-minus"></i>
                         </button>
                     </li>
+                    <!-- <li class="data-field">
+                        current not yet supported
+                        <label for="include">Include</label>:
+                        <div class="row">
+                            <div>
+                                <input type="checkbox" name="image" id="image"> image
+                            </div>
+                            <div>
+                                <input type="checkbox" name="video" id="video"> image
+                            </div>
+                            <div>
+                                <input type="checkbox" name="full-content" id="full-content"> full content
+                            </div>
+                        </div>
+                    </li> -->
                     <li class="data-field">
                         <label for="country">Country</label>:
-                        <div class="row" id="country">
+                        <div name="country" id="country" class="row">
                         </div>
                         <button type="button" title="insert-country" id="insert-country-btn" class="btn btn-small">
                             <i class="fa-regular fa-plus"></i>
@@ -61,17 +60,17 @@
                         </button>
                     </li>
                     <li class="data-field">
-                        <label for="from-time">From</label>:
-                        <input type="date" name="from-time" id="from-time" class="form-input" max={{now "2006-01-02"}}>
-                        <div id="from-time-tz"></div>
-                    </li>
-                    <li class="data-field">
-                        <label for="to-time">To</label>:
-                        <input type="date" name="to-time" id="to-time" class="form-input" max={{now "2006-01-02"}}>
-                        <div id="to-time-tz"></div>
+                        <label for="category">Category</label>:
+                        <div name="category" id="category" class="row">
+                        </div>
+                        <button type="button" title="insert-category" id="insert-category-btn" class="btn btn-small">
+                            <i class="fa-regular fa-plus"></i>
+                        </button>
+                        <button type="button" title="delete-category" id="delete-category-btn" class="btn btn-small">
+                            <i class="fa-regular fa-minus"></i>
+                        </button>
                     </li>
                 </ul>
-                <input type="hidden" id="timezone" name="timezone">
                 <input type="submit" value="Submit" class="btn">
                 <p class="footer">
                     back to <a href="/{{.Version}}/endpoints" class=" url">endpoints</a> page

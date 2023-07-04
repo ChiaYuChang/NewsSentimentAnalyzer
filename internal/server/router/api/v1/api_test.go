@@ -55,6 +55,8 @@ func TestGetWelcome(t *testing.T) {
 	view, err := view.NewView(nil, VIEWS_PATH+"/template/*.gotmpl")
 	require.NoError(t, err)
 
+	version := "v1"
+
 	cli := &http.Client{
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			return ErrRedirect
@@ -92,7 +94,7 @@ func TestGetWelcome(t *testing.T) {
 			SetupServer: func(store model.Store) *chi.Mux {
 				srvc := service.NewService(store, validator.Validate)
 				apiRepo := api.APIRepo{
-					Version:     "v1",
+					Version:     version,
 					Service:     srvc,
 					View:        view,
 					TokenMaker:  tm,
@@ -101,11 +103,11 @@ func TestGetWelcome(t *testing.T) {
 				}
 				mux := chi.NewMux()
 				mux.Use(tm.BearerAuthenticator)
-				mux.Get(fmt.Sprintf("/%s/welcome", apiRepo.Version), apiRepo.GetWelcome)
+				mux.Get(fmt.Sprintf("/%s/welcome", version), apiRepo.GetWelcome)
 				return mux
 			},
 			SetupRequest: func(t *testing.T, url string) *http.Request {
-				req, err := http.NewRequest(http.MethodGet, url+"/v1/welcome", nil)
+				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/%s/welcome", url, version), nil)
 				require.NoError(t, err)
 				req.AddCookie(&http.Cookie{
 					Name:  cookiemaker.AUTH_COOKIE_KEY,
@@ -117,6 +119,9 @@ func TestGetWelcome(t *testing.T) {
 			Check: func(t *testing.T, resp *http.Response) {
 				require.Equal(t, http.StatusOK, resp.StatusCode)
 				body, err := io.ReadAll(resp.Body)
+
+				t.Log(string(body))
+
 				require.NoError(t, err)
 				require.Contains(t, string(body), fmt.Sprintf("<h1>Welcome %s</h1>", user.Email))
 				require.Contains(t, string(body), "<title>Welcome</title>")
@@ -155,7 +160,7 @@ func TestGetWelcome(t *testing.T) {
 			SetupServer: func(store model.Store) *chi.Mux {
 				srvc := service.NewService(store, validator.Validate)
 				apiRepo := api.APIRepo{
-					Version:     "v1",
+					Version:     version,
 					Service:     srvc,
 					View:        view,
 					TokenMaker:  tm,
@@ -164,11 +169,11 @@ func TestGetWelcome(t *testing.T) {
 				}
 				mux := chi.NewMux()
 				mux.Use(tm.BearerAuthenticator)
-				mux.Get(fmt.Sprintf("/%s/apikey", apiRepo.Version), apiRepo.GetAPIKey)
+				mux.Get(fmt.Sprintf("/%s/apikey", version), apiRepo.GetAPIKey)
 				return mux
 			},
 			SetupRequest: func(t *testing.T, url string) *http.Request {
-				req, err := http.NewRequest(http.MethodGet, url+"/v1/apikey", nil)
+				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/%s/apikey", url, version), nil)
 				require.NoError(t, err)
 				req.AddCookie(&http.Cookie{
 					Name:  cookiemaker.AUTH_COOKIE_KEY,

@@ -30,7 +30,8 @@ type AuthRepo struct {
 }
 
 func NewAuthRepo(version string, srvc service.Service, view view.View,
-	tokenmaker tokenmaker.TokenMaker, cookiemaker *cookiemaker.CookieMaker) AuthRepo {
+	tokenmaker tokenmaker.TokenMaker, cookiemaker *cookiemaker.CookieMaker,
+	decoder *form.Decoder) AuthRepo {
 	return AuthRepo{
 		APIVersion:  version,
 		Service:     srvc,
@@ -267,10 +268,6 @@ func (repo AuthRepo) PostChangPassword(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	fmt.Println("UserID  :", userInfo.GetUserID())
-	fmt.Println("Username:", userInfo.GetUsername())
-	fmt.Println(changePasswordInfo)
-
 	if err, _, _ := repo.Service.User().Login(
 		req.Context(), userInfo.GetUsername(),
 		changePasswordInfo.OldPassword); err != nil {
@@ -315,6 +312,6 @@ func (repo AuthRepo) PostChangPassword(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	http.Redirect(w, req, fmt.Sprintf("/%s/welcome", repo.APIVersion), http.StatusSeeOther)
+	http.Redirect(w, req, "welcome", http.StatusSeeOther)
 	return
 }

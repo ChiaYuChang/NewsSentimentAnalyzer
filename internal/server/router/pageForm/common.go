@@ -1,6 +1,7 @@
 package pageform
 
 import (
+	"fmt"
 	"strings"
 	"time"
 )
@@ -24,10 +25,29 @@ func (s SearchIn) String() string {
 	if s.InContent {
 		ss = append(ss, "content")
 	}
+
+	if len(ss) == 3 {
+		return ""
+	}
 	return strings.Join(ss, ",")
 }
 
 type TimeRange struct {
 	Form time.Time `form:"from-time" validate:"lte"`
 	To   time.Time `form:"to-time" validate:"lte"`
+}
+
+func (tr TimeRange) String() string {
+	return tr.ToString("")
+}
+
+func (tr TimeRange) ToString(prefix string) string {
+	sb := strings.Builder{}
+	if !tr.Form.IsZero() {
+		sb.WriteString(fmt.Sprintf("%s- From    : %s\n", prefix, tr.Form.Format(time.DateOnly)))
+	}
+	if !tr.To.IsZero() {
+		sb.WriteString(fmt.Sprintf("%s- To      : %s\n", prefix, tr.To.Format(time.DateOnly)))
+	}
+	return sb.String()
 }

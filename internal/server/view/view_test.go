@@ -1,21 +1,24 @@
 package view_test
 
 import (
+	"bytes"
 	"fmt"
-	"html/template"
-	"os"
+	htemplate "html/template"
 	"strings"
 	"testing"
+	ttemplate "text/template"
 
-	newsdata "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/NEWSDATA"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view/object"
 	"github.com/stretchr/testify/require"
+	"github.com/tdewolff/minify/v2"
+	"github.com/tdewolff/minify/v2/js"
 )
 
 const VIEWS_PATH = "../../../views"
 
 func TestHeadConent(t *testing.T) {
-	tmpl, err := template.
+	tmpl, err := htemplate.
 		New("head").
 		ParseFiles(VIEWS_PATH + "/template/head.gotmpl")
 	require.NoError(t, err)
@@ -65,12 +68,34 @@ func TestHeadConent(t *testing.T) {
 		NewHTMLElement().
 		AddPair("src", "js/func.js")
 
-	err = tmpl.ExecuteTemplate(os.Stdout, "head", head)
-	require.NoError(t, err)
+	t.Run(
+		"Use content",
+		func(t *testing.T) {
+			err = head.Execute(tmpl.Lookup("head"))
+			require.NoError(t, err)
+			require.True(t, head.HasExec())
+			require.Contains(t, head.Content(), `charset="UTF-8"`)
+			require.Contains(t, head.Content(), `ref="stylesheet" href="css/style.css">`)
+			require.Contains(t, head.Content(), `src="js/func.js"`)
+		},
+	)
+
+	t.Run(
+		"Write to buffer",
+		func(t *testing.T) {
+			bf := bytes.NewBufferString("")
+			err = tmpl.ExecuteTemplate(bf, "head", head)
+			require.NoError(t, err)
+
+			require.Contains(t, bf.String(), `charset="UTF-8"`)
+			require.Contains(t, bf.String(), `ref="stylesheet" href="css/style.css">`)
+			require.Contains(t, bf.String(), `src="js/func.js"`)
+		},
+	)
 }
 
 func TestPageWelcome(t *testing.T) {
-	tmpl, err := template.
+	tmpl, err := htemplate.
 		ParseFiles(
 			VIEWS_PATH+"/template/head.gotmpl",
 			VIEWS_PATH+"/template/welcome.gotmpl",
@@ -108,19 +133,18 @@ func TestPageWelcome(t *testing.T) {
 	err = tmpl.ExecuteTemplate(&sb, "welcome.gotmpl", page)
 	require.NoError(t, err)
 	doc = sb.String()
-	require.Contains(t, doc, "href='admin.html'")
+	require.Contains(t, doc, "Admin")
 
 	page.Role = "user"
 	sb = strings.Builder{}
 	err = tmpl.ExecuteTemplate(&sb, "welcome.gotmpl", page)
 	doc = sb.String()
-	t.Log(doc)
 	require.NoError(t, err)
-	require.NotContains(t, doc, "href='admin.html'")
+	require.NotContains(t, doc, "Admin")
 }
 
 func TestPageSignUp(t *testing.T) {
-	tmpl, err := template.
+	tmpl, err := htemplate.
 		ParseFiles(
 			VIEWS_PATH+"/template/head.gotmpl",
 			VIEWS_PATH+"/template/signup.gotmpl",
@@ -168,7 +192,7 @@ func TestPageSignUp(t *testing.T) {
 }
 
 func TestPageLogin(t *testing.T) {
-	tmpl, err := template.
+	tmpl, err := htemplate.
 		ParseFiles(
 			VIEWS_PATH+"/template/head.gotmpl",
 			VIEWS_PATH+"/template/login.gotmpl",
@@ -240,49 +264,31 @@ func TestPageLogin(t *testing.T) {
 	}
 }
 
-func TestJS(t *testing.T) {
-	tmpl, err := template.
-		New("head").
+func TestMinifyJS(t *testing.T) {
+	tmpl, err := ttemplate.
+		New("selector.gotmpl").
 		ParseFiles(VIEWS_PATH + "/template/js/selector.gotmpl")
 	require.NoError(t, err)
 	require.NotNil(t, tmpl)
 
-	opts := []object.SelectOpts{
-		{
-			OptMap:         newsdata.CatList,
-			MaxDiv:         5,
-			DefaultValue:   "",
-			DefaultText:    "All",
-			InsertButtonId: "iCatBtn",
-			DeleteButtonId: "dCatBtn",
-			PositionId:     "category",
-			AlertMessage:   "haha",
-		},
-		{
-			OptMap:         newsdata.CtryList,
-			MaxDiv:         5,
-			DefaultValue:   "",
-			DefaultText:    "All",
-			InsertButtonId: "iCtryBtn",
-			DeleteButtonId: "dCtryBtn",
-			PositionId:     "country",
-			AlertMessage:   "haha",
-		},
-		{
-			OptMap:         newsdata.LangList,
-			MaxDiv:         5,
-			DefaultValue:   "",
-			DefaultText:    "All",
-			InsertButtonId: "iLangBtn",
-			DeleteButtonId: "dLangBtn",
-			PositionId:     "language",
-			AlertMessage:   "haha",
-		},
-	}
+	for _, opts := range [][]object.SelectOpts{
+		view.NEWSDATASelectOpts,
+		view.GnewsSelectOpts,
+		view.NewsAPISelectOpts,
+	} {
 
-	sb := &strings.Builder{}
-	tmpl.ExecuteTemplate(sb, "selector.gotmpl", opts)
-	t.Log(sb.String())
+		bf := bytes.NewBufferString("")
+		err = tmpl.ExecuteTemplate(bf, "selector.gotmpl", opts)
+		require.NoError(t, err)
+
+		m := minify.New()
+		m.AddFunc("application/javascript", js.Minify)
+
+		sb := &strings.Builder{}
+		err = m.Minify("application/javascript", sb, bf)
+		require.NoError(t, err)
+		require.NotEmpty(t, sb.String())
+	}
 }
 
 // func TestAPIEndpointsPage(t *testing.T) {

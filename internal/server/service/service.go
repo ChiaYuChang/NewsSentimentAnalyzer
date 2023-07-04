@@ -29,6 +29,10 @@ func NewServiceWithDefautlVal(store model.Store) Service {
 	return NewService(store, validator.Validate)
 }
 
+func (srvc Service) Close() error {
+	return srvc.store.Close()
+}
+
 type authService Service
 
 func (srvc Service) Auth() authService {

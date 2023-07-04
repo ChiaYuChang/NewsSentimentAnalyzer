@@ -19,6 +19,7 @@ import (
 	tokenmaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/tokenMaker"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/form"
+	val "github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -28,19 +29,20 @@ type APIRepo struct {
 	View        view.View
 	TokenMaker  tokenmaker.TokenMaker
 	CookieMaker *cookiemaker.CookieMaker
+	Validate    *val.Validate
 	FormDecoder *form.Decoder
 }
 
-func NewAPIRepo(ver string, srvc service.Service,
-	view view.View, tokenmaker tokenmaker.TokenMaker,
-	cookiemaker *cookiemaker.CookieMaker) APIRepo {
+func NewAPIRepo(ver string, srvc service.Service, view view.View,
+	tokenmaker tokenmaker.TokenMaker, cookiemaker *cookiemaker.CookieMaker,
+	decoder *form.Decoder) APIRepo {
 	return APIRepo{
 		Version:     ver,
 		Service:     srvc,
 		View:        view,
 		TokenMaker:  tokenmaker,
 		CookieMaker: cookiemaker,
-		FormDecoder: form.NewDecoder(),
+		FormDecoder: decoder,
 	}
 }
 
@@ -56,7 +58,7 @@ func (repo APIRepo) GetWelcome(w http.ResponseWriter, req *http.Request) {
 
 	pageData := object.WelcomePage{
 		Page: object.Page{
-			HeadConent: view.NewHeadContent(),
+			HeadConent: view.SharedHeadContent,
 			Title:      "Welcome",
 		},
 		Name:             payload.GetUsername(),
@@ -115,7 +117,7 @@ func (repo APIRepo) GetAPIKey(w http.ResponseWriter, req *http.Request) {
 
 	pageData := object.APIKeyPage{
 		Page: object.Page{
-			HeadConent: view.NewHeadContent(),
+			HeadConent: view.SharedHeadContent,
 			Title:      "API Key",
 		},
 		APIVersion:   repo.Version,
@@ -210,10 +212,10 @@ func (repo APIRepo) PostAPIKey(w http.ResponseWriter, req *http.Request) {
 
 	var apikey pageform.APIKeyPost
 	if err := repo.FormDecoder.Decode(&apikey, req.PostForm); err != nil {
-		fmt.Println(err)
 		return
 	}
 
+	apikey.Key = strings.TrimSpace(apikey.Key)
 	if err := validator.Validate.Struct(apikey); err != nil {
 		ecErr := *ec.MustGetEcErr(ec.ECBadRequest)
 		ecErr.WithDetails(err.Error())
@@ -263,7 +265,7 @@ func (repo APIRepo) GetEndpoints(w http.ResponseWriter, req *http.Request) {
 
 	pageData := object.APIEndpointFromDBModel(
 		object.Page{
-			HeadConent: view.NewHeadContent(),
+			HeadConent: view.SharedHeadContent,
 			Title:      "Endpoints",
 		},
 		repo.Version,
@@ -286,7 +288,7 @@ func (repo APIRepo) GetAdmin(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if userInfo.GetRole() != tokenmaker.RAdmin {
-		http.Redirect(w, req, "/v1/forbidden", http.StatusSeeOther)
+		http.Redirect(w, req, "forbidden", http.StatusSeeOther)
 	}
 
 	pageData := object.APIAdminPage{
@@ -297,4 +299,8 @@ func (repo APIRepo) GetAdmin(w http.ResponseWriter, req *http.Request) {
 	}
 	w.WriteHeader(http.StatusOK)
 	_ = repo.View.ExecuteTemplate(w, "admin.gotmpl", pageData)
+}
+
+func (repo APIRepo) EndpointRepo() EndpointRepo {
+	return NewEndpointRepo(repo, validator.Validate)
 }
