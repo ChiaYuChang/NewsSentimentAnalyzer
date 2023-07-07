@@ -5,37 +5,65 @@ import (
 	"net/url"
 	"reflect"
 
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/validator"
 	"github.com/go-playground/form"
 	val "github.com/go-playground/validator/v10"
 )
 
+func init() {
+	validator.Validate.RegisterValidation(
+		LocationValidator.Tag(),
+		LocationValidator.ValFunc(),
+	)
+}
+
 var ErrUnregisteredPageForm = errors.New("unregistered pageform")
 
-type pageFormRepoKey struct {
-	API      string
-	Endpoint string
+type pageFormRepoKey [2]string
+
+func NewPageFormRepoKey(api, endpoint string) pageFormRepoKey {
+	return pageFormRepoKey{api, endpoint}
+}
+
+func (k pageFormRepoKey) API() string {
+	return k[0]
+}
+
+func (k pageFormRepoKey) Endpoint() string {
+	return k[1]
+}
+
+var PageFormRepo = make(pageFormRepo)
+
+func Add(pf PageForm) {
+	PageFormRepo.Add(pf)
+}
+
+func Set(api, endpoint string, pf PageForm) {
+	PageFormRepo.Set(api, endpoint, pf)
+}
+
+func Get(api, endpoint string) (PageForm, error) {
+	return PageFormRepo.Get(api, endpoint)
 }
 
 type pageFormRepo map[pageFormRepoKey]PageForm
 
 func (pfr pageFormRepo) Add(pf PageForm) {
-	pfr[pageFormRepoKey{pf.API(), pf.Endpoint()}] = pf
+	pfr[NewPageFormRepoKey(pf.API(), pf.Endpoint())] = pf
 }
 
 func (pfr pageFormRepo) Set(api, endpoint string, pf PageForm) {
-	pfr[pageFormRepoKey{api, endpoint}] = pf
+	pfr[NewPageFormRepoKey(api, endpoint)] = pf
 }
 
 func (pfr pageFormRepo) Get(api, endpoint string) (PageForm, error) {
-	pf, ok := pfr[pageFormRepoKey{api, endpoint}]
+	pf, ok := pfr[NewPageFormRepoKey(api, endpoint)]
 	if !ok {
 		return nil, ErrUnregisteredPageForm
 	}
-
 	return reflect.New(reflect.TypeOf(pf)).Interface().(PageForm), nil
 }
-
-var PageFormRepo = make(pageFormRepo)
 
 type PageForm interface {
 	Endpoint() string

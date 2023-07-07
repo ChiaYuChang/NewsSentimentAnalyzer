@@ -4,7 +4,17 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+
+	cli "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client"
+	srv "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/GNews"
 )
+
+func init() {
+	cli.PageFormHandlerRepo.RegisterPageForm(
+		srv.GNewsHeadlines{}, HandleHeadlines)
+	cli.PageFormHandlerRepo.RegisterPageForm(
+		srv.GNewsSearch{}, HandleSearch)
+}
 
 const (
 	API_ROOT            = "https://gnews.io/api"

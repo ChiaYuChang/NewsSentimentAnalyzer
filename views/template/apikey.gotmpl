@@ -58,11 +58,7 @@
                     <tr>
                         <td>
                             <div class="row">
-                                {{if eq $api.Icon ""}}
-                                <img src="/static/image/icon_Default.svg" alt="OpenAI" class="api-logo-icon">
-                                {{else}}
-                                <img src="{{$api.Icon}}" alt="{{$api.Name}}" class="api-logo-icon">
-                                {{end}}
+                                <img src="/static/image/{{$api.Icon}}" alt="{{$api.Name}}" class="api-logo-icon">
                                 <span>{{$api.Name}}</span>
                             </div>
                         </td>
@@ -77,11 +73,7 @@
                     <tr>
                         <td>
                             <div class="row">
-                                {{if eq $api.Icon ""}}
-                                <img src="/static/image/icon_Default.svg" alt="OpenAI" class="api-logo-icon">
-                                {{else}}
-                                <img src="{{$api.Icon}}" alt="{{$api.Name}}" class="api-logo-icon">
-                                {{end}}
+                                <img src="/static/image/{{$api.Icon}}" alt="{{$api.Name}}" class="api-logo-icon">
                                 <span>{{$api.Name}}</span>
                             </div>
                         </td>

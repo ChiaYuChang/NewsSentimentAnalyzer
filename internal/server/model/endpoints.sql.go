@@ -7,8 +7,6 @@ package model
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const countEndpoint = `-- name: CountEndpoint :one
@@ -126,16 +124,16 @@ SELECT ep.id AS endpoint_id,ep.name AS endpoint_name, ep.api_id, ep.template_nam
 `
 
 type ListEndpointByOwnerRow struct {
-	EndpointID   int32       `json:"endpoint_id"`
-	EndpointName string      `json:"endpoint_name"`
-	ApiID        int16       `json:"api_id"`
-	TemplateName string      `json:"template_name"`
-	Key          string      `json:"key"`
-	ApiName      string      `json:"api_name"`
-	Type         ApiType     `json:"type"`
-	Icon         pgtype.Text `json:"icon"`
-	Image        pgtype.Text `json:"image"`
-	DocumentUrl  string      `json:"document_url"`
+	EndpointID   int32   `json:"endpoint_id"`
+	EndpointName string  `json:"endpoint_name"`
+	ApiID        int16   `json:"api_id"`
+	TemplateName string  `json:"template_name"`
+	Key          string  `json:"key"`
+	ApiName      string  `json:"api_name"`
+	Type         ApiType `json:"type"`
+	Icon         string  `json:"icon"`
+	Image        string  `json:"image"`
+	DocumentUrl  string  `json:"document_url"`
 }
 
 func (q *Queries) ListEndpointByOwner(ctx context.Context, owner int32) ([]*ListEndpointByOwnerRow, error) {

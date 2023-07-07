@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client"
+	cli "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client"
 	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm"
 	srv "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/GNews"
 )
@@ -33,21 +33,22 @@ const (
 type Query struct {
 	Apikey   string
 	Endpoint string
-	client.Params
+	cli.Params
 }
 
 func newQuery(apikey string) *Query {
 	return &Query{
 		Apikey: apikey,
-		Params: client.NewParams(),
+		Params: cli.NewParams(),
 	}
 }
 
-func HandleHeadlines(apikey string, pf pageform.PageForm) (*Query, error) {
+func HandleHeadlines(apikey string, pf pageform.PageForm) (cli.Query, error) {
 	data, ok := pf.(srv.GNewsHeadlines)
 	if !ok {
-		return nil, client.ErrTypeAssertionFailure
+		return nil, cli.ErrTypeAssertionFailure
 	}
+	data.TimeRange.ToUTP()
 
 	q, err := newQuery(apikey).
 		SetEndpoint(data.Endpoint())
@@ -64,11 +65,12 @@ func HandleHeadlines(apikey string, pf pageform.PageForm) (*Query, error) {
 	return q, nil
 }
 
-func HandleSearch(apikey string, pf pageform.PageForm) (*Query, error) {
+func HandleSearch(apikey string, pf pageform.PageForm) (cli.Query, error) {
 	data, ok := pf.(srv.GNewsSearch)
 	if !ok {
-		return nil, client.ErrTypeAssertionFailure
+		return nil, cli.ErrTypeAssertionFailure
 	}
+	data.TimeRange.ToUTP()
 
 	q, err := newQuery(apikey).
 		SetEndpoint(data.Endpoint())
@@ -192,4 +194,16 @@ func (q *Query) ToRequestURL(u *url.URL) string {
 	u = u.JoinPath(string(q.Endpoint))
 	u.RawQuery = v.Encode()
 	return u.String()
+}
+
+func (q *Query) ToBeautifulJSON(prefix, indent string) ([]byte, error) {
+	return q.Params.ToBeautifulJSON(prefix, indent)
+}
+
+func (q *Query) ToJSON() ([]byte, error) {
+	return q.Params.ToJSON()
+}
+
+func (q *Query) ToQueryString() string {
+	return q.Params.ToQueryString()
 }

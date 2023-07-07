@@ -130,9 +130,9 @@ CREATE TABLE public.apis (
     id smallint NOT NULL,
     name character varying(20) NOT NULL,
     type public.api_type NOT NULL,
-    image character varying(128),
-    icon character varying(128),
-    document_url character varying(128) NOT NULL,
+    image character varying(128) DEFAULT 'logo_Default.svg'::character varying NOT NULL,
+    icon character varying(128) DEFAULT 'static/image/icon_Default.svg'::character varying NOT NULL,
+    document_url character varying(128) DEFAULT '#'::character varying NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     deleted_at timestamp with time zone
@@ -213,7 +213,7 @@ CREATE TABLE public.jobs (
     src_api_id smallint NOT NULL,
     src_query text NOT NULL,
     llm_api_id smallint NOT NULL,
-    llm_query text NOT NULL,
+    llm_query json NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     deleted_at timestamp with time zone

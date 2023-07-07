@@ -79,7 +79,7 @@ func APIKeyFromDBModel(page Page, rows []*model.ListAPIKeyRow) APIKeyPage {
 		(*which) = append((*which), &APIKey{
 			ID:   row.ApiID,
 			Name: row.Name,
-			Icon: row.Image.String,
+			Icon: row.Image,
 			Key:  row.Key,
 		})
 	}
@@ -131,7 +131,7 @@ func APIEndpointFromDBModel(page Page, apiVer string, rows []*model.ListEndpoint
 			AddPair("src", path.Join(
 				"/static",
 				global.AppVar.Server.RoutePattern.StaticFiles.Image,
-				row.Image.String,
+				row.Image,
 			)).
 			AddPair("alt", row.ApiName).
 			AddPair("class", "api-logo api-logo-large")

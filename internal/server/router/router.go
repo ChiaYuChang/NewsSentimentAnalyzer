@@ -31,7 +31,7 @@ func NewRouter(srvc service.Service, vw view.View, filesystem http.FileSystem,
 
 	formDecoder := form.NewDecoder()
 	formDecoder.RegisterCustomTypeFunc(func(vals []string) (interface{}, error) {
-		return time.Parse("2006-01-02", vals[0])
+		return time.Parse(time.DateOnly, vals[0])
 	}, time.Time{})
 
 	auth := auth.NewAuthRepo("v1", srvc, vw, tmaker, cmaker, formDecoder)
@@ -47,8 +47,8 @@ func NewRouter(srvc service.Service, vw view.View, filesystem http.FileSystem,
 	wg.Add(1)
 	go func(epRepo api.EndpointRepo, epChan chan *model.ListAllEndpointRow, wg *sync.WaitGroup) {
 		for ep := range epChan {
-			apiName, endpointName, templateName := ep.ApiName, ep.EndpointName, ep.TemplateName
-			_ = epRepo.RegisterEndpointsPageView(apiName, endpointName, templateName)
+			apiName, apiID, endpointName, templateName := ep.ApiName, ep.ApiID, ep.EndpointName, ep.TemplateName
+			_ = epRepo.RegisterEndpointsPageView(apiName, apiID, endpointName, templateName)
 		}
 		wg.Done()
 	}(epRepo, epChan, wg)

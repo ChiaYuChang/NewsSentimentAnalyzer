@@ -5,8 +5,18 @@ import (
 	"net/http"
 	"net/url"
 
+	cli "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client"
 	srv "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/NEWSDATA"
 )
+
+func init() {
+	cli.PageFormHandlerRepo.RegisterPageForm(
+		srv.NEWSDATAIOLatestNews{}, HandleLatestNewsQuery)
+	cli.PageFormHandlerRepo.RegisterPageForm(
+		srv.NEWSDATAIONewsArchive{}, HandleNewsArchive)
+	cli.PageFormHandlerRepo.RegisterPageForm(
+		srv.NEWSDATAIONewsSources{}, HandleNewsSources)
+}
 
 const (
 	API_ROOT             = "https://newsdata.io/api"

@@ -8,7 +8,12 @@ import (
 	"net/http"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client"
+	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/GNews"
+	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/NEWSDATA"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
 	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view/object"
 	ec "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/errorCode"
@@ -40,7 +45,7 @@ type EndpointRepo struct {
 	apiRepo  APIRepo
 	val      *val.Validate
 	PageView map[repoMapKey][]byte
-	PageForm map[repoMapKey]pageform.PageForm
+	ApiID    map[repoMapKey]int16
 }
 
 func NewEndpointRepo(apiRepo APIRepo, v *val.Validate) EndpointRepo {
@@ -48,10 +53,11 @@ func NewEndpointRepo(apiRepo APIRepo, v *val.Validate) EndpointRepo {
 		apiRepo:  apiRepo,
 		val:      v,
 		PageView: make(map[repoMapKey][]byte),
+		ApiID:    make(map[repoMapKey]int16),
 	}
 }
 
-func (repo *EndpointRepo) RegisterEndpointsPageView(apiName, endpointName, templateName string) error {
+func (repo *EndpointRepo) RegisterEndpointsPageView(apiName string, apiId int16, endpointName, templateName string) error {
 	pageData := object.APIEndpointPage{
 		Page: object.Page{
 			HeadConent: view.SharedHeadContent,
@@ -70,6 +76,7 @@ func (repo *EndpointRepo) RegisterEndpointsPageView(apiName, endpointName, templ
 
 	key := newRepoMapKey(apiName, endpointName)
 	repo.PageView[key] = buffer.Bytes()
+	repo.ApiID[key] = apiId
 	return nil
 }
 
@@ -96,7 +103,7 @@ func (repo EndpointRepo) GetAPIEndpoints(key repoMapKey) (http.HandlerFunc, erro
 }
 
 func (repo EndpointRepo) PostAPIEndpoints(key repoMapKey) (http.HandlerFunc, error) {
-	pf, err := pageform.PageFormRepo.Get(key.APIName(), key.EndpointName())
+	pf, err := pageform.Get(key.APIName(), key.EndpointName())
 	if err != nil || pf == nil {
 		ecErr := ec.MustGetEcErr(ec.ECServerError)
 		if err != nil {
@@ -104,10 +111,11 @@ func (repo EndpointRepo) PostAPIEndpoints(key repoMapKey) (http.HandlerFunc, err
 			ecErr.WithDetails(key.String() + " not found")
 		}
 		if pf == nil {
-			ecErr.WithDetails("pf is nil")
+			ecErr.WithDetails("pageform object is nil")
 		}
 		return nil, ecErr
 	}
+
 	return func(w http.ResponseWriter, req *http.Request) {
 		postEndpoints(repo, pf, w, req)
 	}, nil
@@ -137,14 +145,35 @@ func postEndpoints(repo EndpointRepo, obj pageform.PageForm, w http.ResponseWrit
 	}
 	fmt.Println("Decode and Validate OK")
 
+	apikey, _ := repo.apiRepo.Service.APIKey().Get(
+		req.Context(), &service.APIKeyGetRequest{
+			Owner: userInfo.GetUserID(),
+			ApiID: repo.ApiID[newRepoMapKey(obj.API(), obj.Endpoint())],
+		},
+	)
+
+	q, err := client.NewQueryFromPageFrom(apikey.Key, obj)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	repo.apiRepo.Service.Job().Create(
+		req.Context(), &service.JobCreateRequest{
+			Owner:    userInfo.GetUserID(),
+			Status:   string(model.JobStatusCreated),
+			SrcApiID: apikey.ApiID,
+			SrcQuery: q.ToQueryString(),
+		},
+	)
+
 	fmt.Fprintf(w,
-		"User: %s(%s)\nAPI: %s\nEndpoint: %s\n%s\n",
+		"User: %s(%s)\nAPI: %s\nEndpoint: %s\nQuery: %s\n%s\n",
 		userInfo.GetUsername(),
 		userInfo.GetRole(),
 		obj.API(),
 		obj.Endpoint(),
+		q.ToQueryString(),
 		obj.String(),
 	)
-
 	return
 }

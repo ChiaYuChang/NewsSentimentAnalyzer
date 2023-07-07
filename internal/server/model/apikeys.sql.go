@@ -7,8 +7,6 @@ package model
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const cleanUpAPIKey = `-- name: CleanUpAPIKey :execrows
@@ -114,14 +112,14 @@ SELECT k.id AS api_key_id, k.owner, k.key,
 `
 
 type ListAPIKeyRow struct {
-	ApiKeyID int32       `json:"api_key_id"`
-	Owner    int32       `json:"owner"`
-	Key      string      `json:"key"`
-	ApiID    int16       `json:"api_id"`
-	Type     ApiType     `json:"type"`
-	Name     string      `json:"name"`
-	Image    pgtype.Text `json:"image"`
-	Icon     pgtype.Text `json:"icon"`
+	ApiKeyID int32   `json:"api_key_id"`
+	Owner    int32   `json:"owner"`
+	Key      string  `json:"key"`
+	ApiID    int16   `json:"api_id"`
+	Type     ApiType `json:"type"`
+	Name     string  `json:"name"`
+	Image    string  `json:"image"`
+	Icon     string  `json:"icon"`
 }
 
 func (q *Queries) ListAPIKey(ctx context.Context, owner int32) ([]*ListAPIKeyRow, error) {

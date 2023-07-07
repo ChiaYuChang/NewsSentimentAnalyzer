@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client"
+	cli "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client"
 	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm"
 	newsdata "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/NEWSDATA"
 )
@@ -27,7 +27,7 @@ const (
 type Query struct {
 	Apikey   string
 	Endpoint string
-	client.Params
+	cli.Params
 	Page     string
 	NextPage string
 }
@@ -35,14 +35,14 @@ type Query struct {
 func newQuery(apikey string) *Query {
 	return &Query{
 		Apikey: apikey,
-		Params: client.NewParams(),
+		Params: cli.NewParams(),
 	}
 }
 
-func HandleLatestNewsQuery(apikey string, pf pageform.PageForm) (*Query, error) {
+func HandleLatestNewsQuery(apikey string, pf pageform.PageForm) (cli.Query, error) {
 	data, ok := pf.(newsdata.NEWSDATAIOLatestNews)
 	if !ok {
-		return nil, client.ErrTypeAssertionFailure
+		return nil, cli.ErrTypeAssertionFailure
 	}
 
 	q, err := newQuery(apikey).
@@ -60,11 +60,12 @@ func HandleLatestNewsQuery(apikey string, pf pageform.PageForm) (*Query, error) 
 	return q, nil
 }
 
-func HandleNewsArchive(apikey string, pf pageform.PageForm) (*Query, error) {
+func HandleNewsArchive(apikey string, pf pageform.PageForm) (cli.Query, error) {
 	data, ok := pf.(newsdata.NEWSDATAIONewsArchive)
 	if !ok {
-		return nil, client.ErrTypeAssertionFailure
+		return nil, cli.ErrTypeAssertionFailure
 	}
+	data.TimeRange.ToUTP()
 
 	q, err := newQuery(apikey).
 		SetEndpoint(data.Endpoint())
@@ -83,7 +84,7 @@ func HandleNewsArchive(apikey string, pf pageform.PageForm) (*Query, error) {
 	return q, nil
 }
 
-func HandleNewsSources(apikey string, pf pageform.PageForm) (*Query, error) {
+func HandleNewsSources(apikey string, pf pageform.PageForm) (cli.Query, error) {
 	data := pf.(newsdata.NEWSDATAIONewsSources)
 
 	q, err := newQuery(apikey).SetEndpoint(data.Endpoint())
@@ -178,4 +179,16 @@ func (q *Query) ToRequestURL(u *url.URL) string {
 	u = u.JoinPath(string(q.Endpoint))
 	u.RawQuery = v.Encode()
 	return u.String()
+}
+
+func (q *Query) ToBeautifulJSON(prefix, indent string) ([]byte, error) {
+	return q.Params.ToBeautifulJSON(prefix, indent)
+}
+
+func (q *Query) ToJSON() ([]byte, error) {
+	return q.Params.ToJSON()
+}
+
+func (q *Query) ToQueryString() string {
+	return q.Params.ToQueryString()
 }

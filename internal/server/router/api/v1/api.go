@@ -131,11 +131,7 @@ func (repo APIRepo) GetAPIKey(w http.ResponseWriter, req *http.Request) {
 			ID:   a.ApiID,
 			Name: a.Name,
 			Key:  a.Key,
-			Icon: "/static/image/logo_API_Default.svg",
-		}
-
-		if a.Image.Valid {
-			obj.Icon = a.Icon.String
+			Icon: a.Icon,
 		}
 
 		switch a.Type {

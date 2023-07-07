@@ -189,8 +189,8 @@ type Api struct {
 	ID          int16              `json:"id"`
 	Name        string             `json:"name"`
 	Type        ApiType            `json:"type"`
-	Image       pgtype.Text        `json:"image"`
-	Icon        pgtype.Text        `json:"icon"`
+	Image       string             `json:"image"`
+	Icon        string             `json:"icon"`
 	DocumentUrl string             `json:"document_url"`
 	CreatedAt   pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`

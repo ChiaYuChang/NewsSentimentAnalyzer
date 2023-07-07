@@ -17,3 +17,9 @@ sql:
         output_db_file_name: db.go
         output_models_file_name: model.go
         output_querier_file_name: querier.go
+        overrides:
+          - db_type: "json"
+            go_type: "string"
+          - db_type: "json"
+            go_type: "string"
+            nullable: true

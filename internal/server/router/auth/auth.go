@@ -38,7 +38,7 @@ func NewAuthRepo(version string, srvc service.Service, view view.View,
 		View:        view,
 		TokenMaker:  tokenmaker,
 		CookieMaker: cookiemaker,
-		FormDecoder: form.NewDecoder(),
+		FormDecoder: decoder,
 	}
 }
 

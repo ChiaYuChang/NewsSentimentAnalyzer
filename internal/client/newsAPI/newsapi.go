@@ -71,11 +71,6 @@ type Client struct {
 	*http.Client
 }
 
-// func NewDefaultClient() Client {
-// 	// using default client
-// 	return NewClient(API_KEY, http.DefaultClient)
-// }
-
 func NewClient(apiKey string, cli *http.Client) Client {
 	return Client{apiKey, cli}
 }

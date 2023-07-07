@@ -20,7 +20,7 @@ func init() {
 	}
 
 	for _, pf := range pfs {
-		pageform.PageFormRepo.Add(pf)
+		pageform.Add(pf)
 	}
 
 	for _, v := range []validator.Enmus[string]{

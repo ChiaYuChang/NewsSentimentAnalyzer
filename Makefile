@@ -5,7 +5,7 @@ APP_REPOSITORY="github.com/ChiaYuChang/NewsSentimentAnalyzer"
 POSTGRESQL_URL="postgres://${POSTGRES_USERNAME}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT}/${POSTGRES_DB_NAME}_${STATE}?sslmode=disable"
 
 build:
-	@go build -o ${BIN_PATH} ./main.go
+	@CGO_ENABLED=0 GOOS=linux go build -o ${BIN_PATH}/nsa ./main.go
 
 run:
 	@go run ./main.go

@@ -1,11 +1,11 @@
 INSERT INTO endpoints (
     "name", "api_id", "template_name"
 ) VALUES
-    ('Latest News'  , 1, 'NEWSDATA-latest'),
-    ('News Archive' , 1, 'NEWSDATA-archive'),
-    ('News Sources' , 1, 'NEWSDATA-sources'),
-    ('Search'       , 2, 'GNews-search'),
-    ('Top Headlines', 2, 'GNews-headlines'),
-    ('Everything'   , 3, 'NewsAPI-everything'),
-    ('Top Headlines', 3, 'NewsAPI-top-headlines'),
-    ('Sources'      , 3, 'NewsAPI-sources');
+    ('Latest News'  , 1, 'NEWSDATA.IO-latest_news.gotmpl'),
+    ('News Archive' , 1, 'NEWSDATA.IO-news_archive.gotmpl'),
+    ('News Sources' , 1, 'NEWSDATA.IO-news_sources.gotmpl'),
+    ('Search'       , 2, 'GNews-search.gotmpl'),
+    ('Top Headlines', 2, 'GNews-top_headlines.gotmpl'),
+    ('Everything'   , 3, 'NewsAPI-everything.gotmpl'),
+    ('Top Headlines', 3, 'NewsAPI-top_headlines.gotmpl'),
+    ('Sources'      , 3, 'NewsAPI-sources.gotmpl');
