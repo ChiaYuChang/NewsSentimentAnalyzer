@@ -130,7 +130,7 @@ func APIEndpointFromDBModel(page Page, apiVer string, rows []*model.ListEndpoint
 			Image.
 			AddPair("src", path.Join(
 				"/static",
-				global.AppVar.Server.RoutePattern.StaticFiles.Image,
+				global.AppVar.App.StaticFile.SubFolder["image"],
 				row.Image,
 			)).
 			AddPair("alt", row.ApiName).
@@ -144,7 +144,7 @@ func APIEndpointFromDBModel(page Page, apiVer string, rows []*model.ListEndpoint
 			AddPair("class", "btn").
 			AddPair("onclick", fmt.Sprintf(
 				"location.href='.%s/%s'",
-				global.AppVar.Server.RoutePattern.Pages["endpoints"],
+				global.AppVar.App.RoutePattern.Page["endpoints"],
 				fmt.Sprintf("%s-%s", row.ApiName, row.EndpointName))).
 			// AddPair("onclick", fmt.Sprintf(
 			// 	"location.href='.%s/%s'",

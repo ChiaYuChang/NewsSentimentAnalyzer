@@ -442,7 +442,7 @@ var Country = map[string]string{
 	Namibia:              "Namibia",
 	Nepal:                "Nepal",
 	Netherland:           "Netherland",
-	Newzealand:           "Newzealand",
+	Newzealand:           "New Zealand",
 	Niger:                "Niger",
 	Nigeria:              "Nigeria",
 	Northkorea:           "North Korea",

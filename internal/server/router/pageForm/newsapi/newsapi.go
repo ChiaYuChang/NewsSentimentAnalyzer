@@ -254,7 +254,7 @@ var Country = map[string]string{
 	Nigeria:            "Nigeria",
 	Netherlands:        "Netherlands",
 	Norway:             "Norway",
-	NewZealand:         "NewZealand",
+	NewZealand:         "New Zealand",
 	Philippines:        "Philippines",
 	Poland:             "Poland",
 	Portugal:           "Portugal",

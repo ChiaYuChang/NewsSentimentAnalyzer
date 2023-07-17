@@ -1,179 +1,105 @@
 package global
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"encoding/json"
-	"fmt"
-	"io"
-	"os"
-	"strings"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
+	"go.uber.org/ratelimit"
 )
 
 type Option struct {
-	TokenMaker        JWTOption               `json:"tokenmaker"`
-	PasswordValidator PasswordValidatorOption `json:"password_validator"`
-	Server            ServerOption            `json:"server"`
+	Token    TokenMakerOption `mapstructure:"token"`
+	Password PasswordOption   `mapstructure:"password"`
+	App      AppOption        `mapstructure:"app"`
 }
 
-func (o Option) String() string {
-	sb := strings.Builder{}
-	sb.WriteString("Option:\n")
-	sb.WriteString("- " + o.TokenMaker.String())
-	sb.WriteString("- " + o.PasswordValidator.String())
-	sb.WriteString("- " + o.Server.String())
-	return sb.String()
+func (opt Option) String() string {
+	o, _ := json.MarshalIndent(opt, "", "\t")
+	return string(o)
 }
 
-func ReadOption(path string) (*Option, error) {
-	f, err := os.Open(path)
+type TokenMakerOption struct {
+	secret      []byte          `mapstructure:"-"`
+	Signature   string          `mapstructure:"signature"`
+	SignMethod  TokenSignMethod `mapstructure:"signMethod"`
+	ExpireAfter time.Duration   `mapstructure:"expireAfter"`
+	ValidAfter  time.Duration   `mapstructure:"validAfter"`
+	Issuer      string          `mapstructure:"issuer,omitempty"`
+	Subject     string          `mapstructure:"subject,omitempty"`
+	Audience    string          `mapstructure:"audience,omitempty"`
+	JWTId       string          `mapstructure:"id,omitempty"`
+}
+
+type TokenSignMethod struct {
+	Algorthm string `mapstructure:"algorithm"`
+	Size     int    `mapstructure:"size"`
+}
+
+func (tknOpt TokenMakerOption) String() string {
+	opt, err := json.MarshalIndent(tknOpt, "", "\t")
 	if err != nil {
-		return nil, fmt.Errorf("error while opening option.json: %w", err)
+		return ""
 	}
-	defer f.Close()
+	return string(opt)
+}
 
-	bs, err := io.ReadAll(f)
+func (tknOpt TokenMakerOption) Secret() []byte {
+	cpSrct := make([]byte, len(tknOpt.secret))
+	copy(cpSrct, tknOpt.secret)
+	return cpSrct
+}
+
+func (tknOpt *TokenMakerOption) SetSecret(secret []byte) {
+	tknOpt.secret = secret
+}
+
+type RateLimit struct {
+	Per time.Duration `mapstructure:"per"`
+}
+
+func (rlOpt RateLimit) RateLimitOption() ratelimit.Option {
+	return ratelimit.Per(rlOpt.Per)
+}
+
+type PasswordOption struct {
+	ASCIIOnly     bool `mapstructure:"asciiOnly"`
+	MinLength     int  `mapstructure:"minLength"`
+	MaxLength     int  `mapstructure:"maxLength"`
+	MinNumDigit   int  `mapstructure:"minNumDigit"`
+	MinNumUpper   int  `mapstructure:"minNumUpper"`
+	MinNumLower   int  `mapstructure:"minNumLower"`
+	MinNumSpecial int  `mapstructure:"minNumSpecial"`
+}
+
+func (pwdOpt PasswordOption) String() string {
+	opt, err := json.MarshalIndent(pwdOpt, "", "\t")
 	if err != nil {
-		return nil, fmt.Errorf("error while reading token maker option: %w", err)
+		return ""
 	}
-
-	var option Option
-	err = json.Unmarshal(bs, &option)
-	if err != nil {
-		return nil, fmt.Errorf("error while unmarshal option: %w", err)
-	}
-
-	return &option, nil
+	return string(opt)
 }
 
-type JWTOption struct {
-	Secret          []byte            `json:"-"`
-	SecretLength    int               `json:"secret_len"`
-	ExpireAfterHour int               `json:"expire_after"`
-	ValidAfterHour  int               `json:"valid_after"`
-	SignMethod      jwt.SigningMethod `json:"-"`
-}
-
-func (jwtOpt JWTOption) String() string {
-	sb := strings.Builder{}
-
-	sb.WriteString("JWT Opions:\n")
-	if jwtOpt.Secret == nil || len(jwtOpt.Secret) == 0 {
-		sb.WriteString("\t- Secret           : [[:EMPTY:]]\n")
-	} else {
-		hexSrct := jwtOpt.GetHexSecretString()
-		sb.WriteString(fmt.Sprintf("\t- Secret           : %s...\n", hexSrct[:80]))
-	}
-
-	sb.WriteString(fmt.Sprintf("\t- Expire After     : %s\n", jwtOpt.ExpireAfter()))
-	sb.WriteString(fmt.Sprintf("\t- Valid After      : %s\n", jwtOpt.ValidAfter()))
-
-	if jwtOpt.SignMethod == nil {
-		sb.WriteString("\t- Sign Method      : [[:EMPTY:]]\n")
-	} else {
-		sb.WriteString(fmt.Sprintf("\t- Sign Method      : %s\n", jwtOpt.SignMethod.Alg()))
-	}
-	return sb.String()
-}
-
-func (jwtOpt JWTOption) ExpireAfter() time.Duration {
-	return time.Duration(jwtOpt.ExpireAfterHour) * time.Hour
-}
-
-func (jwtOpt JWTOption) ValidAfter() time.Duration {
-	return time.Duration(jwtOpt.ValidAfterHour) * time.Hour
-}
-
-func (jwtOpt *JWTOption) UpdateSecret() error {
-	secret := make([]byte, jwtOpt.SecretLength)
-	_, err := rand.Read(secret)
-	if err != nil {
-		return err
-	}
-	jwtOpt.Secret = secret
-	return nil
-}
-
-func (jwtOpt JWTOption) GetSecret() []byte {
-	if len(jwtOpt.Secret) == 0 {
-		jwtOpt.UpdateSecret()
-	}
-	return jwtOpt.Secret
-}
-
-func (jwtOpt JWTOption) GetHexSecretString() string {
-	return hex.EncodeToString(jwtOpt.GetSecret())
-}
-
-type PasswordValidatorOption struct {
-	AcceptASCIIOnly bool `json:"ascii_only"`
-	MinLength       int  `json:"min_length"`
-	MaxLength       int  `json:"max_length"`
-	MinDigit        int  `json:"min_digit"`
-	MinUpper        int  `json:"min_upper"`
-	MinLower        int  `json:"min_lower"`
-	MinSpecial      int  `json:"min_special"`
-}
-
-func (pwdOpt PasswordValidatorOption) String() string {
-	sb := strings.Builder{}
-	sb.WriteString("Password Validator:\n")
-	sb.WriteString(fmt.Sprintf("\t- Only ASCII       : %v\n", pwdOpt.AcceptASCIIOnly))
-	sb.WriteString(fmt.Sprintf("\t- Password Len     : (%d, %d)\n",
-		pwdOpt.MinLength, pwdOpt.MaxLength))
-	sb.WriteString(fmt.Sprintf("\t- Min # of digit   : %d\n", pwdOpt.MinDigit))
-	sb.WriteString(fmt.Sprintf("\t- Min # of upper   : %d\n", pwdOpt.MinUpper))
-	sb.WriteString(fmt.Sprintf("\t- Min # of lower   : %d\n", pwdOpt.MinLower))
-	sb.WriteString(fmt.Sprintf("\t- Min # of special : %d\n", pwdOpt.MinSpecial))
-	return sb.String()
-}
-
-type ServerOption struct {
-	APIVersion     string       `json:"api_version"`
-	Binding        Binding      `json:"binding"`
-	TemplatePath   []string     `json:"template_path"`
-	StaticFilePath string       `json:"static_file_path"`
-	RoutePattern   RoutePattern `json:"route_pattern"`
-}
-
-type Binding struct {
-	Host string `json:"host"`
-	Port int    `json:"port"`
+type AppOption struct {
+	Template     []string     `mapstructure:"template"`
+	StaticFile   StaticFile   `mapstructure:"staticFile"`
+	RoutePattern RoutePattern `mapstructure:"routePattern"`
 }
 
 type RoutePattern struct {
-	Pages       map[string]string `json:"pages"`
-	ErrorPages  map[string]string `json:"error_pages"`
-	StaticFiles StaticFiles       `json:"static_files"`
+	Page       map[string]string `mapstructure:"page"`
+	ErrorPage  map[string]string `mapstructure:"errorPage"`
+	StaticPage string            `mapstructure:"staticPage"`
 }
 
-type StaticFiles struct {
-	Image string `json:"img"`
-	JS    string `json:"js"`
-	CSS   string `json:"css"`
+type StaticFile struct {
+	Path      string            `mapstructure:"path"`
+	SubFolder map[string]string `mapstructure:"subFolder"`
 }
 
-func (srvOpt ServerOption) String() string {
-	sb := strings.Builder{}
-	sb.WriteString("Server Options:\n")
-	sb.WriteString(fmt.Sprintf("\t- API Version: %s\n", srvOpt.APIVersion))
-	sb.WriteString(fmt.Sprintf("\t- Templates :\n"))
-	for _, tmpl := range srvOpt.TemplatePath {
-		sb.WriteString(fmt.Sprintf("\t\t- %s\n", tmpl))
+func (appOpt AppOption) String() string {
+	opt, err := json.MarshalIndent(appOpt, "", "\t")
+	if err != nil {
+		return ""
 	}
-	sb.WriteString(fmt.Sprintf("\t- Static Files : %v\n", srvOpt.StaticFilePath))
-	sb.WriteString("\t- Route pattern:\n")
-	sb.WriteString("\t\t- Page:\n")
-	for pageName, pagePath := range srvOpt.RoutePattern.Pages {
-		sb.WriteString(fmt.Sprintf("\t\t- %s: %s\n", pageName, pagePath))
-	}
-
-	sb.WriteString("\t\t- Static Files:\n")
-	sb.WriteString(fmt.Sprintf("\t\t\t- Image: %s\n", srvOpt.RoutePattern.StaticFiles.Image))
-	sb.WriteString(fmt.Sprintf("\t\t\t- CSS  : %s\n", srvOpt.RoutePattern.StaticFiles.CSS))
-	sb.WriteString(fmt.Sprintf("\t\t\t- JS   : %s\n", srvOpt.RoutePattern.StaticFiles.JS))
-	return sb.String()
+	return string(opt)
 }

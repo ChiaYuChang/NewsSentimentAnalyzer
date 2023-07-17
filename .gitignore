@@ -1,3 +1,6 @@
-secret.json
 .env
 bin/*
+
+nsa
+
+secrets

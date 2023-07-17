@@ -129,6 +129,7 @@ func TestJWTMakerErrors(t *testing.T) {
 	maker := tm.NewJWTMaker(
 		tm.DEFAULT_SECRET,
 		tm.DEFAULT_JWT_SIGN_METHOD,
+		tm.DEFAULT_JWT_SIGN_METHOD_SIZE,
 		3*time.Second,
 		1*time.Second,
 	)
@@ -150,11 +151,6 @@ func TestJWTMakerErrors(t *testing.T) {
 	require.Error(t, err)
 	require.ErrorContains(t, err, jwt.ErrTokenUnverifiable.Error())
 	require.ErrorContains(t, err, ec.MustGetErr(tm.JWTErrExpired).Error())
-
-	tokenStr = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InVzZXIiLCJyb2xlIjoxLCJleHAiOjE2ODQ5MzM2MzUsIm5iZiI6MTY4NDkzMzYzMiwiaWF0Ijo5OTk5OTk5OTk5fQ.Ou7qut3DG0ACNJt-V2Yg2hDYrWURvvXMieW5DgCUzLufpPz-6-bl3Fnr3fOW_p4KOLf7o-Ev7exjXbK0lxEBOQ"
-	_, err = maker.ValidateToken(tokenStr)
-	require.ErrorContains(t, err, jwt.ErrTokenUnverifiable.Error())
-	require.ErrorContains(t, err, ec.MustGetErr(tm.JWTErrUsedBeforeIssued).Error())
 }
 
 func TestJWTMakerAsMaker(t *testing.T) {

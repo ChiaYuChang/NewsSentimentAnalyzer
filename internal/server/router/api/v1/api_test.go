@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/middleware"
@@ -36,19 +37,21 @@ const VIEWS_PATH = "../../../../../views"
 
 const AUTH_TOKEN = "[[::AUTH_TOKEN::]]"
 
-var opt global.JWTOption
+var opt global.TokenMakerOption
 
 func init() {
 	secretLen := 256
 	secret := make([]byte, secretLen)
 	_, _ = rand.Read(secret)
-	opt = global.JWTOption{
-		Secret:          secret,
-		SecretLength:    secretLen,
-		ExpireAfterHour: 3,
-		ValidAfterHour:  0,
-		SignMethod:      tokenmaker.DEFAULT_JWT_SIGN_METHOD,
+	opt = global.TokenMakerOption{
+		ExpireAfter: 3 * time.Minute,
+		ValidAfter:  0,
+		SignMethod: global.TokenSignMethod{
+			Algorthm: tokenmaker.DEFAULT_JWT_SIGN_METHOD,
+			Size:     tokenmaker.DEFAULT_JWT_SIGN_METHOD_SIZE,
+		},
 	}
+	opt.SetSecret(tokenmaker.DEFAULT_SECRET)
 }
 
 func TestGetWelcome(t *testing.T) {
@@ -120,8 +123,6 @@ func TestGetWelcome(t *testing.T) {
 				require.Equal(t, http.StatusOK, resp.StatusCode)
 				body, err := io.ReadAll(resp.Body)
 
-				t.Log(string(body))
-
 				require.NoError(t, err)
 				require.Contains(t, string(body), fmt.Sprintf("<h1>Welcome %s</h1>", user.Email))
 				require.Contains(t, string(body), "<title>Welcome</title>")
@@ -130,22 +131,31 @@ func TestGetWelcome(t *testing.T) {
 		{
 			Name: "Get API Key Page",
 			SetupStore: func(t *testing.T) model.Store {
-				apikeyrow := []*model.ListAPIKeyRow{}
-				for i := 0; i < 10; i++ {
+				n := 10
+				apikeyrow := make([]*model.ListAPIKeyRow, n)
+				listapirow := make([]*model.ListAPIRow, n)
+
+				for i := 0; i < n; i++ {
 					api, err := testtool.GenRdmAPI(int16(i))
 					require.NoError(t, err)
 
 					key, err := testtool.GenRdmAPIKey(user.ID, api.ID)
 					require.NoError(t, err)
 
-					apikeyrow = append(apikeyrow, &model.ListAPIKeyRow{
+					apikeyrow[i] = &model.ListAPIKeyRow{
 						ApiKeyID: key.ID,
 						Owner:    user.ID,
 						Key:      key.Key,
-						ApiID:    int16(i),
+						ApiID:    api.ID,
 						Type:     api.Type,
 						Name:     api.Name,
-					})
+					}
+
+					listapirow[i] = &model.ListAPIRow{
+						ID:   api.ID,
+						Name: api.Name,
+						Type: api.Type,
+					}
 				}
 
 				ctl := gomock.NewController(t)
@@ -155,6 +165,10 @@ func TestGetWelcome(t *testing.T) {
 					ListAPIKey(gomock.Any(), gomock.Eq(user.ID)).
 					Times(1).
 					Return(apikeyrow, nil)
+				store.
+					EXPECT().ListAPI(gomock.Any(), gomock.Any()).
+					Times(1).
+					Return(listapirow, nil)
 				return store
 			},
 			SetupServer: func(store model.Store) *chi.Mux {
@@ -183,8 +197,8 @@ func TestGetWelcome(t *testing.T) {
 				return req
 			},
 			Check: func(t *testing.T, resp *http.Response) {
-				body, err := io.ReadAll(resp.Body)
-				t.Log(string(body))
+				_, err := io.ReadAll(resp.Body)
+				// t.Log(string(body))
 				require.Equal(t, http.StatusOK, resp.StatusCode)
 				require.NoError(t, err)
 			},
@@ -193,7 +207,7 @@ func TestGetWelcome(t *testing.T) {
 
 	for i, tc := range tcs {
 		t.Run(
-			fmt.Sprintf("Case %d-%s", i, tc.Name),
+			fmt.Sprintf("Case %d-%s", i+1, tc.Name),
 			func(t *testing.T) {
 				mux := tc.SetupServer(tc.SetupStore(t))
 				srv := httptest.NewTLSServer(mux)

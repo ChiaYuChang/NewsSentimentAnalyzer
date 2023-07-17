@@ -1,9 +1,11 @@
 package api
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
@@ -46,6 +48,17 @@ func NewAPIRepo(ver string, srvc service.Service, view view.View,
 	}
 }
 
+func (repo APIRepo) HealthCheck(w http.ResponseWriter, req *http.Request) {
+	m := make(map[string]string)
+	m["status code"] = strconv.Itoa(http.StatusOK)
+	m["status"] = "OK"
+	m["message"] = "News Sentiment Analyzer (nsa)"
+
+	j, _ := json.Marshal(m)
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(j))
+}
+
 func (repo APIRepo) GetWelcome(w http.ResponseWriter, req *http.Request) {
 	payload, ok := req.Context().Value(global.CtxUserInfo).(tokenmaker.Payload)
 	if !ok {
@@ -63,12 +76,12 @@ func (repo APIRepo) GetWelcome(w http.ResponseWriter, req *http.Request) {
 		},
 		Name:             payload.GetUsername(),
 		Role:             payload.GetRole().String(),
-		PageEndpoint:     strings.TrimLeft(global.AppVar.Server.RoutePattern.Pages["endpoints"], "/"),
-		PageChangePWD:    strings.TrimLeft(global.AppVar.Server.RoutePattern.Pages["change_password"], "/"),
-		PageManageAPIKey: strings.TrimLeft(global.AppVar.Server.RoutePattern.Pages["apikey"], "/"),
+		PageEndpoint:     strings.TrimLeft(global.AppVar.App.RoutePattern.Page["endpoints"], "/"),
+		PageChangePWD:    strings.TrimLeft(global.AppVar.App.RoutePattern.Page["change-password"], "/"),
+		PageManageAPIKey: strings.TrimLeft(global.AppVar.App.RoutePattern.Page["apikey"], "/"),
 		PageSeeResult:    "#",
-		PageAdmin:        strings.TrimLeft(global.AppVar.Server.RoutePattern.Pages["admin"], "/"),
-		PageLogout:       global.AppVar.Server.RoutePattern.Pages["logout"],
+		PageAdmin:        strings.TrimLeft(global.AppVar.App.RoutePattern.Page["admin"], "/"),
+		PageLogout:       global.AppVar.App.RoutePattern.Page["sign-out"],
 	}
 
 	_ = repo.View.ExecuteTemplate(w, "welcome.gotmpl", pageData)

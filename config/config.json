@@ -1,0 +1,60 @@
+{
+  "token": {
+    "signature": "jwt",
+    "signMethod": {
+      "algorithm": "HMAC",
+      "size": 512
+    },
+    "expireAfter": "72h",
+    "validAfter": "0s",
+    "issuer": "nsa-server",
+    "subject": "",
+    "audience": "",
+    "id": ""
+  },
+  "password": {
+    "asciiOnly": true,
+    "minLength": 8,
+    "maxLength": 30,
+    "minNumDigit": 1,
+    "minNumUpper": 1,
+    "minNumLower": 1,
+    "minNumSpecial": 1
+  },
+  "ratelimit": {
+    "per": "60s"
+  },
+  "app": {
+    "staticFile": {
+      "path": "views/static",
+      "subfolder": {
+        "image": "/image",
+        "js": "/js",
+        "css": "/css"
+      }
+    },
+    "template": [
+      "views/template/*.gotmpl",
+      "views/template/endpoint/*.gotmpl"
+    ],
+    "routePattern": {
+      "page": {
+        "login": "/login",
+        "sign-up": "/sign-up",
+        "sign-in": "/sign-in",
+        "sign-out": "/sign-out",
+        "admin": "/admin",
+        "welcome": "/welcome",
+        "apikey": "/apikey",
+        "change-password": "/change-password",
+        "endpoints": "/endpoints"
+      },
+      "errorPage": {
+        "unauthorized": "/unauthorized",
+        "bad-request": "/bad-request",
+        "forbidden": "/forbidden"
+      },
+      "staticPage": "/static/*"
+    }
+  }
+}

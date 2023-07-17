@@ -48,7 +48,7 @@ func HandleHeadlines(apikey string, pf pageform.PageForm) (cli.Query, error) {
 	if !ok {
 		return nil, cli.ErrTypeAssertionFailure
 	}
-	data.TimeRange.ToUTP()
+	data.TimeRange.ToUTC()
 
 	q, err := newQuery(apikey).
 		SetEndpoint(data.Endpoint())
@@ -70,7 +70,7 @@ func HandleSearch(apikey string, pf pageform.PageForm) (cli.Query, error) {
 	if !ok {
 		return nil, cli.ErrTypeAssertionFailure
 	}
-	data.TimeRange.ToUTP()
+	data.TimeRange.ToUTC()
 
 	q, err := newQuery(apikey).
 		SetEndpoint(data.Endpoint())

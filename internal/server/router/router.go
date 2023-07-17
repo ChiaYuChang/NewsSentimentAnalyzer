@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 	"sync"
 	"time"
 
@@ -23,19 +24,24 @@ import (
 	"github.com/go-chi/chi/v5"
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/go-playground/form"
+	"github.com/spf13/viper"
 )
 
 func NewRouter(srvc service.Service, vw view.View, filesystem http.FileSystem,
 	tmaker tokenmaker.TokenMaker, cmaker *cookiemaker.CookieMaker) *chi.Mux {
-	errHandlerRepo, _ := errorhandler.NewErrorHandlerRepo(vw.Template.Lookup("errorpage.gotmpl"))
+	errHandlerRepo, err := errorhandler.NewErrorHandlerRepo(vw.Template.Lookup("errorpage.gotmpl"))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error while errorhandler.NewErrorHandlerRepo: %s", err)
+		os.Exit(1)
+	}
 
 	formDecoder := form.NewDecoder()
 	formDecoder.RegisterCustomTypeFunc(func(vals []string) (interface{}, error) {
 		return time.Parse(time.DateOnly, vals[0])
 	}, time.Time{})
 
-	auth := auth.NewAuthRepo("v1", srvc, vw, tmaker, cmaker, formDecoder)
-	apiRepo := api.NewAPIRepo("v1", srvc, vw, tmaker, cmaker, formDecoder)
+	auth := auth.NewAuthRepo(viper.GetString("APP_API_VERSION"), srvc, vw, tmaker, cmaker, formDecoder)
+	apiRepo := api.NewAPIRepo(viper.GetString("APP_API_VERSION"), srvc, vw, tmaker, cmaker, formDecoder)
 
 	epRepo := apiRepo.EndpointRepo()
 	epChan := make(chan *model.ListAllEndpointRow)
@@ -58,39 +64,40 @@ func NewRouter(srvc service.Service, vw view.View, filesystem http.FileSystem,
 		TokenMaker:          tmaker,
 	}
 
+	rp := global.AppVar.App.RoutePattern
 	r := chi.NewRouter()
 	r.Use(chimiddleware.Logger)
 	r.Use(chimiddleware.Recoverer)
 
 	r.Get("/favicon.ico", http.NotFound)
-	r.Handle("/static/*", http.StripPrefix("/static", http.FileServer(filesystem)))
+	r.Handle(rp.StaticPage, http.StripPrefix("/static", http.FileServer(filesystem)))
 
-	r.Get(global.AppVar.Server.RoutePattern.Pages["login"], auth.GetLogin)
-	r.Post(global.AppVar.Server.RoutePattern.Pages["login"], auth.PostLogin)
+	r.Get(rp.Page["sign-in"], auth.GetSignIn)
+	r.Post(rp.Page["sign-in"], auth.PostSignIn)
 
-	r.Get(global.AppVar.Server.RoutePattern.Pages["sign-up"], auth.GetSignUp)
-	r.Post(global.AppVar.Server.RoutePattern.Pages["sign-up"], auth.PostSignUp)
+	r.Get(rp.Page["sign-up"], auth.GetSignUp)
+	r.Post(rp.Page["sign-up"], auth.PostSignUp)
 
-	r.Get(global.AppVar.Server.RoutePattern.Pages["logout"], auth.Logout)
-	r.Get(global.AppVar.Server.RoutePattern.ErrorPages["unauthorized"], errHandlerRepo.Unauthorized)
-	r.Get(global.AppVar.Server.RoutePattern.ErrorPages["badrequest"], errHandlerRepo.BadRequest)
-	r.Get("/*", errHandlerRepo.SeeOther("/login"))
+	r.Get(rp.Page["sign-out"], auth.GetSignOut)
+	r.Get(rp.ErrorPage["unauthorized"], errHandlerRepo.Unauthorized)
+	r.Get(rp.ErrorPage["bad-request"], errHandlerRepo.BadRequest)
+	r.Get("/*", errHandlerRepo.SeeOther("/sign-in"))
 
 	r.Route(fmt.Sprintf("/%s", apiRepo.Version), func(r chi.Router) {
 		r.Use(bearerTokenMaker.BearerAuthenticator)
-		r.Get(global.AppVar.Server.RoutePattern.Pages["welcome"], apiRepo.GetWelcome)
+		r.Get(rp.Page["welcome"], apiRepo.GetWelcome)
 
-		r.Get(global.AppVar.Server.RoutePattern.Pages["apikey"], apiRepo.GetAPIKey)
-		r.Post(global.AppVar.Server.RoutePattern.Pages["apikey"], apiRepo.PostAPIKey)
-		r.Delete(global.AppVar.Server.RoutePattern.Pages["apikey"]+"/{id}", apiRepo.DeleteAPIKey)
+		r.Get(rp.Page["apikey"], apiRepo.GetAPIKey)
+		r.Post(rp.Page["apikey"], apiRepo.PostAPIKey)
+		r.Delete(rp.Page["apikey"]+"/{id}", apiRepo.DeleteAPIKey)
 
-		r.Get(global.AppVar.Server.RoutePattern.Pages["change_password"], auth.GetChangePassword)
-		r.Post(global.AppVar.Server.RoutePattern.Pages["change_password"], auth.PostChangPassword)
+		r.Get(rp.Page["change-password"], auth.GetChangePassword)
+		r.Post(rp.Page["change-password"], auth.PostChangPassword)
 
-		r.Get(global.AppVar.Server.RoutePattern.Pages["admin"], apiRepo.GetAdmin)
+		r.Get(rp.Page["admin"], apiRepo.GetAdmin)
 
 		r.Route(
-			global.AppVar.Server.RoutePattern.Pages["endpoints"],
+			rp.Page["endpoints"],
 			func(r chi.Router) {
 				r.Get("/", apiRepo.GetEndpoints)
 				wg.Wait()
@@ -109,7 +116,7 @@ func NewRouter(srvc service.Service, vw view.View, filesystem http.FileSystem,
 				}
 				r.Get("/*", errHandlerRepo.NotFound)
 			})
-		r.Get(global.AppVar.Server.RoutePattern.ErrorPages["forbidden"], errHandlerRepo.Forbidden)
+		r.Get(rp.ErrorPage["forbidden"], errHandlerRepo.Forbidden)
 		r.Get("/*", errHandlerRepo.NotFound)
 	})
 

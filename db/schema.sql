@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 14.6 (Debian 14.6-1.pgdg110+1)
+-- Dumped from database version 15.3
 -- Dumped by pg_dump version 15.3
 
 SET statement_timeout = 0;
@@ -17,16 +17,7 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: public; Type: SCHEMA; Schema: -; Owner: postgres
---
-
--- *not* creating schema, since initdb creates it
-
-
-ALTER SCHEMA public OWNER TO postgres;
-
---
--- Name: api_type; Type: TYPE; Schema: public; Owner: postgres
+-- Name: api_type; Type: TYPE; Schema: public; Owner: admin
 --
 
 CREATE TYPE public.api_type AS ENUM (
@@ -35,10 +26,10 @@ CREATE TYPE public.api_type AS ENUM (
 );
 
 
-ALTER TYPE public.api_type OWNER TO postgres;
+ALTER TYPE public.api_type OWNER TO admin;
 
 --
--- Name: event_type; Type: TYPE; Schema: public; Owner: postgres
+-- Name: event_type; Type: TYPE; Schema: public; Owner: admin
 --
 
 CREATE TYPE public.event_type AS ENUM (
@@ -50,10 +41,10 @@ CREATE TYPE public.event_type AS ENUM (
 );
 
 
-ALTER TYPE public.event_type OWNER TO postgres;
+ALTER TYPE public.event_type OWNER TO admin;
 
 --
--- Name: job_status; Type: TYPE; Schema: public; Owner: postgres
+-- Name: job_status; Type: TYPE; Schema: public; Owner: admin
 --
 
 CREATE TYPE public.job_status AS ENUM (
@@ -65,10 +56,10 @@ CREATE TYPE public.job_status AS ENUM (
 );
 
 
-ALTER TYPE public.job_status OWNER TO postgres;
+ALTER TYPE public.job_status OWNER TO admin;
 
 --
--- Name: role; Type: TYPE; Schema: public; Owner: postgres
+-- Name: role; Type: TYPE; Schema: public; Owner: admin
 --
 
 CREATE TYPE public.role AS ENUM (
@@ -77,14 +68,14 @@ CREATE TYPE public.role AS ENUM (
 );
 
 
-ALTER TYPE public.role OWNER TO postgres;
+ALTER TYPE public.role OWNER TO admin;
 
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
 --
--- Name: apikeys; Type: TABLE; Schema: public; Owner: postgres
+-- Name: apikeys; Type: TABLE; Schema: public; Owner: admin
 --
 
 CREATE TABLE public.apikeys (
@@ -98,10 +89,10 @@ CREATE TABLE public.apikeys (
 );
 
 
-ALTER TABLE public.apikeys OWNER TO postgres;
+ALTER TABLE public.apikeys OWNER TO admin;
 
 --
--- Name: apikeys_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: apikeys_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
 --
 
 CREATE SEQUENCE public.apikeys_id_seq
@@ -113,17 +104,17 @@ CREATE SEQUENCE public.apikeys_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.apikeys_id_seq OWNER TO postgres;
+ALTER TABLE public.apikeys_id_seq OWNER TO admin;
 
 --
--- Name: apikeys_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: apikeys_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
 --
 
 ALTER SEQUENCE public.apikeys_id_seq OWNED BY public.apikeys.id;
 
 
 --
--- Name: apis; Type: TABLE; Schema: public; Owner: postgres
+-- Name: apis; Type: TABLE; Schema: public; Owner: admin
 --
 
 CREATE TABLE public.apis (
@@ -131,7 +122,7 @@ CREATE TABLE public.apis (
     name character varying(20) NOT NULL,
     type public.api_type NOT NULL,
     image character varying(128) DEFAULT 'logo_Default.svg'::character varying NOT NULL,
-    icon character varying(128) DEFAULT 'static/image/icon_Default.svg'::character varying NOT NULL,
+    icon character varying(128) DEFAULT 'favicon_Default.svg'::character varying NOT NULL,
     document_url character varying(128) DEFAULT '#'::character varying NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
@@ -139,10 +130,10 @@ CREATE TABLE public.apis (
 );
 
 
-ALTER TABLE public.apis OWNER TO postgres;
+ALTER TABLE public.apis OWNER TO admin;
 
 --
--- Name: apis_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: apis_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
 --
 
 CREATE SEQUENCE public.apis_id_seq
@@ -154,17 +145,17 @@ CREATE SEQUENCE public.apis_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.apis_id_seq OWNER TO postgres;
+ALTER TABLE public.apis_id_seq OWNER TO admin;
 
 --
--- Name: apis_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: apis_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
 --
 
 ALTER SEQUENCE public.apis_id_seq OWNED BY public.apis.id;
 
 
 --
--- Name: endpoints; Type: TABLE; Schema: public; Owner: postgres
+-- Name: endpoints; Type: TABLE; Schema: public; Owner: admin
 --
 
 CREATE TABLE public.endpoints (
@@ -178,10 +169,10 @@ CREATE TABLE public.endpoints (
 );
 
 
-ALTER TABLE public.endpoints OWNER TO postgres;
+ALTER TABLE public.endpoints OWNER TO admin;
 
 --
--- Name: endpoints_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: endpoints_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
 --
 
 CREATE SEQUENCE public.endpoints_id_seq
@@ -193,17 +184,17 @@ CREATE SEQUENCE public.endpoints_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.endpoints_id_seq OWNER TO postgres;
+ALTER TABLE public.endpoints_id_seq OWNER TO admin;
 
 --
--- Name: endpoints_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: endpoints_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
 --
 
 ALTER SEQUENCE public.endpoints_id_seq OWNED BY public.endpoints.id;
 
 
 --
--- Name: jobs; Type: TABLE; Schema: public; Owner: postgres
+-- Name: jobs; Type: TABLE; Schema: public; Owner: admin
 --
 
 CREATE TABLE public.jobs (
@@ -220,10 +211,10 @@ CREATE TABLE public.jobs (
 );
 
 
-ALTER TABLE public.jobs OWNER TO postgres;
+ALTER TABLE public.jobs OWNER TO admin;
 
 --
--- Name: keywords; Type: TABLE; Schema: public; Owner: postgres
+-- Name: keywords; Type: TABLE; Schema: public; Owner: admin
 --
 
 CREATE TABLE public.keywords (
@@ -233,10 +224,10 @@ CREATE TABLE public.keywords (
 );
 
 
-ALTER TABLE public.keywords OWNER TO postgres;
+ALTER TABLE public.keywords OWNER TO admin;
 
 --
--- Name: keywords_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: keywords_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
 --
 
 CREATE SEQUENCE public.keywords_id_seq
@@ -247,17 +238,17 @@ CREATE SEQUENCE public.keywords_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.keywords_id_seq OWNER TO postgres;
+ALTER TABLE public.keywords_id_seq OWNER TO admin;
 
 --
--- Name: keywords_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: keywords_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
 --
 
 ALTER SEQUENCE public.keywords_id_seq OWNED BY public.keywords.id;
 
 
 --
--- Name: logs; Type: TABLE; Schema: public; Owner: postgres
+-- Name: logs; Type: TABLE; Schema: public; Owner: admin
 --
 
 CREATE TABLE public.logs (
@@ -269,10 +260,10 @@ CREATE TABLE public.logs (
 );
 
 
-ALTER TABLE public.logs OWNER TO postgres;
+ALTER TABLE public.logs OWNER TO admin;
 
 --
--- Name: logs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: logs_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
 --
 
 CREATE SEQUENCE public.logs_id_seq
@@ -283,17 +274,17 @@ CREATE SEQUENCE public.logs_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.logs_id_seq OWNER TO postgres;
+ALTER TABLE public.logs_id_seq OWNER TO admin;
 
 --
--- Name: logs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: logs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
 --
 
 ALTER SEQUENCE public.logs_id_seq OWNED BY public.logs.id;
 
 
 --
--- Name: news; Type: TABLE; Schema: public; Owner: postgres
+-- Name: news; Type: TABLE; Schema: public; Owner: admin
 --
 
 CREATE TABLE public.news (
@@ -310,10 +301,10 @@ CREATE TABLE public.news (
 );
 
 
-ALTER TABLE public.news OWNER TO postgres;
+ALTER TABLE public.news OWNER TO admin;
 
 --
--- Name: news_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: news_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
 --
 
 CREATE SEQUENCE public.news_id_seq
@@ -324,17 +315,17 @@ CREATE SEQUENCE public.news_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.news_id_seq OWNER TO postgres;
+ALTER TABLE public.news_id_seq OWNER TO admin;
 
 --
--- Name: news_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: news_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
 --
 
 ALTER SEQUENCE public.news_id_seq OWNED BY public.news.id;
 
 
 --
--- Name: newsjobs; Type: TABLE; Schema: public; Owner: postgres
+-- Name: newsjobs; Type: TABLE; Schema: public; Owner: admin
 --
 
 CREATE TABLE public.newsjobs (
@@ -344,10 +335,10 @@ CREATE TABLE public.newsjobs (
 );
 
 
-ALTER TABLE public.newsjobs OWNER TO postgres;
+ALTER TABLE public.newsjobs OWNER TO admin;
 
 --
--- Name: newsjobs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: newsjobs_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
 --
 
 CREATE SEQUENCE public.newsjobs_id_seq
@@ -358,17 +349,17 @@ CREATE SEQUENCE public.newsjobs_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.newsjobs_id_seq OWNER TO postgres;
+ALTER TABLE public.newsjobs_id_seq OWNER TO admin;
 
 --
--- Name: newsjobs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: newsjobs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
 --
 
 ALTER SEQUENCE public.newsjobs_id_seq OWNED BY public.newsjobs.id;
 
 
 --
--- Name: schema_migrations; Type: TABLE; Schema: public; Owner: postgres
+-- Name: schema_migrations; Type: TABLE; Schema: public; Owner: admin
 --
 
 CREATE TABLE public.schema_migrations (
@@ -377,10 +368,10 @@ CREATE TABLE public.schema_migrations (
 );
 
 
-ALTER TABLE public.schema_migrations OWNER TO postgres;
+ALTER TABLE public.schema_migrations OWNER TO admin;
 
 --
--- Name: users; Type: TABLE; Schema: public; Owner: postgres
+-- Name: users; Type: TABLE; Schema: public; Owner: admin
 --
 
 CREATE TABLE public.users (
@@ -398,10 +389,10 @@ CREATE TABLE public.users (
 );
 
 
-ALTER TABLE public.users OWNER TO postgres;
+ALTER TABLE public.users OWNER TO admin;
 
 --
--- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
 --
 
 CREATE SEQUENCE public.users_id_seq
@@ -413,73 +404,73 @@ CREATE SEQUENCE public.users_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.users_id_seq OWNER TO postgres;
+ALTER TABLE public.users_id_seq OWNER TO admin;
 
 --
--- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
 --
 
 ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 
 
 --
--- Name: apikeys id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: apikeys id; Type: DEFAULT; Schema: public; Owner: admin
 --
 
 ALTER TABLE ONLY public.apikeys ALTER COLUMN id SET DEFAULT nextval('public.apikeys_id_seq'::regclass);
 
 
 --
--- Name: apis id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: apis id; Type: DEFAULT; Schema: public; Owner: admin
 --
 
 ALTER TABLE ONLY public.apis ALTER COLUMN id SET DEFAULT nextval('public.apis_id_seq'::regclass);
 
 
 --
--- Name: endpoints id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: endpoints id; Type: DEFAULT; Schema: public; Owner: admin
 --
 
 ALTER TABLE ONLY public.endpoints ALTER COLUMN id SET DEFAULT nextval('public.endpoints_id_seq'::regclass);
 
 
 --
--- Name: keywords id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: keywords id; Type: DEFAULT; Schema: public; Owner: admin
 --
 
 ALTER TABLE ONLY public.keywords ALTER COLUMN id SET DEFAULT nextval('public.keywords_id_seq'::regclass);
 
 
 --
--- Name: logs id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: logs id; Type: DEFAULT; Schema: public; Owner: admin
 --
 
 ALTER TABLE ONLY public.logs ALTER COLUMN id SET DEFAULT nextval('public.logs_id_seq'::regclass);
 
 
 --
--- Name: news id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: news id; Type: DEFAULT; Schema: public; Owner: admin
 --
 
 ALTER TABLE ONLY public.news ALTER COLUMN id SET DEFAULT nextval('public.news_id_seq'::regclass);
 
 
 --
--- Name: newsjobs id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: newsjobs id; Type: DEFAULT; Schema: public; Owner: admin
 --
 
 ALTER TABLE ONLY public.newsjobs ALTER COLUMN id SET DEFAULT nextval('public.newsjobs_id_seq'::regclass);
 
 
 --
--- Name: users id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: users id; Type: DEFAULT; Schema: public; Owner: admin
 --
 
 ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
 
 
 --
--- Name: apikeys apikeys_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: apikeys apikeys_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
 ALTER TABLE ONLY public.apikeys
@@ -487,7 +478,7 @@ ALTER TABLE ONLY public.apikeys
 
 
 --
--- Name: apis apis_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: apis apis_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
 ALTER TABLE ONLY public.apis
@@ -495,7 +486,7 @@ ALTER TABLE ONLY public.apis
 
 
 --
--- Name: endpoints endpoints_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: endpoints endpoints_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
 ALTER TABLE ONLY public.endpoints
@@ -503,7 +494,7 @@ ALTER TABLE ONLY public.endpoints
 
 
 --
--- Name: jobs jobs_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: jobs jobs_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
 ALTER TABLE ONLY public.jobs
@@ -511,7 +502,7 @@ ALTER TABLE ONLY public.jobs
 
 
 --
--- Name: keywords keywords_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: keywords keywords_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
 ALTER TABLE ONLY public.keywords
@@ -519,7 +510,7 @@ ALTER TABLE ONLY public.keywords
 
 
 --
--- Name: logs logs_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: logs logs_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
 ALTER TABLE ONLY public.logs
@@ -527,7 +518,7 @@ ALTER TABLE ONLY public.logs
 
 
 --
--- Name: news news_md5_hash_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: news news_md5_hash_key; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
 ALTER TABLE ONLY public.news
@@ -535,7 +526,7 @@ ALTER TABLE ONLY public.news
 
 
 --
--- Name: news news_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: news news_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
 ALTER TABLE ONLY public.news
@@ -543,7 +534,7 @@ ALTER TABLE ONLY public.news
 
 
 --
--- Name: newsjobs newsjobs_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: newsjobs newsjobs_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
 ALTER TABLE ONLY public.newsjobs
@@ -551,7 +542,7 @@ ALTER TABLE ONLY public.newsjobs
 
 
 --
--- Name: schema_migrations schema_migrations_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: schema_migrations schema_migrations_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
 ALTER TABLE ONLY public.schema_migrations
@@ -559,7 +550,7 @@ ALTER TABLE ONLY public.schema_migrations
 
 
 --
--- Name: users users_email_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: users users_email_key; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
 ALTER TABLE ONLY public.users
@@ -567,7 +558,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
 ALTER TABLE ONLY public.users
@@ -575,63 +566,63 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: apikeys_owner_api_id_idx; Type: INDEX; Schema: public; Owner: postgres
+-- Name: apikeys_owner_api_id_idx; Type: INDEX; Schema: public; Owner: admin
 --
 
 CREATE INDEX apikeys_owner_api_id_idx ON public.apikeys USING btree (owner, api_id);
 
 
 --
--- Name: jobs_owner_status_idx; Type: INDEX; Schema: public; Owner: postgres
+-- Name: jobs_owner_status_idx; Type: INDEX; Schema: public; Owner: admin
 --
 
 CREATE INDEX jobs_owner_status_idx ON public.jobs USING btree (owner, status);
 
 
 --
--- Name: keywords_keyword_idx; Type: INDEX; Schema: public; Owner: postgres
+-- Name: keywords_keyword_idx; Type: INDEX; Schema: public; Owner: admin
 --
 
 CREATE INDEX keywords_keyword_idx ON public.keywords USING btree (keyword);
 
 
 --
--- Name: logs_user_id_type_idx; Type: INDEX; Schema: public; Owner: postgres
+-- Name: logs_user_id_type_idx; Type: INDEX; Schema: public; Owner: admin
 --
 
 CREATE INDEX logs_user_id_type_idx ON public.logs USING btree (user_id, type);
 
 
 --
--- Name: news_md5_hash_idx; Type: INDEX; Schema: public; Owner: postgres
+-- Name: news_md5_hash_idx; Type: INDEX; Schema: public; Owner: admin
 --
 
 CREATE INDEX news_md5_hash_idx ON public.news USING btree (md5_hash);
 
 
 --
--- Name: news_publish_at_idx; Type: INDEX; Schema: public; Owner: postgres
+-- Name: news_publish_at_idx; Type: INDEX; Schema: public; Owner: admin
 --
 
 CREATE INDEX news_publish_at_idx ON public.news USING btree (publish_at);
 
 
 --
--- Name: newsjobs_job_id_news_id_idx; Type: INDEX; Schema: public; Owner: postgres
+-- Name: newsjobs_job_id_news_id_idx; Type: INDEX; Schema: public; Owner: admin
 --
 
 CREATE INDEX newsjobs_job_id_news_id_idx ON public.newsjobs USING btree (job_id, news_id);
 
 
 --
--- Name: users_email_idx; Type: INDEX; Schema: public; Owner: postgres
+-- Name: users_email_idx; Type: INDEX; Schema: public; Owner: admin
 --
 
 CREATE INDEX users_email_idx ON public.users USING btree (email);
 
 
 --
--- Name: apikeys apikeys_api_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: apikeys apikeys_api_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
 ALTER TABLE ONLY public.apikeys
@@ -639,7 +630,7 @@ ALTER TABLE ONLY public.apikeys
 
 
 --
--- Name: apikeys apikeys_owner_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: apikeys apikeys_owner_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
 ALTER TABLE ONLY public.apikeys
@@ -647,7 +638,7 @@ ALTER TABLE ONLY public.apikeys
 
 
 --
--- Name: endpoints endpoints_api_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: endpoints endpoints_api_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
 ALTER TABLE ONLY public.endpoints
@@ -655,7 +646,7 @@ ALTER TABLE ONLY public.endpoints
 
 
 --
--- Name: jobs jobs_llm_api_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: jobs jobs_llm_api_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
 ALTER TABLE ONLY public.jobs
@@ -663,7 +654,7 @@ ALTER TABLE ONLY public.jobs
 
 
 --
--- Name: jobs jobs_owner_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: jobs jobs_owner_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
 ALTER TABLE ONLY public.jobs
@@ -671,7 +662,7 @@ ALTER TABLE ONLY public.jobs
 
 
 --
--- Name: jobs jobs_src_api_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: jobs jobs_src_api_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
 ALTER TABLE ONLY public.jobs
@@ -679,7 +670,7 @@ ALTER TABLE ONLY public.jobs
 
 
 --
--- Name: keywords keywords_news_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: keywords keywords_news_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
 ALTER TABLE ONLY public.keywords
@@ -687,7 +678,7 @@ ALTER TABLE ONLY public.keywords
 
 
 --
--- Name: logs logs_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: logs logs_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
 ALTER TABLE ONLY public.logs
@@ -695,7 +686,7 @@ ALTER TABLE ONLY public.logs
 
 
 --
--- Name: newsjobs newsjobs_job_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: newsjobs newsjobs_job_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
 ALTER TABLE ONLY public.newsjobs
@@ -703,19 +694,11 @@ ALTER TABLE ONLY public.newsjobs
 
 
 --
--- Name: newsjobs newsjobs_news_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: newsjobs newsjobs_news_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
 ALTER TABLE ONLY public.newsjobs
     ADD CONSTRAINT newsjobs_news_id_fkey FOREIGN KEY (news_id) REFERENCES public.news(id) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: SCHEMA public; Type: ACL; Schema: -; Owner: postgres
---
-
-REVOKE USAGE ON SCHEMA public FROM PUBLIC;
-GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
 --

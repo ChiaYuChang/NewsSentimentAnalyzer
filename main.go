@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"strings"
+	"os"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
@@ -15,53 +15,50 @@ import (
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/validator"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view"
 	tokenmaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/tokenMaker"
+	"github.com/spf13/viper"
 )
 
 func main() {
-	if err := global.ReadAppVar(
-		"./secret.json",
-		"./config/option.json",
-		"./config/endpoint.json",
-	); err != nil {
-		panic(fmt.Sprintf("error while reading secret: %s", err.Error()))
-	}
+	global.ReadConfig()
 	fmt.Println(global.AppVar)
 
-	db := global.AppVar.Secret.Database["postgres"]
-	options := make([]string, 0, len(db.Options))
-	// for optName, optValue := range db.Options {
-	// 	options = append(options, fmt.Sprintf("%s=%s", optName, optValue))
-	// }
+	options := url.Values{}
+	options.Add("sslmode", viper.GetString("POSTGRES_SSL_MODE"))
 	connStr := fmt.Sprintf(
 		"postgres://%s:%s@%s:%d/%s?%s",
-		db.UserName, db.Password, db.Host, db.Port, db.DBName,
-		url.QueryEscape(strings.Join(options, ",")),
+		viper.GetString("POSTGRES_USERNAME"),
+		viper.GetString("POSTGRES_PASSWORD"),
+		viper.GetString("POSTGRES_HOST"),
+		viper.GetInt("POSTGRES_PORT"),
+		viper.GetString("POSTGRES_DB_NAME"),
+		options.Encode(),
 	)
 
+	fmt.Println("ConnStr:", connStr)
 	conn, err := model.NewDBConnection(context.TODO(), connStr)
 	if err != nil {
-		panic(err)
+		fmt.Fprintln(os.Stderr, err.Error())
+		os.Exit(1)
 	}
 
 	service := service.NewService(model.NewPGXStore(conn), validator.Validate)
-	vw, err := view.NewViewWithDefaultTemplateFuncs(global.AppVar.Server.TemplatePath...)
+
+	vw, err := view.NewViewWithDefaultTemplateFuncs(global.AppVar.App.Template...)
 	if err != nil {
 		panic(err)
 	}
 
-	fs := http.Dir(global.AppVar.Server.StaticFilePath)
+	fs := http.Dir(global.AppVar.App.StaticFile.Path)
 	tm := tokenmaker.NewJWTMakerWithDefaultVal()
 	cm := cookieMaker.NewTestCookieMaker()
 
 	mux := router.NewRouter(service, vw, fs, tm, cm)
 
 	errCh := make(chan error)
+	addr := fmt.Sprintf("%s:%d", viper.GetString("APP_HOST"), viper.GetInt("APP_PORT"))
+	fmt.Println("Server start at:", addr)
 	go func(chan<- error) {
-		errCh <- http.ListenAndServe(fmt.Sprintf(
-			"%s:%d",
-			global.AppVar.Server.Binding.Host,
-			global.AppVar.Server.Binding.Port,
-		), mux)
+		errCh <- http.ListenAndServe(addr, mux)
 	}(errCh)
 
 	err = <-errCh

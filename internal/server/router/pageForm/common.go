@@ -84,7 +84,7 @@ func (tr TimeRange) ToString(prefix string) string {
 	return sb.String()
 }
 
-func (tr *TimeRange) ToUTP() *TimeRange {
+func (tr *TimeRange) ToUTC() *TimeRange {
 	loc, err := time.LoadLocation(tr.Location)
 	if err != nil {
 		loc = time.UTC

@@ -1,19 +1,83 @@
 version: '3.8'
 
 services:
-  postgres:
-    image: postgres:15-alpine
+  pgsql:
+    image: ${POSTGRES_IMAGE_TAG}
     restart: always
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT}:5432"
     networks:
       - app-net
+    volumes:
+      - ./db/migration:/docker-entrypoint-initdb.d/
+    secrets:
+      - POSTGRES_PASSWORD
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
-      POSTGRES_DB: nsa
+      POSTGRES_USER: ${POSTGRES_USERNAME}
+      POSTGRES_DB: ${POSTGRES_DB_NAME}
+      POSTGRES_PASSWORD_FILE: /run/secrets/POSTGRES_PASSWORD
+      APP_STATE: ${APP_STATE}
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -d ${POSTGRES_DB_NAME} -U ${POSTGRES_USERNAME} -p 5432 -h localhost"
+        ]
+      interval: 5s
+      timeout: 10s
+      start_period: 30s
+      retries: 5
+  redis:
+    image: ${REDIS_IMAGE_TAG}
+    command: [ "--name", "${REDIS_DB_NAME}" ]
+  app:
+    build:
+      context: .
+    depends_on:
+      pgsql:
+        condition: service_healthy
+    environment:
+      POSTGRES_USERNAME: ${POSTGRES_USERNAME}
+      POSTGRES_HOST: pgsql
+      POSTGRES_PORT: 5432
+      POSTGRES_SSL_MODE: ${POSTGRES_SSL_MODE}
+      POSTGRES_PASSWORD_FILE: /run/secrets/POSTGRES_PASSWORD
+      POSTGRES_DB_NAME: ${APP_NAME}_${APP_STATE}
+      APP_NAME: ${APP_NAME}
+      JWT_SECRET_PATH: /run/secrets/JWT_SECRET
+      APIKEYS_PATH: /run/secrets/APIKEYS
+    secrets:
+      - POSTGRES_PASSWORD
+      - APIKEYS
+      - JWT_SECRET
+    ports:
+      - "${APP_PORT}:8000"
+    networks:
+      - app-net
+    command:
+      [
+        "--port",
+        "${APP_PORT}",
+        "--host",
+        "",
+        "--version",
+        "${APP_API_VERSION}",
+        "--state",
+        "${APP_STATE}",
+        "--config",
+        "${APP_CONFIG}",
+        "--docker"
+      ]
+
+secrets:
+  POSTGRES_PASSWORD:
+    file: ./secrets/.POSTGRES_PASSWORD
+  APIKEYS:
+    file: ./secrets/.APIKEY.yaml
+  JWT_SECRET:
+    file: ./secrets/.JWT_SECRET
 
 networks:
   app-net:
-    name: net
+    name: app-net
     external: false

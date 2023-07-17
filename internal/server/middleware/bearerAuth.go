@@ -17,12 +17,13 @@ type BearerTokenMaker struct {
 	tokenmaker.TokenMaker
 }
 
-func NewJWTTokenMaker(makerOpt global.JWTOption, claimOpt ...tokenmaker.JWTClaimsOpt) BearerTokenMaker {
+func NewJWTTokenMaker(makerOpt global.TokenMakerOption, claimOpt ...tokenmaker.JWTClaimsOpt) BearerTokenMaker {
 	maker := tokenmaker.NewJWTMaker(
-		makerOpt.Secret,
-		makerOpt.SignMethod,
-		makerOpt.ExpireAfter(),
-		makerOpt.ValidAfter())
+		makerOpt.Secret(),
+		makerOpt.SignMethod.Algorthm,
+		makerOpt.SignMethod.Size,
+		makerOpt.ExpireAfter,
+		makerOpt.ValidAfter)
 	maker.WithOptions(claimOpt...)
 	return BearerTokenMaker{false, maker}
 }
@@ -86,6 +87,7 @@ func (bm BearerTokenMaker) BearerAuthenticator(next http.Handler) http.Handler {
 			Path:  "/ ",
 		})
 
+		fmt.Println("JWT PASS")
 		next.ServeHTTP(w, req.WithContext(ctx))
 		// update JWT
 		w.Header().Set("Trailer-JWT", fmt.Sprintf("Bearer %s", bearer))

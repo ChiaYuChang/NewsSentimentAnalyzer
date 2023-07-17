@@ -12,6 +12,7 @@ func init() {
 	errorcode.WithOptions(WithTokenMakerError())
 }
 
+// secret only for test. never use in production!!
 var DEFAULT_SECRET = []byte("SHOULD-NEVER-USED-IN-PRODUCTION")
 
 const DEFAULT_EXPIRE_AFTER = 3 * time.Hour

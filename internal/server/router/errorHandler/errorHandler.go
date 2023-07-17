@@ -2,6 +2,7 @@ package errorhandler
 
 import (
 	"bytes"
+	"errors"
 	"html/template"
 	"net/http"
 
@@ -20,6 +21,10 @@ type ErrorHandlerRepo struct {
 }
 
 func NewErrorHandlerRepo(tmpl *template.Template) (ErrorHandlerRepo, error) {
+	if tmpl == nil {
+		return ErrorHandlerRepo{}, errors.New("a nil templated are provided")
+	}
+
 	repo := ErrorHandlerRepo{
 		page:               map[int][]byte{},
 		tmpl:               tmpl,

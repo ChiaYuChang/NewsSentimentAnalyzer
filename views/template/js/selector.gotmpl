@@ -48,7 +48,8 @@ function addListenerToBtn(iPosId, iBtnId, dBtnId, maxDiv, opts, alertMsg) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-{{range .}}
+        {{range .}}
+    let {{.PositionId}}Opts = [
         {{$optMap := .OptMap}}
         { value: "{{.DefaultValue}}", txt: "{{.DefaultText}}"},
         {{range $key := .SortedOptKey}}

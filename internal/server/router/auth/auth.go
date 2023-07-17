@@ -42,9 +42,11 @@ func NewAuthRepo(version string, srvc service.Service, view view.View,
 	}
 }
 
-func (repo AuthRepo) GetLogin(w http.ResponseWriter, req *http.Request) {
+func (repo AuthRepo) GetSignIn(w http.ResponseWriter, req *http.Request) {
 	if _, err := req.Cookie(cookiemaker.AUTH_COOKIE_KEY); err == nil {
-		http.Redirect(w, req, fmt.Sprintf("/%s/welcome", repo.APIVersion), http.StatusSeeOther)
+		http.Redirect(w, req,
+			fmt.Sprintf("/%s/%s", repo.APIVersion, global.AppVar.App.RoutePattern.Page["welcome"]),
+			http.StatusSeeOther)
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -59,7 +61,7 @@ func (repo AuthRepo) GetLogin(w http.ResponseWriter, req *http.Request) {
 	return
 }
 
-func (repo AuthRepo) PostLogin(w http.ResponseWriter, req *http.Request) {
+func (repo AuthRepo) PostSignIn(w http.ResponseWriter, req *http.Request) {
 	err := req.ParseForm()
 	if err != nil {
 		ecErr := ec.MustGetEcErr(ec.ECBadRequest)
@@ -79,7 +81,7 @@ func (repo AuthRepo) PostLogin(w http.ResponseWriter, req *http.Request) {
 		data := object.LoginPage{
 			Page: object.Page{
 				HeadConent: view.NewHeadContent(),
-				Title:      "Login",
+				Title:      "Sign-In",
 			},
 			Username: auth.Email,
 		}
@@ -115,7 +117,9 @@ func (repo AuthRepo) PostLogin(w http.ResponseWriter, req *http.Request) {
 		repo.CookieMaker.NewCookie(
 			cookiemaker.AUTH_COOKIE_KEY,
 			bearer))
-	http.Redirect(w, req, fmt.Sprintf("/%s/welcome", repo.APIVersion), http.StatusSeeOther)
+	http.Redirect(w, req,
+		fmt.Sprintf("/%s/%s", repo.APIVersion, global.AppVar.App.RoutePattern.Page["welcome"]),
+		http.StatusSeeOther)
 	return
 }
 
@@ -215,13 +219,17 @@ func (repo AuthRepo) PostSignUp(w http.ResponseWriter, req *http.Request) {
 			cookiemaker.AUTH_COOKIE_KEY, bearer)
 		http.SetCookie(w, cookie)
 		// }
-		http.Redirect(w, req, fmt.Sprintf("/%s/welcome", repo.APIVersion), http.StatusSeeOther)
+		http.Redirect(w, req,
+			fmt.Sprintf("/%s/%s", repo.APIVersion, global.AppVar.App.RoutePattern.Page["welcome"]),
+			http.StatusSeeOther)
 	}
 }
 
-func (repo AuthRepo) Logout(w http.ResponseWriter, req *http.Request) {
+func (repo AuthRepo) GetSignOut(w http.ResponseWriter, req *http.Request) {
 	http.SetCookie(w, repo.CookieMaker.DeleteCookie(cookiemaker.AUTH_COOKIE_KEY))
-	http.Redirect(w, req, "/login", http.StatusSeeOther)
+	http.Redirect(w, req,
+		global.AppVar.App.RoutePattern.Page["sign-in"],
+		http.StatusSeeOther)
 }
 
 func (repo AuthRepo) GetChangePassword(w http.ResponseWriter, req *http.Request) {
@@ -312,6 +320,8 @@ func (repo AuthRepo) PostChangPassword(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	http.Redirect(w, req, "welcome", http.StatusSeeOther)
+	http.Redirect(w, req,
+		fmt.Sprintf("/%s/%s", repo.APIVersion, global.AppVar.App.RoutePattern.Page["welcome"]),
+		http.StatusSeeOther)
 	return
 }

@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/middleware"
@@ -20,18 +21,20 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var opt global.JWTOption
+var opt global.TokenMakerOption
+var secret []byte
 
 func init() {
 	secretLen := 256
-	secret := make([]byte, secretLen)
+	secret = make([]byte, secretLen)
 	_, _ = rand.Read(secret)
-	opt = global.JWTOption{
-		Secret:          secret,
-		SecretLength:    secretLen,
-		ExpireAfterHour: 3,
-		ValidAfterHour:  0,
-		SignMethod:      tokenmaker.DEFAULT_JWT_SIGN_METHOD,
+	opt = global.TokenMakerOption{
+		ExpireAfter: 3 * time.Minute,
+		ValidAfter:  0,
+		SignMethod: global.TokenSignMethod{
+			Algorthm: tokenmaker.DEFAULT_JWT_SIGN_METHOD,
+			Size:     tokenmaker.DEFAULT_JWT_SIGN_METHOD_SIZE,
+		},
 	}
 }
 

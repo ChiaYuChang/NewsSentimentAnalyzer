@@ -19,6 +19,7 @@ import (
 	ec "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/errorCode"
 	tokenmaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/tokenMaker"
 	val "github.com/go-playground/validator/v10"
+	"github.com/spf13/viper"
 )
 
 var ErrEndpointNotFount = errors.New("unregistered endpoint")
@@ -64,7 +65,7 @@ func (repo *EndpointRepo) RegisterEndpointsPageView(apiName string, apiId int16,
 			Title:      endpointName,
 		},
 		API:      apiName,
-		Version:  global.AppVar.Server.APIVersion,
+		Version:  viper.GetString("APP_API_VERISON"),
 		Endpoint: endpointName,
 	}
 

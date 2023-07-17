@@ -9,7 +9,63 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var DEFAULT_JWT_SIGN_METHOD = jwt.SigningMethodHS512
+// default method for generating jwt signature (default: HMAC)
+var DEFAULT_JWT_SIGN_METHOD = "HMAC"
+
+// default siz for generating jwt signature (default: 384)
+var DEFAULT_JWT_SIGN_METHOD_SIZE = 384
+
+// get jwt.SigningMethod by alg, size (default: HMAC384)
+func GetJWTSignMethod(alg string, size int) jwt.SigningMethod {
+	var method jwt.SigningMethod
+
+	switch alg {
+	case "ED25519", "ed25519":
+		method = jwt.SigningMethodEdDSA
+	case "ECDSA", "ecdsa":
+		switch size {
+		case 256:
+			method = jwt.SigningMethodES256
+		case 384:
+			method = jwt.SigningMethodES384
+		case 512:
+			method = jwt.SigningMethodES512
+		}
+	case "HMAC", "hmac":
+		switch size {
+		case 256:
+			method = jwt.SigningMethodHS256
+		case 384:
+			method = jwt.SigningMethodHS384
+		case 512:
+			method = jwt.SigningMethodHS512
+		}
+	case "RSA", "rsa":
+		switch size {
+		case 256:
+			method = jwt.SigningMethodRS256
+		case 384:
+			method = jwt.SigningMethodRS384
+		case 512:
+			method = jwt.SigningMethodRS512
+		}
+	case "RSAPSS", "rsapass":
+		switch size {
+		case 256:
+			method = jwt.SigningMethodPS256
+		case 384:
+			method = jwt.SigningMethodPS384
+		case 512:
+			method = jwt.SigningMethodPS512
+		}
+	default:
+		method = GetJWTSignMethod(
+			DEFAULT_JWT_SIGN_METHOD,
+			DEFAULT_JWT_SIGN_METHOD_SIZE,
+		)
+	}
+	return method
+}
 
 type JWTClaims struct {
 	UserInfo
@@ -48,6 +104,7 @@ func (c JWTClaims) String() string {
 	return sb.String()
 }
 
+// options for jwt payload
 type JWTClaimsOpt struct {
 	OptionName    string
 	AddField      func(claims *JWTClaims) error
@@ -106,10 +163,12 @@ type JWTMaker struct {
 	Options     map[string]JWTClaimsOpt
 }
 
-func NewJWTMaker(secret []byte, signMethod jwt.SigningMethod, expireAfter, validAfter time.Duration) JWTMaker {
+func NewJWTMaker(secret []byte, signMethodAlg string, signMethodSize int, expireAfter, validAfter time.Duration) JWTMaker {
 	return JWTMaker{
-		secret, expireAfter,
-		validAfter, signMethod,
+		secret,
+		expireAfter,
+		validAfter,
+		GetJWTSignMethod(signMethodAlg, signMethodSize),
 		map[string]JWTClaimsOpt{}}
 }
 
@@ -117,6 +176,7 @@ func NewJWTMakerWithDefaultVal() JWTMaker {
 	return NewJWTMaker(
 		DEFAULT_SECRET,
 		DEFAULT_JWT_SIGN_METHOD,
+		DEFAULT_JWT_SIGN_METHOD_SIZE,
 		DEFAULT_EXPIRE_AFTER,
 		DEFAULT_VALID_AFTER,
 	)
@@ -131,6 +191,11 @@ func (jm JWTMaker) GetSecret() []byte {
 func (jm *JWTMaker) UpdateSecret(secret []byte) *JWTMaker {
 	jm.secret = make([]byte, len(secret))
 	copy(jm.secret, secret)
+	return jm
+}
+
+func (jm *JWTMaker) WithSigningMethod(alg string, size int) *JWTMaker {
+	jm.SignMethod = GetJWTSignMethod(alg, size)
 	return jm
 }
 

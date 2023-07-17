@@ -1,51 +1,44 @@
 include .env
 
-STATE=testing
-APP_REPOSITORY="github.com/ChiaYuChang/NewsSentimentAnalyzer"
-POSTGRESQL_URL="postgres://${POSTGRES_USERNAME}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT}/${POSTGRES_DB_NAME}_${STATE}?sslmode=disable"
-
 build:
-	@CGO_ENABLED=0 GOOS=linux go build -o ${BIN_PATH}/nsa ./main.go
-
-run:
-	@go run ./main.go
+	@go build -o ${BIN_PATH}/${APP_NAME} ./main.go
 
 sqlc-generate:
-	sqlc generate -f ./config/sqlc.yml
+	sqlc generate -f ${SQLC_CONFIG}
 
 sqlc-clean:
-	rm ./internal/server/model/*.sql.go
-	rm ./internal/server/model/db.go
-	rm ./internal/server/model/querier.go
-	rm ./internal/server/model/model.go
+	rm ${SQLC_OUT_PATH}/*.sql.go
+	rm ${SQLC_OUT_PATH}/db.go
+	rm ${SQLC_OUT_PATH}/querier.go
+	rm ${SQLC_OUT_PATH}/model.go
 
 docker-new-psql-container:
-	@docker volume create nsa-volume
-	@docker run --name nsa-postgres \
+	@docker volume create ${APP_NAME}-volume
+	@docker run --name ${APP_NAME}-postgres \
 	-p ${POSTGRES_PORT}:5432 \
-	-v nsa-volume:/var/lib/postgresql/data \
+	-v ${APP_NAME}-volume:/var/lib/postgresql/data \
 	-e POSTGRES_USER=${POSTGRES_USERNAME} \
 	-e POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
 	-d \
-	postgres:14.6
+	${POSTGRES_IMAGE_TAG}
 
 docker-create-db:
-	docker exec nsa-postgres psql -U postgres -c "CREATE DATABASE ${POSTGRES_DB_NAME}_${STATE};"
+	docker exec ${APP_NAME}-postgres psql -U ${POSTGRES_USERNAME} -c "CREATE DATABASE ${POSTGRES_DB_NAME};"
 
 docker-flush-db:
-	docker container rm nsa-postgres
-	docker volume rm nsa-volume
+	docker container rm ${APP_NAME}-postgres
+	docker volume rm ${APP_NAME}-volume
 
 docker-down-db:
-	docker stop nsa-postgres
+	docker stop ${APP_NAME}-postgres
 
 docker-up-db:
-	docker start nsa-postgres
+	docker start ${APP_NAME}-postgres
 
 migrate-create:
 	@echo "Name of .sql?: "; \
     read FILENAME; \
-	migrate create -ext sql -dir ./db/migration -seq $${FILENAME} 
+	migrate create -ext sql -dir ${MIGRATION_PATH} -seq $${FILENAME} 
 
 migrate-up:
 	migrate -path ${MIGRATION_PATH}/ -database ${POSTGRESQL_URL} -verbose up 1
@@ -74,7 +67,16 @@ mockgen-tokenmaker:
 	@mockgen -destination pkgs/tokenMaker/mockTokenMaker/tokenMaker.go \
 	${APP_REPOSITORY}/pkgs/tokenMaker TokenMaker,Payload
 
+gen-jwt-secret:
+	@openssl rand -base64 ${JWT_SECRET_LEN} > ${JWT_SECRET_OUT_PATH}
+
+run: docker-up-db
+	rm ./${APP_NAME}
+	go build -o ./${APP_NAME} main.go
+	chmod +x ./${APP_NAME}
+	./${APP_NAME} -v v1 -c ./config/config.json -s development -h localhost -p 8000
+
 about: ## Display info related to the build
 	@echo "- Protoc version  : $(shell protoc --version)"
 	@echo "- Go version      : $(shell go version)"
-	@echo "- migrate version : ${shell migrate -version}"
+	@echo "- migrate version : ${shell migrate -version)}"

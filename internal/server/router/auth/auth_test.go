@@ -81,7 +81,7 @@ func TestAuthLogin(t *testing.T) {
 			}
 
 			mux := chi.NewMux()
-			mux.Get("/login", authReup.GetLogin)
+			mux.Get("/login", authReup.GetSignIn)
 
 			srv := httptest.NewTLSServer(mux)
 			srvcUrl := srv.URL
@@ -137,7 +137,7 @@ func TestAuthLogin(t *testing.T) {
 			}
 
 			mux := chi.NewMux()
-			mux.Post("/login", authReup.PostLogin)
+			mux.Post("/login", authReup.PostSignIn)
 			mux.Get("/v1/welcome", func(w http.ResponseWriter, req *http.Request) {
 				bearer := "TOKEN"
 				if err != nil {
@@ -205,7 +205,7 @@ func TestAuthLogin(t *testing.T) {
 			}
 
 			mux := chi.NewMux()
-			mux.Post("/login", authReup.PostLogin)
+			mux.Post("/login", authReup.PostSignIn)
 			srv := httptest.NewTLSServer(mux)
 			srvcUrl := srv.URL
 
@@ -252,7 +252,7 @@ func TestAuthLogin(t *testing.T) {
 			}
 
 			mux := chi.NewMux()
-			mux.Post("/login", authReup.PostLogin)
+			mux.Post("/login", authReup.PostSignIn)
 			srv := httptest.NewTLSServer(mux)
 			srvcUrl := srv.URL
 
@@ -299,7 +299,7 @@ func TestAuthLogin(t *testing.T) {
 			}
 
 			mux := chi.NewMux()
-			mux.Post("/login", authReup.PostLogin)
+			mux.Post("/login", authReup.PostSignIn)
 			srv := httptest.NewTLSServer(mux)
 			srvcUrl := srv.URL
 
@@ -358,7 +358,7 @@ func TestAuthLogin(t *testing.T) {
 			}
 
 			mux := chi.NewMux()
-			mux.Post("/login", authReup.PostLogin)
+			mux.Post("/login", authReup.PostSignIn)
 
 			srv := httptest.NewTLSServer(mux)
 			srvcUrl := srv.URL
