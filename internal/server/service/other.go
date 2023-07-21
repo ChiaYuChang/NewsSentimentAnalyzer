@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
+	"github.com/google/uuid"
 )
 
 func (srvc otherService) Service() Service {
@@ -20,9 +21,9 @@ func (r NewsJobCreateRequest) RequestName() string {
 }
 
 type LogCreateRequest struct {
-	UserID  int32  `validate:"required,min=1"`
-	Type    string `validate:"required,event_type"`
-	Message string `validate:"required"`
+	UserID  uuid.UUID `validate:"required,uuid4"`
+	Type    string    `validate:"required,event_type"`
+	Message string    `validate:"required"`
 }
 
 func (r LogCreateRequest) RequestName() string {

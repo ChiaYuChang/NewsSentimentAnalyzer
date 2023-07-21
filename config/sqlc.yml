@@ -18,8 +18,8 @@ sql:
         output_models_file_name: model.go
         output_querier_file_name: querier.go
         overrides:
-          - db_type: "json"
-            go_type: "string"
-          - db_type: "json"
-            go_type: "string"
+          - db_type: "uuid"
+            go_type: "github.com/google/uuid.UUID"
+          - db_type: "uuid"
+            go_type: "github.com/google/uuid.UUID"
             nullable: true

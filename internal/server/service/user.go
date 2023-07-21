@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/context"
 )
@@ -13,13 +14,13 @@ func (srvc userService) Service() Service {
 }
 
 func (srvc userService) Create(
-	ctx context.Context, req *UserCreateRequest) (id int32, err error) {
+	ctx context.Context, req *UserCreateRequest) (id uuid.UUID, err error) {
 	if err := srvc.validate.Struct(req); err != nil {
-		return 0, err
+		return uuid.Nil, err
 	}
 
 	if params, err := req.ToParams(); err != nil {
-		return 0, fmt.Errorf("error while ToParams error: %w", err)
+		return uuid.Nil, fmt.Errorf("error while ToParams error: %w", err)
 	} else {
 		return srvc.store.CreateUser(ctx, params)
 	}
@@ -33,15 +34,15 @@ func (srvc userService) GetAuthInfo(
 	return srvc.store.GetUserAuth(ctx, email)
 }
 
-func (srvc userService) Login(ctx context.Context, email, password string) (err error, uid int32, role string) {
+func (srvc userService) Login(ctx context.Context, email, password string) (err error, uid uuid.UUID, role string) {
 	if len(password) < 1 {
-		return bcrypt.ErrMismatchedHashAndPassword, 0, ""
+		return bcrypt.ErrMismatchedHashAndPassword, uuid.Nil, ""
 	}
 
 	var auth *model.GetUserAuthRow
 	auth, err = srvc.GetAuthInfo(ctx, email)
 	if err != nil {
-		return err, 0, ""
+		return err, uuid.Nil, ""
 	}
 
 	return bcrypt.CompareHashAndPassword(auth.Password, []byte(password)), auth.ID, string(auth.Role)
@@ -61,16 +62,16 @@ func (srvc userService) UpdatePassword(
 }
 
 func (srvc userService) Delete(
-	ctx context.Context, Id int32) (n int64, err error) {
-	if err := srvc.validate.Var(Id, "required,min=1"); err != nil {
+	ctx context.Context, Id uuid.UUID) (n int64, err error) {
+	if err := srvc.validate.Var(Id, "not_uuid_nil,uuid4"); err != nil {
 		return 0, err
 	}
 	return srvc.store.DeleteUser(ctx, Id)
 }
 
 func (srvc userService) HardDelete(
-	ctx context.Context, Id int32) (n int64, err error) {
-	if err := srvc.validate.Var(Id, "required,min=1"); err != nil {
+	ctx context.Context, Id uuid.UUID) (n int64, err error) {
+	if err := srvc.validate.Var(Id, "not_uuid_nil,uuid4"); err != nil {
 		return 0, err
 	}
 	return srvc.store.HardDeleteUser(ctx, Id)
@@ -110,8 +111,8 @@ func (req UserCreateRequest) ToParams() (*model.CreateUserParams, error) {
 }
 
 type UserUpdatePasswordRequest struct {
-	ID       int32  `validate:"required,min=1"`
-	Password string `validate:"required,password"`
+	ID       uuid.UUID `validate:"not_uuid_nil,uuid4"`
+	Password string    `validate:"required,password"`
 }
 
 func (r UserUpdatePasswordRequest) RequestName() string {

@@ -1,6 +1,6 @@
 CREATE TABLE "jobs" (
   "id"              integer         PRIMARY KEY,
-  "owner"           integer         NOT NULL,
+  "owner"           uuid            NOT NULL,
   "status"          job_status      NOT NULL,
   "src_api_id"      smallint        NOT NULL,
   "src_query"       text            NOT NULL,

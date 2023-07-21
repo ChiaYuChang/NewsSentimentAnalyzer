@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	ec "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/errorCode"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
@@ -16,7 +17,7 @@ type Store interface {
 	ExecTx(ctx context.Context, fn QueryCallBackFun) error
 	DoCheckAndUpdateUserPasswordTx(ctx context.Context, params *CheckAndUpdateUserPasswordTxParams) error
 	DoCreateOrUpdateAPIKeyTx(ctx context.Context, params *CreateOrUpdateAPIKeyTxParams) (*CreateOrUpdateAPIKeyTxResults, error)
-	Close() error
+	Close(ctx context.Context) error
 }
 
 type CheckAndUpdateUserPasswordTxParams struct {
@@ -29,9 +30,9 @@ type CheckAndUpdateUserPasswordTxParams struct {
 type QueryCallBackFun func(*Queries) error
 
 type CreateOrUpdateAPIKeyTxParams struct {
-	Owner int32  `json:"owner"`
-	ApiID int16  `json:"api_id"`
-	Key   string `json:"key"`
+	Owner uuid.UUID `json:"owner"`
+	ApiID int16     `json:"api_id"`
+	Key   string    `json:"key"`
 }
 
 type CreateOrUpdateAPIKeyTxResults struct {
@@ -44,8 +45,8 @@ type PGXStore struct {
 	Conn *pgx.Conn
 }
 
-func (s PGXStore) Close() error {
-	return s.Close()
+func (s PGXStore) Close(ctx context.Context) error {
+	return s.Conn.Close(ctx)
 }
 
 func NewDBConnection(ctx context.Context, connStr string) (*pgx.Conn, error) {
@@ -95,8 +96,9 @@ type PGXPoolStore struct {
 	Conn *pgxpool.Pool
 }
 
-func (s PGXPoolStore) Close() error {
-	return s.Close()
+func (s PGXPoolStore) Close(ctx context.Context) error {
+	s.Conn.Close()
+	return nil
 }
 
 func NewDBConnectionPools(ctx context.Context, connStr string) (*pgxpool.Pool, error) {

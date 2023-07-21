@@ -16,43 +16,44 @@ import (
 
 var AppVar Option
 
-func ReadConfig() {
+func ReadConfig() error {
 	if err := BindFlags(); err != nil {
-		panic(err.Error())
+		return fmt.Errorf("error while Bindflags: %w", err)
 	}
 
 	if err := BindEnv(); err != nil {
-		fmt.Println("error while viper.BindEnv.", err)
-		os.Exit(1)
+		return fmt.Errorf("error while BindEnv: %w", err)
 	}
 
 	if !viper.GetBool("USE_DOCKER_ENV") {
-		ReadAndExportEnvFile("./.env")
+		if err := ReadAndExportEnvFile("./.env"); err != nil {
+			return fmt.Errorf("error while ReadAndExportEnvFile: %w", err)
+		}
 		viper.Set("POSTGRES_DB_NAME", fmt.Sprintf(
+			"%s_%s", viper.GetString("APP_NAME"), viper.GetString("APP_STATE")),
+		)
+		viper.Set("REDIS_DB_NAME", fmt.Sprintf(
 			"%s_%s", viper.GetString("APP_NAME"), viper.GetString("APP_STATE")),
 		)
 	}
 
 	if err := ReadAndSetPostgresPassword(
 		viper.GetString("POSTGRES_PASSWORD_FILE")); err != nil {
-		fmt.Println("error while reading postgres password.", err)
-		os.Exit(1)
+		return fmt.Errorf("error while reading postgres password: %w", err)
 	}
 
 	if err := ReadOptionsFrom(viper.GetString("APP_CONFIG_FILE")); err != nil {
-		fmt.Println("error while reading option file.", err)
-		os.Exit(1)
+		return fmt.Errorf("error while reading option file: %w", err)
 	}
 
 	if err := viper.Unmarshal(&AppVar); err != nil {
-		fmt.Println("error while unmarshaling AppVar.", err)
-		os.Exit(1)
+		return fmt.Errorf("error while unmarshaling AppVar: %w", err)
 	}
 
 	if err := ReadTokenMakerSecret(viper.GetString("TOKEN_SECRET_FILE")); err != nil {
-		fmt.Println("error while reading tokenmaker secret.", err)
-		os.Exit(1)
+		return fmt.Errorf("error while reading tokenmaker secret: %w", err)
 	}
+	return nil
 }
 
 func BindFlags() error {
@@ -203,6 +204,16 @@ func setDefaultEnvVariable() {
 	viper.SetDefault("POSTGRES_DB_NAME", "postgres")
 	viper.SetDefault("POSTGRES_PASSWORD_FILE", "")
 	viper.SetDefault("TOKEN_SECRET_FILE", "/run/secrets/TOKEN_SECRET")
+
+	viper.SetDefault("REDIS_HOST", "127.0.0.1")
+	viper.SetDefault("REDIS_PORT", 6379)
+	viper.SetDefault("REDIS_DB_NAME", "redis")
+	viper.SetDefault("REDIS_NETWORK", "tcp")
+	viper.SetDefault("REDIS_MAX_RETRIES", 5)
+	viper.SetDefault("REDIS_READ_TIMEOUT", 3*time.Second)
+	viper.SetDefault("REDIS_WRITE_TIMEOUT", 3*time.Second)
+	viper.SetDefault("REDIS_FIFO", true)
+	viper.SetDefault("REDIS_POOLSIZE", 6)
 }
 
 func setDefaultForOption() {

@@ -16,6 +16,7 @@ import (
 	rg "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/randanGenerator"
 	val "github.com/go-playground/validator/v10"
 	"github.com/golang/mock/gomock"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/bcrypt"
@@ -25,8 +26,8 @@ func TestCreateUserService(t *testing.T) {
 	type testCase struct {
 		Name        string
 		Init        func()
-		SetupFunc   func(ctl *gomock.Controller) (*service.UserCreateRequest, *mock_model.MockStore, int32)
-		TestFunc    func(req *service.UserCreateRequest, store *mock_model.MockStore, id int32)
+		SetupFunc   func(ctl *gomock.Controller) (*service.UserCreateRequest, *mock_model.MockStore, uuid.UUID)
+		TestFunc    func(req *service.UserCreateRequest, store *mock_model.MockStore, id uuid.UUID)
 		CleanUpFunc func()
 	}
 
@@ -42,7 +43,7 @@ func TestCreateUserService(t *testing.T) {
 					validator.NewDefaultPasswordValidator(),
 				)
 			},
-			SetupFunc: func(ctl *gomock.Controller) (*service.UserCreateRequest, *mock_model.MockStore, int32) {
+			SetupFunc: func(ctl *gomock.Controller) (*service.UserCreateRequest, *mock_model.MockStore, uuid.UUID) {
 				user, err := testtool.GenRdmUser()
 				require.NoError(t, err)
 
@@ -67,7 +68,7 @@ func TestCreateUserService(t *testing.T) {
 
 				return req, store, user.ID
 			},
-			TestFunc: func(req *service.UserCreateRequest, store *mock_model.MockStore, id int32) {
+			TestFunc: func(req *service.UserCreateRequest, store *mock_model.MockStore, id uuid.UUID) {
 				srvc := service.NewService(store, Validate)
 				n, err := srvc.User().Create(context.Background(), req)
 				require.NoError(t, err)
@@ -87,7 +88,7 @@ func TestCreateUserService(t *testing.T) {
 					validator.NewDefaultPasswordValidator(),
 				)
 			},
-			SetupFunc: func(ctl *gomock.Controller) (*service.UserCreateRequest, *mock_model.MockStore, int32) {
+			SetupFunc: func(ctl *gomock.Controller) (*service.UserCreateRequest, *mock_model.MockStore, uuid.UUID) {
 				user, err := testtool.GenRdmUser()
 				require.NoError(t, err)
 
@@ -108,14 +109,14 @@ func TestCreateUserService(t *testing.T) {
 
 				return req, store, user.ID
 			},
-			TestFunc: func(req *service.UserCreateRequest, store *mock_model.MockStore, id int32) {
+			TestFunc: func(req *service.UserCreateRequest, store *mock_model.MockStore, id uuid.UUID) {
 				srvc := service.NewService(store, Validate)
 				n, err := srvc.User().Create(context.Background(), req)
 				var valErr val.ValidationErrors
 				ok := errors.As(err, &valErr)
 				require.True(t, ok)
 				require.Error(t, err)
-				require.Equal(t, int32(0), n)
+				require.Equal(t, uuid.Nil, n)
 			},
 			CleanUpFunc: func() {
 				Validate = nil
@@ -134,7 +135,7 @@ func TestCreateUserService(t *testing.T) {
 					leakyPWDValidator,
 				)
 			},
-			SetupFunc: func(ctl *gomock.Controller) (*service.UserCreateRequest, *mock_model.MockStore, int32) {
+			SetupFunc: func(ctl *gomock.Controller) (*service.UserCreateRequest, *mock_model.MockStore, uuid.UUID) {
 				user, err := testtool.GenRdmUser()
 				require.NoError(t, err)
 
@@ -155,12 +156,12 @@ func TestCreateUserService(t *testing.T) {
 
 				return req, store, user.ID
 			},
-			TestFunc: func(req *service.UserCreateRequest, store *mock_model.MockStore, id int32) {
+			TestFunc: func(req *service.UserCreateRequest, store *mock_model.MockStore, id uuid.UUID) {
 				srvc := service.NewService(store, Validate)
 				n, err := srvc.User().Create(context.Background(), req)
 				require.Error(t, err)
 				require.ErrorIs(t, err, bcrypt.ErrPasswordTooLong)
-				require.Equal(t, int32(0), n)
+				require.Equal(t, uuid.Nil, n)
 			},
 			CleanUpFunc: func() {
 				Validate = nil
@@ -342,6 +343,7 @@ func TestUpdateUserPasswordService(t *testing.T) {
 			Name: "Create User OK",
 			Init: func() {
 				Validate = val.New()
+				validator.RegisterUUID(Validate)
 				validator.RegisterValidator(
 					Validate,
 					validator.EnmusRole,
@@ -350,7 +352,7 @@ func TestUpdateUserPasswordService(t *testing.T) {
 			},
 			SetupFunc: func(ctl *gomock.Controller) (*service.UserUpdatePasswordRequest, *mock_model.MockStore, int64) {
 				req := &service.UserUpdatePasswordRequest{
-					ID:       rand.Int31n(100_000) + 1,
+					ID:       uuid.New(),
 					Password: string(rg.Must[[]byte](rg.GenRdmPwd(8, 30, 2, 2, 2, 2))),
 				}
 				require.NotEmpty(t, req.RequestName())
@@ -381,6 +383,7 @@ func TestUpdateUserPasswordService(t *testing.T) {
 			Name: "ID is invalid",
 			Init: func() {
 				Validate = val.New()
+				validator.RegisterUUID(Validate)
 				validator.RegisterValidator(
 					Validate,
 					validator.EnmusRole,
@@ -388,8 +391,9 @@ func TestUpdateUserPasswordService(t *testing.T) {
 				)
 			},
 			SetupFunc: func(ctl *gomock.Controller) (*service.UserUpdatePasswordRequest, *mock_model.MockStore, int64) {
+				uuidv2, _ := uuid.NewDCEGroup()
 				req := &service.UserUpdatePasswordRequest{
-					ID:       -rand.Int31n(1_000),
+					ID:       uuidv2,
 					Password: string(rg.Must[[]byte](rg.GenRdmPwd(8, 30, 2, 2, 2, 2))),
 				}
 				require.NotEmpty(t, req.RequestName())
@@ -422,6 +426,7 @@ func TestUpdateUserPasswordService(t *testing.T) {
 				leakyPWDValidator := validator.NewPasswordValidator(
 					false, 0, 100, 0, 0, 0, 0,
 				)
+				validator.RegisterUUID(Validate)
 				validator.RegisterValidator(
 					Validate,
 					validator.EnmusRole,
@@ -430,7 +435,7 @@ func TestUpdateUserPasswordService(t *testing.T) {
 			},
 			SetupFunc: func(ctl *gomock.Controller) (*service.UserUpdatePasswordRequest, *mock_model.MockStore, int64) {
 				req := &service.UserUpdatePasswordRequest{
-					ID:       rand.Int31n(100_000),
+					ID:       uuid.New(),
 					Password: string(rg.Must[[]byte](rg.GenRdmPwd(80, 100, 2, 2, 2, 2))),
 				}
 				require.NotEmpty(t, req.RequestName())
@@ -486,8 +491,8 @@ func TestDeleteUserService(t *testing.T) {
 	type testCase struct {
 		Name        string
 		Init        func()
-		SetupFunc   func(ctl *gomock.Controller) (int32, *mock_model.MockStore, int64)
-		TestFunc    func(id int32, store *mock_model.MockStore, nAffectedRow int64)
+		SetupFunc   func(ctl *gomock.Controller) (uuid.UUID, *mock_model.MockStore, int64)
+		TestFunc    func(id uuid.UUID, store *mock_model.MockStore, nAffectedRow int64)
 		CleanUpFunc func()
 	}
 
@@ -497,15 +502,15 @@ func TestDeleteUserService(t *testing.T) {
 			Name: "Delete User OK",
 			Init: func() {
 				Validate = val.New()
+				validator.RegisterUUID(Validate)
 				validator.RegisterValidator(
 					Validate,
 					validator.EnmusRole,
 					validator.NewDefaultPasswordValidator(),
 				)
 			},
-			SetupFunc: func(ctl *gomock.Controller) (int32, *mock_model.MockStore, int64) {
-				id := rand.Int31n(100_000) + 1
-
+			SetupFunc: func(ctl *gomock.Controller) (uuid.UUID, *mock_model.MockStore, int64) {
+				id := uuid.New()
 				store := mock_model.NewMockStore(ctl)
 				store.
 					EXPECT().
@@ -515,7 +520,7 @@ func TestDeleteUserService(t *testing.T) {
 
 				return id, store, 1
 			},
-			TestFunc: func(id int32, store *mock_model.MockStore, nAffectedRow int64) {
+			TestFunc: func(id uuid.UUID, store *mock_model.MockStore, nAffectedRow int64) {
 				srvc := service.NewService(store, Validate)
 				n, err := srvc.User().Delete(context.Background(), id)
 				require.NoError(t, err)
@@ -529,24 +534,24 @@ func TestDeleteUserService(t *testing.T) {
 			Name: "ID is invalid",
 			Init: func() {
 				Validate = val.New()
+				validator.RegisterUUID(Validate)
 				validator.RegisterValidator(
 					Validate,
 					validator.EnmusRole,
 					validator.NewDefaultPasswordValidator(),
 				)
 			},
-			SetupFunc: func(ctl *gomock.Controller) (int32, *mock_model.MockStore, int64) {
-				id := -rand.Int31n(100_000)
-
+			SetupFunc: func(ctl *gomock.Controller) (uuid.UUID, *mock_model.MockStore, int64) {
+				uuidv2, _ := uuid.NewDCEGroup()
 				store := mock_model.NewMockStore(ctl)
 				store.
 					EXPECT().
 					DeleteUser(gomock.Any(), gomock.Any()).
 					Times(0)
 
-				return id, store, 0
+				return uuidv2, store, 0
 			},
-			TestFunc: func(id int32, store *mock_model.MockStore, nAffectedRow int64) {
+			TestFunc: func(id uuid.UUID, store *mock_model.MockStore, nAffectedRow int64) {
 				srvc := service.NewService(store, Validate)
 				n, err := srvc.User().Delete(context.Background(), id)
 				var valErr val.ValidationErrors

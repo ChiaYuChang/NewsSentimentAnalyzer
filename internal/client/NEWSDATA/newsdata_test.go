@@ -1,18 +1,56 @@
 package newsdata_test
 
-// import (
-// 	"fmt"
-// 	"testing"
-// 	"time"
+import (
+	"encoding/json"
+	"os"
+	"testing"
 
-// 	newsdata "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/NEWSDATA"
-// 	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm"
-// 	rg "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/randanGenerator"
-// 	val "github.com/go-playground/validator/v10"
-// 	"github.com/stretchr/testify/require"
-// )
+	cli "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/NEWSDATA"
+	"github.com/stretchr/testify/require"
+)
 
-// const APIKey = "Key"
+const TEST_API_KEY = "pub_00000x0000x00xx0x0000xxxx00x00xx0xx002"
+
+func TestParseResponse(t *testing.T) {
+	type testCase struct {
+		name        string
+		fileName    string
+		hasNextPage bool
+	}
+
+	tcs := []testCase{
+		{
+			name:        "w/o next page",
+			fileName:    "example_response/001.json",
+			hasNextPage: false,
+		},
+		{
+			name:        "w/ next page",
+			fileName:    "example_response/002.json",
+			hasNextPage: true,
+		},
+	}
+
+	for i := range tcs {
+		tc := tcs[i]
+		t.Run(
+			tc.name,
+			func(t *testing.T) {
+				respJson, err := os.ReadFile(tc.fileName)
+				require.NoError(t, err)
+
+				var resp cli.Response
+				err = json.Unmarshal(respJson, &resp)
+				require.NoError(t, err)
+				require.Equal(t, tc.hasNextPage, resp.HasNextPage())
+				require.GreaterOrEqual(t, resp.TotalResult, resp.Len())
+				if resp.HasNextPage() {
+					t.Log(resp.NextPage)
+				}
+			},
+		)
+	}
+}
 
 // func TestBuildLatestNewsQuery(t *testing.T) {
 // 	var err error

@@ -13,6 +13,7 @@ import (
 	rg "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/randanGenerator"
 	val "github.com/go-playground/validator/v10"
 	"github.com/golang/mock/gomock"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/stretchr/testify/require"
 )
@@ -20,9 +21,9 @@ import (
 func TestListEndpointByOwener(t *testing.T) {
 	type testCase struct {
 		Name      string
-		Owner     int32
-		SetupFunc func(owner int32, ctl *gomock.Controller) service.Service
-		CheckFunc func(owner int32, srvc service.Service)
+		Owner     uuid.UUID
+		SetupFunc func(owner uuid.UUID, ctl *gomock.Controller) service.Service
+		CheckFunc func(owner uuid.UUID, srvc service.Service)
 	}
 
 	n := 5
@@ -61,8 +62,8 @@ func TestListEndpointByOwener(t *testing.T) {
 	tcs := []testCase{
 		{
 			Name:  "OK",
-			Owner: 1,
-			SetupFunc: func(owner int32, ctl *gomock.Controller) service.Service {
+			Owner: uuid.New(),
+			SetupFunc: func(owner uuid.UUID, ctl *gomock.Controller) service.Service {
 				store := mock_model.NewMockStore(ctl)
 				store.
 					EXPECT().
@@ -72,7 +73,7 @@ func TestListEndpointByOwener(t *testing.T) {
 
 				return service.NewService(store, validator.Validate)
 			},
-			CheckFunc: func(owner int32, srvc service.Service) {
+			CheckFunc: func(owner uuid.UUID, srvc service.Service) {
 				eps, err := srvc.
 					Endpoint().
 					ListEndpointByOwner(
@@ -84,8 +85,8 @@ func TestListEndpointByOwener(t *testing.T) {
 		},
 		{
 			Name:  "Error Owner ID",
-			Owner: 0,
-			SetupFunc: func(owner int32, ctl *gomock.Controller) service.Service {
+			Owner: uuid.Nil,
+			SetupFunc: func(owner uuid.UUID, ctl *gomock.Controller) service.Service {
 				store := mock_model.NewMockStore(ctl)
 				store.
 					EXPECT().
@@ -93,7 +94,7 @@ func TestListEndpointByOwener(t *testing.T) {
 					Times(0)
 				return service.NewService(store, validator.Validate)
 			},
-			CheckFunc: func(owner int32, srvc service.Service) {
+			CheckFunc: func(owner uuid.UUID, srvc service.Service) {
 				eps, err := srvc.
 					Endpoint().
 					ListEndpointByOwner(

@@ -2,6 +2,7 @@ package validator
 
 import (
 	"fmt"
+	"os"
 
 	val "github.com/go-playground/validator/v10"
 )
@@ -9,9 +10,23 @@ import (
 var Validate *val.Validate
 
 func init() {
-	Validate = val.New()
+	var err error
+	Validate, err = NewValiateWithDefault()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error while NewValiateWithDefault: %v", err)
+		os.Exit(1)
+	}
+}
+
+func NewValiateWithDefault() (*val.Validate, error) {
+	v := val.New()
+
+	if err := RegisterUUID(v); err != nil {
+		return nil, fmt.Errorf("error while RegisterUUID: %w", err)
+	}
+
 	if err := RegisterValidator(
-		Validate,
+		v,
 		NewDefaultPasswordValidator(),
 		NotBeforeNow,
 		EnmusRole,
@@ -19,6 +34,7 @@ func init() {
 		EnmusApiType,
 		EnmusEventType,
 	); err != nil {
-		panic(fmt.Errorf("error while register validators: %w", err))
+		return nil, fmt.Errorf("error while register validators: %v", err)
 	}
+	return v, nil
 }

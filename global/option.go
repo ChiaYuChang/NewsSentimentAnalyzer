@@ -8,9 +8,10 @@ import (
 )
 
 type Option struct {
-	Token    TokenMakerOption `mapstructure:"token"`
-	Password PasswordOption   `mapstructure:"password"`
-	App      AppOption        `mapstructure:"app"`
+	Token       TokenMakerOption `mapstructure:"token"`
+	RateLimiter RateLimiter      `mapstructure:"ratelimiter"`
+	Password    PasswordOption   `mapstructure:"password"`
+	App         AppOption        `mapstructure:"app"`
 }
 
 func (opt Option) String() string {
@@ -53,7 +54,14 @@ func (tknOpt *TokenMakerOption) SetSecret(secret []byte) {
 	tknOpt.secret = secret
 }
 
+type RateLimiter struct {
+	Auth RateLimit `mapstructure:"auth"`
+	API  RateLimit `mapstructure:"api"`
+	User RateLimit `mapstructure:"user"`
+}
+
 type RateLimit struct {
+	N   int           `mapstructure:"n"`
 	Per time.Duration `mapstructure:"per"`
 }
 

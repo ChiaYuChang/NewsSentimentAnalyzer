@@ -80,7 +80,7 @@ SET default_table_access_method = heap;
 
 CREATE TABLE public.apikeys (
     id integer NOT NULL,
-    owner integer NOT NULL,
+    owner uuid NOT NULL,
     api_id smallint NOT NULL,
     key text NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
@@ -199,7 +199,7 @@ ALTER SEQUENCE public.endpoints_id_seq OWNED BY public.endpoints.id;
 
 CREATE TABLE public.jobs (
     id integer NOT NULL,
-    owner integer NOT NULL,
+    owner uuid NOT NULL,
     status public.job_status NOT NULL,
     src_api_id smallint NOT NULL,
     src_query text NOT NULL,
@@ -253,7 +253,7 @@ ALTER SEQUENCE public.keywords_id_seq OWNED BY public.keywords.id;
 
 CREATE TABLE public.logs (
     id bigint NOT NULL,
-    user_id integer NOT NULL,
+    user_id uuid NOT NULL,
     type public.event_type NOT NULL,
     message character varying(256) NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL
@@ -290,14 +290,15 @@ ALTER SEQUENCE public.logs_id_seq OWNED BY public.logs.id;
 CREATE TABLE public.news (
     id bigint NOT NULL,
     md5_hash character(128) NOT NULL,
+    author character varying DEFAULT ''::character varying NOT NULL,
     title text NOT NULL,
     url text NOT NULL,
     description text NOT NULL,
     content text NOT NULL,
     source text,
+    response jsonb NOT NULL,
     publish_at timestamp with time zone NOT NULL,
-    created_at timestamp with time zone DEFAULT now() NOT NULL,
-    updated_at timestamp with time zone DEFAULT now() NOT NULL
+    created_at timestamp with time zone DEFAULT now() NOT NULL
 );
 
 
@@ -375,7 +376,7 @@ ALTER TABLE public.schema_migrations OWNER TO admin;
 --
 
 CREATE TABLE public.users (
-    id integer NOT NULL,
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
     password bytea NOT NULL,
     first_name character varying(30) NOT NULL,
     last_name character varying(30) NOT NULL,
@@ -390,28 +391,6 @@ CREATE TABLE public.users (
 
 
 ALTER TABLE public.users OWNER TO admin;
-
---
--- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
---
-
-CREATE SEQUENCE public.users_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.users_id_seq OWNER TO admin;
-
---
--- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
---
-
-ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
-
 
 --
 -- Name: apikeys id; Type: DEFAULT; Schema: public; Owner: admin
@@ -460,13 +439,6 @@ ALTER TABLE ONLY public.news ALTER COLUMN id SET DEFAULT nextval('public.news_id
 --
 
 ALTER TABLE ONLY public.newsjobs ALTER COLUMN id SET DEFAULT nextval('public.newsjobs_id_seq'::regclass);
-
-
---
--- Name: users id; Type: DEFAULT; Schema: public; Owner: admin
---
-
-ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
 
 
 --

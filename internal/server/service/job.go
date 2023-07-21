@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
+	"github.com/google/uuid"
 )
 
 func (srvc jobService) Service() Service {
@@ -11,12 +12,12 @@ func (srvc jobService) Service() Service {
 }
 
 type JobCreateRequest struct {
-	Owner    int32  `validate:"required,min=1"`
-	Status   string `validate:"required,job_status"`
-	SrcApiID int16  `validate:"required,min=1"`
-	SrcQuery string `validate:"required,url,min=1"`
-	LlmApiID int16  `validate:"required,min=1"`
-	LlmQuery string `validate:"required,url,min=1"`
+	Owner    uuid.UUID `validate:"not_uuid_nil,uuid4"`
+	Status   string    `validate:"required,job_status"`
+	SrcApiID int16     `validate:"required,min=1"`
+	SrcQuery string    `validate:"required,url,min=1"`
+	LlmApiID int16     `validate:"required,min=1"`
+	LlmQuery string    `validate:"required,json"`
 }
 
 func (r JobCreateRequest) RequestName() string {
@@ -24,8 +25,8 @@ func (r JobCreateRequest) RequestName() string {
 }
 
 type JobDeleteRequest struct {
-	ID    int32 `validate:"required,min=1"`
-	Owner int32 `validate:"required,min=1"`
+	ID    int32     `validate:"required,min=1"`
+	Owner uuid.UUID `validate:"not_uuid_nil,uuid4"`
 }
 
 func (r JobDeleteRequest) RequestName() string {
@@ -33,8 +34,8 @@ func (r JobDeleteRequest) RequestName() string {
 }
 
 type JobGetJobsByOwnerRequest struct {
-	Owner int32 `validate:"required,min=1"`
-	N     int32 `validate:"required,min=1"`
+	Owner uuid.UUID `validate:"not_uuid_nil,uuid4"`
+	N     int32     `validate:"required,min=1"`
 }
 
 func (r JobGetJobsByOwnerRequest) RequestName() string {
@@ -42,9 +43,9 @@ func (r JobGetJobsByOwnerRequest) RequestName() string {
 }
 
 type JobUpdateStatusRequest struct {
-	Status string `validate:"required,min=1,job_status"`
-	ID     int32  `validate:"required,min=1"`
-	Owner  int32  `validate:"required,min=1"`
+	Status string    `validate:"required,min=1,job_status"`
+	ID     int32     `validate:"required,min=1"`
+	Owner  uuid.UUID `validate:"not_uuid_nil,uuid4"`
 }
 
 func (r JobUpdateStatusRequest) RequestName() string {
@@ -62,7 +63,7 @@ func (srvc jobService) Create(ctx context.Context, r *JobCreateRequest) (id int3
 		SrcApiID: r.SrcApiID,
 		SrcQuery: r.SrcQuery,
 		LlmApiID: r.LlmApiID,
-		LlmQuery: r.LlmQuery,
+		LlmQuery: []byte(r.LlmQuery),
 	})
 }
 

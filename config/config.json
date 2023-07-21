@@ -21,8 +21,19 @@
     "minNumLower": 1,
     "minNumSpecial": 1
   },
-  "ratelimit": {
-    "per": "60s"
+  "ratelimiter": {
+    "auth": {
+      "n": 100,
+      "per": "60s"
+    },
+    "api": {
+      "n": 100,
+      "per": "60s"
+    },
+    "user": {
+      "n": 10,
+      "per": "60s"
+    }
   },
   "app": {
     "staticFile": {
@@ -52,7 +63,8 @@
       "errorPage": {
         "unauthorized": "/unauthorized",
         "bad-request": "/bad-request",
-        "forbidden": "/forbidden"
+        "forbidden": "/forbidden",
+        "too-many-request": "/too-many-request"
       },
       "staticPage": "/static/*"
     }

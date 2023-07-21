@@ -9,6 +9,7 @@ import (
 	ec "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/errorCode"
 	tm "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/tokenMaker"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
 
@@ -102,7 +103,7 @@ func TestJWTMakerWithOptions(t *testing.T) {
 
 	username := "user"
 	role := tm.RAdmin
-	uid := int32(1)
+	uid := uuid.New()
 	for i := range tcs {
 		tc := tcs[i]
 		t.Run(
@@ -136,7 +137,7 @@ func TestJWTMakerErrors(t *testing.T) {
 
 	username := "user"
 	role := tm.RAdmin
-	uid := int32(1)
+	uid := uuid.New()
 	tokenStr, _ := maker.MakeToken(username, uid, role)
 	_, err = maker.ValidateToken(tokenStr)
 	require.ErrorContains(t, err, jwt.ErrTokenUnverifiable.Error())
@@ -158,7 +159,7 @@ func TestJWTMakerAsMaker(t *testing.T) {
 
 	username := "user"
 	role := tm.RAdmin
-	uid := int32(1)
+	uid := uuid.New()
 	tokenStr, err := maker.MakeToken(username, uid, role)
 	require.NoError(t, err)
 	payload, err := maker.ValidateToken(tokenStr)

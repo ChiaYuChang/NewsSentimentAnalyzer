@@ -24,10 +24,11 @@ import (
 	"github.com/go-chi/chi/v5"
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/go-playground/form"
+	"github.com/redis/go-redis/v9"
 	"github.com/spf13/viper"
 )
 
-func NewRouter(srvc service.Service, vw view.View, filesystem http.FileSystem,
+func NewRouter(srvc service.Service, rds *redis.Client, vw view.View,
 	tmaker tokenmaker.TokenMaker, cmaker *cookiemaker.CookieMaker) *chi.Mux {
 	errHandlerRepo, err := errorhandler.NewErrorHandlerRepo(vw.Template.Lookup("errorpage.gotmpl"))
 	if err != nil {
@@ -64,13 +65,31 @@ func NewRouter(srvc service.Service, vw view.View, filesystem http.FileSystem,
 		TokenMaker:          tmaker,
 	}
 
+	authRateLimiter := middleware.NewRateLimiter(
+		global.AppVar.RateLimiter.Auth.N,
+		global.AppVar.RateLimiter.Auth.RateLimitOption(),
+	)
+
+	apiRateLimiter := middleware.NewRateLimiter(
+		global.AppVar.RateLimiter.API.N,
+		global.AppVar.RateLimiter.API.RateLimitOption(),
+	)
+
+	qureyRateLimiter := middleware.NewRedisRateLimiter(
+		rds,
+		global.AppVar.RateLimiter.User.N,
+		global.AppVar.RateLimiter.User.Per,
+	)
+
 	rp := global.AppVar.App.RoutePattern
 	r := chi.NewRouter()
 	r.Use(chimiddleware.Logger)
 	r.Use(chimiddleware.Recoverer)
+	r.Use(authRateLimiter.RateLimit)
 
 	r.Get("/favicon.ico", http.NotFound)
-	r.Handle(rp.StaticPage, http.StripPrefix("/static", http.FileServer(filesystem)))
+	r.Handle(rp.StaticPage, http.StripPrefix(
+		"/static", http.FileServer(http.Dir(global.AppVar.App.StaticFile.Path))))
 
 	r.Get(rp.Page["sign-in"], auth.GetSignIn)
 	r.Post(rp.Page["sign-in"], auth.PostSignIn)
@@ -81,10 +100,15 @@ func NewRouter(srvc service.Service, vw view.View, filesystem http.FileSystem,
 	r.Get(rp.Page["sign-out"], auth.GetSignOut)
 	r.Get(rp.ErrorPage["unauthorized"], errHandlerRepo.Unauthorized)
 	r.Get(rp.ErrorPage["bad-request"], errHandlerRepo.BadRequest)
+	r.Get(rp.ErrorPage["too-many-request"], errHandlerRepo.TooManyRequests)
 	r.Get("/*", errHandlerRepo.SeeOther("/sign-in"))
 
 	r.Route(fmt.Sprintf("/%s", apiRepo.Version), func(r chi.Router) {
+		r.Use(chimiddleware.Logger)
+		r.Use(chimiddleware.Recoverer)
+		r.Use(apiRateLimiter.RateLimit)
 		r.Use(bearerTokenMaker.BearerAuthenticator)
+
 		r.Get(rp.Page["welcome"], apiRepo.GetWelcome)
 
 		r.Get(rp.Page["apikey"], apiRepo.GetAPIKey)
@@ -99,6 +123,7 @@ func NewRouter(srvc service.Service, vw view.View, filesystem http.FileSystem,
 		r.Route(
 			rp.Page["endpoints"],
 			func(r chi.Router) {
+				r.Use(qureyRateLimiter.RateLimit)
 				r.Get("/", apiRepo.GetEndpoints)
 				wg.Wait()
 				for key := range epRepo.PageView {

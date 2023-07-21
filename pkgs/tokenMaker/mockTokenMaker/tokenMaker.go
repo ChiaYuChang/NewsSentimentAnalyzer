@@ -9,6 +9,7 @@ import (
 
 	tokenmaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/tokenMaker"
 	gomock "github.com/golang/mock/gomock"
+	uuid "github.com/google/uuid"
 )
 
 // MockTokenMaker is a mock of TokenMaker interface.
@@ -35,7 +36,7 @@ func (m *MockTokenMaker) EXPECT() *MockTokenMakerMockRecorder {
 }
 
 // MakeToken mocks base method.
-func (m *MockTokenMaker) MakeToken(arg0 string, arg1 int32, arg2 tokenmaker.Role) (string, error) {
+func (m *MockTokenMaker) MakeToken(arg0 string, arg1 uuid.UUID, arg2 tokenmaker.Role) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "MakeToken", arg0, arg1, arg2)
 	ret0, _ := ret[0].(string)
@@ -101,6 +102,20 @@ func (m *MockPayload) EXPECT() *MockPayloadMockRecorder {
 	return m.recorder
 }
 
+// GetKey mocks base method.
+func (m *MockPayload) GetKey() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetKey")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GetKey indicates an expected call of GetKey.
+func (mr *MockPayloadMockRecorder) GetKey() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetKey", reflect.TypeOf((*MockPayload)(nil).GetKey))
+}
+
 // GetRole mocks base method.
 func (m *MockPayload) GetRole() tokenmaker.Role {
 	m.ctrl.T.Helper()
@@ -116,10 +131,10 @@ func (mr *MockPayloadMockRecorder) GetRole() *gomock.Call {
 }
 
 // GetUserID mocks base method.
-func (m *MockPayload) GetUserID() int32 {
+func (m *MockPayload) GetUserID() uuid.UUID {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserID")
-	ret0, _ := ret[0].(int32)
+	ret0, _ := ret[0].(uuid.UUID)
 	return ret0
 }
 

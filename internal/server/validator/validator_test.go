@@ -7,6 +7,7 @@ import (
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/validator"
 	val "github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
 
@@ -204,4 +205,57 @@ func TestPast(t *testing.T) {
 	require.NoError(t, validate.Var(time.Now(), validator.NotBeforeNow.Tag()))
 	require.NoError(t, validate.Var(time.Now().Add(-1*time.Hour), validator.NotBeforeNow.Tag()))
 	require.Error(t, validate.Var(time.Now().Add(1*time.Hour), validator.NotBeforeNow.Tag()))
+}
+
+func TestValidateUUID(t *testing.T) {
+	validate := val.New()
+	validator.RegisterUUID(validate)
+
+	type testCase struct {
+		Name         string
+		UID          uuid.UUID
+		Tags         []string
+		ExpectResult []bool
+	}
+
+	uid4 := uuid.New()
+	uid3 := uuid.NewMD5(uuid.Nil, []byte("UUID version 3"))
+
+	tcs := []testCase{
+		{
+			Name:         "UUID ver4",
+			UID:          uid4,
+			Tags:         []string{"uuid", "uuid3", "uuid4", "not_uuid_nil"},
+			ExpectResult: []bool{true, false, true, true},
+		},
+		{
+			Name:         "UUID ver3",
+			UID:          uid3,
+			Tags:         []string{"uuid", "uuid3", "uuid4", "not_uuid_nil"},
+			ExpectResult: []bool{true, true, false, true},
+		},
+		{
+			Name:         "uuid.Nil",
+			UID:          uuid.Nil,
+			Tags:         []string{"uuid", "uuid3", "uuid4", "not_uuid_nil"},
+			ExpectResult: []bool{true, false, false, false},
+		},
+	}
+
+	for i := range tcs {
+		tc := tcs[i]
+		t.Run(
+			tc.Name,
+			func(t *testing.T) {
+				for j, tag := range tc.Tags {
+					err := validate.Var(tc.UID, tag)
+					if tc.ExpectResult[j] {
+						require.NoError(t, err)
+					} else {
+						require.Error(t, err)
+					}
+				}
+			},
+		)
+	}
 }

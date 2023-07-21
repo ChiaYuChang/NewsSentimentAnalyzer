@@ -7,6 +7,7 @@ import (
 
 	ec "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/errorCode"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 // default method for generating jwt signature (default: HMAC)
@@ -84,8 +85,12 @@ func (c JWTClaims) GetUsername() string {
 	return c.UserName
 }
 
-func (c JWTClaims) GetUserID() int32 {
+func (c JWTClaims) GetUserID() uuid.UUID {
 	return c.UID
+}
+
+func (c JWTClaims) GetKey() string {
+	return c.UID.String()
 }
 
 func (c JWTClaims) String() string {
@@ -206,7 +211,7 @@ func (jm *JWTMaker) WithOptions(options ...JWTClaimsOpt) *JWTMaker {
 	return jm
 }
 
-func (jm JWTMaker) MakeToken(username string, uid int32, role Role) (string, error) {
+func (jm JWTMaker) MakeToken(username string, uid uuid.UUID, role Role) (string, error) {
 	currTime := time.Now()
 	valideAt := currTime.Add(jm.ValidAfter)
 	expireAt := valideAt.Add(jm.ExpireAfter)

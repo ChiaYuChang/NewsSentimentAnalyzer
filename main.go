@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"net/url"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
@@ -14,6 +16,7 @@ import (
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/validator"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view"
+	errorcode "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/errorCode"
 	tokenmaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/tokenMaker"
 	"github.com/spf13/viper"
 )
@@ -22,47 +25,108 @@ func main() {
 	global.ReadConfig()
 	fmt.Println(global.AppVar)
 
-	options := url.Values{}
-	options.Add("sslmode", viper.GetString("POSTGRES_SSL_MODE"))
-	connStr := fmt.Sprintf(
-		"postgres://%s:%s@%s:%d/%s?%s",
-		viper.GetString("POSTGRES_USERNAME"),
-		viper.GetString("POSTGRES_PASSWORD"),
-		viper.GetString("POSTGRES_HOST"),
-		viper.GetInt("POSTGRES_PORT"),
-		viper.GetString("POSTGRES_DB_NAME"),
-		options.Encode(),
+	pgSqlConn, err := global.ConnectToPostgres(context.Background())
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	srvc := service.NewService(model.NewPGXStore(pgSqlConn), validator.Validate)
+
+	rds := global.ConnectToRedis()
+	rdsStatus := rds.Ping(context.Background())
+	if err := rdsStatus.Err(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+
+	vw, err := view.NewViewWithDefaultTemplateFuncs(global.AppVar.App.Template...)
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "error while NewView: %s\n", err)
+		os.Exit(1)
+	}
+
+	tm := tokenmaker.NewJWTMaker(
+		global.AppVar.Token.Secret(),
+		global.AppVar.Token.SignMethod.Algorthm,
+		global.AppVar.Token.SignMethod.Size,
+		global.AppVar.Token.ExpireAfter,
+		global.AppVar.Token.ValidAfter,
 	)
 
-	fmt.Println("ConnStr:", connStr)
-	conn, err := model.NewDBConnection(context.TODO(), connStr)
-	if err != nil {
+	cm := cookieMaker.NewCookieMaker(
+		"/", viper.GetString("APP_HOST"),
+		int(global.AppVar.Token.ExpireAfter.Seconds()),
+		true, false, http.SameSiteLaxMode,
+	)
+
+	addr := fmt.Sprintf("%s:%d", viper.GetString("APP_HOST"), viper.GetInt("APP_PORT"))
+	server := &http.Server{
+		Addr:    addr,
+		Handler: router.NewRouter(srvc, rds, vw, tm, cm),
+	}
+
+	serverCtx, serverCancel := context.WithCancel(context.Background())
+	signalChan := make(chan os.Signal)
+	signal.Notify(signalChan, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM)
+	go func(signalChan chan os.Signal) {
+		sig := <-signalChan
+		fmt.Printf("Get %v\n", sig)
+
+		shutdownCtx, shutdownCancel := context.WithTimeout(serverCtx, 30*time.Second)
+		defer shutdownCancel()
+
+		go func() {
+			<-shutdownCtx.Done()
+			if shutdownCtx.Err() == context.DeadlineExceeded {
+				fmt.Fprintln(os.Stderr, "graceful shutdown timed out.. forcing exit.")
+				os.Exit(0)
+			}
+		}()
+
+		ec := make(chan error)
+		go func() {
+			ec <- server.Shutdown(shutdownCtx)
+			fmt.Println("Server shutdown")
+		}()
+
+		go func() {
+			ec <- srvc.Close(shutdownCtx)
+			fmt.Println("PostgresSQL connection closed")
+		}()
+
+		go func() {
+			ec <- rds.Close()
+			fmt.Println("Redis connection closed")
+		}()
+
+		var ecErr *errorcode.Error
+		for i := 0; i < 3; i++ {
+			err := <-ec
+			if err != nil {
+				if ecErr == nil {
+					ecErr = errorcode.MustGetEcErr(errorcode.ECServerError)
+				}
+				ecErr.WithDetails(err.Error())
+			}
+		}
+
+		if ecErr != nil {
+			jsn, _ := ecErr.ToJson()
+			fmt.Fprintln(os.Stderr, string(jsn))
+		}
+		serverCancel()
+	}(signalChan)
+
+	fmt.Println("Server start at:", addr)
+	if err := server.ListenAndServeTLS(
+		"./secrets/server.crt",
+		"./secrets/server.key",
+	); err != nil && err != http.ErrServerClosed {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
 	}
 
-	service := service.NewService(model.NewPGXStore(conn), validator.Validate)
-
-	vw, err := view.NewViewWithDefaultTemplateFuncs(global.AppVar.App.Template...)
-	if err != nil {
-		panic(err)
-	}
-
-	fs := http.Dir(global.AppVar.App.StaticFile.Path)
-	tm := tokenmaker.NewJWTMakerWithDefaultVal()
-	cm := cookieMaker.NewTestCookieMaker()
-
-	mux := router.NewRouter(service, vw, fs, tm, cm)
-
-	errCh := make(chan error)
-	addr := fmt.Sprintf("%s:%d", viper.GetString("APP_HOST"), viper.GetInt("APP_PORT"))
-	fmt.Println("Server start at:", addr)
-	go func(chan<- error) {
-		errCh <- http.ListenAndServe(addr, mux)
-	}(errCh)
-
-	err = <-errCh
-	if err != nil {
-		panic(err)
-	}
+	<-serverCtx.Done()
+	fmt.Println("Shutdown gracefully")
+	os.Exit(0)
 }

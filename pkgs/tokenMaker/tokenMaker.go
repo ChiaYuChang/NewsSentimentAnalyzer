@@ -6,6 +6,7 @@ import (
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
 	errorcode "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/errorCode"
+	"github.com/google/uuid"
 )
 
 func init() {
@@ -19,7 +20,7 @@ const DEFAULT_EXPIRE_AFTER = 3 * time.Hour
 const DEFAULT_VALID_AFTER = 0 * time.Second
 
 type TokenMaker interface {
-	MakeToken(username string, uid int32, role Role) (string, error)
+	MakeToken(username string, uid uuid.UUID, role Role) (string, error)
 	ValidateToken(tokenStr string) (Payload, error)
 	fmt.Stringer
 }
@@ -85,12 +86,13 @@ type Payload interface {
 	GetRole() Role
 	GetUsername() string
 	GetUserInfo() UserInfo
-	GetUserID() int32
+	GetUserID() uuid.UUID
+	GetKey() string
 	fmt.Stringer
 }
 
 type UserInfo struct {
-	UserName string `json:"username"`
-	Role     Role   `json:"role"`
-	UID      int32  `json:"uid"`
+	UserName string    `json:"username"`
+	Role     Role      `json:"role"`
+	UID      uuid.UUID `json:"uid"`
 }

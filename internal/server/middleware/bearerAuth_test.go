@@ -18,6 +18,7 @@ import (
 	ec "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/errorCode"
 	tokenmaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/tokenMaker"
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
 
@@ -42,7 +43,7 @@ func TestBearerAuthenticator(t *testing.T) {
 	username := "username"
 	password := "password"
 	role := tokenmaker.RUser
-	uid := int32(1)
+	uid := uuid.New()
 
 	maker := middleware.NewJWTTokenMaker(opt, tokenmaker.WithIssuer("[[:Issuer:]]"))
 	maker.AllowFromHTTPCookie = true

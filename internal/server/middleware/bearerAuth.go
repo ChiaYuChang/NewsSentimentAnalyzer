@@ -87,7 +87,6 @@ func (bm BearerTokenMaker) BearerAuthenticator(next http.Handler) http.Handler {
 			Path:  "/ ",
 		})
 
-		fmt.Println("JWT PASS")
 		next.ServeHTTP(w, req.WithContext(ctx))
 		// update JWT
 		w.Header().Set("Trailer-JWT", fmt.Sprintf("Bearer %s", bearer))

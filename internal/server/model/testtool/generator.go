@@ -7,6 +7,7 @@ import (
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/convert"
 	rg "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/randanGenerator"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -37,7 +38,7 @@ func GenRdmUser() (*model.User, error) {
 	}
 
 	return &model.User{
-		ID:        rand.Int31() + 1,
+		ID:        uuid.New(),
 		Password:  []byte(pwd),
 		FirstName: fnm,
 		LastName:  lnm,
@@ -83,9 +84,9 @@ func GenRdmAPI(id int16) (*model.Api, error) {
 
 // generate a random apikey model. if 'owner', and 'api_id' <= 0, they will
 // be generated randomly.
-func GenRdmAPIKey(owner int32, api_id int16) (*model.Apikey, error) {
-	if owner <= 0 {
-		owner = rand.Int31n(1_000_000)
+func GenRdmAPIKey(owner uuid.UUID, api_id int16) (*model.Apikey, error) {
+	if owner == uuid.Nil {
+		owner = uuid.New()
 	}
 
 	if api_id <= 0 {

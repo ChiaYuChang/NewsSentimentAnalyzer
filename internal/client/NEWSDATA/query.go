@@ -28,8 +28,7 @@ type Query struct {
 	Apikey   string
 	Endpoint string
 	cli.Params
-	Page     string
-	NextPage string
+	Page string
 }
 
 func newQuery(apikey string) *Query {
@@ -135,8 +134,8 @@ func (q *Query) WithCategory(category ...string) *Query {
 	return q
 }
 
-func (q *Query) WithNextPage(next string) *Query {
-	q.NextPage = next
+func (q *Query) WithNextPage(page string) *Query {
+	q.Page = page
 	return q
 }
 
@@ -175,6 +174,9 @@ func (q *Query) ToRequestURL(u *url.URL) string {
 	v := q.Params.ToUrlVals()
 	if q.Apikey != "" {
 		v.Add("apikey", q.Apikey)
+	}
+	if q.Page != "" {
+		v.Add("page", q.Page)
 	}
 	u = u.JoinPath(string(q.Endpoint))
 	u.RawQuery = v.Encode()

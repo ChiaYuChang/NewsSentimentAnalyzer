@@ -125,6 +125,14 @@ var ErrorPage404 = object.ErrorPage{
 	ShouldAutoRedirect: false,
 }
 
+var ErrorPage429 = object.ErrorPage{
+	Page:               object.Page{HeadConent: SharedHeadContent, Title: "409 error"},
+	ErrorCode:          http.StatusTooManyRequests,
+	ErrorMessage:       "Too Many Requests",
+	ErrorDetail:        "You have sent too many requests to us recently. Please try again later.",
+	ShouldAutoRedirect: false,
+}
+
 var NEWSDATASelectOpts = []object.SelectOpts{
 	{
 		OptMap:         newsdata.Country,

@@ -13,6 +13,7 @@ import (
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/validator"
 	val "github.com/go-playground/validator/v10"
 	"github.com/golang/mock/gomock"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/stretchr/testify/require"
 )
@@ -25,6 +26,7 @@ func TestCreateAPIKeyService(t *testing.T) {
 	}
 
 	Validate := val.New()
+	validator.RegisterUUID(Validate)
 	validator.RegisterValidator(
 		Validate,
 		validator.EnmusApiType,
@@ -34,7 +36,7 @@ func TestCreateAPIKeyService(t *testing.T) {
 		{
 			Name: "Create API OK",
 			SetupFunc: func(ctl *gomock.Controller) (*service.APIKeyCreateRequest, *mock_model.MockStore, int32) {
-				apikey, err := testtool.GenRdmAPIKey(0, 0)
+				apikey, err := testtool.GenRdmAPIKey(uuid.Nil, 0)
 				require.NoError(t, err)
 
 				req := &service.APIKeyCreateRequest{
@@ -64,7 +66,7 @@ func TestCreateAPIKeyService(t *testing.T) {
 		{
 			Name: "Missing Key",
 			SetupFunc: func(ctl *gomock.Controller) (*service.APIKeyCreateRequest, *mock_model.MockStore, int32) {
-				apikey, err := testtool.GenRdmAPIKey(0, 0)
+				apikey, err := testtool.GenRdmAPIKey(uuid.Nil, 0)
 				require.NoError(t, err)
 
 				req := &service.APIKeyCreateRequest{
@@ -118,7 +120,7 @@ func TestListAPIKeyService(t *testing.T) {
 	nUser := 5
 	nAPI := 3
 
-	users := make(map[int32]*model.User, nUser)
+	users := make(map[uuid.UUID]*model.User, nUser)
 	for i := 0; i < nUser; i++ {
 		user, _ := testtool.GenRdmUser()
 		users[user.ID] = user
@@ -131,7 +133,7 @@ func TestListAPIKeyService(t *testing.T) {
 	}
 
 	type key struct {
-		owner int32
+		owner uuid.UUID
 		api   int16
 	}
 
@@ -144,6 +146,7 @@ func TestListAPIKeyService(t *testing.T) {
 	}
 
 	Validate := val.New()
+	validator.RegisterUUID(Validate)
 	for _, user := range users {
 		func(user *model.User) {
 			ctl := gomock.NewController(t)
@@ -153,7 +156,7 @@ func TestListAPIKeyService(t *testing.T) {
 				EXPECT().
 				ListAPIKey(gomock.Any(), gomock.Eq(user.ID)).
 				Times(1).
-				DoAndReturn(func(ctx context.Context, owner int32) ([]*model.ListAPIKeyRow, error) {
+				DoAndReturn(func(ctx context.Context, owner uuid.UUID) ([]*model.ListAPIKeyRow, error) {
 					aks := []*model.ListAPIKeyRow{}
 					for api_id, api := range apis {
 						if apikey, ok := apikeys[key{owner, api_id}]; ok {
@@ -187,7 +190,7 @@ func TestListAPIKeyService(t *testing.T) {
 	ctl := gomock.NewController(t)
 	defer ctl.Finish()
 
-	invalidExistUserID := int32(-1)
+	invalidExistUserID, _ := uuid.NewDCEPerson() // uuid2
 	store := mock_model.NewMockStore(ctl)
 	store.
 		EXPECT().
@@ -200,7 +203,7 @@ func TestListAPIKeyService(t *testing.T) {
 	var valErr val.ValidationErrors
 	ok := errors.As(err, &valErr)
 	require.True(t, ok)
-	require.ErrorContains(t, err, "failed on the 'min' tag")
+	require.ErrorContains(t, err, "failed on the 'uuid4' tag")
 }
 
 func TestDeleteAPIKeyService(t *testing.T) {
@@ -213,22 +216,26 @@ func TestDeleteAPIKeyService(t *testing.T) {
 
 	type testCase struct {
 		Name    string
-		Owner   int32
+		Owner   uuid.UUID
 		ApiID   int16
 		ErrType ErrType
 		ErrTag  string
 	}
 
+	uuidv4 := uuid.New()
+	uuidv2, err := uuid.NewDCEGroup()
+	require.NoError(t, err)
 	tcs := []testCase{
-		{"OK", 1, 1, Success, ""},
-		{"Invalid Owner", -1, 1, ValidationError, "min"},
-		{"Missing Owner", 0, 1, ValidationError, "required"},
-		{"Invalid ApiID", 1, -1, ValidationError, "min"},
-		{"Missing ApiID", 1, 0, ValidationError, "required"},
-		{"No row", 1, 1, NoRowError, ""},
+		{"OK", uuidv4, 1, Success, ""},
+		{"Invalid Owner", uuidv2, 1, ValidationError, "uuid4"},
+		{"Missing Owner", uuid.Nil, 1, ValidationError, "not_uuid_nil"},
+		{"Invalid ApiID", uuidv4, -1, ValidationError, "min"},
+		{"Missing ApiID", uuidv4, 0, ValidationError, "required"},
+		{"No row", uuidv4, 1, NoRowError, ""},
 	}
 
 	Validate := val.New()
+	validator.RegisterUUID(Validate)
 	for i := range tcs {
 		tc := tcs[i]
 		t.Run(

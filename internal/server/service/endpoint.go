@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -12,8 +13,8 @@ func (srvc endpointService) Service() Service {
 	return Service(srvc)
 }
 
-func (srvc endpointService) ListEndpointByOwner(ctx context.Context, owner int32) ([]*model.ListEndpointByOwnerRow, error) {
-	if err := srvc.validate.Var(owner, "required,min=1"); err != nil {
+func (srvc endpointService) ListEndpointByOwner(ctx context.Context, owner uuid.UUID) ([]*model.ListEndpointByOwnerRow, error) {
+	if err := srvc.validate.Var(owner, "required,uuid4"); err != nil {
 		return nil, err
 	}
 	return srvc.store.ListEndpointByOwner(ctx, owner)

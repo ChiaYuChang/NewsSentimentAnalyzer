@@ -38,11 +38,12 @@ func NewErrorHandlerRepo(tmpl *template.Template) (ErrorHandlerRepo, error) {
 	}
 
 	eps := []epages{
-		{view.ErrorPage400, http.StatusBadRequest},
-		{view.ErrorPage401, http.StatusUnauthorized},
-		{view.ErrorPage403, http.StatusForbidden},
-		{view.ErrorPage404, http.StatusNotFound},
-		{view.ErrorPage500, http.StatusInternalServerError},
+		{epage: view.ErrorPage400, status: http.StatusBadRequest},
+		{epage: view.ErrorPage401, status: http.StatusUnauthorized},
+		{epage: view.ErrorPage403, status: http.StatusForbidden},
+		{epage: view.ErrorPage404, status: http.StatusNotFound},
+		{epage: view.ErrorPage429, status: http.StatusTooManyRequests},
+		{epage: view.ErrorPage500, status: http.StatusInternalServerError},
 	}
 
 	for _, ep := range eps {
@@ -66,10 +67,10 @@ func (repo ErrorHandlerRepo) fetchErrorPage(httpEC int, w http.ResponseWriter, r
 	page, ok := repo.page[httpEC]
 	if !ok {
 		if httpEC >= 400 && httpEC < 500 {
-			// 400
+			// 400 Bad Request
 			page = repo.page[repo.DefaultClientError]
 		} else {
-			// 500
+			// 500 Internal Server Error
 			page = repo.page[repo.DefaultServerError]
 		}
 	}
@@ -107,6 +108,11 @@ func (repo ErrorHandlerRepo) Forbidden(w http.ResponseWriter, req *http.Request)
 // 404 error
 func (repo ErrorHandlerRepo) NotFound(w http.ResponseWriter, req *http.Request) {
 	repo.fetchErrorPage(http.StatusNotFound, w, req)
+}
+
+// 426 error
+func (repo ErrorHandlerRepo) TooManyRequests(w http.ResponseWriter, req *http.Request) {
+	repo.fetchErrorPage(http.StatusTooManyRequests, w, req)
 }
 
 // 500 error

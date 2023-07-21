@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
+	"github.com/google/uuid"
 )
 
 func (srvc apikeyService) Service() Service {
@@ -39,8 +40,8 @@ func (srvc apikeyService) Get(ctx context.Context, r *APIKeyGetRequest) (*model.
 		})
 }
 
-func (srvc apikeyService) List(ctx context.Context, owner int32) ([]*model.ListAPIKeyRow, error) {
-	if err := srvc.validate.Var(owner, "required,min=1"); err != nil {
+func (srvc apikeyService) List(ctx context.Context, owner uuid.UUID) ([]*model.ListAPIKeyRow, error) {
+	if err := srvc.validate.Var(owner, "not_uuid_nil,uuid4"); err != nil {
 		return nil, err
 	}
 	return srvc.store.ListAPIKey(ctx, owner)
@@ -59,9 +60,9 @@ func (srvc apikeyService) CreateOrUpdate(ctx context.Context, r *APIKeyCreateOrU
 }
 
 type APIKeyCreateRequest struct {
-	Owner int32  `validate:"required"`
-	ApiID int16  `validate:"required"`
-	Key   string `validate:"required"`
+	Owner uuid.UUID `validate:"not_uuid_nil,uuid4"`
+	ApiID int16     `validate:"required"`
+	Key   string    `validate:"required"`
 }
 
 func (req APIKeyCreateRequest) RequestName() string {
@@ -77,8 +78,8 @@ func (req APIKeyCreateRequest) ToParams() (*model.CreateAPIKeyParams, error) {
 }
 
 type APIKeyDeleteRequest struct {
-	Owner int32 `validate:"required,min=1"`
-	ApiID int16 `validate:"required,min=1"`
+	Owner uuid.UUID `validate:"not_uuid_nil,uuid4"`
+	ApiID int16     `validate:"required,min=1"`
 }
 
 func (req APIKeyDeleteRequest) RequestName() string {
@@ -93,8 +94,8 @@ func (req APIKeyDeleteRequest) ToParams() (*model.DeleteAPIKeyParams, error) {
 }
 
 type APIKeyGetRequest struct {
-	Owner int32 `validate:"required,min=1"`
-	ApiID int16 `validate:"required,min=1"`
+	Owner uuid.UUID `validate:"not_uuid_nil,uuid4"`
+	ApiID int16     `validate:"required,min=1"`
 }
 
 func (req APIKeyGetRequest) RequestName() string {
@@ -120,9 +121,9 @@ func (req APIKeyUpdateRequest) RequestName() string {
 }
 
 type APIKeyCreateOrUpdateRequest struct {
-	Owner int32  `validate:"required,min=1"`
-	ApiID int16  `validate:"required,min=1"`
-	Key   string `validate:"required,min=32,max=64"`
+	Owner uuid.UUID `validate:"not_uuid_nil,uuid4"`
+	ApiID int16     `validate:"required,min=1"`
+	Key   string    `validate:"required,min=32,max=64"`
 }
 
 func (req APIKeyCreateOrUpdateRequest) RequestName() string {

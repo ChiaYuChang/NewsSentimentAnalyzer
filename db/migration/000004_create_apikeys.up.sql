@@ -1,6 +1,6 @@
 CREATE TABLE "apikeys" (
   "id"          SERIAL      PRIMARY KEY,
-  "owner"       integer     NOT NULL,
+  "owner"       uuid        NOT NULL,
   "api_id"      smallint    NOT NULL,
   "key"         text        NOT NULL,
   "created_at"  timestamptz NOT NULL DEFAULT (now()),

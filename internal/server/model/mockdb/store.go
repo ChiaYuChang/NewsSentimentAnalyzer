@@ -10,6 +10,7 @@ import (
 
 	model "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
 	gomock "github.com/golang/mock/gomock"
+	uuid "github.com/google/uuid"
 	pgtype "github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -97,17 +98,17 @@ func (mr *MockStoreMockRecorder) CleanUpUsers(arg0 interface{}) *gomock.Call {
 }
 
 // Close mocks base method.
-func (m *MockStore) Close() error {
+func (m *MockStore) Close(arg0 context.Context) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Close")
+	ret := m.ctrl.Call(m, "Close", arg0)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Close indicates an expected call of Close.
-func (mr *MockStoreMockRecorder) Close() *gomock.Call {
+func (mr *MockStoreMockRecorder) Close(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockStore)(nil).Close))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockStore)(nil).Close), arg0)
 }
 
 // CountEndpoint mocks base method.
@@ -246,10 +247,10 @@ func (mr *MockStoreMockRecorder) CreateNewsJob(arg0, arg1 interface{}) *gomock.C
 }
 
 // CreateUser mocks base method.
-func (m *MockStore) CreateUser(arg0 context.Context, arg1 *model.CreateUserParams) (int32, error) {
+func (m *MockStore) CreateUser(arg0 context.Context, arg1 *model.CreateUserParams) (uuid.UUID, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateUser", arg0, arg1)
-	ret0, _ := ret[0].(int32)
+	ret0, _ := ret[0].(uuid.UUID)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -366,7 +367,7 @@ func (mr *MockStoreMockRecorder) DeleteNewsPublishBefore(arg0, arg1 interface{})
 }
 
 // DeleteUser mocks base method.
-func (m *MockStore) DeleteUser(arg0 context.Context, arg1 int32) (int64, error) {
+func (m *MockStore) DeleteUser(arg0 context.Context, arg1 uuid.UUID) (int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteUser", arg0, arg1)
 	ret0, _ := ret[0].(int64)
@@ -589,7 +590,7 @@ func (mr *MockStoreMockRecorder) GetUserAuth(arg0, arg1 interface{}) *gomock.Cal
 }
 
 // HardDeleteUser mocks base method.
-func (m *MockStore) HardDeleteUser(arg0 context.Context, arg1 int32) (int64, error) {
+func (m *MockStore) HardDeleteUser(arg0 context.Context, arg1 uuid.UUID) (int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HardDeleteUser", arg0, arg1)
 	ret0, _ := ret[0].(int64)
@@ -634,7 +635,7 @@ func (mr *MockStoreMockRecorder) ListAPIByType(arg0, arg1 interface{}) *gomock.C
 }
 
 // ListAPIKey mocks base method.
-func (m *MockStore) ListAPIKey(arg0 context.Context, arg1 int32) ([]*model.ListAPIKeyRow, error) {
+func (m *MockStore) ListAPIKey(arg0 context.Context, arg1 uuid.UUID) ([]*model.ListAPIKeyRow, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListAPIKey", arg0, arg1)
 	ret0, _ := ret[0].([]*model.ListAPIKeyRow)
@@ -664,7 +665,7 @@ func (mr *MockStoreMockRecorder) ListAllEndpoint(arg0, arg1 interface{}) *gomock
 }
 
 // ListEndpointByOwner mocks base method.
-func (m *MockStore) ListEndpointByOwner(arg0 context.Context, arg1 int32) ([]*model.ListEndpointByOwnerRow, error) {
+func (m *MockStore) ListEndpointByOwner(arg0 context.Context, arg1 uuid.UUID) ([]*model.ListEndpointByOwnerRow, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListEndpointByOwner", arg0, arg1)
 	ret0, _ := ret[0].([]*model.ListEndpointByOwnerRow)

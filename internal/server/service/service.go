@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
@@ -29,8 +30,8 @@ func NewServiceWithDefautlVal(store model.Store) Service {
 	return NewService(store, validator.Validate)
 }
 
-func (srvc Service) Close() error {
-	return srvc.store.Close()
+func (srvc Service) Close(ctx context.Context) error {
+	return srvc.store.Close(ctx)
 }
 
 type authService Service

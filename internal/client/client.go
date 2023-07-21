@@ -1,11 +1,15 @@
 package client
 
 import (
+	"crypto/md5"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/url"
+	"regexp"
 	"strings"
+	"time"
 
 	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm"
 )
@@ -70,11 +74,6 @@ func (repo pageFormHandlerRepo) NewQueryFromPageFrom(apikey string, pf pageform.
 
 type SelectOpts [2]string
 
-type Response interface {
-	fmt.Stringer
-	Status()
-	NTotalResutl() int
-}
 type Params map[string][]string
 
 func NewParams() Params {
@@ -139,4 +138,30 @@ type Query interface {
 	ToQueryString() string
 	ToBeautifulJSON(prefix, indent string) ([]byte, error)
 	ToJSON() ([]byte, error)
+}
+
+type Response interface {
+	fmt.Stringer
+	GetStatus()
+	Len() int
+	ToNews(c chan<- News)
+}
+
+type News struct {
+	MD5Hash     string
+	Title       string
+	Url         string
+	Description string
+	Content     string
+	Source      string
+	PublishAt   time.Time
+}
+
+var re = regexp.MustCompile(`[\p{P}\p{Zs}[:punct:]]`)
+
+func MD5Hash(title string, publishedAt time.Time) string {
+	text := re.ReplaceAllString(title, "")
+	hasher := md5.New()
+	hasher.Write([]byte(fmt.Sprintf("%s@%s", text, publishedAt.UTC().Format(time.DateTime))))
+	return base64.StdEncoding.EncodeToString(hasher.Sum(nil))
 }
