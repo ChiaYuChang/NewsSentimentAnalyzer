@@ -1,5 +1,5 @@
 CREATE TABLE "jobs" (
-  "id"              integer         PRIMARY KEY,
+  "id"              SERIAL          PRIMARY KEY,
   "owner"           uuid            NOT NULL,
   "status"          job_status      NOT NULL,
   "src_api_id"      smallint        NOT NULL,
