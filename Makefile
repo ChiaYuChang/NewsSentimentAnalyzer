@@ -1,7 +1,11 @@
 include .env
 
 build:
-	@go build -o ${BIN_PATH}/${APP_NAME} ./main.go
+	@go build -o ${BIN_PATH}/${APP_NAME} ./main.go && \
+		chmod +x ./${APP_NAME}
+
+build-wasm:
+	@GOARCH=wasm GOOS=js go build -o ${WASM_PATH}/${WASM_NAME} ./thirdparty/wasm/main.go
 
 sqlc-generate:
 	sqlc generate -f ${SQLC_CONFIG}
@@ -73,8 +77,8 @@ db-dump:
 	pg_dump  ${POSTGRESQL_URL} -f ${SQL_SCHEME_PATH}/schema.sql --schema-only
 
 mockgen-store:
-	@mockgen -destination internal/server/model/mockdb/store.go \
-	${APP_REPOSITORY}/internal/server/model Store
+	@mockgen -destination internal/model/mockdb/store.go \
+	${APP_REPOSITORY}/internal/model Store
 
 mockgen-tokenmaker:
 	@mockgen -destination pkgs/tokenMaker/mockTokenMaker/tokenMaker.go \
@@ -84,7 +88,7 @@ gen-jwt-secret:
 	@openssl rand -base64 ${JWT_SECRET_LEN} > ${JWT_SECRET_OUT_PATH}
 
 gen-private-key:
-	openssl  ecparam -genkey \
+	openssl ecparam -genkey \
 	-name secp384r1 \
 	-out ${KEY_PATH}/${PRIVATE_KEY_NAME}
 
@@ -94,10 +98,9 @@ gen-public-key: gen-private-key
 	-out ${KEY_PATH}/${PUBLIC_KEY_NAME} \
 	-days 365
 
-run: docker-up-db 
-	go build -o ./${APP_NAME} main.go && \
-		chmod +x ./${APP_NAME} && \
-		./${APP_NAME} -v v1 -c ./config/config.json -s development -h localhost -p 8000
+
+run: docker-up-db build build-wasm
+	./${APP_NAME} -v v1 -c ./config/config.json -s development -h localhost -p 8000
 
 about: ## Display info related to the build
 	@echo "- Protoc version  : $(shell protoc --version)"

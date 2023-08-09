@@ -6,7 +6,7 @@ import (
 	"path"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model"
 )
 
 type WelcomePage struct {
@@ -31,6 +31,10 @@ type LoginPage struct {
 type SignUpPage struct {
 	Page
 	ShowUsernameHasUsedAlert bool
+}
+
+type APIResultPage struct {
+	Page
 }
 
 type APIAdminPage struct {

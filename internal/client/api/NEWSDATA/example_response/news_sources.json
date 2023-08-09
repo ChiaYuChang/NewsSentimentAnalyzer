@@ -1,0 +1,757 @@
+{
+    "status": "success",
+    "results": [
+        {
+            "id": "minnesotacbslocal",
+            "name": "Minnesota CBS Local",
+            "url": "https://minnesota.cbslocal.com/",
+            "description": "Minneapolis's source for breaking news, weather, traffic, and sports.All the local news and information you need – plus other fun stuff – from the team at WCCO and CBSMinnesota.com.",
+            "category": [
+                "top",
+                "sports",
+                "business",
+                "entertainment",
+                "health",
+                "politics",
+                "environment"
+            ],
+            "language": [
+                "english"
+            ],
+            "country": [
+                "united states of america"
+            ]
+        },
+        {
+            "id": "bostoncbslocal",
+            "name": "CBS Boston",
+            "url": "https://boston.cbslocal.com/",
+            "description": "Boston's source for breaking news, weather, traffic, and sports. All the local news and information you need – plus other fun stuff .",
+            "category": [
+                "top",
+                "sports",
+                "business",
+                "entertainment",
+                "health",
+                "politics",
+                "environment"
+            ],
+            "language": [
+                "english"
+            ],
+            "country": [
+                "united states of america"
+            ]
+        },
+        {
+            "id": "rand",
+            "name": "RAND objective analysis effective solutions",
+            "url": "https://www.rand.org/",
+            "description": "The RAND Corporation is a research organization that develops solutions to public policy challenges to help make communities throughout the world safer and more secure, healthier and more prosperous.",
+            "category": [
+                "top",
+                "technology",
+                "business",
+                "science",
+                "health",
+                "world",
+                "environment"
+            ],
+            "language": [
+                "english"
+            ],
+            "country": [
+                "united states of america"
+            ]
+        },
+        {
+            "id": "freep",
+            "name": "Detroit Free Press",
+            "url": "https://www.freep.com/",
+            "description": "For Detroit, for Michigan, for you, we are On Guard.",
+            "category": [
+                "top",
+                "sports",
+                "business",
+                "entertainment",
+                "environment"
+            ],
+            "language": [
+                "english"
+            ],
+            "country": [
+                "united states of america"
+            ]
+        },
+        {
+            "id": "npr",
+            "name": "NPR",
+            "url": "https://www.npr.org/",
+            "description": "NPR delivers breaking national and world news. Also top stories from business, politics, health, science, technology, music, arts, and culture. Subscribe to podcasts and RSS feeds.",
+            "category": [
+                "top",
+                "technology",
+                "business",
+                "science",
+                "entertainment",
+                "health",
+                "world",
+                "politics",
+                "environment"
+            ],
+            "language": [
+                "english"
+            ],
+            "country": [
+                "united states of america"
+            ]
+        },
+        {
+            "id": "discovermagazine",
+            "name": "Discover Magazine",
+            "url": "https://www.discovermagazine.com/",
+            "description": "Discover satisfies everyday curiosity with relevant and approachable science news, feature articles, photos and more.",
+            "category": [
+                "top",
+                "technology",
+                "science",
+                "health",
+                "world",
+                "environment"
+            ],
+            "language": [
+                "english"
+            ],
+            "country": [
+                "united states of america"
+            ]
+        },
+        {
+            "id": "eastbaytimes",
+            "name": "East Bay Times",
+            "url": "https://www.eastbaytimes.com/",
+            "description": "East BayTimes is the leading source of breaking news, local news, sports, entertainment, lifestyle and opinion for Contra Costa County, Alameda County, Oakland and beyond",
+            "category": [
+                "top",
+                "sports",
+                "business",
+                "entertainment",
+                "world",
+                "politics",
+                "environment",
+                "tourism"
+            ],
+            "language": [
+                "english"
+            ],
+            "country": [
+                "united states of america"
+            ]
+        },
+        {
+            "id": "buzzfeednews",
+            "name": "Buzz Feed News Reporting To You",
+            "url": "https://www.buzzfeednews.com/",
+            "description": "Our staff of more than 100 reporters and editors are working around the globe to cover what you care about, break big stories, and expose injustices that can change lives.",
+            "category": [
+                "top",
+                "technology",
+                "science",
+                "entertainment",
+                "health",
+                "world",
+                "politics",
+                "environment"
+            ],
+            "language": [
+                "english"
+            ],
+            "country": [
+                "united states of america"
+            ]
+        },
+        {
+            "id": "washingtontimes",
+            "name": "The Washington Times , America’s Newspaper",
+            "url": "https://www.washingtontimes.com/",
+            "description": "The Times delivers that audience facts and commentary to inform and to celebrate the American values of freedom, faith and family.",
+            "category": [
+                "top",
+                "sports",
+                "technology",
+                "entertainment",
+                "health",
+                "world",
+                "environment"
+            ],
+            "language": [
+                "english"
+            ],
+            "country": [
+                "united states of america"
+            ]
+        },
+        {
+            "id": "chicagotribune",
+            "name": "Chicago Tribune",
+            "url": "https://www.chicagotribune.com/",
+            "description": "The Beacon-News and The Courier-News, as well as more than 30 weekly community publications. The CTMG portfolio also includes Chicago magazine, and other digital brands, products and services.",
+            "category": [
+                "top",
+                "sports",
+                "business",
+                "entertainment",
+                "world",
+                "environment"
+            ],
+            "language": [
+                "english"
+            ],
+            "country": [
+                "united states of america"
+            ]
+        },
+        {
+            "id": "phys",
+            "name": "Phys.org",
+            "url": "https://phys.org/",
+            "description": "Daily science news on research developments, technological breakthroughs, and the latest scientific innovations.",
+            "category": [
+                "technology",
+                "business",
+                "science",
+                "environment"
+            ],
+            "language": [
+                "english"
+            ],
+            "country": [
+                "united states of america",
+                "united kingdom",
+                "india",
+                "australia",
+                "singapore"
+            ]
+        },
+        {
+            "id": "mercurynews",
+            "name": "The Mercury News",
+            "url": "https://www.mercurynews.com/",
+            "description": "The Mercury News is the leading source of breaking news, local news, sports, business, entertainment, lifestyle and opinion for Silicon Valley, San Francisco Bay Area and beyond",
+            "category": [
+                "top",
+                "sports",
+                "technology",
+                "business",
+                "entertainment",
+                "health",
+                "world",
+                "politics",
+                "environment",
+                "food",
+                "tourism"
+            ],
+            "language": [
+                "english"
+            ],
+            "country": [
+                "united states of america"
+            ]
+        },
+        {
+            "id": "brinknews",
+            "name": "BRINK",
+            "url": "https://www.brinknews.com/",
+            "description": "BRINK is a global content platform that helps companies and governments stay ahead in a rapidly changing world.",
+            "category": [
+                "top",
+                "technology",
+                "business",
+                "entertainment",
+                "politics",
+                "environment"
+            ],
+            "language": [
+                "english"
+            ],
+            "country": [
+                "united states of america"
+            ]
+        },
+        {
+            "id": "newatlas",
+            "name": "New Atlas",
+            "url": "https://newatlas.com/",
+            "description": "New Atlas is one of the world's largest independent science and technology publications. We are passionate about the extraordinary ideas that move the world forward in all fields: science, transport, consumer electronics, architecture, and beyond.",
+            "category": [
+                "top",
+                "sports",
+                "technology",
+                "business",
+                "science",
+                "entertainment",
+                "health",
+                "environment"
+            ],
+            "language": [
+                "english"
+            ],
+            "country": [
+                "united states of america"
+            ]
+        },
+        {
+            "id": "sanfranciscocbslocal",
+            "name": "Sanfrancisco CBS Local",
+            "url": "https://sanfrancisco.cbslocal.com/",
+            "description": "CBS San Francisco (CBS SF) is powered by the Bay Area’s KPIX 5.All the local news and information you need – plus other fun stuff – from the team at KPIX and CBSSF.com.",
+            "category": [
+                "top",
+                "sports",
+                "technology",
+                "business",
+                "entertainment",
+                "health",
+                "politics",
+                "environment"
+            ],
+            "language": [
+                "english"
+            ],
+            "country": [
+                "united states of america"
+            ]
+        },
+        {
+            "id": "seattletimes",
+            "name": "The Seattle Times",
+            "url": "https://www.seattletimes.com/",
+            "description": "The Seattle Times reaches more Northwest adults than any other local media, delivering quality content where, when and how our readers want it. Explore our diverse range of products across print and digital platforms.",
+            "category": [
+                "top",
+                "sports",
+                "technology",
+                "business",
+                "science",
+                "entertainment",
+                "health",
+                "world",
+                "politics",
+                "environment",
+                "food"
+            ],
+            "language": [
+                "english"
+            ],
+            "country": [
+                "united states of america"
+            ]
+        },
+        {
+            "id": "sciencenews",
+            "name": "Science News",
+            "url": "https://www.sciencenews.org/",
+            "description": "Science News features news articles, videos and more about the latest scientific advances. Independent, accurate nonprofit news since 1921.",
+            "category": [
+                "top",
+                "technology",
+                "science",
+                "entertainment",
+                "health",
+                "environment"
+            ],
+            "language": [
+                "english"
+            ],
+            "country": [
+                "united states of america"
+            ]
+        },
+        {
+            "id": "globalissues",
+            "name": "Global Issues",
+            "url": "https://www.globalissues.org/",
+            "description": "Welcome to the global issues web site. This web site looks into global issues that affect everyone and aims to show how most issues are inter-related.",
+            "category": [
+                "top",
+                "politics",
+                "environment"
+            ],
+            "language": [
+                "english"
+            ],
+            "country": [
+                "united states of america"
+            ]
+        },
+        {
+            "id": "dfwcbslocal",
+            "name": "DFW CBS Local",
+            "url": "https://dfw.cbslocal.com/",
+            "description": "The Metroplex's source for breaking news, weather, traffic, and sports.All the local news and information you need – plus other fun stuff – from the team at KTVT and CBSDFW.com.",
+            "category": [
+                "top",
+                "sports",
+                "environment"
+            ],
+            "language": [
+                "english"
+            ],
+            "country": [
+                "united states of america"
+            ]
+        },
+        {
+            "id": "brookings",
+            "name": "BROOKINGS",
+            "url": "https://www.brookings.edu/",
+            "description": "Our mission is to conduct in-depth research that leads to new ideas for solving problems facing society at the local, national and global level.",
+            "category": [
+                "top",
+                "technology",
+                "business",
+                "health",
+                "world",
+                "politics",
+                "environment"
+            ],
+            "language": [
+                "english"
+            ],
+            "country": [
+                "united states of america"
+            ]
+        },
+        {
+            "id": "electrek",
+            "name": "Electrek",
+            "url": "https://electrek.co/",
+            "description": "News, reviews, and analysis of the electric vehicle market. We provide coverage of the entire sustainable ecosystems and related products.",
+            "category": [
+                "top",
+                "technology",
+                "business",
+                "environment"
+            ],
+            "language": [
+                "english"
+            ],
+            "country": [
+                "united states of america"
+            ]
+        },
+        {
+            "id": "dailypress",
+            "name": "Daily Press",
+            "url": "https://www.dailypress.com/",
+            "description": "Online resource for Hampton Roads news and Virginia news, including coverage of Newport News, Hampton and beyond from Daily Press",
+            "category": [
+                "top",
+                "sports",
+                "business",
+                "science",
+                "entertainment",
+                "politics",
+                "environment",
+                "food"
+            ],
+            "language": [
+                "english"
+            ],
+            "country": [
+                "united states of america"
+            ]
+        },
+        {
+            "id": "tmj4",
+            "name": "TMJ4 News",
+            "url": "https://www.tmj4.com/",
+            "description": "TMJ4 News brings you breaking and developing news, weather, traffic and sports coverage from the Milwaukee metro area and across Wisconsin on WTMJ-TV and TMJ4.com.",
+            "category": [
+                "top",
+                "sports",
+                "business",
+                "entertainment",
+                "health",
+                "environment"
+            ],
+            "language": [
+                "english"
+            ],
+            "country": [
+                "united states of america"
+            ]
+        },
+        {
+            "id": "truthout",
+            "name": "Truthout",
+            "url": "https://truthout.org/",
+            "description": "Independent news and commentary on a diverse range of social justice issues.",
+            "category": [
+                "top",
+                "business",
+                "science",
+                "entertainment",
+                "health",
+                "politics",
+                "environment"
+            ],
+            "language": [
+                "english"
+            ],
+            "country": [
+                "united states of america"
+            ]
+        },
+        {
+            "id": "nwahomepage",
+            "name": "KNWA FOX24",
+            "url": "https://www.nwahomepage.com/",
+            "description": "Northwest Arkansas and River Valley News",
+            "category": [
+                "top",
+                "sports",
+                "environment"
+            ],
+            "language": [
+                "english"
+            ],
+            "country": [
+                "united states of america"
+            ]
+        },
+        {
+            "id": "globalpressjournal",
+            "name": "Global Press Journal",
+            "url": "https://globalpressjournal.com/",
+            "description": "Global Press Journal produces ethical, accurate news to create a more just and informed world.",
+            "category": [
+                "top",
+                "health",
+                "world",
+                "environment"
+            ],
+            "language": [
+                "english"
+            ],
+            "country": [
+                "united states of america"
+            ]
+        },
+        {
+            "id": "newyorkcbslocal",
+            "name": "Newyork CBS Local",
+            "url": "https://newyork.cbslocal.com/",
+            "description": "CBS New York: CBS 2, WLNY TV10/55.All News. All the Time.CBSNewYork.com provides you with 24/7 access to the latest updates in Local News, Sports, Traffic, Weather, and the Best Of New York!",
+            "category": [
+                "top",
+                "sports",
+                "environment"
+            ],
+            "language": [
+                "english"
+            ],
+            "country": [
+                "united states of america"
+            ]
+        },
+        {
+            "id": "huffpost",
+            "name": "Huffpost",
+            "url": "https://www.huffpost.com/",
+            "description": "At HuffPost, we report with empathy and put people at the heart of every story. We take a people-first approach in everything we report be it news and politics or lifestyle and entertainment and we cover real stories about real life.",
+            "category": [
+                "top",
+                "sports",
+                "technology",
+                "business",
+                "science",
+                "entertainment",
+                "health",
+                "world",
+                "politics",
+                "environment",
+                "food"
+            ],
+            "language": [
+                "english"
+            ],
+            "country": [
+                "united states of america"
+            ]
+        },
+        {
+            "id": "agrilifetoday",
+            "name": "AgrilifeToday",
+            "url": "https://agrilifetoday.tamu.edu/",
+            "description": "We provide agriculture and health news from Texas A&amp;M AgriLife. We share news to improve lives, environments, scientific rigor and the Texas Economy",
+            "category": [
+                "top",
+                "technology",
+                "business",
+                "health",
+                "environment"
+            ],
+            "language": [
+                "english"
+            ],
+            "country": [
+                "united states of america"
+            ]
+        },
+        {
+            "id": "vox",
+            "name": "VOX",
+            "url": "https://www.vox.com/",
+            "description": "Vox's journalists candidly shepherd audiences through politics and policy, business and pop culture, food, science, and everything else that matters.",
+            "category": [
+                "top",
+                "technology",
+                "business",
+                "science",
+                "health",
+                "world",
+                "politics",
+                "environment"
+            ],
+            "language": [
+                "english"
+            ],
+            "country": [
+                "united states of america"
+            ]
+        },
+        {
+            "id": "theguardian",
+            "name": "The Guardian",
+            "url": "https://www.theguardian.com/",
+            "description": "Latest international news, sport, and comment from the Guardian.",
+            "category": [
+                "top",
+                "sports",
+                "technology",
+                "business",
+                "science",
+                "entertainment",
+                "health",
+                "environment",
+                "food"
+            ],
+            "language": [
+                "english"
+            ],
+            "country": [
+                "united states of america",
+                "united kingdom",
+                "india",
+                "australia",
+                "singapore",
+                "canada"
+            ]
+        },
+        {
+            "id": "thehill",
+            "name": "The Hill",
+            "url": "https://thehill.com/",
+            "description": "Focusing on politics, policy, business and international relations, The Hill's coverage includes the U.S. Congress, the presidency and executive branch, and election campaigns. The Hill describes its output as \"nonpartisan reporting on the inner workings of Government and the nexus of politics and business\".",
+            "category": [
+                "top",
+                "technology",
+                "business",
+                "science",
+                "entertainment",
+                "health",
+                "world",
+                "politics",
+                "environment"
+            ],
+            "language": [
+                "english"
+            ],
+            "country": [
+                "united states of america"
+            ]
+        },
+        {
+            "id": "ctnewsjunkie",
+            "name": "CT News Junkie",
+            "url": "https://ctnewsjunkie.com/",
+            "description": "CTNewsJunkie is a Connecticut-owned-and-operated news website covering state politics and public policy from the Capitol in Hartford. Launched in 2005, CTNewsJunkie is a publication of Dig & Scoop LLC.",
+            "category": [
+                "top",
+                "business",
+                "science",
+                "health",
+                "politics",
+                "environment"
+            ],
+            "language": [
+                "english"
+            ],
+            "country": [
+                "united states of america"
+            ]
+        },
+        {
+            "id": "futurism",
+            "name": "Futurism",
+            "url": "https://futurism.com/",
+            "description": "Discover the latest science, technology, news, and videos on breakthroughs that are shaping the world of tomorrow with Futurism.",
+            "category": [
+                "top",
+                "technology",
+                "science",
+                "environment"
+            ],
+            "language": [
+                "english"
+            ],
+            "country": [
+                "united states of america"
+            ]
+        },
+        {
+            "id": "laist",
+            "name": "LAist",
+            "url": "https://laist.com",
+            "description": "We listen to what you’re curious about, what keeps you up at night, and who you want to be held accountable. LAist. True L.A. stories, powered by you.",
+            "category": [
+                "top",
+                "entertainment",
+                "health",
+                "politics",
+                "environment",
+                "food"
+            ],
+            "language": [
+                "english"
+            ],
+            "country": [
+                "united states of america"
+            ]
+        },
+        {
+            "id": "thebusinessjournal",
+            "name": "The Businessjournal",
+            "url": "https://thebusinessjournal.com/",
+            "description": "Official Site of The Business Journal. The Central Valley&#039;s source for exclusive local business news. Serving Fresno, Madera, Tulare, and Kings Counties",
+            "category": [
+                "top",
+                "sports",
+                "technology",
+                "business",
+                "science",
+                "health",
+                "politics",
+                "environment",
+                "tourism"
+            ],
+            "language": [
+                "english"
+            ],
+            "country": [
+                "united states of america"
+            ]
+        }
+    ]
+}

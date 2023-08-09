@@ -41,7 +41,8 @@
       "subfolder": {
         "image": "/image",
         "js": "/js",
-        "css": "/css"
+        "css": "/css",
+        "wasm": "/wasm"
       }
     },
     "template": [
@@ -55,6 +56,7 @@
         "sign-in": "/sign-in",
         "sign-out": "/sign-out",
         "admin": "/admin",
+        "result": "/result",
         "welcome": "/welcome",
         "apikey": "/apikey",
         "change-password": "/change-password",
@@ -66,7 +68,8 @@
         "forbidden": "/forbidden",
         "too-many-request": "/too-many-request"
       },
-      "staticPage": "/static/*"
+      "staticPage": "/static/*",
+      "healthCheck": "/health-check"
     }
   }
 }

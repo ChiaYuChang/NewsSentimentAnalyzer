@@ -38,9 +38,9 @@ func init() {
 const NewsAPIName = "NEWS API"
 
 const (
-	NewsAPIEPEverything   string = "Everything"
-	NewsAPIEPTopHeadlines        = "Top Headlines"
-	NewsAPIEPSources             = "Sources"
+	EPEverything   string = "Everything"
+	EPTopHeadlines        = "Top Headlines"
+	EPSources             = "Sources"
 )
 
 type NEWSAPIEverything struct {
@@ -54,7 +54,7 @@ type NEWSAPIEverything struct {
 }
 
 func (f NEWSAPIEverything) Endpoint() string {
-	return NewsAPIEPEverything
+	return EPEverything
 }
 
 func (f NEWSAPIEverything) API() string {
@@ -86,7 +86,7 @@ type NEWSAPISources struct {
 }
 
 func (f NEWSAPISources) Endpoint() string {
-	return NewsAPIEPSources
+	return EPSources
 }
 
 func (f NEWSAPISources) API() string {
@@ -108,14 +108,14 @@ func (f NEWSAPISources) String() string {
 }
 
 type NEWSAPITopHeadlines struct {
-	Keyword  string   `form:"keyword"`
-	Sources  string   `form:"sources"`
-	Country  []string `form:"country"`
-	Category []string `form:"category"`
+	Keyword  string `form:"keyword"`
+	Sources  string `form:"sources"`
+	Country  string `form:"country"`
+	Category string `form:"category"`
 }
 
 func (f NEWSAPITopHeadlines) Endpoint() string {
-	return NewsAPIEPTopHeadlines
+	return EPTopHeadlines
 }
 
 func (f NEWSAPITopHeadlines) API() string {
@@ -132,8 +132,8 @@ func (f NEWSAPITopHeadlines) String() string {
 	sb.WriteString("NEWSAPISources:\n")
 	sb.WriteString(fmt.Sprintf("\t- Keyword : %s\n", f.Keyword))
 	sb.WriteString(fmt.Sprintf("\t- Sources : %s\n", f.Sources))
-	sb.WriteString(fmt.Sprintf("\t- Category: %s\n", strings.Join(f.Category, ", ")))
-	sb.WriteString(fmt.Sprintf("\t- Country : %s\n", strings.Join(f.Country, ", ")))
+	sb.WriteString(fmt.Sprintf("\t- Category: %s\n", f.Category))
+	sb.WriteString(fmt.Sprintf("\t- Country : %s\n", f.Country))
 	return sb.String()
 }
 

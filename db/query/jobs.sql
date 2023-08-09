@@ -1,12 +1,24 @@
 -- name: GetJobsByOwner :many
-SELECT id, owner, status, src_api_id, src_query, llm_api_id, llm_query, created_at, updated_at
-  FROM jobs
- WHERE owner = $1
-   AND deleted_at IS NULL
+SELECT j.id, j.owner, j.status, asrc.name AS news_src, allm.name AS analyzer, j.created_at, j.updated_at
+  FROM jobs AS j
+ INNER JOIN apis AS asrc ON j.src_api_id = asrc.id
+ INNER JOIN apis AS allm ON j.llm_api_id = allm.id 
+ WHERE j.owner = $1
+   AND j.id > @next::int
+   AND j.deleted_at IS NULL
  ORDER BY 
-       updated_at DESC,
-       status     DESC
+       j.updated_at DESC,
+       j.status     DESC
  LIMIT @n::int;
+
+-- name: GetJobsByJobId :one
+SELECT j.id, j.owner, j.status, asrc.name AS news_src, allm.name AS analyzer, j.created_at, j.updated_at
+  FROM jobs AS j
+ INNER JOIN apis AS asrc ON j.src_api_id = asrc.id
+ INNER JOIN apis AS allm ON j.llm_api_id = allm.id 
+ WHERE j.owner = $1
+   AND j.id = $2
+   AND j.deleted_at IS NULL;
 
 -- name: CreateJob :one
 INSERT INTO jobs (

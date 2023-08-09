@@ -9,9 +9,9 @@ import (
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client"
-	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/GNews"
-	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/NEWSDATA"
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
+	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api/GNews"
+	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api/NEWSDATA"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model"
 	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view"
@@ -65,7 +65,7 @@ func (repo *EndpointRepo) RegisterEndpointsPageView(apiName string, apiId int16,
 			Title:      endpointName,
 		},
 		API:      apiName,
-		Version:  viper.GetString("APP_API_VERISON"),
+		Version:  viper.GetString("APP_API_VERSION"),
 		Endpoint: endpointName,
 	}
 
@@ -131,20 +131,25 @@ func postEndpoints(repo EndpointRepo, obj pageform.PageForm, w http.ResponseWrit
 		w.Write(ecErr.MustToJson())
 		return
 	}
-	fmt.Println("Get User Info OK")
+	global.Logger.Info().
+		Str("user_id", userInfo.GetUserID().String()).
+		Str("user_role", userInfo.GetRole().String()).
+		Msg("Get User Info OK")
 
 	if err := req.ParseForm(); err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println("Parse form OK")
+	global.Logger.Info().
+		Msg("Parse form OK")
 
 	obj, err := obj.FormDecodeAndValidate(repo.apiRepo.FormDecoder, repo.val, req.PostForm)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println("Decode and Validate OK")
+	global.Logger.Info().
+		Msg("Decode and Validate OK")
 
 	apikey, _ := repo.apiRepo.Service.APIKey().Get(
 		req.Context(), &service.APIKeyGetRequest{
@@ -153,7 +158,7 @@ func postEndpoints(repo EndpointRepo, obj pageform.PageForm, w http.ResponseWrit
 		},
 	)
 
-	q, err := client.NewQueryFromPageFrom(apikey.Key, obj)
+	q, err := client.PageFormHandlerRepo.NewQueryFromPageFrom(apikey.Key, obj)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -163,7 +168,7 @@ func postEndpoints(repo EndpointRepo, obj pageform.PageForm, w http.ResponseWrit
 			Owner:    userInfo.GetUserID(),
 			Status:   string(model.JobStatusCreated),
 			SrcApiID: apikey.ApiID,
-			SrcQuery: q.ToQueryString(),
+			SrcQuery: q.Params().ToQueryString(),
 		},
 	)
 
@@ -173,7 +178,7 @@ func postEndpoints(repo EndpointRepo, obj pageform.PageForm, w http.ResponseWrit
 		userInfo.GetRole(),
 		obj.API(),
 		obj.Endpoint(),
-		q.ToQueryString(),
+		q.Params().ToQueryString(),
 		obj.String(),
 	)
 	return

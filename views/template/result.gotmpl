@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {{template "head" .Page.HeadConent}}
+    <title>{{.Page.Title}}</title>
+</head>
+
+<body>
+    <section class="background">
+        <div class="mid-card">
+        <table id="qurey-result" class="pure-table pure-table-horizontal">
+            <thead>
+                <tr>
+                    <th dtype="int" onclick="sortTable(0)">Id</th>
+                    <th dtype="string" onclick="sortTable(1)">Status</th>
+                    <th dtype="string" onclick="sortTable(2)">News API</th>
+                    <th dtype="string" onclick="sortTable(3)">LLM</th>
+                    <th dtype="string" onclick="sortTable(4)">Created At</th>
+                    <th dtype="string" onclick="sortTable(5)">Updated At</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="pure-table-odd">
+                    <td>2</td>
+                    <td>created</td>
+                    <td>GNews</td>
+                    <td>OpenAI</td>
+                    <td>2023-08-09 21:17:00</td>
+                    <td>2023-08-09 21:17:00</td>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>running</td>
+                    <td>News API</td>
+                    <td>OpenAI</td>
+                    <td>2023-08-09 20:13:00</td>
+                    <td>2023-08-09 20:15:31</td>
+                </tr>
+            </tbody>
+        </table>
+         <p class="footer">
+            back to <a href="welcome" class=" url">welcome</a> page
+        </p>
+        </div>
+    </section>
+</body>
+
+</html>

@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/middleware"
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/api/v1"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/auth"
 	cookiemaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/cookieMaker"
@@ -25,6 +25,7 @@ import (
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/go-playground/form"
 	"github.com/redis/go-redis/v9"
+	"github.com/rs/zerolog"
 	"github.com/spf13/viper"
 )
 
@@ -83,7 +84,8 @@ func NewRouter(srvc service.Service, rds *redis.Client, vw view.View,
 
 	rp := global.AppVar.App.RoutePattern
 	r := chi.NewRouter()
-	r.Use(chimiddleware.Logger)
+	// r.Use(chimiddleware.Logger)
+	r.Use(middleware.NewZerologLogger(zerolog.InfoLevel))
 	r.Use(chimiddleware.Recoverer)
 	r.Use(authRateLimiter.RateLimit)
 
@@ -104,7 +106,6 @@ func NewRouter(srvc service.Service, rds *redis.Client, vw view.View,
 	r.Get("/*", errHandlerRepo.SeeOther("/sign-in"))
 
 	r.Route(fmt.Sprintf("/%s", apiRepo.Version), func(r chi.Router) {
-		r.Use(chimiddleware.Logger)
 		r.Use(chimiddleware.Recoverer)
 		r.Use(apiRateLimiter.RateLimit)
 		r.Use(bearerTokenMaker.BearerAuthenticator)
@@ -119,6 +120,8 @@ func NewRouter(srvc service.Service, rds *redis.Client, vw view.View,
 		r.Post(rp.Page["change-password"], auth.PostChangPassword)
 
 		r.Get(rp.Page["admin"], apiRepo.GetAdmin)
+
+		r.Get(rp.Page["result"], apiRepo.GetResult)
 
 		r.Route(
 			rp.Page["endpoints"],

@@ -12,10 +12,10 @@ import (
 	"time"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model"
+	mock_model "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model/mockdb"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model/testtool"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/middleware"
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
-	mock_model "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model/mockdb"
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model/testtool"
 	tokenmaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/tokenMaker"
 	"github.com/go-chi/chi/v5"
 

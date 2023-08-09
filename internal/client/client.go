@@ -1,31 +1,27 @@
 package client
 
 import (
-	"crypto/md5"
-	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"net/url"
-	"regexp"
-	"strings"
-	"time"
+	"net/http"
+	"sync"
 
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model"
 	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm"
+	"golang.org/x/net/context"
 )
 
-var ErrTypeAssertionFailure = errors.New("type assertion failure")
 var ErrPageFormHandlerHasBeenRegistered = errors.New("the PageFormHandler has already been registered")
 var ErrHandlerNotFound = errors.New("unregistered handler")
+var ErrUnknownEndpoint = errors.New("unknown endpoint")
+var ErrNotSupportedEndpoint = errors.New("currently not support endpoint")
 
 var PageFormHandlerRepo = NewPageFormHandlerRepo()
 
 func RegisterPageForm(pf pageform.PageForm, handler PageFormHandler) {
 	PageFormHandlerRepo.RegisterPageForm(pf, handler)
-}
-
-func NewQueryFromPageFrom(apikey string, pf pageform.PageForm) (Query, error) {
-	return PageFormHandlerRepo.NewQueryFromPageFrom(apikey, pf)
 }
 
 type repoMapKey [2]string
@@ -46,7 +42,10 @@ func (k repoMapKey) String() string {
 	return fmt.Sprintf("%s-%s", k[0], k[1])
 }
 
-type PageFormHandler func(apikey string, pageForm pageform.PageForm) (Query, error)
+type PageFormHandler interface {
+	Handle(apikey string, pageForm pageform.PageForm) (api.Query, error)
+	Parse(response *http.Response) (api.Response, error)
+}
 
 type pageFormHandlerRepo map[repoMapKey]PageFormHandler
 
@@ -63,105 +62,77 @@ func (repo pageFormHandlerRepo) RegisterPageForm(pf pageform.PageForm, handler P
 	return nil
 }
 
-func (repo pageFormHandlerRepo) NewQueryFromPageFrom(apikey string, pf pageform.PageForm) (Query, error) {
+func (repo pageFormHandlerRepo) NewQueryFromPageFrom(apikey string, pf pageform.PageForm) (api.Query, error) {
 	key := newRepoMapKey(pf.API(), pf.Endpoint())
-	if handler, ok := repo[key]; !ok {
+	handler, ok := repo[key]
+	if !ok {
 		return nil, ErrHandlerNotFound
-	} else {
-		return handler(apikey, pf)
 	}
+
+	return handler.Handle(apikey, pf)
 }
 
-type SelectOpts [2]string
-
-type Params map[string][]string
-
-func NewParams() Params {
-	return make(Params)
-}
-
-func (p Params) Add(key, val string) {
-	if val == "" {
-		return
+func (repo pageFormHandlerRepo) Do(cli http.Client, apikey string, pf pageform.PageForm) error {
+	key := newRepoMapKey(pf.API(), pf.Endpoint())
+	handler, ok := repo[key]
+	if !ok {
+		return ErrHandlerNotFound
 	}
-	p[key] = append(p[key], val)
-}
 
-func (p Params) AddList(key string, val ...string) {
-	nonEmptyVal := make([]string, 0, len(val))
-	for _, v := range val {
-		if v != "" {
-			nonEmptyVal = append(nonEmptyVal, v)
+	q, err := handler.Handle(apikey, pf)
+	if err != nil {
+		return fmt.Errorf("error while .Handle: %w", err)
+	}
+
+	req, err := q.ToRequest()
+	if err != nil {
+		return fmt.Errorf("error while .ToRequest: %w", err)
+	}
+
+	cPars := make(chan *model.CreateNewsParams)
+	go func() {
+		for p := range cPars {
+			global.Logger.
+				Info().
+				Str("md5", p.Md5Hash).
+				Str("title", p.Title).
+				Time("publish_at", p.PublishAt.Time.UTC()).
+				Msg("Create an article")
 		}
+	}()
+
+	reqs := []*http.Request{req}
+	ctx, cancel := context.WithCancel(context.Background())
+	wg := &sync.WaitGroup{}
+	for i := 0; i < len(reqs); i++ {
+		httpResp, err := cli.Do(reqs[i])
+		if err != nil {
+			cancel()
+			return err
+		}
+
+		resp, err := handler.Parse(httpResp)
+		if err != nil {
+			cancel()
+			return err
+		}
+
+		if resp.HasNext() {
+			next, err := resp.NextPageRequest(nil)
+			if err != nil {
+				cancel()
+				return err
+			}
+			reqs = append(reqs, next)
+		}
+
+		wg.Add(1)
+		go func(wg *sync.WaitGroup) {
+			defer wg.Done()
+			resp.ToNews(ctx, wg, cPars)
+		}(wg)
 	}
-	p[key] = append(p[key], nonEmptyVal...)
-}
-
-func (p Params) Set(key, val string) {
-	if val == "" {
-		delete(p, key)
-		return
-	}
-	p[key] = []string{val}
-}
-
-func (p Params) SetList(key string, val ...string) {
-	if val == nil {
-		delete(p, key)
-		return
-	}
-	p[key] = val
-}
-
-func (p Params) ToUrlVals() url.Values {
-	val := url.Values{}
-	for k, v := range p {
-		val.Add(k, strings.Join(v, ","))
-	}
-	return val
-}
-
-func (p Params) ToQueryString() string {
-	return p.ToUrlVals().Encode()
-}
-
-func (p Params) ToBeautifulJSON(prefix, indent string) ([]byte, error) {
-	return json.MarshalIndent(p, prefix, indent)
-}
-
-func (p Params) ToJSON() ([]byte, error) {
-	return json.Marshal(map[string][]string(p))
-}
-
-type Query interface {
-	ToRequestURL(u *url.URL) string
-	ToQueryString() string
-	ToBeautifulJSON(prefix, indent string) ([]byte, error)
-	ToJSON() ([]byte, error)
-}
-
-type Response interface {
-	fmt.Stringer
-	GetStatus()
-	Len() int
-	ToNews(c chan<- News)
-}
-
-type News struct {
-	MD5Hash     string
-	Title       string
-	Url         string
-	Description string
-	Content     string
-	Source      string
-	PublishAt   time.Time
-}
-
-var re = regexp.MustCompile(`[\p{P}\p{Zs}[:punct:]]`)
-
-func MD5Hash(title string, publishedAt time.Time) string {
-	text := re.ReplaceAllString(title, "")
-	hasher := md5.New()
-	hasher.Write([]byte(fmt.Sprintf("%s@%s", text, publishedAt.UTC().Format(time.DateTime))))
-	return base64.StdEncoding.EncodeToString(hasher.Sum(nil))
+	wg.Wait()
+	close(cPars)
+	return nil
 }

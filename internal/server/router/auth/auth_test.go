@@ -10,9 +10,9 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
-	mock_model "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model/mockdb"
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model/testtool"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model"
+	mock_model "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model/mockdb"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model/testtool"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/auth"
 	cookiemaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/cookieMaker"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"

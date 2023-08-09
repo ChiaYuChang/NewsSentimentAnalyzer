@@ -30,11 +30,15 @@ services:
   redis:
     image: ${REDIS_IMAGE_TAG}
     command: [ "--name", "${REDIS_DB_NAME}" ]
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
   app:
     build:
       context: .
     depends_on:
       pgsql:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     environment:
       POSTGRES_USERNAME: ${POSTGRES_USERNAME}

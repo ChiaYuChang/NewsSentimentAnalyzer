@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/cookieMaker"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
@@ -23,11 +23,17 @@ import (
 
 func main() {
 	global.ReadConfig()
-	fmt.Println(global.AppVar)
+
+	logfile, err := os.OpenFile("log.json", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error while OpenFile: %v", err)
+		os.Exit(1)
+	}
+	global.NewGlobalLogger(logfile)
+	fmt.Println(global.AppVar.String())
 
 	pgSqlConn, err := global.ConnectToPostgres(context.Background())
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 	srvc := service.NewService(model.NewPGXStore(pgSqlConn), validator.Validate)
@@ -35,15 +41,17 @@ func main() {
 	rds := global.ConnectToRedis()
 	rdsStatus := rds.Ping(context.Background())
 	if err := rdsStatus.Err(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		global.Logger.Err(err).Send()
 		os.Exit(1)
 	}
+	global.Logger.Err(err).Send()
 
 	vw, err := view.NewViewWithDefaultTemplateFuncs(global.AppVar.App.Template...)
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "error while NewView: %s\n", err)
+		global.Logger.Err(err).Msg("Failed to connect to redis")
 		os.Exit(1)
 	}
+	global.Logger.Info().Msg("Connected to redis")
 
 	tm := tokenmaker.NewJWTMaker(
 		global.AppVar.Token.Secret(),
@@ -78,7 +86,7 @@ func main() {
 		go func() {
 			<-shutdownCtx.Done()
 			if shutdownCtx.Err() == context.DeadlineExceeded {
-				fmt.Fprintln(os.Stderr, "graceful shutdown timed out.. forcing exit.")
+				global.Logger.Error().Msg("graceful shutdown timed out.. forcing exit.")
 				os.Exit(0)
 			}
 		}()
@@ -86,17 +94,17 @@ func main() {
 		ec := make(chan error)
 		go func() {
 			ec <- server.Shutdown(shutdownCtx)
-			fmt.Println("Server shutdown")
+			global.Logger.Info().Msg("Server shutdown")
 		}()
 
 		go func() {
 			ec <- srvc.Close(shutdownCtx)
-			fmt.Println("PostgresSQL connection closed")
+			global.Logger.Info().Msg("PostgresSQL connection closed")
 		}()
 
 		go func() {
 			ec <- rds.Close()
-			fmt.Println("Redis connection closed")
+			global.Logger.Info().Msg("Redis connection closed")
 		}()
 
 		var ecErr *errorcode.Error
@@ -117,7 +125,12 @@ func main() {
 		serverCancel()
 	}(signalChan)
 
-	fmt.Println("Server start at:", addr)
+	global.Logger.Info().
+		Msgf("Server start at: %s", addr)
+	global.Logger.Info().
+		Msgf("API version: %s", viper.GetString("APP_API_VERSION"))
+
+	startAt := time.Now()
 	if err := server.ListenAndServeTLS(
 		"./secrets/server.crt",
 		"./secrets/server.key",
@@ -127,6 +140,13 @@ func main() {
 	}
 
 	<-serverCtx.Done()
-	fmt.Println("Shutdown gracefully")
+	endAt := time.Now()
+	global.Logger.Info().
+		Dur("Uptime", endAt.Sub(startAt)).
+		Msg("Shutdown gracefully")
+
+	if err := logfile.Close(); err != nil {
+		global.Logger.Err(err).Send()
+	}
 	os.Exit(0)
 }

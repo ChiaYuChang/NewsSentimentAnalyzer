@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model"
 )
 
 type KeywordCreateRequest struct {

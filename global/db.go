@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+	"strings"
 
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model"
 	"github.com/jackc/pgx/v5"
 	"github.com/redis/go-redis/v9"
 	"github.com/spf13/viper"
@@ -23,8 +24,24 @@ func ConnectToPostgres(ctx context.Context) (*pgx.Conn, error) {
 		viper.GetString("POSTGRES_DB_NAME"),
 		options.Encode(),
 	)
-	// fmt.Println("postgres connStr:", connStr)
-	return model.NewDBConnection(ctx, connStr)
+	conn, err := model.NewDBConnection(ctx, connStr)
+	if err != nil {
+		Logger.Err(err).
+			Msg("failed to connect to postgres")
+		return nil, err
+	}
+	Logger.Info().
+		Str("pgSqlConn", fmt.Sprintf(
+			"postgres://%s:%s@%s:%d/%s?%s",
+			viper.GetString("POSTGRES_USERNAME"),
+			strings.Repeat("x", len(viper.GetString("POSTGRES_PASSWORD"))),
+			viper.GetString("POSTGRES_HOST"),
+			viper.GetInt("POSTGRES_PORT"),
+			viper.GetString("POSTGRES_DB_NAME"),
+			options.Encode(),
+		)).
+		Msg("Connected to postgres")
+	return conn, nil
 }
 
 func ConnectToRedis() *redis.Client {

@@ -1,7 +1,7 @@
 package validator
 
 import (
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model"
 	val "github.com/go-playground/validator/v10"
 )
 

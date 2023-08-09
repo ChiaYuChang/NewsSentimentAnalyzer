@@ -1,0 +1,32 @@
+{
+    "status": "ok",
+    "totalResults": 12,
+    "articles": [
+        {
+            "source": {
+                "id": "google-news",
+                "name": "Google News"
+            },
+            "author": "愛爾達體育家族 ELTA Sports",
+            "title": "【成都世大運】世大運空氣手槍捷報！ 女將陳俞如奪銅/愛爾達電視20230729 - 愛爾達體育家族 ELTA Sports",
+            "description": null,
+            "url": "https://news.google.com/rss/articles/CCAiCzNydlVuREpTMmxvmAEB?oc=5",
+            "urlToImage": null,
+            "publishedAt": "2023-07-29T09:46:17Z",
+            "content": null
+        },
+        {
+            "source": {
+                "id": "google-news",
+                "name": "Google News"
+            },
+            "author": "Tech Saydigi",
+            "title": "2023 成都世大運中華隊獎牌、賽程、比分、轉播資訊整理 - Tech Saydigi",
+            "description": null,
+            "url": "https://news.google.com/rss/articles/CBMiKmh0dHBzOi8vdGVjaHNheWRpZ2kuY29tLzIwMjMvMDcvNzYwOTQuaHRtbNIBAA?oc=5",
+            "urlToImage": null,
+            "publishedAt": "2023-07-28T23:59:17Z",
+            "content": null
+        }
+    ]
+}

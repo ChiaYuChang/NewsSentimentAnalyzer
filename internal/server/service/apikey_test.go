@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
-	mock_model "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model/mockdb"
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model/testtool"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model"
+	mock_model "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model/mockdb"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model/testtool"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/validator"
 	val "github.com/go-playground/validator/v10"

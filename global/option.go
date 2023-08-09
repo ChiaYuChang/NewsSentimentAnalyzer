@@ -94,9 +94,10 @@ type AppOption struct {
 }
 
 type RoutePattern struct {
-	Page       map[string]string `mapstructure:"page"`
-	ErrorPage  map[string]string `mapstructure:"errorPage"`
-	StaticPage string            `mapstructure:"staticPage"`
+	Page        map[string]string `mapstructure:"page"`
+	ErrorPage   map[string]string `mapstructure:"errorPage"`
+	StaticPage  string            `mapstructure:"staticPage"`
+	HealthCheck string            `mapstructure:"healthCheck"`
 }
 
 type StaticFile struct {

@@ -1,0 +1,7 @@
+{
+    "status": "error",
+    "results": {
+        "message": "Number of countries selected cannot be greater than 1",
+        "code": "FilterLimitExceed"
+    }
+}

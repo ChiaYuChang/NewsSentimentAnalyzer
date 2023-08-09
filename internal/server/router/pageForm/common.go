@@ -49,7 +49,7 @@ func (s SearchIn) String() string {
 		ss = append(ss, "content")
 	}
 
-	if len(ss) == 3 {
+	if len(ss) == 3 || len(ss) == 0 {
 		return ""
 	}
 	return strings.Join(ss, ",")

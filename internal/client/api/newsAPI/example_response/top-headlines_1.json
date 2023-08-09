@@ -1,0 +1,136 @@
+{
+    "status": "ok",
+    "totalResults": 12,
+    "articles": [
+        {
+            "source": {
+                "id": "google-news",
+                "name": "Google News"
+            },
+            "author": "愛爾達體育家族 ELTA Sports",
+            "title": "【成都世大運】武術好手孫家閎勇奪太極拳金牌/愛爾達電視20230730 - 愛爾達體育家族 ELTA Sports",
+            "description": null,
+            "url": "https://news.google.com/rss/articles/CCAiC0JsejNQZE4zQ3NZmAEB?oc=5",
+            "urlToImage": null,
+            "publishedAt": "2023-07-30T11:01:18Z",
+            "content": null
+        },
+        {
+            "source": {
+                "id": "google-news",
+                "name": "Google News"
+            },
+            "author": "愛爾達體育家族 ELTA Sports",
+            "title": "台灣品勢男團黃靖彤林禹翰馬允中飛踢空翻默契佳| 成都世大運 - 愛爾達體育家族 ELTA Sports",
+            "description": null,
+            "url": "https://news.google.com/rss/articles/CCAiC3B4NzFxZkxjdjlzmAEB?oc=5",
+            "urlToImage": null,
+            "publishedAt": "2023-07-30T10:30:08Z",
+            "content": null
+        },
+        {
+            "source": {
+                "id": "google-news",
+                "name": "Google News"
+            },
+            "author": "自由時報",
+            "title": "世大運男籃》慘遭巴西痛宰58分 台灣隊籃底失守苦吞2連敗 - 自由時報",
+            "description": null,
+            "url": "https://news.google.com/rss/articles/CBMiM2h0dHBzOi8vc3BvcnRzLmx0bi5jb20udHcvbmV3cy9icmVha2luZ25ld3MvNDM4MDY4OdIBN2h0dHBzOi8vc3BvcnRzLmx0bi5jb20udHcvYW1wL25ld3MvYnJlYWtpbmduZXdzLzQzODA2ODk?oc=5",
+            "urlToImage": null,
+            "publishedAt": "2023-07-30T10:16:00Z",
+            "content": null
+        },
+        {
+            "source": {
+                "id": "google-news",
+                "name": "Google News"
+            },
+            "author": "愛爾達體育家族 ELTA Sports",
+            "title": "【成都世大運】中華隊羽球團體賽首戰5比0輕取愛沙尼亞/愛爾達電視20230730 - 愛爾達體育家族 ELTA Sports",
+            "description": null,
+            "url": "https://news.google.com/rss/articles/CCAiC1FJQjdZeC1zNHUwmAEB?oc=5",
+            "urlToImage": null,
+            "publishedAt": "2023-07-30T09:20:47Z",
+            "content": null
+        },
+        {
+            "source": {
+                "id": "google-news",
+                "name": "Google News"
+            },
+            "author": "TVBS",
+            "title": "世大運／再勝地主！複合弓混雙扳倒中國隊 林明靜、吳子瑋摘銅│TVBS新聞網 - TVBS",
+            "description": null,
+            "url": "https://news.google.com/rss/articles/CBMiJ2h0dHBzOi8vbmV3cy50dmJzLmNvbS50dy9zcG9ydHMvMjE5MzU0NNIBK2h0dHBzOi8vbmV3cy50dmJzLmNvbS50dy9hbXAvc3BvcnRzLzIxOTM1NDQ?oc=5",
+            "urlToImage": null,
+            "publishedAt": "2023-07-30T04:35:00Z",
+            "content": null
+        },
+        {
+            "source": {
+                "id": "google-news",
+                "name": "Google News"
+            },
+            "author": "Yahoo奇摩新聞",
+            "title": "世大運／跆拳道漂亮寶貝成戲劇女主角！私下美照曝 - Yahoo奇摩新聞",
+            "description": null,
+            "url": "https://news.google.com/rss/articles/CBMi6AFodHRwczovL3R3Lm5ld3MueWFob28uY29tLyVFNCVCOCU5NiVFNSVBNCVBNyVFOSU4MSU4Qi0lRTglQjclODYlRTYlOEIlQjMlRTklODElOTMlRTYlQkMlODIlRTQlQkElQUUlRTUlQUYlQjYlRTglQjIlOUQlRTYlODglOTAlRTYlODglQjIlRTUlOEElODclRTUlQTUlQjMlRTQlQjglQkIlRTglQTclOTItJUU3JUE3JTgxJUU0JUI4JThCJUU3JUJFJThFJUU3JTg1JUE3JUU2JTlCJTlELTAyMDYzNDkxMi5odG1s0gHwAWh0dHBzOi8vdHcubmV3cy55YWhvby5jb20vYW1waHRtbC8lRTQlQjglOTYlRTUlQTQlQTclRTklODElOEItJUU4JUI3JTg2JUU2JThCJUIzJUU5JTgxJTkzJUU2JUJDJTgyJUU0JUJBJUFFJUU1JUFGJUI2JUU4JUIyJTlEJUU2JTg4JTkwJUU2JTg4JUIyJUU1JThBJTg3JUU1JUE1JUIzJUU0JUI4JUJCJUU4JUE3JTkyLSVFNyVBNyU4MSVFNCVCOCU4QiVFNyVCRSU4RSVFNyU4NSVBNyVFNiU5QiU5RC0wMjA2MzQ5MTIuaHRtbA?oc=5",
+            "urlToImage": null,
+            "publishedAt": "2023-07-30T02:19:20Z",
+            "content": null
+        },
+        {
+            "source": {
+                "id": "google-news",
+                "name": "Google News"
+            },
+            "author": "愛爾達體育家族 ELTA Sports",
+            "title": "【成都世大運】預賽首場打得悶男排被義大利直落三吞首敗/愛爾達電視20230729 - 愛爾達體育家族 ELTA Sports",
+            "description": null,
+            "url": "https://news.google.com/rss/articles/CCAiC0F4SDNsUWJkUmhBmAEB?oc=5",
+            "urlToImage": null,
+            "publishedAt": "2023-07-29T17:25:36Z",
+            "content": null
+        },
+        {
+            "source": {
+                "id": "google-news",
+                "name": "Google News"
+            },
+            "author": "愛爾達體育家族 ELTA Sports",
+            "title": "【成都世大運】台灣女將拚世大運五環項目第四名作收/愛爾達電視20230729 - 愛爾達體育家族 ELTA Sports",
+            "description": null,
+            "url": "https://news.google.com/rss/articles/CCAiC3BRUlNjY2g5RVZJmAEB?oc=5",
+            "urlToImage": null,
+            "publishedAt": "2023-07-29T13:26:45Z",
+            "content": null
+        },
+        {
+            "source": {
+                "id": "google-news",
+                "name": "Google News"
+            },
+            "author": "愛爾達體育家族 ELTA Sports",
+            "title": "【成都世大運】世大運女籃預賽二連勝成功晉級八強/愛爾達電視20230729 - 愛爾達體育家族 ELTA Sports",
+            "description": null,
+            "url": "https://news.google.com/rss/articles/CCAiC3dqcUh0dy1oamo0mAEB?oc=5",
+            "urlToImage": null,
+            "publishedAt": "2023-07-29T12:30:07Z",
+            "content": null
+        },
+        {
+            "source": {
+                "id": "google-news",
+                "name": "Google News"
+            },
+            "author": "中央社即時新聞",
+            "title": "世大運首日台灣3銀3銅武術大驚喜楊勇緯最可惜| 運動 - 中央社即時新聞",
+            "description": null,
+            "url": "https://news.google.com/rss/articles/CBMiMmh0dHBzOi8vd3d3LmNuYS5jb20udHcvbmV3cy9hc3B0LzIwMjMwNzI5MDIwNS5hc3B40gEA?oc=5",
+            "urlToImage": null,
+            "publishedAt": "2023-07-29T12:24:00Z",
+            "content": null
+        }
+    ]
+}

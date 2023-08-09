@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model"
 	cookiemaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/cookieMaker"
 	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
@@ -79,7 +79,7 @@ func (repo APIRepo) GetWelcome(w http.ResponseWriter, req *http.Request) {
 		PageEndpoint:     strings.TrimLeft(global.AppVar.App.RoutePattern.Page["endpoints"], "/"),
 		PageChangePWD:    strings.TrimLeft(global.AppVar.App.RoutePattern.Page["change-password"], "/"),
 		PageManageAPIKey: strings.TrimLeft(global.AppVar.App.RoutePattern.Page["apikey"], "/"),
-		PageSeeResult:    "#",
+		PageSeeResult:    strings.TrimLeft(global.AppVar.App.RoutePattern.Page["result"], "/"),
 		PageAdmin:        strings.TrimLeft(global.AppVar.App.RoutePattern.Page["admin"], "/"),
 		PageLogout:       global.AppVar.App.RoutePattern.Page["sign-out"],
 	}
@@ -308,6 +308,32 @@ func (repo APIRepo) GetAdmin(w http.ResponseWriter, req *http.Request) {
 	}
 	w.WriteHeader(http.StatusOK)
 	_ = repo.View.ExecuteTemplate(w, "admin.gotmpl", pageData)
+}
+
+func (repo APIRepo) GetResult(w http.ResponseWriter, req *http.Request) {
+	_, ok := req.Context().Value(global.CtxUserInfo).(tokenmaker.Payload)
+	if !ok {
+		ecErr := ec.MustGetEcErr(ec.ECServerError)
+		ecErr.WithDetails("user information not found")
+		w.WriteHeader(ecErr.HttpStatusCode)
+		w.Write(ecErr.MustToJson())
+		return
+	}
+
+	hc := view.NewHeadContent()
+	hc.Script.NewHTMLElement().
+		AddPair("src", "/static/js/wasm_exec.js")
+	hc.Script.NewHTMLElement().
+		AddPair("src", "/static/js/wasm_go.js")
+
+	pageData := object.APIResultPage{
+		Page: object.Page{
+			HeadConent: hc,
+			Title:      "result",
+		},
+	}
+	w.WriteHeader(http.StatusOK)
+	_ = repo.View.ExecuteTemplate(w, "result.gotmpl", pageData)
 }
 
 func (repo APIRepo) EndpointRepo() EndpointRepo {

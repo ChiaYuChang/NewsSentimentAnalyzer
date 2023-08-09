@@ -45,16 +45,16 @@
                         <label for="exclude-domains">Exculde Domains</label>:
                         <input type="text" name="exclude-domains" id="exclude-domains" class="form-input">
                     </li>
-                    <li class="data-field">
+                     <li class="data-field">
                         <label for="language">Language</label>:
-                        <select name="language" id="language" class="form-input">
-                            <option value="">All</option>
-                            <option value="zh">Chinese</option>
-                            <option value="en">English</option>
-                            <option value="es">Spanish</option>
-                            <option value="jp">Japanese</option>
-                            <option value="ko">Korean</option>
-                        </select>
+                        <div name="language" id="language" class="row">
+                        </div>
+                        <button type="button" title="insert-lang" id="insert-lang-btn" class="pure-button-disabled btn btn-small">
+                            <i class="fa-regular fa-plus"></i>
+                        </button>
+                        <button type="button" title="delete-lang" id="delete-lang-btn" class="pure-button-disabled btn btn-small">
+                            <i class="fa-regular fa-minus"></i>
+                        </button>
                     </li>
                     <li class="data-field">
                         <label for="from-time">From</label>:

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model"
 	errorcode "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/errorCode"
 	"github.com/google/uuid"
 )

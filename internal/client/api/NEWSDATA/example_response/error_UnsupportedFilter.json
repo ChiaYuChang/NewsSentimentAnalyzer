@@ -1,0 +1,7 @@
+{
+    "status": "error",
+    "results": {
+        "message": "Sorry! No such category exists in our database.",
+        "code": "UnsupportedFilter"
+    }
+}

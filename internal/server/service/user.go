@@ -3,7 +3,7 @@ package service
 import (
 	"fmt"
 
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/context"

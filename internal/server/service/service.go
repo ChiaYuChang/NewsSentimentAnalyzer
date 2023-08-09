@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/validator"
 	val "github.com/go-playground/validator/v10"
 )

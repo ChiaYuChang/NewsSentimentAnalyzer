@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/model"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/convert"
 )
 
