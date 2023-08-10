@@ -311,7 +311,7 @@ func (repo APIRepo) GetAdmin(w http.ResponseWriter, req *http.Request) {
 }
 
 func (repo APIRepo) GetResult(w http.ResponseWriter, req *http.Request) {
-	_, ok := req.Context().Value(global.CtxUserInfo).(tokenmaker.Payload)
+	userInfo, ok := req.Context().Value(global.CtxUserInfo).(tokenmaker.Payload)
 	if !ok {
 		ecErr := ec.MustGetEcErr(ec.ECServerError)
 		ecErr.WithDetails("user information not found")
@@ -320,20 +320,43 @@ func (repo APIRepo) GetResult(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	hc := view.NewHeadContent()
-	hc.Script.NewHTMLElement().
-		AddPair("src", "/static/js/wasm_exec.js")
-	hc.Script.NewHTMLElement().
-		AddPair("src", "/static/js/wasm_go.js")
-
-	pageData := object.APIResultPage{
-		Page: object.Page{
-			HeadConent: hc,
-			Title:      "result",
-		},
+	if err := req.ParseForm(); err != nil {
+		ecErr := ec.MustGetEcErr(ec.ECInvalidParams)
+		ecErr.WithDetails("user information not found")
+		w.WriteHeader(ecErr.HttpStatusCode)
+		w.Write(ecErr.MustToJson())
+		return
 	}
-	w.WriteHeader(http.StatusOK)
-	_ = repo.View.ExecuteTemplate(w, "result.gotmpl", pageData)
+
+	if jobs, err := repo.Service.Job().GetByOwner(req.Context(), &service.JobGetByOwnerRequest{
+		Owner: userInfo.GetUserID(),
+		Next:  0,
+		N:     10,
+	}); err != nil && err != pgx.ErrNoRows {
+		ecErr := ec.MustGetEcErr(ec.ECServerError)
+		ecErr.WithDetails(err.Error())
+		w.WriteHeader(ecErr.HttpStatusCode)
+		w.Write(ecErr.MustToJson())
+		return
+	} else {
+		hc := view.NewHeadContent()
+		hc.Script.NewHTMLElement().
+			AddPair("src", "/static/js/wasm_exec.js")
+		hc.Script.NewHTMLElement().
+			AddPair("src", "/static/js/wasm_go.js")
+
+		pageData := object.APIResultPage{
+			Page: object.Page{
+				HeadConent: hc,
+				Title:      "result",
+			},
+		}
+		pageData.SetJobs(jobs)
+
+		w.WriteHeader(http.StatusOK)
+		_ = repo.View.ExecuteTemplate(w, "result.gotmpl", pageData)
+
+	}
 }
 
 func (repo APIRepo) EndpointRepo() EndpointRepo {

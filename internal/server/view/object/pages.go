@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"html/template"
 	"path"
+	"sort"
+	"time"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model"
@@ -35,6 +37,33 @@ type SignUpPage struct {
 
 type APIResultPage struct {
 	Page
+	Jobs []Job
+}
+
+type Job struct {
+	Status    string
+	NewsSrc   string
+	Analyzer  string
+	CreatedAt string
+	UpdatedAt string
+}
+
+func (p *APIResultPage) SetJobs(jl []*model.GetJobsByOwnerRow) *APIResultPage {
+	sort.Slice(jl, func(i, j int) bool {
+		return jl[i].UpdatedAt.Time.Before(jl[j].UpdatedAt.Time)
+	})
+
+	p.Jobs = make([]Job, len(jl))
+	for i, j := range jl {
+		p.Jobs[i] = Job{
+			Status:    string(j.Status),
+			NewsSrc:   j.NewsSrc,
+			Analyzer:  j.Analyzer,
+			CreatedAt: j.CreatedAt.Time.Format(time.DateTime),
+			UpdatedAt: j.UpdatedAt.Time.Format(time.DateTime),
+		}
+	}
+	return p
 }
 
 type APIAdminPage struct {

@@ -33,13 +33,42 @@ func (r JobDeleteRequest) RequestName() string {
 	return "job-delete-req"
 }
 
-type JobGetJobsByOwnerRequest struct {
+func (r JobDeleteRequest) ToParams() (*model.DeleteJobParams, error) {
+	return &model.DeleteJobParams{
+		ID: r.ID, Owner: r.Owner,
+	}, nil
+}
+
+type JobGetByOwnerRequest struct {
 	Owner uuid.UUID `validate:"not_uuid_nil,uuid4"`
+	Next  int32     `validate:"min=0"`
 	N     int32     `validate:"required,min=1"`
 }
 
-func (r JobGetJobsByOwnerRequest) RequestName() string {
+func (r JobGetByOwnerRequest) RequestName() string {
 	return "job-get-by-owner-req"
+}
+
+func (r JobGetByOwnerRequest) ToParams() (*model.GetJobsByOwnerParams, error) {
+	return &model.GetJobsByOwnerParams{
+		Owner: r.Owner, Next: r.Next, N: r.N,
+	}, nil
+}
+
+type JobGetByJobIdRequest struct {
+	Owner uuid.UUID `validate:"not_uuid_nil,uuid4"`
+	Id    int32     `validate:"required,min=1"`
+}
+
+func (r JobGetByJobIdRequest) RequestName() string {
+	return "job-get-by-owner-req"
+}
+
+func (r JobGetByJobIdRequest) ToParams() (*model.GetJobsByJobIdParams, error) {
+	return &model.GetJobsByJobIdParams{
+		Owner: r.Owner,
+		ID:    r.Id,
+	}, nil
 }
 
 type JobUpdateStatusRequest struct {
@@ -50,6 +79,14 @@ type JobUpdateStatusRequest struct {
 
 func (r JobUpdateStatusRequest) RequestName() string {
 	return "job-udpate-status-req"
+}
+
+func (r JobUpdateStatusRequest) ToParams() (*model.UpdateJobStatusParams, error) {
+	return &model.UpdateJobStatusParams{
+		Status: model.JobStatus(r.Status),
+		ID:     r.ID,
+		Owner:  r.Owner,
+	}, nil
 }
 
 func (srvc jobService) Create(ctx context.Context, r *JobCreateRequest) (id int32, err error) {
@@ -67,36 +104,40 @@ func (srvc jobService) Create(ctx context.Context, r *JobCreateRequest) (id int3
 	})
 }
 
-func (srvc jobService) Delete(ctx context.Context, r *JobDeleteRequest) (n int64, err error) {
-	if err := srvc.validate.Struct(r); err != nil {
+func (srvc jobService) Delete(ctx context.Context, req *JobDeleteRequest) (n int64, err error) {
+	if err := srvc.validate.Struct(req); err != nil {
 		return 0, err
 	}
-	return srvc.store.DeleteJob(ctx, &model.DeleteJobParams{
-		ID: r.ID, Owner: r.Owner,
-	})
+	params, _ := req.ToParams()
+	return srvc.store.DeleteJob(ctx, params)
 }
 
-func (srvc jobService) GetByOwner(ctx context.Context, r *JobGetJobsByOwnerRequest) ([]*model.GetJobsByOwnerRow, error) {
-	if err := srvc.validate.Struct(r); err != nil {
+func (srvc jobService) GetByOwner(ctx context.Context, req *JobGetByOwnerRequest) ([]*model.GetJobsByOwnerRow, error) {
+	if err := srvc.validate.Struct(req); err != nil {
 		return nil, err
 	}
 
-	return srvc.store.GetJobsByOwner(ctx, &model.GetJobsByOwnerParams{
-		Owner: r.Owner, N: r.N,
-	})
+	params, _ := req.ToParams()
+	return srvc.store.GetJobsByOwner(ctx, params)
+}
+
+func (srvc jobService) GetByJobId(ctx context.Context, req *JobGetByJobIdRequest) (*model.GetJobsByJobIdRow, error) {
+	if err := srvc.validate.Struct(req); err != nil {
+		return nil, err
+	}
+
+	params, _ := req.ToParams()
+	return srvc.store.GetJobsByJobId(ctx, params)
 }
 
 func (srvc jobService) UpdateJobStatus(
-	ctx context.Context, r *JobUpdateStatusRequest) (n int64, err error) {
-	if err := srvc.validate.Struct(r); err != nil {
+	ctx context.Context, req *JobUpdateStatusRequest) (n int64, err error) {
+	if err := srvc.validate.Struct(req); err != nil {
 		return 0, err
 	}
 
-	return srvc.store.UpdateJobStatus(ctx, &model.UpdateJobStatusParams{
-		Status: model.JobStatus(r.Status),
-		ID:     r.ID,
-		Owner:  r.Owner,
-	})
+	params, _ := req.ToParams()
+	return srvc.store.UpdateJobStatus(ctx, params)
 }
 
 func (srvc jobService) CleanUp(ctx context.Context) (n int64, err error) {

@@ -121,7 +121,7 @@ func NewRouter(srvc service.Service, rds *redis.Client, vw view.View,
 
 		r.Get(rp.Page["admin"], apiRepo.GetAdmin)
 
-		r.Get(rp.Page["result"], apiRepo.GetResult)
+		// r.Get(rp.Page["result"], apiRepo.GetResult)
 
 		r.Route(
 			rp.Page["endpoints"],
