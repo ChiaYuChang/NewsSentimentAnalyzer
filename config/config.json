@@ -56,7 +56,7 @@
         "sign-in": "/sign-in",
         "sign-out": "/sign-out",
         "admin": "/admin",
-        "result": "/result",
+        "job": "/job",
         "welcome": "/welcome",
         "apikey": "/apikey",
         "change-password": "/change-password",

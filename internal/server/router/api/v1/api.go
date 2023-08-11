@@ -10,7 +10,6 @@ import (
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model"
-	cookiemaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/cookieMaker"
 	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/validator"
@@ -30,20 +29,17 @@ type APIRepo struct {
 	Service     service.Service
 	View        view.View
 	TokenMaker  tokenmaker.TokenMaker
-	CookieMaker *cookiemaker.CookieMaker
 	Validate    *val.Validate
 	FormDecoder *form.Decoder
 }
 
 func NewAPIRepo(ver string, srvc service.Service, view view.View,
-	tokenmaker tokenmaker.TokenMaker, cookiemaker *cookiemaker.CookieMaker,
-	decoder *form.Decoder) APIRepo {
+	tokenmaker tokenmaker.TokenMaker, decoder *form.Decoder) APIRepo {
 	return APIRepo{
 		Version:     ver,
 		Service:     srvc,
 		View:        view,
 		TokenMaker:  tokenmaker,
-		CookieMaker: cookiemaker,
 		FormDecoder: decoder,
 	}
 }
@@ -79,12 +75,17 @@ func (repo APIRepo) GetWelcome(w http.ResponseWriter, req *http.Request) {
 		PageEndpoint:     strings.TrimLeft(global.AppVar.App.RoutePattern.Page["endpoints"], "/"),
 		PageChangePWD:    strings.TrimLeft(global.AppVar.App.RoutePattern.Page["change-password"], "/"),
 		PageManageAPIKey: strings.TrimLeft(global.AppVar.App.RoutePattern.Page["apikey"], "/"),
-		PageSeeResult:    strings.TrimLeft(global.AppVar.App.RoutePattern.Page["result"], "/"),
+		PageSeeResult:    strings.TrimLeft(global.AppVar.App.RoutePattern.Page["job"], "/"),
 		PageAdmin:        strings.TrimLeft(global.AppVar.App.RoutePattern.Page["admin"], "/"),
-		PageLogout:       global.AppVar.App.RoutePattern.Page["sign-out"],
+		PageSignOut:      global.AppVar.App.RoutePattern.Page["sign-out"],
 	}
 
-	_ = repo.View.ExecuteTemplate(w, "welcome.gotmpl", pageData)
+	err := repo.View.ExecuteTemplate(w, "welcome.gotmpl", pageData)
+	if err != nil {
+		global.Logger.
+			Err(err).
+			Msg("error while ExecuteTemplate welcome.gotmpl")
+	}
 	return
 }
 
@@ -310,7 +311,7 @@ func (repo APIRepo) GetAdmin(w http.ResponseWriter, req *http.Request) {
 	_ = repo.View.ExecuteTemplate(w, "admin.gotmpl", pageData)
 }
 
-func (repo APIRepo) GetResult(w http.ResponseWriter, req *http.Request) {
+func (repo APIRepo) GetJob(w http.ResponseWriter, req *http.Request) {
 	userInfo, ok := req.Context().Value(global.CtxUserInfo).(tokenmaker.Payload)
 	if !ok {
 		ecErr := ec.MustGetEcErr(ec.ECServerError)
@@ -348,7 +349,7 @@ func (repo APIRepo) GetResult(w http.ResponseWriter, req *http.Request) {
 		pageData := object.APIResultPage{
 			Page: object.Page{
 				HeadConent: hc,
-				Title:      "result",
+				Title:      "job",
 			},
 		}
 		pageData.SetJobs(jobs)
@@ -357,6 +358,55 @@ func (repo APIRepo) GetResult(w http.ResponseWriter, req *http.Request) {
 		_ = repo.View.ExecuteTemplate(w, "result.gotmpl", pageData)
 
 	}
+}
+
+func (repo APIRepo) GetJobDetail(w http.ResponseWriter, req *http.Request) {
+	userInfo, ok := req.Context().Value(global.CtxUserInfo).(tokenmaker.Payload)
+	if !ok {
+		ecErr := ec.MustGetEcErr(ec.ECServerError)
+		ecErr.WithDetails("user information not found")
+		w.WriteHeader(ecErr.HttpStatusCode)
+		w.Write(ecErr.MustToJson())
+		return
+	}
+
+	req.ParseForm()
+	jIdStr := chi.URLParam(req, "jId")
+	jId, err := convert.StrTo(jIdStr).Int()
+	w.Header().Set("Content-Type", "application/json")
+
+	if jId <= 0 || err != nil {
+		err := ec.MustGetEcErr(ec.ECBadRequest)
+		err.WithDetails("jid not found")
+		w.WriteHeader(err.HttpStatusCode)
+		w.Write(err.MustToJson())
+		return
+	}
+
+	job, err := repo.Service.Job().GetByJobId(req.Context(), &service.JobGetByJobIdRequest{
+		Owner: userInfo.GetUserID(),
+		Id:    int32(jId),
+	})
+
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			ecErr := ec.MustGetEcErr(ec.ECForbidden)
+			w.WriteHeader(ecErr.HttpStatusCode)
+			w.Write(ecErr.MustToJson())
+			return
+		}
+		ecErr := ec.MustGetEcErr(ec.ECBadRequest)
+		w.WriteHeader(ecErr.HttpStatusCode)
+		w.Write(ecErr.MustToJson())
+		return
+	}
+
+	analyzerQuery := map[string]string{}
+	json.Unmarshal(job.LlmQuery, &analyzerQuery)
+	jsn, _ := json.Marshal(object.NewJobDetails(userInfo.GetUsername(), job))
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsn)
+	return
 }
 
 func (repo APIRepo) EndpointRepo() EndpointRepo {

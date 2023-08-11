@@ -94,9 +94,10 @@ header {
 
 .background {
     display: grid;
-    grid-template-columns: 2fr 5fr 2fr;
+    grid-template-columns: 2fr 7fr 2fr;
     margin: 0 auto;
 }
+
 
 .mid-card {
     min-width: 650px;
@@ -320,12 +321,17 @@ input[type='checkbox'] {
     padding: 0.25rem 0;
 }
 
-.api-table {
+.table-container {
+    width: 100%;
+    overflow: auto;
+}
+
+.striped-table {
     font-size: .8rem;
     width: 100%;
 }
 
-#api-table thead {
+.striped-table thead tr {
     background: #19A7CE;
     color: #F6F1F1;
     font-weight: bold;
@@ -333,10 +339,49 @@ input[type='checkbox'] {
     padding: .5rem .75rem;
 }
 
-#api-table tbody tr:nth-of-type(even) {
+.striped-table tbody tr:nth-of-type(even) {
     background-color: #F6F1F1;
 }
 
-#api-table tbody tr:last-of-type {
+.striped-table tbody tr:last-of-type {
     border-bottom: 2px solid #146C94;
+}
+
+.code-block {
+    padding: 1rem;
+}
+
+.job-status-created,
+.job-status-running,
+.job-status-done,
+.job-status-faliure,
+.job-status-canceled {
+    color: white;
+    border-radius: 4px;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    font-weight: 500;
+    padding: 3px .5rem;
+}
+
+.job-status-created {
+    background-color: #F6F1F1;
+    color: #146C94;
+    border: 1px solid #000000;
+}
+
+.job-status-running {
+    background-color: rgb(230, 170, 0);
+}
+
+.job-status-done {
+    background-color: rgb(28, 184, 65);
+}
+
+.job-status-faliure {
+    background-color: rgb(202, 60, 60);
+}
+
+.job-status-canceled {
+    background-color: rgb(100, 100, 100);
 }

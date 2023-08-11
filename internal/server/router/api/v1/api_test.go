@@ -52,6 +52,9 @@ func init() {
 		},
 	}
 	opt.SetSecret(tokenmaker.DEFAULT_SECRET)
+
+	cm := cookiemaker.NewDefaultCookieMacker("localhost")
+	cookiemaker.SetDefaultCookieMaker(cm)
 }
 
 func TestGetWelcome(t *testing.T) {
@@ -72,7 +75,6 @@ func TestGetWelcome(t *testing.T) {
 
 	tm := middleware.NewJWTTokenMaker(opt)
 	tm.AllowFromHTTPCookie = true
-	cm := cookiemaker.NewDefaultCookieMacker("localhost")
 
 	user, _ := testtool.GenRdmUser()
 	bearer, err := tm.TokenMaker.MakeToken(user.Email, user.ID, tokenmaker.ParseRole(user.Role))
@@ -101,7 +103,6 @@ func TestGetWelcome(t *testing.T) {
 					Service:     srvc,
 					View:        view,
 					TokenMaker:  tm,
-					CookieMaker: cm,
 					FormDecoder: form.NewDecoder(),
 				}
 				mux := chi.NewMux()
@@ -178,7 +179,6 @@ func TestGetWelcome(t *testing.T) {
 					Service:     srvc,
 					View:        view,
 					TokenMaker:  tm,
-					CookieMaker: cm,
 					FormDecoder: form.NewDecoder(),
 				}
 				mux := chi.NewMux()

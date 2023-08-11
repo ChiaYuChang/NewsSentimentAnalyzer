@@ -58,7 +58,7 @@ func (rl RedisRateLimiter) RateLimit(next http.Handler) http.Handler {
 		}
 
 		res, err := rl.Allow(req.Context(),
-			payload.GetKey(), redis_rate.PerSecond(rl.Limit))
+			payload.GetSessionID(), redis_rate.PerSecond(rl.Limit))
 		if err != nil {
 			ecErr := ec.MustGetEcErr(ec.ECServerError)
 			ecErr.WithDetails(err.Error())

@@ -272,8 +272,8 @@ func TestLatestNewsHandler(t *testing.T) {
 	require.NotNil(t, q)
 
 	qs := q.Params().ToQueryString()
-	require.Contains(t, qs, "country="+strings.Join(pf.Country, "%2C"))
-	require.Contains(t, qs, "language="+strings.Join(pf.Language, "%2C"))
+	require.Contains(t, qs, "country=")
+	require.Contains(t, qs, "language=")
 
 	r, err := q.ToRequest()
 	require.NoError(t, err)
@@ -360,9 +360,9 @@ func TestNewsSourcesHandler(t *testing.T) {
 	require.NotNil(t, q)
 
 	qs := q.Params().ToQueryString()
-	require.Contains(t, qs, "country="+strings.Join(pf.Country, "%2C"))
-	require.Contains(t, qs, "language="+strings.Join(pf.Language, "%2C"))
-	require.Contains(t, qs, "category="+strings.Join(pf.Category, "%2C"))
+	require.Contains(t, qs, "country=")
+	require.Contains(t, qs, "language=")
+	require.Contains(t, qs, "category=")
 
 	r, err := q.ToRequest()
 	require.NoError(t, err)

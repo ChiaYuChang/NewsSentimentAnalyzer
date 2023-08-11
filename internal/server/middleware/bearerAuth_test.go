@@ -14,7 +14,7 @@ import (
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/middleware"
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/cookieMaker"
+	cookiemaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/cookieMaker"
 	ec "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/errorCode"
 	tokenmaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/tokenMaker"
 	"github.com/go-chi/chi/v5"
@@ -37,6 +37,9 @@ func init() {
 			Size:     tokenmaker.DEFAULT_JWT_SIGN_METHOD_SIZE,
 		},
 	}
+
+	cm := cookiemaker.NewTestCookieMaker()
+	cookiemaker.SetDefaultCookieMaker(cm)
 }
 
 func TestBearerAuthenticator(t *testing.T) {
@@ -217,9 +220,8 @@ func TestBearerAuthenticator(t *testing.T) {
 			bearer, err := maker.MakeToken(username, uid, role)
 			require.NoError(t, err)
 
-			cm := cookieMaker.NewTestCookieMaker()
 			req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/%s", srv.URL, "user/welcome"), nil)
-			req.AddCookie(cm.NewCookie(cookieMaker.AUTH_COOKIE_KEY, bearer))
+			req.AddCookie(cookiemaker.NewCookie(cookiemaker.AUTH_COOKIE_KEY, bearer))
 			resp, err := cli.Do(req)
 
 			require.NoError(t, err)

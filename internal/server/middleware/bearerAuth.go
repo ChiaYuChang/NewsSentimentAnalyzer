@@ -81,12 +81,7 @@ func (bm BearerTokenMaker) BearerAuthenticator(next http.Handler) http.Handler {
 			payload.GetRole(),
 		)
 
-		http.SetCookie(w, &http.Cookie{
-			Name:  cookiemaker.AUTH_COOKIE_KEY,
-			Value: bearer,
-			Path:  "/ ",
-		})
-
+		http.SetCookie(w, cookiemaker.NewCookie(cookiemaker.AUTH_COOKIE_KEY, bearer))
 		next.ServeHTTP(w, req.WithContext(ctx))
 		// update JWT
 		w.Header().Set("Trailer-JWT", fmt.Sprintf("Bearer %s", bearer))

@@ -78,7 +78,8 @@ func (q *Queries) DeleteJob(ctx context.Context, arg *DeleteJobParams) (int64, e
 }
 
 const getJobsByJobId = `-- name: GetJobsByJobId :one
-SELECT j.id, j.owner, j.status, asrc.name AS news_src, allm.name AS analyzer, j.created_at, j.updated_at
+SELECT j.id, j.owner, j.status, asrc.name AS news_src, j.src_query, 
+       allm.name AS analyzer, j.llm_query, j.created_at, j.updated_at
   FROM jobs AS j
  INNER JOIN apis AS asrc ON j.src_api_id = asrc.id
  INNER JOIN apis AS allm ON j.llm_api_id = allm.id 
@@ -97,7 +98,9 @@ type GetJobsByJobIdRow struct {
 	Owner     uuid.UUID          `json:"owner"`
 	Status    JobStatus          `json:"status"`
 	NewsSrc   string             `json:"news_src"`
+	SrcQuery  string             `json:"src_query"`
 	Analyzer  string             `json:"analyzer"`
+	LlmQuery  []byte             `json:"llm_query"`
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 }
@@ -110,7 +113,9 @@ func (q *Queries) GetJobsByJobId(ctx context.Context, arg *GetJobsByJobIdParams)
 		&i.Owner,
 		&i.Status,
 		&i.NewsSrc,
+		&i.SrcQuery,
 		&i.Analyzer,
+		&i.LlmQuery,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -126,8 +131,7 @@ SELECT j.id, j.owner, j.status, asrc.name AS news_src, allm.name AS analyzer, j.
    AND j.id > $2::int
    AND j.deleted_at IS NULL
  ORDER BY 
-       j.updated_at DESC,
-       j.status     DESC
+       j.id DESC
  LIMIT $3::int
 `
 

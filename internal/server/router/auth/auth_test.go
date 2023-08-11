@@ -38,6 +38,11 @@ const VIEWS_PATH = "../../../../views"
 
 const AUTH_TOKEN = "[[::AUTH_TOKEN::]]"
 
+func init() {
+	cm := cookiemaker.NewDefaultCookieMacker("localhost")
+	cookiemaker.SetDefaultCookieMaker(cm)
+}
+
 func TestAuthLogin(t *testing.T) {
 	vw, err := view.NewView(nil, VIEWS_PATH+"/template/*.gotmpl")
 	require.NoError(t, err)
@@ -70,13 +75,11 @@ func TestAuthLogin(t *testing.T) {
 				Times(0)
 
 			srvc := service.NewService(store, validator.Validate)
-			cm := cookiemaker.NewDefaultCookieMacker("localhost")
 
 			authReup := auth.AuthRepo{
 				Service:     srvc,
 				View:        vw,
 				TokenMaker:  tm,
-				CookieMaker: cm,
 				FormDecoder: form.NewDecoder(),
 			}
 
@@ -126,13 +129,11 @@ func TestAuthLogin(t *testing.T) {
 				Return(AUTH_TOKEN, nil)
 
 			srvc := service.NewService(store, validator.Validate)
-			cm := cookiemaker.NewDefaultCookieMacker("localhost")
 
 			authReup := auth.AuthRepo{
 				Service:     srvc,
 				View:        vw,
 				TokenMaker:  tm,
-				CookieMaker: cm,
 				FormDecoder: form.NewDecoder(),
 			}
 
@@ -194,13 +195,11 @@ func TestAuthLogin(t *testing.T) {
 				Times(0)
 
 			srvc := service.NewService(store, validator.Validate)
-			cm := cookiemaker.NewDefaultCookieMacker("localhost")
 
 			authReup := auth.AuthRepo{
 				Service:     srvc,
 				View:        vw,
 				TokenMaker:  tm,
-				CookieMaker: cm,
 				FormDecoder: form.NewDecoder(),
 			}
 
@@ -241,13 +240,11 @@ func TestAuthLogin(t *testing.T) {
 				Times(0)
 
 			srvc := service.NewService(store, validator.Validate)
-			cm := cookiemaker.NewDefaultCookieMacker("localhost")
 
 			authReup := auth.AuthRepo{
 				Service:     srvc,
 				View:        vw,
 				TokenMaker:  tm,
-				CookieMaker: cm,
 				FormDecoder: form.NewDecoder(),
 			}
 
@@ -288,13 +285,11 @@ func TestAuthLogin(t *testing.T) {
 				Times(0)
 
 			srvc := service.NewService(store, validator.Validate)
-			cm := cookiemaker.NewDefaultCookieMacker("localhost")
 
 			authReup := auth.AuthRepo{
 				Service:     srvc,
 				View:        vw,
 				TokenMaker:  tm,
-				CookieMaker: cm,
 				FormDecoder: form.NewDecoder(),
 			}
 
@@ -347,13 +342,11 @@ func TestAuthLogin(t *testing.T) {
 				Return("", ErrMakerMakeToken)
 
 			srvc := service.NewService(store, validator.Validate)
-			cm := cookiemaker.NewDefaultCookieMacker("localhost")
 
 			authReup := auth.AuthRepo{
 				Service:     srvc,
 				View:        vw,
 				TokenMaker:  tm,
-				CookieMaker: cm,
 				FormDecoder: form.NewDecoder(),
 			}
 
@@ -414,13 +407,11 @@ func TestAuthSignUp(t *testing.T) {
 				Times(0)
 
 			srvc := service.NewService(store, validator.Validate)
-			cm := cookiemaker.NewDefaultCookieMacker("localhost")
 
 			authReup := auth.AuthRepo{
 				Service:     srvc,
 				View:        vw,
 				TokenMaker:  tm,
-				CookieMaker: cm,
 				FormDecoder: form.NewDecoder(),
 			}
 
@@ -478,13 +469,11 @@ func TestAuthSignUp(t *testing.T) {
 				Return(AUTH_TOKEN, nil)
 
 			srvc := service.NewService(store, validator.Validate)
-			cm := cookiemaker.NewDefaultCookieMacker("localhost")
 
 			authRepo := auth.AuthRepo{
 				Service:     srvc,
 				View:        vw,
 				TokenMaker:  tm,
-				CookieMaker: cm,
 				FormDecoder: form.NewDecoder(),
 			}
 
@@ -535,13 +524,11 @@ func TestAuthSignUp(t *testing.T) {
 				Times(0)
 
 			srvc := service.NewService(store, validator.Validate)
-			cm := cookiemaker.NewDefaultCookieMacker("localhost")
 
 			authRepo := auth.AuthRepo{
 				Service:     srvc,
 				View:        vw,
 				TokenMaker:  tm,
-				CookieMaker: cm,
 				FormDecoder: form.NewDecoder(),
 			}
 
@@ -590,13 +577,11 @@ func TestAuthSignUp(t *testing.T) {
 				Times(0)
 
 			srvc := service.NewService(store, validator.Validate)
-			cm := cookiemaker.NewDefaultCookieMacker("localhost")
 
 			authRepo := auth.AuthRepo{
 				Service:     srvc,
 				View:        vw,
 				TokenMaker:  tm,
-				CookieMaker: cm,
 				FormDecoder: form.NewDecoder(),
 			}
 

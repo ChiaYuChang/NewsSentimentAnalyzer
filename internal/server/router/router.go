@@ -42,8 +42,8 @@ func NewRouter(srvc service.Service, rds *redis.Client, vw view.View,
 		return time.Parse(time.DateOnly, vals[0])
 	}, time.Time{})
 
-	auth := auth.NewAuthRepo(viper.GetString("APP_API_VERSION"), srvc, vw, tmaker, cmaker, formDecoder)
-	apiRepo := api.NewAPIRepo(viper.GetString("APP_API_VERSION"), srvc, vw, tmaker, cmaker, formDecoder)
+	auth := auth.NewAuthRepo(viper.GetString("APP_API_VERSION"), srvc, vw, tmaker, formDecoder)
+	apiRepo := api.NewAPIRepo(viper.GetString("APP_API_VERSION"), srvc, vw, tmaker, formDecoder)
 
 	epRepo := apiRepo.EndpointRepo()
 	epChan := make(chan *model.ListAllEndpointRow)
@@ -100,6 +100,7 @@ func NewRouter(srvc service.Service, rds *redis.Client, vw view.View,
 	r.Post(rp.Page["sign-up"], auth.PostSignUp)
 
 	r.Get(rp.Page["sign-out"], auth.GetSignOut)
+
 	r.Get(rp.ErrorPage["unauthorized"], errHandlerRepo.Unauthorized)
 	r.Get(rp.ErrorPage["bad-request"], errHandlerRepo.BadRequest)
 	r.Get(rp.ErrorPage["too-many-request"], errHandlerRepo.TooManyRequests)
@@ -121,7 +122,8 @@ func NewRouter(srvc service.Service, rds *redis.Client, vw view.View,
 
 		r.Get(rp.Page["admin"], apiRepo.GetAdmin)
 
-		// r.Get(rp.Page["result"], apiRepo.GetResult)
+		r.Get(rp.Page["job"], apiRepo.GetJob)
+		r.Get(rp.Page["job"]+"/{jId}", apiRepo.GetJobDetail)
 
 		r.Route(
 			rp.Page["endpoints"],

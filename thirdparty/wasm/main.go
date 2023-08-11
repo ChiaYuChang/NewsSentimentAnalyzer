@@ -46,14 +46,6 @@ func SortTable(this js.Value, args []js.Value) any {
 	}
 
 	QueryTable.HTMLTable.SortByWithMemory(args[0].Int())
-	for i := 0; i < QueryTable.NRow(); i++ {
-		if i%2 == 0 {
-			QueryTable.HTMLTable.Body.Row[i].Class = ""
-		} else {
-			QueryTable.HTMLTable.Body.Row[i].Class = "pure-table-odd"
-		}
-	}
-
 	if b, err := xml.MarshalIndent(QueryTable.Body, "", "\t"); err != nil {
 		return fmt.Sprintf("error while xml.Marshal: %w", err.Error())
 	} else {

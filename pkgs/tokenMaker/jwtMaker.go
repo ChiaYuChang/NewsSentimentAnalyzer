@@ -2,6 +2,7 @@ package tokenmaker
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -89,8 +90,11 @@ func (c JWTClaims) GetUserID() uuid.UUID {
 	return c.UID
 }
 
-func (c JWTClaims) GetKey() string {
-	return c.UID.String()
+func (c JWTClaims) GetSessionID() string {
+	return fmt.Sprintf("%s-%s",
+		strconv.FormatInt(c.Timestamp, 10),
+		c.UID.String(),
+	)
 }
 
 func (c JWTClaims) String() string {
@@ -218,9 +222,10 @@ func (jm JWTMaker) MakeToken(username string, uid uuid.UUID, role Role) (string,
 
 	claims := JWTClaims{
 		UserInfo: UserInfo{
-			UserName: username,
-			Role:     role,
-			UID:      uid,
+			UserName:  username,
+			Role:      role,
+			UID:       uid,
+			Timestamp: time.Now().Unix(),
 		},
 	}
 

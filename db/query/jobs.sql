@@ -7,12 +7,12 @@ SELECT j.id, j.owner, j.status, asrc.name AS news_src, allm.name AS analyzer, j.
    AND j.id > @next::int
    AND j.deleted_at IS NULL
  ORDER BY 
-       j.updated_at DESC,
-       j.status     DESC
+       j.id DESC
  LIMIT @n::int;
 
 -- name: GetJobsByJobId :one
-SELECT j.id, j.owner, j.status, asrc.name AS news_src, allm.name AS analyzer, j.created_at, j.updated_at
+SELECT j.id, j.owner, j.status, asrc.name AS news_src, j.src_query, 
+       allm.name AS analyzer, j.llm_query, j.created_at, j.updated_at
   FROM jobs AS j
  INNER JOIN apis AS asrc ON j.src_api_id = asrc.id
  INNER JOIN apis AS allm ON j.llm_api_id = allm.id 

@@ -2,13 +2,15 @@ package cookieMaker
 
 import (
 	"net/http"
+	"strings"
 	"time"
 )
 
-// const AUTH_COOKIE_KEY string = "__Secure-JWT-Token"
-const AUTH_COOKIE_KEY string = "JWT-Token"
+const AUTH_COOKIE_KEY string = "__Secure-JWT-Token"
 
-var maker *CookieMaker
+// const AUTH_COOKIE_KEY string = "JWT-Token"
+
+var Maker *CookieMaker
 
 type CookieMaker struct {
 	Path     string
@@ -36,19 +38,18 @@ func NewCookieMaker(path, domain string, maxAge int,
 		MaxAge:   maxAge, // 10 mins
 		Secure:   secure,
 		HttpOnly: httpOnly,
-		SameSite: http.SameSiteLaxMode,
+		SameSite: sameSite,
 	}
 }
 
 func SetDefaultCookieMaker(cm *CookieMaker) {
-	maker = cm
+	Maker = cm
 }
 
 func (cm CookieMaker) DeleteCookie(key string) *http.Cookie {
-	return &http.Cookie{
-		Name:   key,
-		MaxAge: -1,
-	}
+	c := cm.NewCookie(key, "")
+	c.MaxAge = -1
+	return c
 }
 
 func (cm CookieMaker) NewCookie(key, val string) *http.Cookie {
@@ -71,15 +72,23 @@ func (cm CookieMaker) NewCookie(key, val string) *http.Cookie {
 
 	cookie.MaxAge = cm.MaxAge
 	cookie.Secure = cm.Secure
-	cookie.HttpOnly = cm.HttpOnly
-	cookie.SameSite = cm.SameSite
+
+	if strings.HasPrefix(key, "__Secure") {
+		cookie.Secure = true
+		cookie.HttpOnly = true
+		cookie.SameSite = http.SameSiteLaxMode
+	} else {
+		cookie.Secure = cm.Secure
+		cookie.HttpOnly = cm.HttpOnly
+		cookie.SameSite = cm.SameSite
+	}
 	return cookie
 }
 
 func NewCookie(key, val string) *http.Cookie {
-	return maker.NewCookie(key, val)
+	return Maker.NewCookie(key, val)
 }
 
 func DeleteCookie(key string) *http.Cookie {
-	return maker.DeleteCookie(key)
+	return Maker.DeleteCookie(key)
 }

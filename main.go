@@ -48,7 +48,8 @@ func main() {
 
 	vw, err := view.NewViewWithDefaultTemplateFuncs(global.AppVar.App.Template...)
 	if err != nil {
-		global.Logger.Err(err).Msg("Failed to connect to redis")
+		global.Logger.
+			Err(err).Msg("error while view.NewViewWithDefaultTemplateFuncs")
 		os.Exit(1)
 	}
 	global.Logger.Info().Msg("Connected to redis")
@@ -64,8 +65,9 @@ func main() {
 	cm := cookieMaker.NewCookieMaker(
 		"/", viper.GetString("APP_HOST"),
 		int(global.AppVar.Token.ExpireAfter.Seconds()),
-		true, false, http.SameSiteLaxMode,
+		true, true, http.SameSiteLaxMode,
 	)
+	cookieMaker.SetDefaultCookieMaker(cm)
 
 	addr := fmt.Sprintf("%s:%d", viper.GetString("APP_HOST"), viper.GetInt("APP_PORT"))
 	server := &http.Server{

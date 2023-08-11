@@ -9,31 +9,56 @@
 <body>
     <section class="background">
         <div class="mid-card">
-        <table id="qurey-result" class="pure-table pure-table-horizontal">
-            <thead>
-                <tr>
-                    <th dtype="int" onclick="sortTable(0)">Id</th>
-                    <th dtype="string" onclick="sortTable(1)">Status</th>
-                    <th dtype="string" onclick="sortTable(2)">News API</th>
-                    <th dtype="string" onclick="sortTable(3)">LLM</th>
-                    <th dtype="string" onclick="sortTable(4)">Created At</th>
-                    <th dtype="string" onclick="sortTable(5)">Updated At</th>
-                </tr>
-            </thead>
-            <tbody>
-            {{$i, $e := range .Jobs}}
-                <tr class="pure-table-odd">
-                    <td>{{i}}</td>
-                    <td>{{e.Status}}</td>
-                    <td>{{e.NewsSrc}}</td>
-                    <td>{{e.Analyzer}}</td>
-                    <td>{{e.CreatedAt}}</td>
-                    <td>{{e.UpdatedAt}}</td>
-                </tr>
-            {{end}}
-            </tbody>
-        </table>
-         <p class="footer">
+        <h1>Jobs</h1>
+        <div class="table-container">
+            <table id="qurey-result" class="pure-table pure-table-horizontal striped-table">
+                <thead>
+                    <tr>
+                        <th dtype="int" onclick="sortTable(0)">Id</th>
+                        <th dtype="string" onclick="sortTable(1)">Status</th>
+                        <th dtype="string" onclick="sortTable(2)">News API</th>
+                        <th dtype="string" onclick="sortTable(3)">LLM</th>
+                        <th dtype="string" onclick="sortTable(4)">Created At</th>
+                        <th dtype="string" onclick="sortTable(5)">Updated At</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {{range $index, $element:=.Jobs}}
+                    <tr>
+                        <td>{{$element.ID}}</td>
+                        <td>
+                            <div class="{{$element.Status.Class}}">
+                                {{$element.Status.Text}}
+                            </div>
+                        </td>
+                        <td>{{$element.NewsSrc}}</td>
+                        <td>{{$element.Analyzer}}</td>
+                        <td>{{$element.CreatedAt}}</td>
+                        <td>{{$element.UpdatedAt}}</td>
+                        <td>
+                            <button type="button" class="btn" onclick="getJob({{$element.ID}})"><i class="fa-regular fa-file-lines"></i></button>
+                        </td>
+                    </tr>
+                {{end}}
+                </tbody>
+            </table>
+        </div>
+        <div>
+            <div class="row">
+                <button type="button" class="btn btn-small" onclick=""><i class="fa-solid fa-angle-left"></i></button>
+                <button type="button" class="btn btn-small" onclick=""><i class="fa-solid fa-angle-right"></i></button>
+            </div>
+        </div>
+        <div id="detail" class="table-container" hidden>
+            <h1>Detail</h1>
+            <h4>Qurey</h4>
+            <table id="detail-table" class="pure-table striped-table">
+                <tbody id="detail-table-body">
+                </tbody>
+            </table>
+        </div>
+        <p class="footer">
             back to <a href="welcome" class=" url">welcome</a> page
         </p>
         </div>
