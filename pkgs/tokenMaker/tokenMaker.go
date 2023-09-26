@@ -22,7 +22,7 @@ const DEFAULT_VALID_AFTER = 0 * time.Second
 type TokenMaker interface {
 	MakeToken(username string, uid uuid.UUID, role Role) (string, error)
 	ValidateToken(tokenStr string) (Payload, error)
-	fmt.Stringer
+	String() string
 }
 
 type Role int8

@@ -2,6 +2,7 @@ package randangenerator_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/validator"
 	rg "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/randanGenerator"
@@ -42,5 +43,26 @@ func TestGenRdnPassword(t *testing.T) {
 			t.Log(string(pwd))
 		}
 		require.NoError(t, err)
+	}
+}
+
+func TestGenRdnTime(t *testing.T) {
+	tf, err := time.Parse(time.DateTime, "2000-01-01 00:00:00")
+	require.NoError(t, err)
+	tt := time.Now()
+
+	n := 100
+	for i := 0; i < n; i++ {
+		rdnt := rg.GenRdnTime(tf, tt)
+		require.True(t, tf.Before(rdnt))
+		require.True(t, tt.After(rdnt))
+	}
+
+	rdnts := rg.GenRdnTimes(100, tf, tt)
+	require.True(t, tf.Before(rdnts[0]))
+	require.True(t, tt.After(rdnts[n-1]))
+	for i := 1; i < n-1; i++ {
+		require.True(t, rdnts[i-1].Before(rdnts[i]))
+		require.True(t, rdnts[i+1].After(rdnts[i]))
 	}
 }

@@ -1,0 +1,82 @@
+.animation-container {
+    box-sizing: border-box;
+    aspect-ratio: 1;
+    position: relative;
+    overflow: hidden;
+    margin: 0 25%;
+}
+
+.fixed-box:hover {
+    cursor: wait;
+}
+
+@keyframes rotate-clockwise {
+    0% {
+        transform: translateX(-50%) translateY(-50%) rotate(0deg);
+    }
+
+    50% {
+        transform: translateX(-50%) translateY(-50%) rotate(180deg);
+    }
+
+    100% {
+        transform: translateX(-50%) translateY(-50%) rotate(360deg);
+    }
+}
+
+@keyframes rotate-counterclockwise {
+    0% {
+        transform: translateX(-50%) translateY(-50%) rotate(360deg);
+    }
+
+    50% {
+        transform: translateX(-50%) translateY(-50%) rotate(180deg);
+    }
+
+    100% {
+        transform: translateX(-50%) translateY(-50%) rotate(0deg);
+    }
+}
+
+.fixed-box {
+    background-color: white;
+    transform: translateX(-50%) translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rotation-box-inner {
+    box-sizing: content-box;
+    filter: blur(3px);
+    opacity: .7;
+    padding: .5rem;
+    background: linear-gradient(#19A7CE 0%, #F6F1F1 30%, #FFF 50%, #F6F1F1 70%, #19A7CE 100%);
+    animation: rotate-clockwise 2s infinite;
+    animation-timing-function: linear;
+}
+
+.rotation-box-outer {
+    box-sizing: content-box;
+    padding: 1rem;
+    filter: blur(3px);
+    background: #19A7CE;
+    background: linear-gradient(#19A7CE 0%, #F6F1F1 30%, #FFF 50%, #F6F1F1 70%, #19A7CE 100%);
+    animation: rotate-counterclockwise 3s infinite;
+    animation-timing-function: linear;
+}
+
+.loading-text {
+    font-weight: bolder;
+    font-size: 2rem;
+    color: #146C94;
+}
+
+.base-box {
+    position: absolute;
+    width: 85%;
+    height: 85%;
+    top: 50%;
+    left: 50%;
+    border-radius: 100rem;
+}

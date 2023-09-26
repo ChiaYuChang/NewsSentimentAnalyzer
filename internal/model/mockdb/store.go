@@ -126,6 +126,21 @@ func (mr *MockStoreMockRecorder) CountEndpoint(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountEndpoint", reflect.TypeOf((*MockStore)(nil).CountEndpoint), arg0)
 }
 
+// CountJob mocks base method.
+func (m *MockStore) CountJob(arg0 context.Context, arg1 uuid.UUID) ([]*model.CountJobRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CountJob", arg0, arg1)
+	ret0, _ := ret[0].([]*model.CountJobRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CountJob indicates an expected call of CountJob.
+func (mr *MockStoreMockRecorder) CountJob(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountJob", reflect.TypeOf((*MockStore)(nil).CountJob), arg0, arg1)
+}
+
 // CreateAPI mocks base method.
 func (m *MockStore) CreateAPI(arg0 context.Context, arg1 *model.CreateAPIParams) (int16, error) {
 	m.ctrl.T.Helper()
@@ -395,6 +410,21 @@ func (mr *MockStoreMockRecorder) DoCheckAndUpdateUserPasswordTx(arg0, arg1 inter
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DoCheckAndUpdateUserPasswordTx", reflect.TypeOf((*MockStore)(nil).DoCheckAndUpdateUserPasswordTx), arg0, arg1)
 }
 
+// DoCountUserJobTx mocks base method.
+func (m *MockStore) DoCountUserJobTx(arg0 context.Context, arg1 uuid.UUID) (*model.CountUserJobTxResult, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DoCountUserJobTx", arg0, arg1)
+	ret0, _ := ret[0].(*model.CountUserJobTxResult)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DoCountUserJobTx indicates an expected call of DoCountUserJobTx.
+func (mr *MockStoreMockRecorder) DoCountUserJobTx(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DoCountUserJobTx", reflect.TypeOf((*MockStore)(nil).DoCountUserJobTx), arg0, arg1)
+}
+
 // DoCreateOrUpdateAPIKeyTx mocks base method.
 func (m *MockStore) DoCreateOrUpdateAPIKeyTx(arg0 context.Context, arg1 *model.CreateOrUpdateAPIKeyTxParams) (*model.CreateOrUpdateAPIKeyTxResults, error) {
 	m.ctrl.T.Helper()
@@ -454,6 +484,51 @@ func (mr *MockStoreMockRecorder) GetAPIKey(arg0, arg1 interface{}) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAPIKey", reflect.TypeOf((*MockStore)(nil).GetAPIKey), arg0, arg1)
 }
 
+// GetJobByOwnerFilterByJIdAndStatus mocks base method.
+func (m *MockStore) GetJobByOwnerFilterByJIdAndStatus(arg0 context.Context, arg1 *model.GetJobByOwnerFilterByJIdAndStatusParams) ([]*model.GetJobByOwnerFilterByJIdAndStatusRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetJobByOwnerFilterByJIdAndStatus", arg0, arg1)
+	ret0, _ := ret[0].([]*model.GetJobByOwnerFilterByJIdAndStatusRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetJobByOwnerFilterByJIdAndStatus indicates an expected call of GetJobByOwnerFilterByJIdAndStatus.
+func (mr *MockStoreMockRecorder) GetJobByOwnerFilterByJIdAndStatus(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetJobByOwnerFilterByJIdAndStatus", reflect.TypeOf((*MockStore)(nil).GetJobByOwnerFilterByJIdAndStatus), arg0, arg1)
+}
+
+// GetJobByOwnerFilterByJIdRange mocks base method.
+func (m *MockStore) GetJobByOwnerFilterByJIdRange(arg0 context.Context, arg1 *model.GetJobByOwnerFilterByJIdRangeParams) ([]*model.GetJobByOwnerFilterByJIdRangeRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetJobByOwnerFilterByJIdRange", arg0, arg1)
+	ret0, _ := ret[0].([]*model.GetJobByOwnerFilterByJIdRangeRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetJobByOwnerFilterByJIdRange indicates an expected call of GetJobByOwnerFilterByJIdRange.
+func (mr *MockStoreMockRecorder) GetJobByOwnerFilterByJIdRange(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetJobByOwnerFilterByJIdRange", reflect.TypeOf((*MockStore)(nil).GetJobByOwnerFilterByJIdRange), arg0, arg1)
+}
+
+// GetJobByOwnerFilterByJIds mocks base method.
+func (m *MockStore) GetJobByOwnerFilterByJIds(arg0 context.Context, arg1 *model.GetJobByOwnerFilterByJIdsParams) ([]*model.GetJobByOwnerFilterByJIdsRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetJobByOwnerFilterByJIds", arg0, arg1)
+	ret0, _ := ret[0].([]*model.GetJobByOwnerFilterByJIdsRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetJobByOwnerFilterByJIds indicates an expected call of GetJobByOwnerFilterByJIds.
+func (mr *MockStoreMockRecorder) GetJobByOwnerFilterByJIds(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetJobByOwnerFilterByJIds", reflect.TypeOf((*MockStore)(nil).GetJobByOwnerFilterByJIds), arg0, arg1)
+}
+
 // GetJobsByJobId mocks base method.
 func (m *MockStore) GetJobsByJobId(arg0 context.Context, arg1 *model.GetJobsByJobIdParams) (*model.GetJobsByJobIdRow, error) {
 	m.ctrl.T.Helper()
@@ -484,6 +559,21 @@ func (mr *MockStoreMockRecorder) GetJobsByOwner(arg0, arg1 interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetJobsByOwner", reflect.TypeOf((*MockStore)(nil).GetJobsByOwner), arg0, arg1)
 }
 
+// GetJobsByOwnerFilterByStatus mocks base method.
+func (m *MockStore) GetJobsByOwnerFilterByStatus(arg0 context.Context, arg1 *model.GetJobsByOwnerFilterByStatusParams) ([]*model.GetJobsByOwnerFilterByStatusRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetJobsByOwnerFilterByStatus", arg0, arg1)
+	ret0, _ := ret[0].([]*model.GetJobsByOwnerFilterByStatusRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetJobsByOwnerFilterByStatus indicates an expected call of GetJobsByOwnerFilterByStatus.
+func (mr *MockStoreMockRecorder) GetJobsByOwnerFilterByStatus(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetJobsByOwnerFilterByStatus", reflect.TypeOf((*MockStore)(nil).GetJobsByOwnerFilterByStatus), arg0, arg1)
+}
+
 // GetKeywordsByNewsId mocks base method.
 func (m *MockStore) GetKeywordsByNewsId(arg0 context.Context, arg1 []int32) ([]string, error) {
 	m.ctrl.T.Helper()
@@ -497,6 +587,21 @@ func (m *MockStore) GetKeywordsByNewsId(arg0 context.Context, arg1 []int32) ([]s
 func (mr *MockStoreMockRecorder) GetKeywordsByNewsId(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetKeywordsByNewsId", reflect.TypeOf((*MockStore)(nil).GetKeywordsByNewsId), arg0, arg1)
+}
+
+// GetLastJobId mocks base method.
+func (m *MockStore) GetLastJobId(arg0 context.Context, arg1 uuid.UUID) ([]*model.GetLastJobIdRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetLastJobId", arg0, arg1)
+	ret0, _ := ret[0].([]*model.GetLastJobIdRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetLastJobId indicates an expected call of GetLastJobId.
+func (mr *MockStoreMockRecorder) GetLastJobId(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLastJobId", reflect.TypeOf((*MockStore)(nil).GetLastJobId), arg0, arg1)
 }
 
 // GetLogByUserId mocks base method.

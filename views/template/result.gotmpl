@@ -3,64 +3,111 @@
 
 <head>
     {{template "head" .Page.HeadConent}}
+    <link rel="stylesheet" href="/static/css/animation.css" /link>
+    <script>
+    var nStatus = [{{.TotalJobs}}, {{.NCreated}}, {{.NRunning}}, {{.NDone}}, {{.NFailed}}, {{.NCanceled}}]
+    var pageSize = {{.PageSize}}
+    </script>
+    <script src="/static/js/job_funcs.js">  </script>
+
+    <script src="/static/js/list.min.js"></script>
     <title>{{.Page.Title}}</title>
 </head>
 
 <body>
     <section class="background">
         <div class="mid-card">
-        <h1>Jobs</h1>
-        <div class="table-container">
-            <table id="qurey-result" class="pure-table pure-table-horizontal striped-table">
-                <thead>
-                    <tr>
-                        <th dtype="int" onclick="sortTable(0)">Id</th>
-                        <th dtype="string" onclick="sortTable(1)">Status</th>
-                        <th dtype="string" onclick="sortTable(2)">News API</th>
-                        <th dtype="string" onclick="sortTable(3)">LLM</th>
-                        <th dtype="string" onclick="sortTable(4)">Created At</th>
-                        <th dtype="string" onclick="sortTable(5)">Updated At</th>
-                        <th>Details</th>
-                    </tr>
-                </thead>
-                <tbody>
-                {{range $index, $element:=.Jobs}}
-                    <tr>
-                        <td>{{$element.ID}}</td>
-                        <td>
-                            <div class="{{$element.Status.Class}}">
-                                {{$element.Status.Text}}
-                            </div>
-                        </td>
-                        <td>{{$element.NewsSrc}}</td>
-                        <td>{{$element.Analyzer}}</td>
-                        <td>{{$element.CreatedAt}}</td>
-                        <td>{{$element.UpdatedAt}}</td>
-                        <td>
-                            <button type="button" class="btn" onclick="getJob({{$element.ID}})"><i class="fa-regular fa-file-lines"></i></button>
-                        </td>
-                    </tr>
+            <h1>Jobs</h1>
+            <div class="job-status-group">
+                <div title="All" class="job-status-label job-status-all job-status-label-selected"
+                onclick='updateQuery("all")'>
+                    <div class="job-status">ALL</div>
+                    <div class="job-n">{{.TotalJobs}}</div>
+                </div>
+                {{if gt .NCreated 0}}
+                <div title="Created" class="job-status-label job-status-created" onclick='updateQuery("created")'>
+                {{else}}
+                <div title="Created" class="job-status-label job-status-created" onclick='showNoJob("created")'>
                 {{end}}
-                </tbody>
-            </table>
-        </div>
-        <div>
-            <div class="row">
-                <button type="button" class="btn btn-small" onclick=""><i class="fa-solid fa-angle-left"></i></button>
-                <button type="button" class="btn btn-small" onclick=""><i class="fa-solid fa-angle-right"></i></button>
+                    <div class="job-status">
+                        <i class="fa-regular fa-flag"></i>
+                    </div>
+                    <div class="job-n">{{.NCreated}}</div>
+                </div>
+                {{if gt .NRunning 0}}
+                <div title="Running" class="job-status-label job-status-running" onclick='updateQuery("running")'>
+                {{else}}
+                <div title="Running" class="job-status-label job-status-running" onclick='showNoJob("running")'>
+                {{end}}
+                    <div class="job-status">
+                        <i class="fa-regular fa-person-running"></i>
+                    </div>
+                    <div class="job-n">{{.NRunning}}</div>
+                </div>
+                {{if gt .NDone 0}}
+                <div title="Done" class="job-status-label job-status-done" onclick='updateQuery("done")'>
+                {{else}}
+                <div title="Done" class="job-status-label job-status-done" onclick='showNoJob("done")'>
+                {{end}}
+                    <div class="job-status">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                    <div class="job-n">{{.NDone}}</div>
+                </div>
+                {{if gt .NFailed 0}}
+                <div title="Failed"  class="job-status-label job-status-faliure" onclick='updateQuery("failure")'>
+                {{else}}
+                <div title="Failed"  class="job-status-label job-status-faliure" onclick='showNoJob("failure")'>
+                {{end}}
+                    <div class="job-status">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <div class="job-n">{{.NFailed}}</div>
+                </div>
+                {{if gt .NCanceled 0}}
+                <div  title="Canceled" class="job-status-label job-status-canceled" onclick='updateQuery("canceled")'>
+                {{else}}
+                <div  title="Canceled" class="job-status-label job-status-canceled" onclick='showNoJob("canceled")'>
+                {{end}}
+                    <div class="job-status">
+                        <i class="fa-regular fa-trash-can"></i>
+                    </div>
+                    <div class="job-n">{{.NCanceled}}</div>
+                </div>
             </div>
-        </div>
-        <div id="detail" class="table-container" hidden>
-            <h1>Detail</h1>
-            <h4>Qurey</h4>
-            <table id="detail-table" class="pure-table striped-table">
-                <tbody id="detail-table-body">
-                </tbody>
-            </table>
-        </div>
-        <p class="footer">
-            back to <a href="welcome" class=" url">welcome</a> page
-        </p>
+            <div class="table-container">
+                <table id="qurey-result" class="pure-table pure-table-horizontal striped-table">
+                    <thead>
+                        <tr>
+                            <th class="sort sort-by-id" data-sort="job-id">Id</th>
+                            <th dtype="string" onclick="sortTable(1)">Status</th>
+                            <th class="sort sort-by-news_src" data-sort="job-news_src">News API</th>
+                            <th class="sort sort-by-analyzer" data-sort="job-analyzer">LLM</th>
+                            <th class="sort sort-by-created_at" data-sort="job-created_at">Created At</th>
+                            <th class="sort sort-by-updated_at" data-sort="job-updated_at">Updated At</th>
+                        </tr>
+                    </thead>
+                    <tbody class="list" id="query-result-tbody">
+                    </tbody>
+                </table>
+            </div>
+            <div>
+                <span>
+                    <button id="prev-page-q" type="button" class="btn btn-small pure-button-disabled" onclick="#"><i class="fa-solid fa-angle-left"></i></button>
+                    <button id="next-page-q" type="button" class="btn btn-small" onclick="queryPage(qNext)"><i class="fa-solid fa-angle-right"></i></button>
+                </span>
+            </div>
+            <div id="detail" class="table-container" hidden>
+                <h1>Detail</h1>
+                <h4>Qurey</h4>
+                <table id="detail-table" class="pure-table striped-table">
+                    <tbody id="detail-table-body">
+                    </tbody>
+                </table>
+            </div>
+            <p class="footer">
+                back to <a href="welcome" class=" url">welcome</a> page
+            </p>
         </div>
     </section>
 </body>

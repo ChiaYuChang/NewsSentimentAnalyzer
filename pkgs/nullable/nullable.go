@@ -3,6 +3,7 @@ package nullable
 import (
 	"bytes"
 	"strconv"
+	"time"
 )
 
 type String[T ~string] struct {
@@ -102,6 +103,34 @@ func (f64 *Float64[T]) UnmarshalJSON(bs []byte) error {
 func (f64 *Float64[T]) MarshalJSON() ([]byte, error) {
 	if f64.Valid {
 		return []byte(strconv.FormatFloat(float64(f64.Value), 'f', -1, 64)), nil
+	}
+	return []byte("null"), nil
+}
+
+type Time struct {
+	Value  time.Time
+	Valid  bool
+	Layout string
+}
+
+func (i *Time) UnmarshalJSON(bs []byte) error {
+	if bytes.Equal(bs, []byte("null")) {
+		(*i).Valid = false
+	} else {
+		t, err := time.Parse(i.Layout, string(bs))
+		if err != nil {
+			return err
+		}
+		(*i).Valid = true
+		(*i).Value = t
+	}
+	return nil
+}
+
+func (i *Time) MarshalJSON() ([]byte, error) {
+	if i.Valid {
+		si := i.Value.Format(i.Layout)
+		return []byte(si), nil
 	}
 	return []byte("null"), nil
 }

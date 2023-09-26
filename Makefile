@@ -42,7 +42,9 @@ docker-create-db:
 
 docker-flush-db:
 	docker container rm ${APP_NAME}-postgres
-	docker volume rm ${APP_NAME}-volume
+	docker container rm ${APP_NAME}-redis
+	docker volume rm ${APP_NAME}-postgres-volume
+	docker volume rm ${APP_NAME}-redis-volume
 
 docker-down-db:
 	@docker stop ${APP_NAME}-postgres
@@ -100,7 +102,11 @@ gen-public-key: gen-private-key
 
 
 run: docker-up-db build build-wasm
-	./${APP_NAME} -v v1 -c ./config/config.json -s development -h localhost -p 8000
+	./${APP_NAME} -v v1 -c ./config/config.json -s development -h localhost -p 8001
+
+build-milvus-health-check:
+	@go build -o bin/milvus-health-check ./thirdparty/milvus-health-check/main.go && \
+		chmod +x ./milvus-health-check
 
 about: ## Display info related to the build
 	@echo "- Protoc version  : $(shell protoc --version)"

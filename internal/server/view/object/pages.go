@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"html/template"
 	"path"
-	"sort"
 	"strings"
 	"time"
 
@@ -39,16 +38,22 @@ type SignUpPage struct {
 
 type APIResultPage struct {
 	Page
-	Jobs []Job
+	TotalJobs int `json:"n_total"`
+	NCreated  int `json:"n_created"`
+	NRunning  int `json:"n_running"`
+	NDone     int `json:"n_done"`
+	NFailed   int `json:"n_failed"`
+	NCanceled int `json:"n_canceled"`
+	PageSize  int `json:"page_size"`
 }
 
 type Job struct {
-	ID        int32     `json:"ID"`
-	Status    JobStatus `json:"Status"`
-	NewsSrc   string    `json:"NewsSrc"`
-	Analyzer  string    `json:"Analyzer"`
-	CreatedAt string    `json:"CreatedAt"`
-	UpdatedAt string    `json:"UpdatedAt"`
+	Id        int32     `json:"id"`
+	Status    JobStatus `json:"status"`
+	NewsSrc   string    `json:"news_src"`
+	Analyzer  string    `json:"analyzer"`
+	CreatedAt string    `json:"created_at"`
+	UpdatedAt string    `json:"updated_at"`
 }
 
 func StatusToClass(jobStatus model.JobStatus) string {
@@ -67,38 +72,16 @@ func StatusToClass(jobStatus model.JobStatus) string {
 	return ""
 }
 
-func (p *APIResultPage) SetJobs(jl []*model.GetJobsByOwnerRow) *APIResultPage {
-	sort.Slice(jl, func(i, j int) bool {
-		return jl[i].UpdatedAt.Time.Before(jl[j].UpdatedAt.Time)
-	})
-
-	p.Jobs = make([]Job, len(jl))
-	for i, j := range jl {
-		p.Jobs[i] = Job{
-			ID: j.ID,
-			Status: JobStatus{
-				Class: StatusToClass(j.Status),
-				Text:  strings.ToTitle(string(j.Status)),
-			},
-			NewsSrc:   j.NewsSrc,
-			Analyzer:  j.Analyzer,
-			CreatedAt: j.CreatedAt.Time.UTC().Format(time.DateOnly),
-			UpdatedAt: j.UpdatedAt.Time.UTC().Format(time.DateOnly),
-		}
-	}
-	return p
-}
-
 type JobDetails struct {
-	JID           int32             `json:"JobID"`
-	Owner         string            `json:"Owner"`
-	Status        JobStatus         `json:"Status"`
-	NewsAPI       string            `json:"NewsAPI"`
-	NewsAPIQuery  string            `json:"NewsAPIQuery"`
-	Analyzer      string            `json:"Analyzer"`
-	AnalyzerQuery map[string]string `json:"AnalyzerQuery"`
-	CreatedAt     string            `json:"CreatedAt"`
-	UpdatedAt     string            `json:"UpdatedAt"`
+	JID           int32             `json:"jid"`
+	Owner         string            `json:"owner"`
+	Status        JobStatus         `json:"status"`
+	NewsAPI       string            `json:"news_api"`
+	NewsAPIQuery  string            `json:"news_api_query"`
+	Analyzer      string            `json:"analyzer"`
+	AnalyzerQuery map[string]string `json:"analyzer_query"`
+	CreatedAt     string            `json:"created_at"`
+	UpdatedAt     string            `json:"updated_at"`
 }
 
 func NewJobDetails(owner string, j *model.GetJobsByJobIdRow) JobDetails {
@@ -117,13 +100,13 @@ func NewJobDetails(owner string, j *model.GetJobsByJobIdRow) JobDetails {
 		Analyzer:      j.Analyzer,
 		AnalyzerQuery: analyzerQuery,
 		CreatedAt:     j.CreatedAt.Time.UTC().Format(time.DateTime),
-		UpdatedAt:     j.CreatedAt.Time.UTC().Format(time.DateTime),
+		UpdatedAt:     j.UpdatedAt.Time.UTC().Format(time.DateTime),
 	}
 }
 
 type JobStatus struct {
-	Class string `json:"Class"`
-	Text  string `json:"Text"`
+	Class string `json:"class"`
+	Text  string `json:"text"`
 }
 
 type APIAdminPage struct {

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model"
@@ -321,43 +322,160 @@ func (repo APIRepo) GetJob(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if err := req.ParseForm(); err != nil {
-		ecErr := ec.MustGetEcErr(ec.ECInvalidParams)
+	hc := view.NewHeadContent()
+	hc.Script.NewHTMLElement().AddPair("src", "/static/js/job_funcs.js")
+	hc.Script.NewHTMLElement().AddPair("src", "//cdnjs.cloudflare.com/ajax/libs/list.js/2.3.1/list.min.js")
+
+	// hc.Script.NewHTMLElement().
+	// 	AddPair("src", "/static/js/wasm_exec.js")
+	// hc.Script.NewHTMLElement().
+	// 	AddPair("src", "/static/js/wasm_go.js")
+
+	pageData := object.APIResultPage{
+		Page: object.Page{
+			HeadConent: hc,
+			Title:      "job",
+		},
+		PageSize: 10,
+	}
+
+	jobSummary, err := repo.Service.Job().Count(req.Context(), userInfo.GetUserID())
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			jobSummary = &model.CountUserJobTxResult{
+				JobGroup:  make(map[model.JobStatus]model.JobGroup),
+				TotalJob:  0,
+				LastJobId: 0,
+			}
+		} else {
+			ecErr := ec.MustGetEcErr(ec.ECServerError)
+			ecErr.WithDetails(err.Error())
+			w.WriteHeader(ecErr.HttpStatusCode)
+			w.Write(ecErr.MustToJson())
+			return
+		}
+	}
+
+	pageData.NCreated = jobSummary.JobGroup[model.JobStatusCreated].NJob
+	pageData.NRunning = jobSummary.JobGroup[model.JobStatusRunning].NJob
+	pageData.NDone = jobSummary.JobGroup[model.JobStatusDone].NJob
+	pageData.NFailed = jobSummary.JobGroup[model.JobStatusFailure].NJob
+	pageData.NCanceled = jobSummary.JobGroup[model.JobStatusCanceled].NJob
+	pageData.TotalJobs = jobSummary.TotalJob
+
+	w.WriteHeader(http.StatusOK)
+	_ = repo.View.ExecuteTemplate(w, "result.gotmpl", pageData)
+}
+
+func formatRequest(r *http.Request) string {
+	// Create return string
+	var request []string
+	// Add the request string
+	url := fmt.Sprintf("%v %v %v", r.Method, r.URL, r.Proto)
+	request = append(request, url)
+	// Add the host
+	request = append(request, fmt.Sprintf("Host: %v", r.Host))
+	// Loop through headers
+	for name, headers := range r.Header {
+		name = strings.ToLower(name)
+		for _, h := range headers {
+			request = append(request, fmt.Sprintf("%v: %v", name, h))
+		}
+	}
+
+	// If this is a POST, add post data
+	if r.Method == "POST" {
+		r.ParseForm()
+		request = append(request, "\n")
+		request = append(request, r.Form.Encode())
+	}
+	// Return the request as a string
+	return strings.Join(request, "\n")
+}
+
+func (repo APIRepo) PostJob(w http.ResponseWriter, req *http.Request) {
+	global.Logger.Info().Msg("Call Post Job API")
+
+	time.Sleep(2 * time.Second)
+	w.Header().Set("Content-Type", "application/json")
+	userInfo, ok := req.Context().Value(global.CtxUserInfo).(tokenmaker.Payload)
+	if !ok {
+		ecErr := ec.MustGetEcErr(ec.ECServerError)
 		ecErr.WithDetails("user information not found")
 		w.WriteHeader(ecErr.HttpStatusCode)
 		w.Write(ecErr.MustToJson())
 		return
 	}
 
-	if jobs, err := repo.Service.Job().GetByOwner(req.Context(), &service.JobGetByOwnerRequest{
-		Owner: userInfo.GetUserID(),
-		Next:  0,
-		N:     10,
-	}); err != nil && err != pgx.ErrNoRows {
-		ecErr := ec.MustGetEcErr(ec.ECServerError)
+	if err := req.ParseForm(); err != nil {
+		ecErr := ec.MustGetEcErr(ec.ECBadRequest)
 		ecErr.WithDetails(err.Error())
 		w.WriteHeader(ecErr.HttpStatusCode)
 		w.Write(ecErr.MustToJson())
 		return
-	} else {
-		hc := view.NewHeadContent()
-		hc.Script.NewHTMLElement().
-			AddPair("src", "/static/js/wasm_exec.js")
-		hc.Script.NewHTMLElement().
-			AddPair("src", "/static/js/wasm_go.js")
-
-		pageData := object.APIResultPage{
-			Page: object.Page{
-				HeadConent: hc,
-				Title:      "job",
-			},
-		}
-		pageData.SetJobs(jobs)
-
-		w.WriteHeader(http.StatusOK)
-		_ = repo.View.ExecuteTemplate(w, "result.gotmpl", pageData)
-
 	}
+
+	var pager pageform.JobPager
+	if err := repo.FormDecoder.Decode(&pager, req.Form); err != nil {
+		ecErr := ec.MustGetEcErr(ec.ECBadRequest)
+		ecErr.WithDetails(err.Error())
+		w.WriteHeader(ecErr.HttpStatusCode)
+		w.Write(ecErr.MustToJson())
+		return
+	}
+
+	if pager.FromJId < 0 || pager.ToJId < 0 || pager.JStatusStr == "" || pager.ParseJIds() != nil {
+		ecErr := ec.MustGetEcErr(ec.ECBadRequest)
+		w.WriteHeader(ecErr.HttpStatusCode)
+		w.Write(ecErr.MustToJson())
+		return
+	}
+
+	global.Logger.Debug().
+		Str("owner", userInfo.GetUserID().String()).
+		Str("jids", pager.JIdsStr).
+		Int32("fjid", pager.FromJId).
+		Int32("tjid", pager.ToJId).
+		Str("status", pager.JStatusStr).
+		Int("page", pager.Page).
+		Msg("Get update query")
+
+	rows, err := repo.Service.Job().Get(req.Context(), userInfo.GetUserID(),
+		pager.JIds, pager.FromJId, pager.ToJId, pager.JStatusStr, 10, pager.Page)
+	if err != nil {
+		ecErr := ec.MustGetEcErr(ec.ECBadRequest)
+		w.WriteHeader(ecErr.HttpStatusCode)
+		w.Write(ecErr.MustToJson())
+		global.Logger.Debug().Msg(ecErr.Error())
+		return
+	}
+
+	global.Logger.Debug().Int("N", len(rows)).Msg("get n rows")
+	job := make([]object.Job, len(rows))
+	for i, r := range rows {
+		job[i] = object.Job{
+			Id: r.ID,
+			Status: object.JobStatus{
+				Text:  string(r.Status),
+				Class: object.StatusToClass(r.Status),
+			},
+			NewsSrc:   r.NewsSrc,
+			Analyzer:  r.Analyzer,
+			CreatedAt: r.CreatedAt.Time.UTC().Format(time.DateOnly),
+			UpdatedAt: r.UpdatedAt.Time.UTC().Format(time.DateOnly),
+		}
+	}
+
+	jsn, err := json.Marshal(job)
+	if err != nil {
+		ecErr := ec.MustGetEcErr(ec.ECServerError)
+		w.WriteHeader(ecErr.HttpStatusCode)
+		w.Write(ecErr.MustToJson())
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsn)
+	return
 }
 
 func (repo APIRepo) GetJobDetail(w http.ResponseWriter, req *http.Request) {
@@ -383,7 +501,7 @@ func (repo APIRepo) GetJobDetail(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	job, err := repo.Service.Job().GetByJobId(req.Context(), &service.JobGetByJobIdRequest{
+	job, err := repo.Service.Job().GetDetails(req.Context(), &service.JobGetByJobIdRequest{
 		Owner: userInfo.GetUserID(),
 		Id:    int32(jId),
 	})
@@ -401,8 +519,6 @@ func (repo APIRepo) GetJobDetail(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	analyzerQuery := map[string]string{}
-	json.Unmarshal(job.LlmQuery, &analyzerQuery)
 	jsn, _ := json.Marshal(object.NewJobDetails(userInfo.GetUsername(), job))
 	w.WriteHeader(http.StatusOK)
 	w.Write(jsn)

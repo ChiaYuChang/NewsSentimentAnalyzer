@@ -123,6 +123,7 @@ func NewRouter(srvc service.Service, rds *redis.Client, vw view.View,
 		r.Get(rp.Page["admin"], apiRepo.GetAdmin)
 
 		r.Get(rp.Page["job"], apiRepo.GetJob)
+		r.Post(rp.Page["job"], apiRepo.PostJob)
 		r.Get(rp.Page["job"]+"/{jId}", apiRepo.GetJobDetail)
 
 		r.Route(

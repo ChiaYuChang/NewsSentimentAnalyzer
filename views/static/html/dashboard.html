@@ -3,91 +3,83 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
 
-    <!-- Font -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
+    <!-- pure css -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/pure-min.css"
         integrity="sha384-X38yfunGUhNzHpBaEBsWLO+A0HDYOQi8ufWDkZ0k9e0eXz/tH3II7uKZ9msv++Ls" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/grids-responsive-min.css">
 
-    <link rel="stylesheet" href="/static/css/style.css" />
-
-    <!-- d3.js -->
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-
-    <script src="/static/js/func.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/list.js/2.3.1/list.min.js"></script>
 </head>
 
-<section>
-    <section class="background">
-        <div class="mid-card">
-            <h1>
-                header
-            </h1>
-            <form action="" method="post" class="pure-form pure-form-aligned">
-                <fieldset>
-                    <div class="pure-control-group">
-                        <label for="aligned-name">Username</label>
-                        <input type="text" id="aligned-name" placeholder="Username" />
-                        <span class="pure-form-message-inline">This is a required field.</span>
-                    </div>
-                    <div class="pure-control-group">
-                        <label for="aligned-password">Password</label>
-                        <input type="password" id="aligned-password" placeholder="Password" />
-                    </div>
-                    <div class="pure-control-group">
-                        <label for="aligned-email">Email Address</label>
-                        <input type="email" id="aligned-email" placeholder="Email Address" />
-                    </div>
-                    <div class="pure-control-group">
-                        <label for="language">Language</label>
-                        <div class="row" id="language">
-                            <select name="language[0]">
-                                <option value="">All</option>
-                                <option value="zh">Chinese</option>
-                                <option value="en">English</option>
-                                <option value="es">Spanish</option>
-                                <option value="jp">Japanese</option>
-                                <option value="ko">Korean</option>
-                            </select>
-                        </div>
-                        <button type="button" id="insertButton" class="btn btn-small">
-                            <span style="font-family: monospace;"> + </span>
-                        </button>
-                        <button type="button" id="deleteButton" class="btn btn-small">
-                            <span style="font-family: monospace;"> - </span>
-                        </button>
-                    </div>
-                </fieldset>
-            </form>
-            <!-- <ul class="pure-control-group">
-                    <li class="data-field">
-                        <label for="language">Language</label>:
-                        <div class="row" id="language">
-                            <select name="language[0]" class="form-input">
-                                <option value="">All</option>
-                                <option value="zh">Chinese</option>
-                                <option value="en">English</option>
-                                <option value="es">Spanish</option>
-                                <option value="jp">Japanese</option>
-                                <option value="ko">Korean</option>
-                            </select>
-                        </div>
-                        <button type="button" id="insertButton" class="btn btn-small">
-                            <span style="font-family: monospace;"> + </span>
-                        </button>
-                        <button type="button" id="deleteButton" class="btn btn-small">
-                            <span style="font-family: monospace;"> - </span>
-                        </button>
-                    </li>
-                </ul> -->
-        </div>
-    </section>
-    </body>
+<body>
+    <table id="my-table" class="pure-table pure-table-horizontal">
+        <thead>
+            <tr>
+                <th class="sort sort-by-id" data-sort="id">Id</th>
+                <th class="sort" data-sort="name">Name</th>
+                <th class="sort" data-sort="f1">Col 3</th>
+            </tr>
+        </thead>
+        <tbody class="list">
+            <tr>
+                <td class="id">1</td>
+                <td class="name">1c</td>
+                <td>
+                    <div class="f1">1</div>
+                    <div>c</div>
+                </td>
+            </tr>
+            <tr>
+                <td class="id">02</td>
+                <td class="name">1b</td>
+                <td>
+                    <div class="f1">2</div>
+                    <div>b</div>
+                </td>
+            </tr>
+            <tr>
+                <td class="id">1</td>
+                <td class="name">1a</td>
+                <td>
+                    <div class="f1">4</div>
+                    <div>a</div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+
+<script>
+    var options = {
+        valueNames: ['id', 'name']
+    };
+    var userList = new List('my-table', options);
+</script>
+
+<style>
+    .sort {
+        cursor: pointer;
+    }
+
+    .sort:hover {
+        background-color: #eee;
+        text-decoration: none;
+    }
+
+    .sort:focus {
+        outline: none;
+    }
+
+    .sort.asc:after {
+        content: ' ▲';
+        position: relative;
+    }
+
+    .sort.desc:after {
+        content: ' ▼';
+        position: relative;
+    }
+</style>
 
 </html>

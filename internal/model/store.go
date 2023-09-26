@@ -20,6 +20,7 @@ type Store interface {
 	ExecTx(ctx context.Context, fn QueryCallBackFun) error
 	DoCheckAndUpdateUserPasswordTx(ctx context.Context, params *CheckAndUpdateUserPasswordTxParams) error
 	DoCreateOrUpdateAPIKeyTx(ctx context.Context, params *CreateOrUpdateAPIKeyTxParams) (*CreateOrUpdateAPIKeyTxResults, error)
+	DoCountUserJobTx(ctx context.Context, owner uuid.UUID) (*CountUserJobTxResult, error)
 	Close(ctx context.Context) error
 }
 
@@ -94,6 +95,10 @@ func (s PGXStore) DoCreateOrUpdateAPIKeyTx(ctx context.Context, params *CreateOr
 	return createOrUpdateAPIKeyTx(s, ctx, params)
 }
 
+func (s PGXStore) DoCountUserJobTx(ctx context.Context, owner uuid.UUID) (*CountUserJobTxResult, error) {
+	return countUserJobTx(s, ctx, owner)
+}
+
 type PGXPoolStore struct {
 	Querier
 	Conn *pgxpool.Pool
@@ -142,6 +147,10 @@ func (s PGXPoolStore) DoCheckAndUpdateUserPasswordTx(ctx context.Context, params
 
 func (s PGXPoolStore) DoCreateOrUpdateAPIKeyTx(ctx context.Context, params *CreateOrUpdateAPIKeyTxParams) (*CreateOrUpdateAPIKeyTxResults, error) {
 	return createOrUpdateAPIKeyTx(s, ctx, params)
+}
+
+func (s PGXPoolStore) DoCountUserJobTx(ctx context.Context, owner uuid.UUID) (*CountUserJobTxResult, error) {
+	return countUserJobTx(s, ctx, owner)
 }
 
 func checkAndUpdateUserPasswordTx(s Store, ctx context.Context, params *CheckAndUpdateUserPasswordTxParams) error {
@@ -226,4 +235,68 @@ func createNewsTx(s Store, ctx context.Context, params *CreateNewsParams) (int64
 		return err
 	})
 	return newsId, err
+}
+
+type CountUserJobTxResult struct {
+	JobGroup  map[JobStatus]JobGroup `json:"job_group"`
+	TotalJob  int                    `json:"total_job"`
+	LastJobId int                    `json:"last_job_id"`
+}
+
+type JobGroup struct {
+	Id   int `json:"jid"`
+	NJob int `json:"n_job"`
+}
+
+func countUserJobTx(s Store, ctx context.Context, owner uuid.UUID) (*CountUserJobTxResult, error) {
+	var countByGroup []*CountJobRow
+	var lastJIdByGroup []*GetLastJobIdRow
+	err := s.ExecTx(ctx, func(q *Queries) error {
+		var err error
+		if countByGroup, err = s.CountJob(ctx, owner); err != nil {
+			return err
+		}
+
+		if lastJIdByGroup, err = s.GetLastJobId(ctx, owner); err != nil {
+			return err
+		}
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	gm := map[JobStatus]int{}
+	im := map[JobStatus]int{}
+	for _, g := range countByGroup {
+		gm[g.Status] = int(g.NJob)
+	}
+
+	for _, g := range lastJIdByGroup {
+		im[g.Status] = int(g.ID)
+	}
+
+	result := &CountUserJobTxResult{
+		JobGroup:  make(map[JobStatus]JobGroup, 5),
+		TotalJob:  0,
+		LastJobId: 0,
+	}
+
+	for _, key := range []JobStatus{JobStatusCreated, JobStatusRunning,
+		JobStatusDone, JobStatusCanceled, JobStatusFailure} {
+		njob, id := gm[key], im[key]
+
+		result.JobGroup[key] = JobGroup{
+			Id:   id,
+			NJob: njob,
+		}
+
+		result.TotalJob += njob
+		if result.LastJobId < id {
+			result.LastJobId = id
+		}
+	}
+
+	return result, nil
 }

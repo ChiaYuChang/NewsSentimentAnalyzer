@@ -1,11 +1,16 @@
 /* 
-basic color
+    basic color
     - #F6F1F1
     - #AFD3E2
     - #19A7CE
     - #146C94
 
-    */
+    functional color
+    - #FFBF00
+    - #1cb841
+    - #ca3c3c
+    - #646464
+*/
 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap');
 
@@ -351,37 +356,92 @@ input[type='checkbox'] {
     padding: 1rem;
 }
 
-.job-status-created,
-.job-status-running,
-.job-status-done,
-.job-status-faliure,
-.job-status-canceled {
-    color: white;
-    border-radius: 4px;
-    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+/* job counter style */
+#query-result-tbody .job-row:hover {
+    cursor: pointer;
+}
+
+#query-result-tbody .job-row:active {
+    transform: translate(2px, 3px);
+}
+
+.job-n {
     text-align: center;
-    font-weight: 500;
-    padding: 3px .5rem;
+    background-color: #F6F1F1;
+    border-radius: 5px;
+    width: 1.5rem;
+    color: #146C94;
+}
+
+
+.job-status-group {
+    display: flex;
+    flex-direction: row;
+    gap: .75rem;
+}
+
+.hide {
+    display: hide;
+}
+
+.job-status-label {
+    display: flex;
+    flex-direction: row;
+    border-radius: 5px;
+    border: 1px solid black;
+}
+
+.job-status-label-selected {
+    font-weight: 700;
+}
+
+.job-status-label:hover {
+    cursor: pointer;
+}
+
+.job-status-label:hover+hide {
+    display: block;
+}
+
+.job-status-label:active {
+    transform: translate(2px, 3px);
+}
+
+.job-status {
+    font-weight: bold;
+    text-align: center;
+    margin: 0 .2rem;
+    width: 2rem;
+    border: solid black 1pxz;
+}
+
+.job-status-all {
+    background-color: #146C94;
+    color: #F6F1F1;
 }
 
 .job-status-created {
     background-color: #F6F1F1;
-    color: #146C94;
     border: 1px solid #000000;
+    color: #146C94;
 }
 
 .job-status-running {
-    background-color: rgb(230, 170, 0);
+    background-color: #FFBF00;
+    color: #F6F1F1;
 }
 
 .job-status-done {
-    background-color: rgb(28, 184, 65);
+    background-color: #1cb841;
+    color: #F6F1F1;
 }
 
 .job-status-faliure {
-    background-color: rgb(202, 60, 60);
+    background-color: #ca3c3c;
+    color: #F6F1F1;
 }
 
 .job-status-canceled {
-    background-color: rgb(100, 100, 100);
+    background-color: #646464;
+    color: #F6F1F1;
 }

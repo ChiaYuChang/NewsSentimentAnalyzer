@@ -3,7 +3,9 @@ package randangenerator
 import (
 	"errors"
 	"fmt"
+	"sort"
 	"strings"
+	"time"
 
 	mrand "math/rand"
 )
@@ -74,4 +76,37 @@ func GenRdmPwd(minLength, maxLength, minDigit,
 	pwd = append(pwd, bsR...)
 	mrand.Shuffle(pwdLen, func(i, j int) { pwd[i], pwd[j] = pwd[j], pwd[i] })
 	return pwd, nil
+}
+
+func GenRdnTime(from, to time.Time) time.Time {
+	return time.Unix(GenRdnUnixTime(from, to), 0)
+}
+
+func GenRdnTimes(n int, from, to time.Time) []time.Time {
+	rut := GenRdnUnixTimes(n, from, to)
+	rt := make([]time.Time, n)
+
+	for i, ut := range rut {
+		rt[i] = time.Unix(ut, 0)
+	}
+	return rt
+}
+
+func GenRdnUnixTime(from, to time.Time) int64 {
+	fu := from.UTC().Unix()
+	tu := to.UTC().Unix()
+	return fu + mrand.Int63n(tu-fu)
+}
+
+func GenRdnUnixTimes(n int, from, to time.Time) []int64 {
+	rus := make([]int64, n)
+	for i := 0; i < n; i++ {
+		rus[i] = GenRdnUnixTime(from, to)
+	}
+
+	sort.Slice(rus, func(i, j int) bool {
+		return rus[i] < rus[j]
+	})
+
+	return rus
 }

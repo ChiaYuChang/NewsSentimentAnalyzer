@@ -46,6 +46,19 @@ func (s StrTo) MustInt() int {
 	return v
 }
 
+func (s StrTo) Int32() (int32, error) {
+	if i, err := s.Int(); err != nil {
+		return 0, err
+	} else {
+		return int32(i), nil
+	}
+}
+
+func (s StrTo) MustInt32() int32 {
+	v, _ := s.Int32()
+	return v
+}
+
 func (s StrTo) UInt32() (uint32, error) {
 	v, err := s.Int()
 	if err != nil {

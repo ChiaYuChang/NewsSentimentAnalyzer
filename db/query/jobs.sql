@@ -4,7 +4,57 @@ SELECT j.id, j.owner, j.status, asrc.name AS news_src, allm.name AS analyzer, j.
  INNER JOIN apis AS asrc ON j.src_api_id = asrc.id
  INNER JOIN apis AS allm ON j.llm_api_id = allm.id 
  WHERE j.owner = $1
-   AND j.id > @next::int
+   AND j.id < @next::int
+   AND j.deleted_at IS NULL
+ ORDER BY 
+       j.id DESC
+ LIMIT @n::int;
+
+-- name: GetJobByOwnerFilterByJIdRange :many
+SELECT j.id, j.owner, j.status, asrc.name AS news_src, allm.name AS analyzer, j.created_at, j.updated_at
+  FROM jobs AS j
+ INNER JOIN apis AS asrc ON j.src_api_id = asrc.id
+ INNER JOIN apis AS allm ON j.llm_api_id = allm.id 
+ WHERE j.owner = $1
+   AND j.id BETWEEN @f_jid::int AND @t_jid::int
+   AND j.deleted_at IS NULL
+ ORDER BY 
+       j.id DESC
+ LIMIT @n::int;
+
+-- name: GetJobsByOwnerFilterByStatus :many
+SELECT j.id, j.owner, j.status, asrc.name AS news_src, allm.name AS analyzer, j.created_at, j.updated_at
+  FROM jobs AS j
+ INNER JOIN apis AS asrc ON j.src_api_id = asrc.id
+ INNER JOIN apis AS allm ON j.llm_api_id = allm.id 
+ WHERE j.owner = $1
+   AND j.id < @next::int
+   AND j.status = @j_status
+   AND j.deleted_at IS NULL
+ ORDER BY 
+       j.id DESC
+ LIMIT @n::int;
+
+-- name: GetJobByOwnerFilterByJIdAndStatus :many
+SELECT j.id, j.owner, j.status, asrc.name AS news_src, allm.name AS analyzer, j.created_at, j.updated_at
+  FROM jobs AS j
+ INNER JOIN apis AS asrc ON j.src_api_id = asrc.id
+ INNER JOIN apis AS allm ON j.llm_api_id = allm.id 
+ WHERE j.owner = $1
+   AND j.id BETWEEN @f_jid::int AND @t_jid::int
+   AND j.status = @j_status
+   AND j.deleted_at IS NULL
+ ORDER BY 
+       j.id DESC
+ LIMIT @n::int;
+
+-- name: GetJobByOwnerFilterByJIds :many
+SELECT j.id, j.owner, j.status, asrc.name AS news_src, allm.name AS analyzer, j.created_at, j.updated_at
+  FROM jobs AS j
+ INNER JOIN apis AS asrc ON j.src_api_id = asrc.id
+ INNER JOIN apis AS allm ON j.llm_api_id = allm.id 
+ WHERE j.owner = $1
+   AND j.id = ANY(@ids::int[])
    AND j.deleted_at IS NULL
  ORDER BY 
        j.id DESC
@@ -19,6 +69,23 @@ SELECT j.id, j.owner, j.status, asrc.name AS news_src, j.src_query,
  WHERE j.owner = $1
    AND j.id = $2
    AND j.deleted_at IS NULL;
+
+-- name: GetLastJobId :many
+SELECT DISTINCT ON (status)
+       id, status
+  FROM jobs
+ WHERE owner = $1
+ ORDER BY 
+        status ASC,
+        id DESC;
+
+ -- name: CountJob :many
+SELECT status, COUNT(*) AS n_job
+  FROM jobs
+ WHERE owner = $1
+ GROUP BY status
+ ORDER BY 
+        status ASC;
 
 -- name: CreateJob :one
 INSERT INTO jobs (

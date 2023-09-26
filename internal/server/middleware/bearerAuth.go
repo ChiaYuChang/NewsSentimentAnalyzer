@@ -62,6 +62,7 @@ func (bm BearerTokenMaker) BearerAuthenticator(next http.Handler) http.Handler {
 			// w.Header().Add("Content-Type", "application/json")
 			// w.WriteHeader(ecErr.HttpStatusCode)
 			// w.Write(ecErr.MustToJson())
+			global.Logger.Debug().Err(err).Msg("token validation error")
 			http.Redirect(w, req, "/unauthorized", http.StatusSeeOther)
 			return
 		}
