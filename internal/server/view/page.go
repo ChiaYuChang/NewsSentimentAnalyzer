@@ -49,6 +49,11 @@ func NewHeadContent() object.HeadConent {
 	head.Link.
 		NewHTMLElement().
 		AddPair("rel", "stylesheet").
+		AddPair("href", "https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;600&display=swap")
+
+	head.Link.
+		NewHTMLElement().
+		AddPair("rel", "stylesheet").
 		AddPair("href", "/static/css/style.css")
 
 	// pure css

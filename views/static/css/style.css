@@ -328,7 +328,6 @@ input[type='checkbox'] {
 
 .table-container {
     width: 100%;
-    overflow: auto;
 }
 
 .striped-table {
@@ -357,19 +356,23 @@ input[type='checkbox'] {
 }
 
 /* job counter style */
-#query-result-tbody .job-row:hover {
+/* #query-result-tbody .job-row:hover {
     cursor: pointer;
 }
 
 #query-result-tbody .job-row:active {
-    transform: translate(2px, 3px);
+    transform: translate(2px, 1px);
+} */
+.mono {
+    font-family: Roboto Mono, monospace;
 }
 
 .job-n {
     text-align: center;
     background-color: #F6F1F1;
     border-radius: 5px;
-    width: 1.5rem;
+    min-width: 2rem;
+    width: 15%;
     color: #146C94;
 }
 
@@ -377,18 +380,32 @@ input[type='checkbox'] {
 .job-status-group {
     display: flex;
     flex-direction: row;
-    gap: .75rem;
+    justify-content: space-between;
 }
 
 .hide {
     display: hide;
 }
 
+.job-data,
+.job-data:active,
+.job-data:hover {
+    cursor: pointer;
+}
+
+.job-data:active {
+    transform: translate(2px, 1px);
+}
+
 .job-status-label {
     display: flex;
+    overflow: hidden;
+    min-width: 4rem;
+    width: 5%;
     flex-direction: row;
+    justify-content: space-between;
     border-radius: 5px;
-    border: 1px solid black;
+    border: 2px solid #146C94;
 }
 
 .job-status-label-selected {
@@ -404,44 +421,67 @@ input[type='checkbox'] {
 }
 
 .job-status-label:active {
-    transform: translate(2px, 3px);
+    transform: translate(2px, 1px);
 }
 
 .job-status {
     font-weight: bold;
     text-align: center;
-    margin: 0 .2rem;
-    width: 2rem;
-    border: solid black 1pxz;
+    text-transform: capitalize;
+    margin: 0 .3rem;
 }
 
-.job-status-all {
+
+.job-status[status="all"] {
     background-color: #146C94;
     color: #F6F1F1;
 }
 
-.job-status-created {
+.job-status[status="created"] {
     background-color: #F6F1F1;
     border: 1px solid #000000;
     color: #146C94;
 }
 
-.job-status-running {
+.job-status[status="running"] {
     background-color: #FFBF00;
     color: #F6F1F1;
 }
 
-.job-status-done {
+.job-status[status="done"] {
     background-color: #1cb841;
     color: #F6F1F1;
 }
 
-.job-status-faliure {
+.job-status[status="failed"] {
+    content: "<i class=" fa-solid fa-triangle-exclamation"></i>";
     background-color: #ca3c3c;
     color: #F6F1F1;
 }
 
-.job-status-canceled {
+.job-status[status="canceled"] {
     background-color: #646464;
     color: #F6F1F1;
+}
+
+.sort {
+    cursor: pointer;
+}
+
+.sort:hover {
+    background-color: #AFD3E2;
+    color: #146C94;
+    text-decoration: none;
+}
+
+.sort:focus {
+    outline: none;
+}
+
+.sort.desc::before {
+    content: " ▼";
+}
+
+.sort.asc::before {
+    content: " ▲";
 }

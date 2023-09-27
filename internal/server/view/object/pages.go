@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"html/template"
 	"path"
-	"strings"
 	"time"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
@@ -48,40 +47,40 @@ type APIResultPage struct {
 }
 
 type Job struct {
-	Id        int32     `json:"id"`
-	Status    JobStatus `json:"status"`
-	NewsSrc   string    `json:"news_src"`
-	Analyzer  string    `json:"analyzer"`
-	CreatedAt string    `json:"created_at"`
-	UpdatedAt string    `json:"updated_at"`
+	Id        int32  `json:"job-id"`
+	Status    string `json:"job-status"`
+	NewsSrc   string `json:"job-news_src"`
+	Analyzer  string `json:"job-analyzer"`
+	CreatedAt string `json:"job-created_at"`
+	UpdatedAt string `json:"job-updated_at"`
 }
 
 func StatusToClass(jobStatus model.JobStatus) string {
 	switch jobStatus {
 	case model.JobStatusCreated:
-		return "job-status-created"
+		return "created"
 	case model.JobStatusRunning:
-		return "job-status-running"
+		return "running"
 	case model.JobStatusDone:
-		return "job-status-done"
+		return "done"
 	case model.JobStatusFailure:
-		return "job-status-faliure"
+		return "failed"
 	case model.JobStatusCanceled:
-		return "job-status-canceled"
+		return "canceled"
 	}
 	return ""
 }
 
 type JobDetails struct {
-	JID           int32             `json:"jid"`
-	Owner         string            `json:"owner"`
-	Status        JobStatus         `json:"status"`
-	NewsAPI       string            `json:"news_api"`
-	NewsAPIQuery  string            `json:"news_api_query"`
-	Analyzer      string            `json:"analyzer"`
-	AnalyzerQuery map[string]string `json:"analyzer_query"`
-	CreatedAt     string            `json:"created_at"`
-	UpdatedAt     string            `json:"updated_at"`
+	JID           int32             `json:"job-id"`
+	Owner         string            `json:"job-owner"`
+	Status        string            `json:"job-status"`
+	NewsAPI       string            `json:"job-news_api"`
+	NewsAPIQuery  string            `json:"job-news_api_query"`
+	Analyzer      string            `json:"job-analyzer"`
+	AnalyzerQuery map[string]string `json:"job-analyzer_query"`
+	CreatedAt     string            `json:"job-created_at"`
+	UpdatedAt     string            `json:"job-updated_at"`
 }
 
 func NewJobDetails(owner string, j *model.GetJobsByJobIdRow) JobDetails {
@@ -89,12 +88,9 @@ func NewJobDetails(owner string, j *model.GetJobsByJobIdRow) JobDetails {
 	json.Unmarshal(j.LlmQuery, &analyzerQuery)
 
 	return JobDetails{
-		JID:   j.ID,
-		Owner: owner,
-		Status: JobStatus{
-			Class: StatusToClass(j.Status),
-			Text:  strings.ToTitle(string(j.Status)),
-		},
+		JID:           j.ID,
+		Owner:         owner,
+		Status:        StatusToClass(j.Status),
 		NewsAPI:       j.NewsSrc,
 		NewsAPIQuery:  j.SrcQuery,
 		Analyzer:      j.Analyzer,
@@ -102,11 +98,6 @@ func NewJobDetails(owner string, j *model.GetJobsByJobIdRow) JobDetails {
 		CreatedAt:     j.CreatedAt.Time.UTC().Format(time.DateTime),
 		UpdatedAt:     j.UpdatedAt.Time.UTC().Format(time.DateTime),
 	}
-}
-
-type JobStatus struct {
-	Class string `json:"class"`
-	Text  string `json:"text"`
 }
 
 type APIAdminPage struct {

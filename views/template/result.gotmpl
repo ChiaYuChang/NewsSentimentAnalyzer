@@ -19,56 +19,38 @@
         <div class="mid-card">
             <h1>Jobs</h1>
             <div class="job-status-group">
-                <div title="All" class="job-status-label job-status-all job-status-label-selected"
-                onclick='updateQuery("all")'>
-                    <div class="job-status">ALL</div>
+                <div title="All" class="job-status-label job-status job-status-label-selected"
+                onclick='updateQuery("all")' status="all">
+                    <div class="job-status">
+                        <i class="fa-solid fa-a"></i>
+                    </div>
                     <div class="job-n">{{.TotalJobs}}</div>
                 </div>
-                {{if gt .NCreated 0}}
-                <div title="Created" class="job-status-label job-status-created" onclick='updateQuery("created")'>
-                {{else}}
-                <div title="Created" class="job-status-label job-status-created" onclick='showNoJob("created")'>
-                {{end}}
+                <div title="Created" class="job-status-label job-status" status="created" onclick='updateQuery("created", {{.NCreated}})'>
                     <div class="job-status">
                         <i class="fa-regular fa-flag"></i>
                     </div>
                     <div class="job-n">{{.NCreated}}</div>
                 </div>
-                {{if gt .NRunning 0}}
-                <div title="Running" class="job-status-label job-status-running" onclick='updateQuery("running")'>
-                {{else}}
-                <div title="Running" class="job-status-label job-status-running" onclick='showNoJob("running")'>
-                {{end}}
+                <div title="Running" class="job-status-label job-status" status="running" onclick='updateQuery("running", {{.NRunning}})'>
                     <div class="job-status">
                         <i class="fa-regular fa-person-running"></i>
                     </div>
                     <div class="job-n">{{.NRunning}}</div>
                 </div>
-                {{if gt .NDone 0}}
-                <div title="Done" class="job-status-label job-status-done" onclick='updateQuery("done")'>
-                {{else}}
-                <div title="Done" class="job-status-label job-status-done" onclick='showNoJob("done")'>
-                {{end}}
+                <div title="Done" class="job-status-label job-status" status="done" onclick='updateQuery("done", {{.NDone}})'>
                     <div class="job-status">
                         <i class="fa-solid fa-check"></i>
                     </div>
                     <div class="job-n">{{.NDone}}</div>
                 </div>
-                {{if gt .NFailed 0}}
-                <div title="Failed"  class="job-status-label job-status-faliure" onclick='updateQuery("failure")'>
-                {{else}}
-                <div title="Failed"  class="job-status-label job-status-faliure" onclick='showNoJob("failure")'>
-                {{end}}
+                <div title="Failed"  class="job-status-label job-status" status="failed" onclick='updateQuery("failure", {{.NFailed}})'>
                     <div class="job-status">
                         <i class="fa-solid fa-triangle-exclamation"></i>
                     </div>
                     <div class="job-n">{{.NFailed}}</div>
                 </div>
-                {{if gt .NCanceled 0}}
-                <div  title="Canceled" class="job-status-label job-status-canceled" onclick='updateQuery("canceled")'>
-                {{else}}
-                <div  title="Canceled" class="job-status-label job-status-canceled" onclick='showNoJob("canceled")'>
-                {{end}}
+                <div  title="Canceled" class="job-status-label job-status" status="canceled" onclick='updateQuery("canceled", {{.NCanceled}})'>
                     <div class="job-status">
                         <i class="fa-regular fa-trash-can"></i>
                     </div>
@@ -80,11 +62,10 @@
                     <thead>
                         <tr>
                             <th class="sort sort-by-id" data-sort="job-id">Id</th>
-                            <th dtype="string" onclick="sortTable(1)">Status</th>
+                            <th class="sort sort-by-status" data-sort="job-status">Status</th>
                             <th class="sort sort-by-news_src" data-sort="job-news_src">News API</th>
                             <th class="sort sort-by-analyzer" data-sort="job-analyzer">LLM</th>
-                            <th class="sort sort-by-created_at" data-sort="job-created_at">Created At</th>
-                            <th class="sort sort-by-updated_at" data-sort="job-updated_at">Updated At</th>
+                            <th class="sort sort-by-updated_at" data-sort="job-updated_at">Last Updated</th>
                         </tr>
                     </thead>
                     <tbody class="list" id="query-result-tbody">

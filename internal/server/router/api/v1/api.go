@@ -326,11 +326,6 @@ func (repo APIRepo) GetJob(w http.ResponseWriter, req *http.Request) {
 	hc.Script.NewHTMLElement().AddPair("src", "/static/js/job_funcs.js")
 	hc.Script.NewHTMLElement().AddPair("src", "//cdnjs.cloudflare.com/ajax/libs/list.js/2.3.1/list.min.js")
 
-	// hc.Script.NewHTMLElement().
-	// 	AddPair("src", "/static/js/wasm_exec.js")
-	// hc.Script.NewHTMLElement().
-	// 	AddPair("src", "/static/js/wasm_go.js")
-
 	pageData := object.APIResultPage{
 		Page: object.Page{
 			HeadConent: hc,
@@ -441,7 +436,7 @@ func (repo APIRepo) PostJob(w http.ResponseWriter, req *http.Request) {
 		Msg("Get update query")
 
 	rows, err := repo.Service.Job().Get(req.Context(), userInfo.GetUserID(),
-		pager.JIds, pager.FromJId, pager.ToJId, pager.JStatusStr, 10, pager.Page)
+		pager.JIds, pager.FromJId, pager.ToJId, pager.JStatusStr, 15, pager.Page)
 	if err != nil {
 		ecErr := ec.MustGetEcErr(ec.ECBadRequest)
 		w.WriteHeader(ecErr.HttpStatusCode)
@@ -454,15 +449,12 @@ func (repo APIRepo) PostJob(w http.ResponseWriter, req *http.Request) {
 	job := make([]object.Job, len(rows))
 	for i, r := range rows {
 		job[i] = object.Job{
-			Id: r.ID,
-			Status: object.JobStatus{
-				Text:  string(r.Status),
-				Class: object.StatusToClass(r.Status),
-			},
+			Id:        r.ID,
+			Status:    object.StatusToClass(r.Status),
 			NewsSrc:   r.NewsSrc,
 			Analyzer:  r.Analyzer,
-			CreatedAt: r.CreatedAt.Time.UTC().Format(time.DateOnly),
-			UpdatedAt: r.UpdatedAt.Time.UTC().Format(time.DateOnly),
+			CreatedAt: r.CreatedAt.Time.UTC().Format(time.DateTime),
+			UpdatedAt: r.UpdatedAt.Time.UTC().Format(time.DateTime),
 		}
 	}
 

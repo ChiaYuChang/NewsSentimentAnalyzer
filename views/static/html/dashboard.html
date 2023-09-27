@@ -17,44 +17,63 @@
         <thead>
             <tr>
                 <th class="sort sort-by-id" data-sort="id">Id</th>
-                <th class="sort" data-sort="name">Name</th>
-                <th class="sort" data-sort="f1">Col 3</th>
+                <th class="sort" data-sort="account">Account</th>
+                <th class="sort" data-sort="first_name">Name</th>
             </tr>
         </thead>
         <tbody class="list">
-            <tr>
-                <td class="id">1</td>
-                <td class="name">1c</td>
-                <td>
-                    <div class="f1">1</div>
-                    <div>c</div>
-                </td>
-            </tr>
-            <tr>
-                <td class="id">02</td>
-                <td class="name">1b</td>
-                <td>
-                    <div class="f1">2</div>
-                    <div>b</div>
-                </td>
-            </tr>
-            <tr>
-                <td class="id">1</td>
-                <td class="name">1a</td>
-                <td>
-                    <div class="f1">4</div>
-                    <div>a</div>
-                </td>
-            </tr>
         </tbody>
     </table>
 </body>
 
 <script>
+    var data = [
+        {
+            id: 1,
+            account: 'Jonny',
+            first_name: 'Jonny',
+            last_name: 'Doe',
+            image: 'https://via.placeholder.com/150'
+        },
+        {
+            id: 2,
+            account: 'Mike',
+            first_name: 'Mike',
+            last_name: 'Hansen',
+            image: 'https://via.placeholder.com/150'
+        },
+        {
+            id: 3,
+            account: 'Steve',
+            first_name: 'Steve',
+            last_name: 'Smith',
+            image: 'https://via.placeholder.com/150'
+
+        },
+    ]
+
+    item = "<tr>"
+    for (var i = 0; i < data.length; i++) {
+        item += "<td class='id'></td>"
+        item += "<td class='account'></td>"
+        item += `<td>
+            <div class='first_name'></div>
+            <div class='last_name'></div>
+            <img class='image'>
+            </td>`
+    }
+    item += "</tr>"
     var options = {
-        valueNames: ['id', 'name']
+        valueNames: [
+            'id',
+            'account',
+            'first_name',
+            "last_name",
+            { "attr": "src", "name": "image" },
+        ],
+        item: item
     };
-    var userList = new List('my-table', options);
+    var userList = new List('my-table', options, data);
 </script>
 
 <style>
@@ -83,3 +102,5 @@
 </style>
 
 </html>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>

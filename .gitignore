@@ -8,3 +8,4 @@ secrets
 views/static/wasm/*
 
 log.json
+thirdparty/milvus-health-check/main

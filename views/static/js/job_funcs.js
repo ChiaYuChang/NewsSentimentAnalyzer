@@ -5,7 +5,7 @@ const jStatusAll = "all";
 const jStatusCreated = "created";
 const jStatusRunning = "running";
 const jStatusDone = "done";
-const jStatusFailure = "failure";
+const jStatusFailed = "failed";
 const jStatusCanceled = "canceled";
 
 const maxInt32 = 2147483647
@@ -21,29 +21,35 @@ var pager = {
     direction: qNext,
 }
 
-var lastP = {
+// last page of each status
+var last_page_of_each_status = {
     all: 0,
     created: 0,
     running: 0,
     done: 0,
-    failure: 0,
+    failed: 0,
     canceled: 0,
 }
 
 addEventListener("DOMContentLoaded", (event) => {
     showLoadingAnimation()
-    console.log(pageSize)
-    console.log(nStatus)
 
-    var jss = [jStatusAll, jStatusCreated, jStatusRunning, jStatusDone, jStatusFailure, jStatusCanceled]
+    // debug only
+    // console.log(pageSize)
+    // console.log(nStatus)
+
+    var jss = [jStatusAll, jStatusCreated, jStatusRunning, jStatusDone, jStatusFailed, jStatusCanceled]
     jss.forEach((js, index) => {
-        lastP[js] = Math.ceil(nStatus[index] / pageSize)
+        last_page_of_each_status[js] = Math.ceil(nStatus[index] / pageSize)
     })
-    console.log(lastP)
+
+    // debug only
+    // console.log(lastP)
+
     getJobs();
 });
 
-function showLoadingAnimation() {
+function showLoadingAnimation(colspan = 5) {
     let el = document.getElementById("query-result-tbody")
     el.replaceChildren();
 
@@ -51,7 +57,7 @@ function showLoadingAnimation() {
     tr.setAttribute("id", "loading-animation")
 
     let td = document.createElement("td")
-    td.setAttribute("colspan", "6")
+    td.setAttribute("colspan", colspan)
 
     let container = document.createElement("div")
     container.setAttribute("class", "animation-container")
@@ -80,7 +86,7 @@ function showLoadingAnimation() {
     el.appendChild(tr)
 }
 
-function showNoJob(jstatus) {
+function showNoJob(jstatus, colspan = 5) {
     let el = document.getElementById("query-result-tbody")
     pager["jstatus"] = jstatus;
 
@@ -88,7 +94,7 @@ function showNoJob(jstatus) {
     tr.setAttribute("id", "loading-animation")
 
     let td = document.createElement("td")
-    td.setAttribute("colspan", "6")
+    td.setAttribute("colspan", colspan)
     td.setAttribute("align", "center")
 
     let h3 = document.createElement("h3")
@@ -110,7 +116,7 @@ function updatePageButton() {
     }
 
     let nbtn = document.getElementById("next-page-q")
-    if (pager.page === lastP[pager.jstatus] - 1) {
+    if (pager.page === last_page_of_each_status[pager.jstatus] - 1) {
         nbtn.classList.add("pure-button-disabled")
         nbtn.setAttribute("onclick", "#")
     } else {
@@ -119,9 +125,10 @@ function updatePageButton() {
     }
 }
 
-function updateQuery(jstatus) {
+function updateQuery(jstatus, n) {
     if (pager.jstatus === jstatus) {
-        console.log(`current status "${jstatus}" not change`)
+        // debug only
+        // console.log(`current status "${jstatus}" not change`)
         return
     }
 
@@ -129,13 +136,18 @@ function updateQuery(jstatus) {
     el.replaceChildren();
 
     pager.jstatus = jstatus
+    if (n === 0) {
+        showNoJob(jstatus, 5)
+        return
+    }
     pager.fjid = maxInt32
     pager.tjid = maxInt32
     pager.page = 0
 
-    updatePageButton()
+    updatePageButton();
     showLoadingAnimation();
     getJobs();
+    return
 }
 
 function queryPage(direction) {
@@ -157,18 +169,53 @@ function getKey(jstatus, page) {
     return `${jstatus}-${page}`;
 }
 
+var jobList
+var item_func = function (values) {
+    return `
+        <tr class='job-data' onclick=${values["onclick"]}>",
+        <th class='job-id mono'>${values["job-id"]}</th>",
+        <td><div class='job-status' style='width:90%;text-align:center' status=${values["job-status"]}>${values["job-status"]}</div></td>",
+        <td class='job-news_src'>${values["job-news_src"]}</td>",
+        <td class='job-analyzer'>${values["job-analyzer"]}</td>",
+        <td class='job-updated_at mono'>${values["job-updated_at"]}</td>",
+        </tr>`
+}
+
+function newList(data) {
+    for (let i = 0; i < data.length; i++) {
+        data[i]["onclick"] = `getJobDetails(${data[i]["job-id"]})`
+    }
+
+    var options = {
+        valueNames: [
+            "job-id", "job-status", "job-news_src", "job-analyzer", "job-created_at", "job-updated_at",
+            { attr: "onclick", name: "job-details" },
+        ], item: item_func,
+    };
+
+    let el = document.getElementById("query-result-tbody");
+    el.replaceChildren()
+
+    jobList = new List('qurey-result', options, data);
+    jobList.sort('job-id', { order: "desc" })
+}
+
 async function getJobs() {
     const fdata = new URLSearchParams();
 
     let ckey = getKey(pager.jstatus, pager.page)
     if (pagerCache.has(ckey)) {
-        console.log("from cache")
+        // debug only
+        // console.log("from cache")
+
         let data = pagerCache.get(ckey)["data"];
-        pager.fjid = data[data.length - 1].id;
-        pager.tjid = data[0].id;
-        appendRowsToTable(data);
+        pager.fjid = data[data.length - 1]["job-id"];
+        pager.tjid = data[0]["job-id"];
+        newList(data)
     } else {
-        console.log("from query")
+        // debug only
+        // console.log("from query")
+
         for (const key in pager) {
             fdata.append(key, pager[key]);
         }
@@ -180,98 +227,125 @@ async function getJobs() {
 
         response.json()
             .then(data => {
-                pager.fjid = data[data.length - 1].id;
-                pager.tjid = data[0].id;
+                if (data.length === 0) {
+                    return
+                }
+                pager.fjid = data[data.length - 1]["job-id"];
+                pager.tjid = data[0]["job-id"];
                 pagerCache.set(ckey, {
                     "from": pager.fjid,
                     "to": pager.tjid,
                     "data": data,
                 });
-                appendRowsToTable(data);
+                newList(data)
             })
             .catch(err => { console.error("Error:", err) });
     }
 }
 
-var fields = ["id", "status", "news_src", "analyzer", "created_at", "updated_at"]
-
-function appendRowsToTable(data) {
-    let el = document.getElementById("query-result-tbody");
-    el.replaceChildren()
-
-    data.forEach(job => {
-        tr = document.createElement("tr")
-        tr.setAttribute("onclick", `getJobDetails(${job["id"]})`)
-        tr.setAttribute("class", "job-row")
-
-        fields.forEach(f => {
-            td = document.createElement("td")
-            td.classList.add("job-" + f)
-            if (f == "status") {
-                div = document.createElement("div")
-                div.setAttribute("class", job[f]["class"])
-                div.setAttribute("style", "width:6rem;text-align:center")
-                div.textContent = job[f]["text"]
-                td.appendChild(div)
-            } else {
-                td.textContent = job[f]
-            }
-            tr.appendChild(td)
-        });
-        tr.appendChild(td)
-        el.appendChild(tr)
-    });
-}
-
 async function getJobDetails(id) {
     let detailEl = document.getElementById("detail");
-    if (detailEl.getAttribute("jid") === ('' + id)) { return }
+    if (detailEl.getAttribute("job-id") === ('' + id)) { return }
 
     var data
     if (detailCache.has(id)) {
         data = detailCache.get(id)
-        console.log("read from cache")
+
+        // debug only
+        // console.log("read from cache")
     } else {
         const response = await fetch(`/v1/job/${id}`);
         if (response.status != 200) {
             detailEl.setAttribute("hidden", "");
-            detailEl.removeAttribute("jid");
+            detailEl.removeAttribute("job-id");
             return
         }
         data = await response.json();
         detailCache.set(id, data)
-        console.log("read from query")
+
+        // debug only
+        // console.log("read from query")
     }
     const dtbodyEl = document.getElementById("detail-table-body")
     dtbodyEl.replaceChildren()
     detailEl.removeAttribute("hidden");
-    detailEl.setAttribute("jid", data.jid);
+    detailEl.setAttribute("job-id", data["job-id"]);
 
-    let jsn = JSON.stringify(data.analyzer_query, null, "\t");
     tr = document.createElement("tr")
+    var detailsfields = [
+        {
+            "row_header": "Job ID",
+            "field_name": "job-id",
+            "is_mono": false,
+        },
+        {
+            "row_header": "Owner",
+            "field_name": "job-owner",
+            "is_mono": false,
+        },
+        {
+            "row_header": "Status",
+            "field_name": "job-status",
+            "is_mono": false,
+        },
+        {
+            "row_header": "News API",
+            "field_name": "job-news_api",
+            "is_mono": false,
+        },
+        {
+            "row_header": "News API Query",
+            "field_name": "job-news_api_query",
+            "is_mono": true,
+        },
+        {
+            "row_header": "Analyzer",
+            "field_name": "job-analyzer",
+            "is_mono": false,
+        },
+        {
+            "row_header": "Analyzer Query",
+            "field_name": "job-analyzer_query",
+            "is_mono": true,
+        },
+        {
+            "row_header": "Created At",
+            "field_name": "job-created_at",
+            "is_mono": true,
+        },
+        {
+            "row_header": "Updated At",
+            "field_name": "job-updated_at",
+            "is_mono": true,
+        },
+    ]
 
-    let fields = ["jid", "owner", "status", "news_api", "news_api_query", "analyzer", "analyzer_query", "created_at", "updated_at"]
-    display_fields = ["Job ID", "Owner", "Status", "News API", "News API Query", "Analyzer", "Analyzer Query", "Created At", "Updated At"]
-    fields.forEach((field, index) => {
+    detailsfields.forEach((f) => {
         let tr = document.createElement("tr")
         let th = document.createElement("th")
-        th.textContent = display_fields[index]
+        th.textContent = f.row_header
         th.setAttribute("scope", "row")
-        th.setAttribute("style", "width:7rem;text-align:left")
+        th.setAttribute("style", "width:20%;min-width:8.5rem;text-align:left")
 
         let td = document.createElement("td")
-        if (field === "analyzer_query") {
+        if (f.field_name === "job-analyzer_query") {
             let pre = document.createElement("pre")
+            let jsn = JSON.stringify(data[f.field_name], null, "\t");
             pre.textContent = jsn
+            td.classList.add("mono")
             td.appendChild(pre)
-        } else if (field === "status") {
+        } else if (f.field_name === "job-status") {
             let div = document.createElement("div")
-            div.setAttribute("class", `job - status ${data[field].class}`)
-            div.textContent = data[field].text;
-            div.setAttribute("style", "width:6rem;text-align:center")
+            div.setAttribute("class", "job-status")
+            div.setAttribute("status", data[f.field_name])
+            div.textContent = data[f.field_name];
+            div.setAttribute("style", "width:6rem")
             td.appendChild(div)
         } else {
-            td.textContent = data[field]
+            td.textContent = data[f.field_name]
+            if (f.is_mono) {
+                td.classList.add("mono")
+            }
         }
 
         tr.appendChild(th)
