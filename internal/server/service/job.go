@@ -270,7 +270,7 @@ func (srvc jobService) Get(ctx context.Context, owner uuid.UUID, jids []int32,
 	_ = js.Scan(status)
 	var hasJStatusFilter bool
 	switch js {
-	case model.JobStatusCreated, model.JobStatusRunning, model.JobStatusDone, model.JobStatusCanceled, model.JobStatusFailure:
+	case model.JobStatusCreated, model.JobStatusRunning, model.JobStatusDone, model.JobStatusCanceled, model.JobStatusFailed:
 		hasJStatusFilter = true
 	default:
 		hasJStatusFilter = false

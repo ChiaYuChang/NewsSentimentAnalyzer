@@ -10,20 +10,70 @@ import (
 
 type NewsCreateRequest struct {
 	Md5Hash     string    `validate:"required,md5"`
-	Title       string    `validate:"required,min=1"`
-	Url         string    `validate:"required,url"`
-	Description string    `validate:"required,min=1"`
-	Content     string    `validate:"required,min=1"`
-	Source      string    `validate:"-"`
-	PublishAt   time.Time `validate:"required,before_now"`
+	Guid        string    `validate:"required"`
+	Author      []string  `validate:"-"`
+	Title       string    `validate:"required"`
+	Link        string    `validate:"required,url"`
+	Description string    `validate:"required"`
+	Language    string    `validate:"-"`
+	Content     []string  `validate:"required"`
+	Category    string    `validate:"-"`
+	Source      string    `validate:"required"`
+	RelatedGuid []string  `validate:"-"`
+	PublishedAt time.Time `validate:"required,before_now"`
 }
 
 func (r NewsCreateRequest) RequestName() string {
 	return "news-create-req"
 }
 
+func (r NewsCreateRequest) ToParams() (*model.CreateNewsParams, error) {
+
+	param := &model.CreateNewsParams{
+		Md5Hash:     r.Md5Hash,
+		Guid:        r.Guid,
+		Author:      r.Author,
+		Title:       r.Title,
+		Link:        r.Link,
+		Description: r.Description,
+		Content:     r.Content,
+		Category:    r.Category,
+		Source:      r.Source,
+		RelatedGuid: r.RelatedGuid,
+	}
+
+	if len(r.Author) > 0 {
+		param.Author = make([]string, len(r.Author))
+		copy(param.Author, r.Author)
+	}
+
+	if len(r.Content) > 0 {
+		param.Content = make([]string, len(r.Content))
+		copy(param.Content, r.Content)
+	}
+
+	if len(r.RelatedGuid) > 0 {
+		param.RelatedGuid = make([]string, len(r.RelatedGuid))
+		copy(param.RelatedGuid, r.RelatedGuid)
+	}
+
+	if r.Language != "" {
+		param.Language = convert.StrTo(r.Language).PgText()
+	}
+
+	param.PublishAt = convert.TimeTo(r.PublishedAt).ToPgTimeStampZ()
+	return param, nil
+}
+
 type NewsDeleteRequest struct {
 	ID int64 `validate:"required,min=1"`
+}
+
+func (srvc newsService) Delete(ctx context.Context, r *NewsDeleteRequest) (n int64, err error) {
+	if err := srvc.validate.Struct(r); err != nil {
+		return 0, err
+	}
+	return srvc.store.DeleteNews(ctx, r.ID)
 }
 
 type NewsDeletePublishBeforeRequest struct {
@@ -71,24 +121,11 @@ func (srvc newsService) Create(ctx context.Context, r *NewsCreateRequest) (id in
 	if err := srvc.validate.Struct(srvc); err != nil {
 		return 0, err
 	}
-
-	return srvc.store.CreateNews(ctx, &model.CreateNewsParams{
-		Md5Hash:     r.Md5Hash,
-		Title:       r.Title,
-		Url:         r.Url,
-		Description: r.Description,
-		Content:     r.Content,
-		Source:      convert.StrTo(r.Source).PgText(),
-		PublishAt:   convert.TimeTo(r.PublishAt).ToPgTimeStampZ(),
-	})
-}
-
-func (srvc newsService) Delete(
-	ctx context.Context, r *NewsDeleteRequest) (n int64, err error) {
-	if err := srvc.validate.Struct(r); err != nil {
+	params, err := r.ToParams()
+	if err != nil {
 		return 0, err
 	}
-	return srvc.store.DeleteNews(ctx, r.ID)
+	return srvc.store.CreateNews(ctx, params)
 }
 
 func (srvc newsService) DeletePublishBefore(

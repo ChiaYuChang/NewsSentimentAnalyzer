@@ -7,7 +7,7 @@ CREATE TYPE "job_status" AS ENUM (
   'created',
   'running',
   'done',
-  'failure',
+  'failed',
   'canceled'
 );
 

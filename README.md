@@ -39,12 +39,14 @@
 - [x] 自由時報 (<news.ltn.com.tw>)
 - [x] 聯合新聞網 (<udn.com>)
 - [x] 轉角國際 (<global.udn.com>)
+- [ ] TechNews 科技新報 (<technews.tw>)
 
 ##### 外媒
 
 - [x] 法廣 (RFI) 台灣 (<www.rfi.fr/tw>)
 - [x] 紐約時報 (The New York Times) 中文網 (<cn.nytimes.com/zh-hant/>)
 - [x] BBC News 中文 <www.bbc.com/zhongwen/trad>
+- [ ] 德國之聲 中文 (<www.dw.com>)
 - [ ] NHK World News 中文 <www3.nhk.or.jp/nhkworld/zt/>
 - [ ] 新華社 (<www.xinhuanet.com>)
 

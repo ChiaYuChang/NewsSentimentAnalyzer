@@ -284,7 +284,7 @@ func countUserJobTx(s Store, ctx context.Context, owner uuid.UUID) (*CountUserJo
 	}
 
 	for _, key := range []JobStatus{JobStatusCreated, JobStatusRunning,
-		JobStatusDone, JobStatusCanceled, JobStatusFailure} {
+		JobStatusDone, JobStatusCanceled, JobStatusFailed} {
 		njob, id := gm[key], im[key]
 
 		result.JobGroup[key] = JobGroup{

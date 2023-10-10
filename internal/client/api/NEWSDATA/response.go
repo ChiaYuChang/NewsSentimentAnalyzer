@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api"
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model"
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/convert"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/parser"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
 )
 
 type Response struct {
@@ -52,25 +52,44 @@ func (resp Response) String() string {
 }
 
 // convert response to model.CreateNewsParams and return by a channel
-func (resp Response) ToNews(ctx context.Context, wg *sync.WaitGroup, c chan<- *model.CreateNewsParams) {
+func (resp Response) ToNews(ctx context.Context, wg *sync.WaitGroup, c chan<- *service.NewsCreateRequest) {
 	defer wg.Done()
 	for i := 0; i < resp.Len(); i++ {
 		select {
 		case <-ctx.Done():
 			break
 		default:
-			c <- &model.CreateNewsParams{
-				Md5Hash: api.MD5Hash(
-					resp.Articles[i].Title,
-					resp.Articles[i].PublishedAt.ToTime(),
-				),
-				Title:       resp.Articles[i].Title,
-				Url:         resp.Articles[i].Url,
-				Description: resp.Articles[i].Description,
-				Content:     resp.Articles[i].Content,
-				Source:      convert.StrTo(resp.Articles[i].SourceId).PgText(),
-				PublishAt:   convert.TimeTo(resp.Articles[i].PublishedAt.ToTime()).ToPgTimeStampZ(),
+			link := resp.Articles[i].Link
+			u, _ := url.Parse(link)
+
+			md5hash, _ := api.MD5Hash(
+				resp.Articles[i].Title,
+				resp.Articles[i].PublishedAt.ToTime(),
+				resp.Articles[i].Content,
+			)
+
+			var req *service.NewsCreateRequest
+			if val, ok := ctx.Value(api.QueryOriPageKey).(bool); ok && val {
+				q := parser.ParseURL(u)
+				req = q.ToNewsCreateParam(md5hash)
+			} else {
+				req = &service.NewsCreateRequest{
+					Md5Hash:     md5hash,
+					Guid:        parser.ToGUID(u),
+					Author:      resp.Articles[i].Author,
+					Title:       resp.Articles[i].Title,
+					Link:        link,
+					Description: resp.Articles[i].Description,
+					Language:    resp.Articles[i].Language,
+					Content:     []string{resp.Articles[i].Content},
+					Category:    "",
+					Source:      u.Host,
+					RelatedGuid: []string{},
+					PublishedAt: resp.Articles[i].PublishedAt.ToTime().UTC(),
+				}
+
 			}
+			c <- req
 		}
 	}
 	return
@@ -78,7 +97,7 @@ func (resp Response) ToNews(ctx context.Context, wg *sync.WaitGroup, c chan<- *m
 
 type Article struct {
 	Title       string      `json:"title"`
-	Url         string      `json:"link"`
+	Link        string      `json:"link"`
 	SourceId    string      `json:"source_id"`
 	Keywords    []string    `json:"keywords"`
 	Author      []string    `json:"creater"`

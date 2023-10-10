@@ -1,51 +1,8 @@
 var pagerCache = new Map();
 var detailCache = new Map();
 
-const jStatusAll = "all";
-const jStatusCreated = "created";
-const jStatusRunning = "running";
-const jStatusDone = "done";
-const jStatusFailed = "failed";
-const jStatusCanceled = "canceled";
-
-const maxInt32 = 2147483647
-
-const qNext = true
-const qPrev = false
-
-var pager = {
-    jstatus: jStatusAll,
-    fjid: maxInt32,
-    tjid: maxInt32,
-    page: 0,
-    direction: qNext,
-}
-
-// last page of each status
-var last_page_of_each_status = {
-    all: 0,
-    created: 0,
-    running: 0,
-    done: 0,
-    failed: 0,
-    canceled: 0,
-}
-
 addEventListener("DOMContentLoaded", (event) => {
     showLoadingAnimation()
-
-    // debug only
-    // console.log(pageSize)
-    // console.log(nStatus)
-
-    var jss = [jStatusAll, jStatusCreated, jStatusRunning, jStatusDone, jStatusFailed, jStatusCanceled]
-    jss.forEach((js, index) => {
-        last_page_of_each_status[js] = Math.ceil(nStatus[index] / pageSize)
-    })
-
-    // debug only
-    // console.log(lastP)
-
     getJobs();
 });
 
@@ -116,7 +73,7 @@ function updatePageButton() {
     }
 
     let nbtn = document.getElementById("next-page-q")
-    if (pager.page === last_page_of_each_status[pager.jstatus] - 1) {
+    if (pager.page === last_page_of_each_jstatus[pager.jstatus] - 1) {
         nbtn.classList.add("pure-button-disabled")
         nbtn.setAttribute("onclick", "#")
     } else {

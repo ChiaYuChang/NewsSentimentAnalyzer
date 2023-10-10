@@ -105,7 +105,7 @@ const (
 	JobStatusCreated  JobStatus = "created"
 	JobStatusRunning  JobStatus = "running"
 	JobStatusDone     JobStatus = "done"
-	JobStatusFailure  JobStatus = "failure"
+	JobStatusFailed   JobStatus = "failed"
 	JobStatusCanceled JobStatus = "canceled"
 )
 
@@ -248,13 +248,16 @@ type Log struct {
 type News struct {
 	ID          int64              `json:"id"`
 	Md5Hash     string             `json:"md5_hash"`
-	Author      string             `json:"author"`
+	Guid        string             `json:"guid"`
+	Author      []string           `json:"author"`
 	Title       string             `json:"title"`
-	Url         string             `json:"url"`
+	Link        string             `json:"link"`
 	Description string             `json:"description"`
-	Content     string             `json:"content"`
-	Source      pgtype.Text        `json:"source"`
-	Response    []byte             `json:"response"`
+	Language    pgtype.Text        `json:"language"`
+	Content     []string           `json:"content"`
+	Category    string             `json:"category"`
+	Source      string             `json:"source"`
+	RelatedGuid []string           `json:"related_guid"`
 	PublishAt   pgtype.Timestamptz `json:"publish_at"`
 	CreatedAt   pgtype.Timestamptz `json:"created_at"`
 }

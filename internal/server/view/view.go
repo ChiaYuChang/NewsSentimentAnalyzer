@@ -48,6 +48,19 @@ func NewViewWithDefaultTemplateFuncs(pattern ...string) (View, error) {
 	fm["trim"] = func(text string) string {
 		return strings.TrimSpace(text)
 	}
+
+	fm["div_ceiling"] = func(x, y int) int {
+		n := x / y
+		if x%y > 0 {
+			n++
+		}
+		return n
+	}
+
+	fm["div_floor"] = func(x, y int) int {
+		return x / y
+	}
+
 	return NewView(fm, pattern...)
 }
 

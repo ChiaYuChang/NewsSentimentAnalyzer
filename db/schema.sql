@@ -3,7 +3,7 @@
 --
 
 -- Dumped from database version 15.3
--- Dumped by pg_dump version 15.3
+-- Dumped by pg_dump version 15.4
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -51,7 +51,7 @@ CREATE TYPE public.job_status AS ENUM (
     'created',
     'running',
     'done',
-    'failure',
+    'failed',
     'canceled'
 );
 
@@ -214,6 +214,28 @@ CREATE TABLE public.jobs (
 ALTER TABLE public.jobs OWNER TO admin;
 
 --
+-- Name: jobs_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public.jobs_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.jobs_id_seq OWNER TO admin;
+
+--
+-- Name: jobs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public.jobs_id_seq OWNED BY public.jobs.id;
+
+
+--
 -- Name: keywords; Type: TABLE; Schema: public; Owner: admin
 --
 
@@ -290,13 +312,16 @@ ALTER SEQUENCE public.logs_id_seq OWNED BY public.logs.id;
 CREATE TABLE public.news (
     id bigint NOT NULL,
     md5_hash character(128) NOT NULL,
-    author character varying DEFAULT ''::character varying NOT NULL,
+    guid character varying NOT NULL,
+    author text[],
     title text NOT NULL,
-    url text NOT NULL,
+    link text NOT NULL,
     description text NOT NULL,
-    content text NOT NULL,
-    source text,
-    response jsonb NOT NULL,
+    language character varying,
+    content text[] NOT NULL,
+    category character varying NOT NULL,
+    source text NOT NULL,
+    related_guid character varying[],
     publish_at timestamp with time zone NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL
 );
@@ -411,6 +436,13 @@ ALTER TABLE ONLY public.apis ALTER COLUMN id SET DEFAULT nextval('public.apis_id
 --
 
 ALTER TABLE ONLY public.endpoints ALTER COLUMN id SET DEFAULT nextval('public.endpoints_id_seq'::regclass);
+
+
+--
+-- Name: jobs id; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.jobs ALTER COLUMN id SET DEFAULT nextval('public.jobs_id_seq'::regclass);
 
 
 --
@@ -563,6 +595,13 @@ CREATE INDEX keywords_keyword_idx ON public.keywords USING btree (keyword);
 --
 
 CREATE INDEX logs_user_id_type_idx ON public.logs USING btree (user_id, type);
+
+
+--
+-- Name: news_guid_idx; Type: INDEX; Schema: public; Owner: admin
+--
+
+CREATE INDEX news_guid_idx ON public.news USING btree (guid);
 
 
 --

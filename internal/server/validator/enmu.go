@@ -76,7 +76,7 @@ var EnmusJobStatus = NewEnmus(
 	model.JobStatusCreated,
 	model.JobStatusRunning,
 	model.JobStatusDone,
-	model.JobStatusFailure,
+	model.JobStatusFailed,
 	model.JobStatusCanceled,
 )
 

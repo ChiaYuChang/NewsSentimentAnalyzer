@@ -13,31 +13,42 @@ import (
 
 const createNews = `-- name: CreateNews :one
 INSERT INTO news (
-    md5_hash, title, url, description, content, source, publish_at
+    md5_hash, guid, author, title, link, description, language,
+    content, category, source, related_guid, publish_at
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7
+    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
 )
 RETURNING id
 `
 
 type CreateNewsParams struct {
 	Md5Hash     string             `json:"md5_hash"`
+	Guid        string             `json:"guid"`
+	Author      []string           `json:"author"`
 	Title       string             `json:"title"`
-	Url         string             `json:"url"`
+	Link        string             `json:"link"`
 	Description string             `json:"description"`
-	Content     string             `json:"content"`
-	Source      pgtype.Text        `json:"source"`
+	Language    pgtype.Text        `json:"language"`
+	Content     []string           `json:"content"`
+	Category    string             `json:"category"`
+	Source      string             `json:"source"`
+	RelatedGuid []string           `json:"related_guid"`
 	PublishAt   pgtype.Timestamptz `json:"publish_at"`
 }
 
 func (q *Queries) CreateNews(ctx context.Context, arg *CreateNewsParams) (int64, error) {
 	row := q.db.QueryRow(ctx, createNews,
 		arg.Md5Hash,
+		arg.Guid,
+		arg.Author,
 		arg.Title,
-		arg.Url,
+		arg.Link,
 		arg.Description,
+		arg.Language,
 		arg.Content,
+		arg.Category,
 		arg.Source,
+		arg.RelatedGuid,
 		arg.PublishAt,
 	)
 	var id int64
@@ -71,8 +82,40 @@ func (q *Queries) DeleteNewsPublishBefore(ctx context.Context, beforeTime pgtype
 	return result.RowsAffected(), nil
 }
 
+const getContentById = `-- name: GetContentById :many
+SELECT id, content
+  FROM news
+ WHERE id = ANY($1::int[]) 
+ ORDER BY id
+`
+
+type GetContentByIdRow struct {
+	ID      int64    `json:"id"`
+	Content []string `json:"content"`
+}
+
+func (q *Queries) GetContentById(ctx context.Context, ids []int32) ([]*GetContentByIdRow, error) {
+	rows, err := q.db.Query(ctx, getContentById, ids)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*GetContentByIdRow
+	for rows.Next() {
+		var i GetContentByIdRow
+		if err := rows.Scan(&i.ID, &i.Content); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getNewsByJob = `-- name: GetNewsByJob :many
-SELECT id, title, description, content, url, source, publish_at
+SELECT id, title, description, source, related_guid, publish_at
   FROM news
  WHERE news.id = ANY(
     SELECT newsjobs.news_id
@@ -87,9 +130,8 @@ type GetNewsByJobRow struct {
 	ID          int64              `json:"id"`
 	Title       string             `json:"title"`
 	Description string             `json:"description"`
-	Content     string             `json:"content"`
-	Url         string             `json:"url"`
-	Source      pgtype.Text        `json:"source"`
+	Source      string             `json:"source"`
+	RelatedGuid []string           `json:"related_guid"`
 	PublishAt   pgtype.Timestamptz `json:"publish_at"`
 }
 
@@ -106,9 +148,8 @@ func (q *Queries) GetNewsByJob(ctx context.Context) ([]*GetNewsByJobRow, error) 
 			&i.ID,
 			&i.Title,
 			&i.Description,
-			&i.Content,
-			&i.Url,
 			&i.Source,
+			&i.RelatedGuid,
 			&i.PublishAt,
 		); err != nil {
 			return nil, err
@@ -122,7 +163,7 @@ func (q *Queries) GetNewsByJob(ctx context.Context) ([]*GetNewsByJobRow, error) 
 }
 
 const getNewsByKeywords = `-- name: GetNewsByKeywords :many
-SELECT id, title, description, content, url, source, publish_at
+SELECT id, title, description, source, related_guid, publish_at
   FROM news
  WHERE id = ANY(
     SELECT news_id
@@ -136,9 +177,8 @@ type GetNewsByKeywordsRow struct {
 	ID          int64              `json:"id"`
 	Title       string             `json:"title"`
 	Description string             `json:"description"`
-	Content     string             `json:"content"`
-	Url         string             `json:"url"`
-	Source      pgtype.Text        `json:"source"`
+	Source      string             `json:"source"`
+	RelatedGuid []string           `json:"related_guid"`
 	PublishAt   pgtype.Timestamptz `json:"publish_at"`
 }
 
@@ -155,9 +195,8 @@ func (q *Queries) GetNewsByKeywords(ctx context.Context, keywords []string) ([]*
 			&i.ID,
 			&i.Title,
 			&i.Description,
-			&i.Content,
-			&i.Url,
 			&i.Source,
+			&i.RelatedGuid,
 			&i.PublishAt,
 		); err != nil {
 			return nil, err
@@ -171,7 +210,7 @@ func (q *Queries) GetNewsByKeywords(ctx context.Context, keywords []string) ([]*
 }
 
 const getNewsByMD5Hash = `-- name: GetNewsByMD5Hash :one
-SELECT id, title, description, content, url, source, publish_at
+SELECT id, title, description, source, related_guid, publish_at
   FROM news
  WHERE md5_hash = $1
 `
@@ -180,9 +219,8 @@ type GetNewsByMD5HashRow struct {
 	ID          int64              `json:"id"`
 	Title       string             `json:"title"`
 	Description string             `json:"description"`
-	Content     string             `json:"content"`
-	Url         string             `json:"url"`
-	Source      pgtype.Text        `json:"source"`
+	Source      string             `json:"source"`
+	RelatedGuid []string           `json:"related_guid"`
 	PublishAt   pgtype.Timestamptz `json:"publish_at"`
 }
 
@@ -193,16 +231,15 @@ func (q *Queries) GetNewsByMD5Hash(ctx context.Context, md5Hash string) (*GetNew
 		&i.ID,
 		&i.Title,
 		&i.Description,
-		&i.Content,
-		&i.Url,
 		&i.Source,
+		&i.RelatedGuid,
 		&i.PublishAt,
 	)
 	return &i, err
 }
 
 const getNewsPublishBetween = `-- name: GetNewsPublishBetween :many
-SELECT id, title, description, content, url, source, publish_at
+SELECT id, title, description, source, related_guid, publish_at
   FROM news
  WHERE publish_at BETWEEN timestamp $1 AND $2
  ORDER BY publish_at
@@ -217,9 +254,8 @@ type GetNewsPublishBetweenRow struct {
 	ID          int64              `json:"id"`
 	Title       string             `json:"title"`
 	Description string             `json:"description"`
-	Content     string             `json:"content"`
-	Url         string             `json:"url"`
-	Source      pgtype.Text        `json:"source"`
+	Source      string             `json:"source"`
+	RelatedGuid []string           `json:"related_guid"`
 	PublishAt   pgtype.Timestamptz `json:"publish_at"`
 }
 
@@ -236,9 +272,8 @@ func (q *Queries) GetNewsPublishBetween(ctx context.Context, arg *GetNewsPublish
 			&i.ID,
 			&i.Title,
 			&i.Description,
-			&i.Content,
-			&i.Url,
 			&i.Source,
+			&i.RelatedGuid,
 			&i.PublishAt,
 		); err != nil {
 			return nil, err
@@ -252,9 +287,8 @@ func (q *Queries) GetNewsPublishBetween(ctx context.Context, arg *GetNewsPublish
 }
 
 const listRecentNNews = `-- name: ListRecentNNews :many
-SELECT id, title, description, content, url, source, publish_at
+SELECT id, title, description, source, related_guid, publish_at
   FROM news
- WHERE deleted_at IS NULL
  ORDER BY publish_at
  LIMIT $1
 `
@@ -263,9 +297,8 @@ type ListRecentNNewsRow struct {
 	ID          int64              `json:"id"`
 	Title       string             `json:"title"`
 	Description string             `json:"description"`
-	Content     string             `json:"content"`
-	Url         string             `json:"url"`
-	Source      pgtype.Text        `json:"source"`
+	Source      string             `json:"source"`
+	RelatedGuid []string           `json:"related_guid"`
 	PublishAt   pgtype.Timestamptz `json:"publish_at"`
 }
 
@@ -282,9 +315,8 @@ func (q *Queries) ListRecentNNews(ctx context.Context, n int32) ([]*ListRecentNN
 			&i.ID,
 			&i.Title,
 			&i.Description,
-			&i.Content,
-			&i.Url,
 			&i.Source,
+			&i.RelatedGuid,
 			&i.PublishAt,
 		); err != nil {
 			return nil, err

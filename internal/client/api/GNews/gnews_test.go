@@ -11,8 +11,8 @@ import (
 	"testing"
 
 	cli "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api/GNews"
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model"
 	srv "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/GNews"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/require"
 )
@@ -187,8 +187,8 @@ func TestHeadlinesHandler(t *testing.T) {
 	srvr := httptest.NewServer(mux)
 	defer srvr.Close()
 
-	cPars := make(chan *model.CreateNewsParams)
-	go func(c <-chan *model.CreateNewsParams) {
+	cPars := make(chan *service.NewsCreateRequest)
+	go func(c <-chan *service.NewsCreateRequest) {
 		for p := range c {
 			require.NotEmpty(t, p.Title)
 			require.NotEmpty(t, p.Md5Hash)

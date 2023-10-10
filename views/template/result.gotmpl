@@ -5,8 +5,27 @@
     {{template "head" .Page.HeadConent}}
     <link rel="stylesheet" href="/static/css/animation.css" /link>
     <script>
-    var nStatus = [{{.TotalJobs}}, {{.NCreated}}, {{.NRunning}}, {{.NDone}}, {{.NFailed}}, {{.NCanceled}}]
-    var pageSize = {{.PageSize}}
+    var nStatus = {
+    {{range $key, $val := .NJobs}} {{$key}} : {{$val}},
+    {{end}}};
+    var pageSize = {{.PageSize}};
+
+    var last_page_of_each_jstatus = {
+        {{range $key, $val := .NJobs}} {{$key}} : Math.ceil({{$val}}/pageSize),
+        {{end}}};
+
+    const maxInt32 = 2147483647;
+
+    const qNext = true;
+    const qPrev = false;
+
+    var pager = {
+        jstatus: {{.TotalJobKey}},
+        fjid: maxInt32,
+        tjid: maxInt32,
+        page: 0,
+        direction: qNext,
+    };
     </script>
     <script src="/static/js/job_funcs.js">  </script>
 
@@ -44,7 +63,7 @@
                     </div>
                     <div class="job-n">{{.NDone}}</div>
                 </div>
-                <div title="Failed"  class="job-status-label job-status" status="failed" onclick='updateQuery("failure", {{.NFailed}})'>
+                <div title="Failed"  class="job-status-label job-status" status="failed" onclick='updateQuery("failed", {{.NFailed}})'>
                     <div class="job-status">
                         <i class="fa-solid fa-triangle-exclamation"></i>
                     </div>

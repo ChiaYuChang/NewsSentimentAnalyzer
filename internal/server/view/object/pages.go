@@ -37,13 +37,42 @@ type SignUpPage struct {
 
 type APIResultPage struct {
 	Page
-	TotalJobs int `json:"n_total"`
-	NCreated  int `json:"n_created"`
-	NRunning  int `json:"n_running"`
-	NDone     int `json:"n_done"`
-	NFailed   int `json:"n_failed"`
-	NCanceled int `json:"n_canceled"`
-	PageSize  int `json:"page_size"`
+	NJobs       map[string]int `json:"n_jobs"`
+	TotalJobKey string         `json:"total_job_key"`
+	PageSize    int            `json:"page_size"`
+}
+
+func (p APIResultPage) TotalJobs() int {
+	return p.NJobs[p.TotalJobKey]
+}
+
+func (p APIResultPage) NCanceled() int {
+	return p.NJobs[string(model.JobStatusCanceled)]
+}
+
+func (p APIResultPage) NCreated() int {
+	return p.NJobs[string(model.JobStatusCreated)]
+}
+
+func (p APIResultPage) NDone() int {
+	return p.NJobs[string(model.JobStatusDone)]
+}
+
+func (p APIResultPage) NFailed() int {
+	return p.NJobs[string(model.JobStatusFailed)]
+}
+
+func (p APIResultPage) NRunning() int {
+	return p.NJobs[string(model.JobStatusRunning)]
+}
+
+func (p APIResultPage) NPage(js string) int {
+	n := p.NJobs[js]
+	q := n / p.PageSize
+	if n%p.PageSize > 0 {
+		q++
+	}
+	return q
 }
 
 type Job struct {
@@ -63,7 +92,7 @@ func StatusToClass(jobStatus model.JobStatus) string {
 		return "running"
 	case model.JobStatusDone:
 		return "done"
-	case model.JobStatusFailure:
+	case model.JobStatusFailed:
 		return "failed"
 	case model.JobStatusCanceled:
 		return "canceled"

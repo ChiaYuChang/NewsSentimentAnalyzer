@@ -37,6 +37,7 @@ type Querier interface {
 	DeleteUser(ctx context.Context, id uuid.UUID) (int64, error)
 	GetAPI(ctx context.Context, id int16) (*Api, error)
 	GetAPIKey(ctx context.Context, arg *GetAPIKeyParams) (*GetAPIKeyRow, error)
+	GetContentById(ctx context.Context, ids []int32) ([]*GetContentByIdRow, error)
 	GetJobByOwnerFilterByJIdAndStatus(ctx context.Context, arg *GetJobByOwnerFilterByJIdAndStatusParams) ([]*GetJobByOwnerFilterByJIdAndStatusRow, error)
 	GetJobByOwnerFilterByJIdRange(ctx context.Context, arg *GetJobByOwnerFilterByJIdRangeParams) ([]*GetJobByOwnerFilterByJIdRangeRow, error)
 	GetJobByOwnerFilterByJIds(ctx context.Context, arg *GetJobByOwnerFilterByJIdsParams) ([]*GetJobByOwnerFilterByJIdsRow, error)

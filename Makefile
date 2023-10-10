@@ -86,20 +86,32 @@ mockgen-tokenmaker:
 	@mockgen -destination pkgs/tokenMaker/mockTokenMaker/tokenMaker.go \
 	${APP_REPOSITORY}/pkgs/tokenMaker TokenMaker,Payload
 
+mockgen-parser:
+	@mockgen -destination internal/server/parser/mockParser/parser.go \
+	${APP_REPOSITORY}/internal/server/parser Parser
+
 gen-jwt-secret:
 	@openssl rand -base64 ${JWT_SECRET_LEN} > ${JWT_SECRET_OUT_PATH}
 
 gen-private-key:
-	openssl ecparam -genkey \
+	@openssl ecparam -genkey \
 	-name secp384r1 \
 	-out ${KEY_PATH}/${PRIVATE_KEY_NAME}
 
 gen-public-key: gen-private-key
-	openssl req -new -x509 -sha256 \
+	@openssl req -new -x509 -sha256 \
 	-key ${KEY_PATH}/${PRIVATE_KEY_NAME} \
 	-out ${KEY_PATH}/${PUBLIC_KEY_NAME} \
+	-config ssl.conf \
 	-days 365
 
+# gen-ssl-key:
+# 	openssl req -x509 -new -nodes -sha256 -utf8 \
+# 	-days 3650 \
+# 	-newkey rsa:2048 \
+# 	-keyout ${KEY_PATH}/${PRIVATE_KEY_NAME} \
+# 	-out ${KEY_PATH}/${PUBLIC_KEY_NAME} \
+# 	-config ssl.conf
 
 run: docker-up-db build build-wasm
 	./${APP_NAME} -v v1 -c ./config/config.json -s development -h localhost -p 8001

@@ -331,7 +331,9 @@ func (repo APIRepo) GetJob(w http.ResponseWriter, req *http.Request) {
 			HeadConent: hc,
 			Title:      "job",
 		},
-		PageSize: 10,
+		NJobs:       map[string]int{},
+		TotalJobKey: "all",
+		PageSize:    15,
 	}
 
 	jobSummary, err := repo.Service.Job().Count(req.Context(), userInfo.GetUserID())
@@ -351,12 +353,10 @@ func (repo APIRepo) GetJob(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	pageData.NCreated = jobSummary.JobGroup[model.JobStatusCreated].NJob
-	pageData.NRunning = jobSummary.JobGroup[model.JobStatusRunning].NJob
-	pageData.NDone = jobSummary.JobGroup[model.JobStatusDone].NJob
-	pageData.NFailed = jobSummary.JobGroup[model.JobStatusFailure].NJob
-	pageData.NCanceled = jobSummary.JobGroup[model.JobStatusCanceled].NJob
-	pageData.TotalJobs = jobSummary.TotalJob
+	for k, v := range jobSummary.JobGroup {
+		pageData.NJobs[string(k)] = v.NJob
+	}
+	pageData.NJobs[pageData.TotalJobKey] = jobSummary.TotalJob
 
 	w.WriteHeader(http.StatusOK)
 	_ = repo.View.ExecuteTemplate(w, "result.gotmpl", pageData)
@@ -391,7 +391,7 @@ func formatRequest(r *http.Request) string {
 func (repo APIRepo) PostJob(w http.ResponseWriter, req *http.Request) {
 	global.Logger.Info().Msg("Call Post Job API")
 
-	time.Sleep(2 * time.Second)
+	// time.Sleep(2 * time.Second)
 	w.Header().Set("Content-Type", "application/json")
 	userInfo, ok := req.Context().Value(global.CtxUserInfo).(tokenmaker.Payload)
 	if !ok {

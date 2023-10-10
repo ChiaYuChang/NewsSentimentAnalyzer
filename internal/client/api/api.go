@@ -16,7 +16,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
 )
 
 var ErrTypeAssertionFailure = errors.New("type assertion failure")
@@ -94,6 +94,12 @@ func (p Params) ToJSON() ([]byte, error) {
 	return json.Marshal(map[string][]string(p))
 }
 
+const QueryOriPageKey = true
+
+func QueryOriginalPageContext(ctx context.Context) context.Context {
+	return context.WithValue(ctx, QueryOriPageKey, true)
+}
+
 type Query interface {
 	String() string
 	Params() Params
@@ -106,16 +112,28 @@ type Response interface {
 	HasNext() bool
 	NextPageRequest(body io.Reader) (*http.Request, error)
 	Len() int
-	ToNews(ctx context.Context, wg *sync.WaitGroup, c chan<- *model.CreateNewsParams)
+	ToNews(ctx context.Context, wg *sync.WaitGroup, c chan<- *service.NewsCreateRequest)
 }
 
-var re = regexp.MustCompile(`[\p{P}\p{Zs}[:punct:]]`)
+var re = regexp.MustCompile("[\\p{Han}[:alnum:]]")
 
-func MD5Hash(title string, publishedAt time.Time) string {
-	text := re.ReplaceAllString(title, "")
+func MD5Hash(title string, publishedAt time.Time, content ...string) (string, error) {
 	hasher := md5.New()
-	hasher.Write([]byte(fmt.Sprintf("%s@%s", text, publishedAt.UTC().Format(time.DateOnly))))
-	return base64.StdEncoding.EncodeToString(hasher.Sum(nil))
+
+	if _, err := hasher.Write(re.ReplaceAll([]byte(title), []byte{})); err != nil {
+		return "", fmt.Errorf("error while writing to hasher: %w", err)
+	}
+
+	cs := strings.Join(content, "")
+	if _, err := hasher.Write(re.ReplaceAll([]byte(cs), []byte{})); err != nil {
+		return "", fmt.Errorf("error while writing to hasher: %w", err)
+	}
+
+	if _, err := hasher.Write(re.ReplaceAll([]byte(publishedAt.UTC().Format(time.DateTime)), []byte{})); err != nil {
+		return "", fmt.Errorf("error while writing to hasher: %w", err)
+	}
+
+	return base64.StdEncoding.EncodeToString(hasher.Sum(nil)), nil
 }
 
 func ToRequest(apiURL, apiMethod, apiKey, apiEndpoint string, body io.Reader, q Query) (*http.Request, error) {

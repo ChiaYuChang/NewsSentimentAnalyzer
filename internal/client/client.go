@@ -8,8 +8,8 @@ import (
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api"
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model"
 	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
 	"golang.org/x/net/context"
 )
 
@@ -89,14 +89,14 @@ func (repo pageFormHandlerRepo) Do(cli http.Client, apikey string, pf pageform.P
 		return fmt.Errorf("error while .ToRequest: %w", err)
 	}
 
-	cPars := make(chan *model.CreateNewsParams)
+	cPars := make(chan *service.NewsCreateRequest)
 	go func() {
 		for p := range cPars {
 			global.Logger.
 				Info().
 				Str("md5", p.Md5Hash).
 				Str("title", p.Title).
-				Time("publish_at", p.PublishAt.Time.UTC()).
+				Time("publish_at", p.PublishedAt.UTC()).
 				Msg("Create an article")
 		}
 	}()

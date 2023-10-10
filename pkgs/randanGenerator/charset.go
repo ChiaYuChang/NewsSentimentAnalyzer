@@ -5,8 +5,46 @@ import (
 	crand "crypto/rand"
 	"errors"
 	"math"
+	"math/big"
+	mrand "math/rand"
 	"unicode/utf8"
 )
+
+type Rand interface {
+	GetIntn(n int) int
+	Read(dest []uint8) (n int, err error)
+}
+
+type CRand struct{}
+
+func (c *CRand) GetIntn(n int) int {
+	i, _ := crand.Int(crand.Reader, big.NewInt(int64(n)))
+	return int(i.Int64())
+}
+
+func (c *CRand) Read(dest []uint8) (n int, err error) {
+	return crand.Read(dest)
+}
+
+type MRand struct {
+	*mrand.Rand
+}
+
+func NewMRand(seed int64) *MRand {
+	r := &MRand{mrand.New(mrand.NewSource(seed))}
+	return r
+}
+
+func (m *MRand) GetIntn(n int) int {
+	return m.Intn(n)
+}
+
+func (m *MRand) Read(dest []uint8) (n int, err error) {
+	for i := range dest {
+		dest[i] = uint8(m.GetIntn(math.MaxUint8))
+	}
+	return len(dest), nil
+}
 
 type CharSet struct {
 	setSize         uint8
@@ -14,6 +52,7 @@ type CharSet struct {
 	setBytes        [][]byte
 	setMap          map[rune]bool
 	IsAllSingleByte bool
+	Rand            Rand
 }
 
 var (
@@ -85,6 +124,18 @@ func (c CharSet) GetByte(i uint8) []byte {
 	return c.setBytes[i%c.setSize]
 }
 
+func (c *CharSet) SetRand(rand Rand) CharSet {
+	c.Rand = rand
+	return *c
+}
+
+func (c1 CharSet) Clone() (CharSet, error) {
+	sc := make([]rune, c1.SetSize())
+	copy(sc, c1.setChars)
+
+	return NewCharSet(sc)
+}
+
 func (c1 CharSet) Merge(c2 CharSet) (CharSet, error) {
 	setMap := make(map[rune]bool, c1.SetSize()+c2.SetSize())
 	size := int64(0)
@@ -135,8 +186,14 @@ func (c CharSet) GenRdmBytes(length int) ([]byte, error) {
 func (c CharSet) GenRdmRunes(length int) ([]rune, error) {
 	index := make([]uint8, length)
 
-	if _, err := crand.Read(index); err != nil {
-		return nil, err
+	if c.Rand == nil {
+		if _, err := crand.Read(index); err != nil {
+			return nil, err
+		}
+	} else {
+		if _, err := c.Rand.Read(index); err != nil {
+			return nil, err
+		}
 	}
 
 	randomRunes := make([]rune, length)

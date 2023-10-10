@@ -10,6 +10,21 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestMRand(t *testing.T) {
+	an, err := rg.AlphaNum.Clone()
+	require.NoError(t, err)
+
+	an.SetRand(rg.NewMRand(1))
+	rs1, err := an.GenRdmString(100)
+	require.NoError(t, err)
+
+	an.SetRand(rg.NewMRand(1))
+	rs2, err := an.GenRdmString(100)
+	require.NoError(t, err)
+
+	require.Equal(t, rs1, rs2)
+}
+
 func TestCharSet(t *testing.T) {
 	n := 100
 	rs := make([]rune, n)
