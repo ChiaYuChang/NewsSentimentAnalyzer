@@ -145,14 +145,12 @@ type ContentParsingFunc func(i *News, s *goquery.Selection)
 
 // ParserRepo is a repository for Parser.
 // It implements the Parser interface.
-type ParserRepo struct {
-	repo map[string]Parser
-}
+type ParserRepo map[string]Parser
 
 // NewNewsParser returns a ParserRepo.
 // opts are optional parsers, which can be registered to the ParserRepo.
-func NewParserRepo(opts ...Parser) *ParserRepo {
-	pr := &ParserRepo{repo: map[string]Parser{}}
+func NewParserRepo(opts ...Parser) ParserRepo {
+	pr := ParserRepo{}
 	for _, opt := range opts {
 		pr.RegisterDomainParser(opt)
 	}
@@ -160,20 +158,20 @@ func NewParserRepo(opts ...Parser) *ParserRepo {
 }
 
 // RegisterDomainParser registers a parser for a domain.
-func (repo *ParserRepo) RegisterDomainParser(parser ...Parser) ParserRepo {
+func (repo ParserRepo) RegisterDomainParser(parser ...Parser) ParserRepo {
 	for _, p := range parser {
 		for _, domain := range p.Domain() {
 			fmt.Println("register parser for domain: ", domain)
-			repo.repo[domain] = p
+			repo[domain] = p
 		}
 	}
-	return *repo
+	return repo
 }
 
 // Domain returns a list of domains that the parser can parse.
 func (repo ParserRepo) Domain() []string {
-	domains := make([]string, 0, len(repo.repo))
-	for domain := range repo.repo {
+	domains := make([]string, 0, len(repo))
+	for domain := range repo {
 		domains = append(domains, domain)
 	}
 	return domains
@@ -188,31 +186,27 @@ func (repo ParserRepo) Parse(q *Query) *Query {
 		}
 	}
 
-	if parser, err := repo.Get(q.URL.Host); err != nil {
-		return parser.Parse(q)
+	if q.RawURL == "" {
+		q.RawURL = q.URL.String()
+	}
+
+	if parser, ok := repo[q.URL.Host]; ok {
+		q = parser.Parse(q)
 	} else {
-		q.Error = ErrParserNotFound
+		q.Error = fmt.Errorf("%w: %s", ErrParserNotFound, q.URL.Host)
 	}
 	return q
 }
 
 // ToGUID returns a GUID from a URL.
 func (repo ParserRepo) ToGUID(href *url.URL) string {
-	if parser, ok := repo.repo[href.Host]; ok {
+	if parser, ok := repo[href.Host]; ok {
 		return parser.ToGUID(href)
 	}
 	return href.Path
 }
 
-// Get returns a parser for a domain.
-func (repo ParserRepo) Get(domain string) (Parser, error) {
-	if parser, ok := repo.repo[domain]; ok {
-		return parser, nil
-	}
-	return nil, ErrParserNotFound
-}
-
 func (repo ParserRepo) Has(domain string) bool {
-	_, ok := repo.repo[domain]
+	_, ok := repo[domain]
 	return ok
 }

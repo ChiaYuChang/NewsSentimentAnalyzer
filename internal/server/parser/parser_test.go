@@ -2,6 +2,7 @@ package parser_test
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -22,38 +23,43 @@ import (
 )
 
 func TestNewsQuerier(t *testing.T) {
+	_, err := http.Get("https://example.com")
 
-	querier, err := parser.NewQuerier(
-		parser.WithDefaultHeader(),
-		parser.WithDefaultClient(),
-		parser.WithClientDefaultTimeout(),
-	)
-	require.NoError(t, err)
-	require.NotNil(t, querier)
-	require.True(t, querier.HasContentEncodingHandler("gzip"))
+	if err == nil {
+		querier, err := parser.NewQuerier(
+			parser.WithDefaultHeader(),
+			parser.WithDefaultClient(),
+			parser.WithClientDefaultTimeout(),
+		)
+		require.NoError(t, err)
+		require.NotNil(t, querier)
+		require.True(t, querier.HasContentEncodingHandler("gzip"))
 
-	rawURLs := []string{
-		"https://news.pts.org.tw/article/652813",
-		"https://www.cna.com.tw/news/aspt/202309050416.aspx",
-	}
+		rawURLs := []string{
+			"https://news.pts.org.tw/article/652813",
+			"https://www.cna.com.tw/news/aspt/202309050416.aspx",
+		}
 
-	for i := range rawURLs {
-		rawURL := rawURLs[i]
-		t.Run(rawURL, func(t *testing.T) {
-			q := querier.DoQuery(parser.NewQuery(rawURL))
-			require.NoError(t, q.Error)
+		for i := range rawURLs {
+			rawURL := rawURLs[i]
+			t.Run(rawURL, func(t *testing.T) {
+				q := querier.DoQuery(parser.NewQuery(rawURL))
+				require.NoError(t, q.Error)
 
-			content, err := q.Content()
-			require.NoError(t, err)
+				content, err := q.Content()
+				require.NoError(t, err)
 
-			var body []byte
-			body, q.Error = io.ReadAll(content)
-			require.NoError(t, err)
-			require.NotNil(t, body)
+				var body []byte
+				body, q.Error = io.ReadAll(content)
+				require.NoError(t, err)
+				require.NotNil(t, body)
 
-			v := validator.New()
-			require.NoError(t, v.Var(string(body), "html"))
-		})
+				v := validator.New()
+				require.NoError(t, v.Var(string(body), "html"))
+			})
+		}
+	} else {
+		t.Log("Newwork is unreachable, skip this test")
 	}
 }
 
@@ -70,14 +76,14 @@ func TestQueryPipeline(t *testing.T) {
        </body>
 	    </html>`
 
-	type testCast struct {
+	type testCase struct {
 		Id         int
 		Path       string
 		StatusCode int
 		TimeDelay  time.Duration
 	}
 
-	tcs := []testCast{
+	tcs := []testCase{
 		{
 			Path:       "/ok",
 			StatusCode: http.StatusOK,
@@ -100,24 +106,27 @@ func TestQueryPipeline(t *testing.T) {
 		},
 	}
 
-	p2id := map[string]int{}
+	path2id := map[string]int{}
 
 	mux := chi.NewRouter()
 	mux.Use(middleware.Compress(5, "gzip"))
 
-	for i := range tcs {
-		tcs[i].Id = i
-
-		p2id[tcs[i].Path] = tcs[i].Id
-		tc := tcs[i]
-		mux.Get(tcs[i].Path, func(w http.ResponseWriter, r *http.Request) {
+	HandlerFromTC := func(tc testCase) func(w http.ResponseWriter, r *http.Request) {
+		return func(w http.ResponseWriter, r *http.Request) {
+			t.Logf("hit: %s Handler wait for %s sec\n", tc.Path, tc.TimeDelay)
 			time.Sleep(tc.TimeDelay)
 			w.WriteHeader(tc.StatusCode)
 			if tc.StatusCode == http.StatusOK {
 				w.Write([]byte(htmlBody))
 			}
 			return
-		})
+		}
+	}
+
+	for i := range tcs {
+		tcs[i].Id = i
+		path2id[tcs[i].Path] = tcs[i].Id
+		mux.Get(tcs[i].Path, HandlerFromTC(tcs[i]))
 	}
 	srvc := httptest.NewServer(mux)
 
@@ -145,7 +154,7 @@ func TestQueryPipeline(t *testing.T) {
 		select {
 		case q := <-outChan:
 			require.NoError(t, q.Error)
-			require.Equal(t, p2id["/ok"], q.Id())
+			require.Equal(t, path2id["/ok"], q.Id())
 			require.Equal(t, 200, q.RespHttpStatusCode())
 
 			rc, err := q.Content()
@@ -161,15 +170,15 @@ func TestQueryPipeline(t *testing.T) {
 			require.Error(t, err)
 			es := err.Error()
 
-			if strings.HasPrefix(es, fmt.Sprintf("%d-th", p2id["/timeout"])) {
+			if strings.HasPrefix(es, fmt.Sprintf("%d-th", path2id["/timeout"])) {
 				require.True(t, strings.Contains(es, "context deadline exceeded"))
 			}
 
-			if strings.HasPrefix(es, fmt.Sprintf("%d-th", p2id["/notfound"])) {
+			if strings.HasPrefix(es, fmt.Sprintf("%d-th", path2id["/notfound"])) {
 				require.True(t, strings.Contains(es, "request error with error code 404"))
 			}
 
-			if strings.HasPrefix(es, fmt.Sprintf("%d-th", p2id["/unauthorized"])) {
+			if strings.HasPrefix(es, fmt.Sprintf("%d-th", path2id["/unauthorized"])) {
 				require.True(t, strings.Contains(es, "request error with error code 401"))
 			}
 		}
@@ -239,7 +248,7 @@ func TestUDNParser(t *testing.T) {
 				t.Parallel()
 				f, err := os.Open(fmt.Sprintf("example/udn/%s", tc.FileName))
 				require.NoError(t, err)
-				q := p.Parse(parser.NewTestQuery(200, f))
+				q := p.Parse(parser.NewTestQuery(200, "", f))
 				require.NoError(t, q.Error)
 				require.NotNil(t, q.News)
 
@@ -346,7 +355,7 @@ func TestCTParser(t *testing.T) {
 				t.Parallel()
 				f, err := os.Open(fmt.Sprintf("example/ct/%s", tc.FileName))
 				require.NoError(t, err)
-				q := p.Parse(parser.NewTestQuery(200, f))
+				q := p.Parse(parser.NewTestQuery(200, "", f))
 				require.NoError(t, q.Error)
 				require.NotNil(t, q)
 				require.Equal(t, tc.GUID, q.News.GUID)
@@ -446,7 +455,7 @@ func TestPTSParser(t *testing.T) {
 				// t.Parallel()
 				f, err := os.Open(fmt.Sprintf("example/pts/%s", tc.FileName))
 				require.NoError(t, err)
-				q := p.Parse(parser.NewTestQuery(200, f))
+				q := p.Parse(parser.NewTestQuery(200, "", f))
 				require.NoError(t, q.Error)
 				require.NotNil(t, q)
 				require.Equal(t, tc.GUID, q.News.GUID)
@@ -571,7 +580,7 @@ func TestCNAParser(t *testing.T) {
 				// t.Parallel()
 				f, err := os.Open(fmt.Sprintf("example/cna/%s", tc.FileName))
 				require.NoError(t, err)
-				q := p.Parse(parser.NewTestQuery(200, f))
+				q := p.Parse(parser.NewTestQuery(200, "", f))
 				require.NoError(t, q.Error)
 				require.NotNil(t, q)
 				require.Equal(t, tc.GUID, q.News.GUID)
@@ -655,7 +664,7 @@ func TestLTNParser(t *testing.T) {
 				// t.Parallel()
 				f, err := os.Open(fmt.Sprintf("example/ltn/%s", tc.FileName))
 				require.NoError(t, err)
-				q := p.Parse(parser.NewTestQuery(200, f))
+				q := p.Parse(parser.NewTestQuery(200, "", f))
 				require.NoError(t, q.Error)
 				require.NotNil(t, q)
 				require.Equal(t, tc.GUID, q.News.GUID)
@@ -777,7 +786,7 @@ func TestUP(t *testing.T) {
 				t.Parallel()
 				f, err := os.Open(fmt.Sprintf("example/up/%s", tc.FileName))
 				require.NoError(t, err)
-				q := p.Parse(parser.NewTestQuery(200, f))
+				q := p.Parse(parser.NewTestQuery(200, "", f))
 				require.NoError(t, q.Error)
 				require.NotNil(t, q)
 				require.Equal(t, tc.GUID, q.News.GUID)
@@ -867,7 +876,7 @@ func TestRFI(t *testing.T) {
 				t.Parallel()
 				f, err := os.Open(fmt.Sprintf("example/rfi/%s", tc.FileName))
 				require.NoError(t, err)
-				q := p.Parse(parser.NewTestQuery(200, f))
+				q := p.Parse(parser.NewTestQuery(200, "", f))
 				require.NoError(t, q.Error)
 				require.NotNil(t, q)
 				require.Equal(t, tc.GUID, q.News.GUID)
@@ -951,7 +960,7 @@ func TestTVBS(t *testing.T) {
 				// t.Parallel()
 				f, err := os.Open(fmt.Sprintf("example/tvbs/%s", tc.FileName))
 				require.NoError(t, err)
-				q := p.Parse(parser.NewTestQuery(200, f))
+				q := p.Parse(parser.NewTestQuery(200, "", f))
 				require.NoError(t, q.Error)
 				require.NotNil(t, q)
 				require.Equal(t, tc.GUID, q.News.GUID)
@@ -1066,7 +1075,7 @@ func TestSETN(t *testing.T) {
 				t.Parallel()
 				f, err := os.Open(fmt.Sprintf("example/setn/%s", tc.FileName))
 				require.NoError(t, err)
-				q := p.Parse(parser.NewTestQuery(200, f))
+				q := p.Parse(parser.NewTestQuery(200, "", f))
 				require.NoError(t, q.Error)
 				require.NotNil(t, q)
 				require.Equal(t, tc.GUID, q.News.GUID)
@@ -1167,7 +1176,7 @@ func TestEtToday(t *testing.T) {
 				// t.Parallel()
 				f, err := os.Open(fmt.Sprintf("example/ettoday/%s", tc.FileName))
 				require.NoError(t, err)
-				q := p.Parse(parser.NewTestQuery(200, f))
+				q := p.Parse(parser.NewTestQuery(200, "", f))
 				require.NoError(t, q.Error)
 				require.NotNil(t, q)
 				require.Equal(t, tc.GUID, q.News.GUID)
@@ -1316,7 +1325,7 @@ func TestBBC(t *testing.T) {
 				t.Parallel()
 				f, err := os.Open(fmt.Sprintf("example/bbc/%s", tc.FileName))
 				require.NoError(t, err)
-				q := p.Parse(parser.NewTestQuery(200, f))
+				q := p.Parse(parser.NewTestQuery(200, "", f))
 				require.NoError(t, q.Error)
 				require.NotNil(t, q)
 
@@ -1452,7 +1461,7 @@ func TestNYTimes(t *testing.T) {
 				t.Parallel()
 				f, err := os.Open(fmt.Sprintf("example/nytimes/%s", tc.FileName))
 				require.NoError(t, err)
-				q := p.Parse(parser.NewTestQuery(200, f))
+				q := p.Parse(parser.NewTestQuery(200, "", f))
 				require.NoError(t, q.Error)
 				require.NotNil(t, q)
 				require.Equal(t, tc.GUID, q.News.GUID)
@@ -1485,24 +1494,7 @@ func (m urlMatcher) Matches(x any) bool {
 	return m.URL.String() == u.String()
 }
 
-type queryMatcher struct {
-	q *parser.Query
-}
-
-func (m queryMatcher) Matches(x any) bool {
-	q, ok := x.(*parser.Query)
-	if !ok {
-		return false
-	}
-
-	if q.RawURL != m.q.RawURL {
-		return false
-	}
-
-	return true
-}
-
-func TestPreserRepo(t *testing.T) {
+func TestPraserRepo(t *testing.T) {
 	ctl := gomock.NewController(t)
 	p := mock_parser.NewMockParser(ctl)
 
@@ -1540,31 +1532,187 @@ func TestPreserRepo(t *testing.T) {
 		RelatedGUID: []string{"/static/002.html", "/static/003.html", "/static/004.html"},
 	}
 
-	p.EXPECT().
-		Parse(gomock.Any()).
-		AnyTimes().
-		DoAndReturn(func(q *parser.Query) {
-			q.News = news
-		})
-
 	repo := parser.NewParserRepo(p)
 	require.True(t, repo.Has("localhost:80"))
 	require.True(t, repo.Has("localhost:8080"))
 	require.True(t, repo.Has("localhost:443"))
-	require.False(t, repo.Has("localhost:5432"))
+	require.False(t, repo.Has("host-not-found"))
 
 	require.Equal(t, u.Path, repo.ToGUID(u))
+	require.ElementsMatch(t, domains, repo.Domain())
 
-	p80, err := repo.Get(u.Host)
-	require.NoError(t, err)
+	p80, ok := repo[u.Host]
+	require.True(t, ok)
 	require.NotNil(t, p80)
 
 	require.Equal(t, domains, p80.Domain())
 	require.Equal(t, u.Path, p80.ToGUID(u))
 
-	_ = p80.Parse(parser.NewQuery(ru))
-	// q := repo.Parse(parser.NewQuery(ru))
-	// require.NoError(t, q.Error)
-	// require.NotNil(t, q.News)
-	// require.Equal(t, ru, q.RawURL)
+	q := parser.NewQuery(ru)
+	require.NotNil(t, q)
+
+	p.EXPECT().
+		Parse(gomock.Any()).
+		Times(1).
+		DoAndReturn(func(q *parser.Query) *parser.Query {
+			jsn, _ := json.Marshal(news)
+
+			n := &parser.News{}
+			_ = json.Unmarshal(jsn, n)
+			q.News = n
+			return q
+		})
+
+	q = repo.Parse(q)
+	require.NotNil(t, q)
+	require.Equal(t, q.News.Title, news.Title)
+	require.Equal(t, q.News.Link, news.Link)
+	require.Equal(t, q.News.Description, news.Description)
+	require.Equal(t, q.News.Language, news.Language)
+	require.Equal(t, q.News.Author, news.Author)
+	require.Equal(t, q.News.Category, news.Category)
+	require.Equal(t, q.News.GUID, news.GUID)
+	require.Equal(t, q.News.Content, news.Content)
+	require.Equal(t, q.News.Tag, news.Tag)
+	require.Equal(t, q.News.RelatedGUID, news.RelatedGUID)
+	require.Greater(t, 10*time.Second, q.News.PubDate.Sub(news.PubDate))
+
+	u, err = url.Parse("http://not-found-in-repo")
+	require.NoError(t, err)
+
+	q = parser.NewQuery(u.String())
+	q = repo.Parse(q)
+	require.NotNil(t, q)
+	require.Empty(t, q.News)
+	require.Equal(t, parser.ErrParserNotFound, q.Error)
+	require.Equal(t, u.Path, repo.ToGUID(u))
+
+	q = &parser.Query{RawURL: u.String()}
+	q = repo.Parse(q)
+	require.NotNil(t, q)
+	require.Empty(t, q.News)
+	require.Equal(t, parser.ErrParserNotFound, q.Error)
+	require.Equal(t, u.Path, repo.ToGUID(u))
+
+	q = &parser.Query{RawURL: ":not-url"}
+	q = repo.Parse(q)
+	require.NotNil(t, q)
+	require.Error(t, q.Error)
+}
+
+func TestDefaultParser(t *testing.T) {
+	repo := parser.GetDefaultParser()
+	require.NotNil(t, repo)
+
+	for _, d := range repo.Domain() {
+		require.True(t, parser.Has(d))
+	}
+
+	var q *parser.Query
+	ru := "https://unknown.host/news/very-important-article"
+	u, err := url.Parse(ru)
+	require.NoError(t, err)
+
+	require.False(t, parser.Has(u.Host))
+
+	q = parser.ParseRawURL(ru)
+
+	require.ErrorIs(t, q.Error, parser.ErrParserNotFound)
+	require.Nil(t, q.News)
+
+	q = parser.ParseURL(u)
+	require.ErrorIs(t, q.Error, parser.ErrParserNotFound)
+	require.Nil(t, q.News)
+
+	q = parser.Parse(&parser.Query{RawURL: ru})
+	require.Nil(t, q.News)
+	require.ErrorIs(t, q.Error, parser.ErrParserNotFound)
+
+	q = parser.Parse(&parser.Query{URL: u})
+	require.Nil(t, q.News)
+	require.ErrorIs(t, q.Error, parser.ErrParserNotFound)
+}
+
+func TestParserRepoForDifferentDomain(t *testing.T) {
+	type testCase struct {
+		Name     string
+		RawURL   string
+		URL      *url.URL
+		Parser   parser.Parser
+		FileName string
+		Title    string
+		GUID     string
+	}
+
+	tcs := []testCase{
+		{
+			Name:     "UDN",
+			RawURL:   "https://udn.com/news/story/123707/7398504",
+			Parser:   parser.NewUDNParser(),
+			FileName: "/udn/news/001.html",
+			Title:    "核汙水排入海 中日緊張升溫",
+			GUID:     "123707-7398504",
+		},
+		{
+			Name:     "PTS",
+			RawURL:   "https://news.pts.org.tw/article/652596",
+			Parser:   parser.NewPTSParser(),
+			FileName: "/pts/001.html",
+			Title:    "美韓軍演首納太空軍 一文了解太空軍是什麼",
+			GUID:     "652596",
+		},
+		{
+			Name:     "CNA",
+			RawURL:   "https://www.cna.com.tw/news/ahel/202308230179.aspx",
+			Parser:   parser.NewCNAParser(),
+			FileName: "/cna/001.html",
+			Title:    "新北攤商涉用豬肉混充羊肉 最重可罰400萬加坐牢",
+			GUID:     "ahel-202308230179",
+		},
+		{
+			Name:     "ETtoday",
+			RawURL:   "https://www.ettoday.net/news/20230904/2575420.htm",
+			Parser:   parser.NewEtTodayParser(),
+			Title:    "快訊／侯友宜將有「重大宣布」！　她喊：大家拭目以待",
+			FileName: "/ettoday/001.html",
+			GUID:     "20230904-2575420",
+		},
+		{
+			Name:     "BBC-ZH",
+			RawURL:   "https://www.bbc.com/zhongwen/trad/chinese-news-66748432",
+			Parser:   parser.NewBBCParser(),
+			FileName: "/bbc/001.html",
+			Title:    "華為：新款5G手機橫空出世 中國半導體突破美國封鎖？",
+			GUID:     "chinese-news-66748432",
+		},
+	}
+
+	repo := parser.ParserRepo{}
+	for i := range tcs {
+		u, err := url.Parse(tcs[i].RawURL)
+		require.NoError(t, err)
+		tcs[i].URL = u
+		repo[u.Host] = tcs[i].Parser
+	}
+
+	for i := range tcs {
+		tc := tcs[i]
+		t.Run(
+			fmt.Sprintf("Case %d: %s", i+1, tcs[i].Name),
+			func(t *testing.T) {
+				require.True(t, repo.Has(tc.URL.Host))
+
+				f, err := os.Open("example/" + tc.FileName)
+				require.NoError(t, err)
+
+				q := parser.NewTestQuery(200, "", f)
+				q.URL = tc.URL
+				q.RawURL = tc.RawURL
+				q = repo.Parse(q)
+				require.NoError(t, q.Error)
+				require.Equal(t, tc.Title, q.News.Title)
+				require.Equal(t, tc.GUID, q.News.GUID)
+			},
+		)
+	}
 }

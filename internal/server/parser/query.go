@@ -362,14 +362,18 @@ func NewQueryWithId(id int, rawURL string) *Query {
 }
 
 // NewTestQuery is a helper function that creates a new query for testing.
-func NewTestQuery(status int, body io.ReadCloser) *Query {
-	return &Query{
-		handler: DefaultTypeHandler,
-		resp: &http.Response{
-			StatusCode: status,
-			Body:       body,
-		},
+func NewTestQuery(status int, rawURL string, body io.ReadCloser) *Query {
+	q := &Query{}
+	if rawURL != "" {
+		q = NewQuery(rawURL)
 	}
+
+	q.handler = DefaultTypeHandler
+	q.resp = &http.Response{
+		StatusCode: status,
+		Body:       body,
+	}
+	return q
 }
 
 // SetId is a helper function that sets id for a query.

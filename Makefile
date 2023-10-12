@@ -88,7 +88,7 @@ mockgen-tokenmaker:
 
 mockgen-parser:
 	@mockgen -destination internal/server/parser/mockParser/parser.go \
-	${APP_REPOSITORY}/internal/server/parser Parser
+	${APP_REPOSITORY}/internal/server/parser Parser,StdParseProcess
 
 gen-jwt-secret:
 	@openssl rand -base64 ${JWT_SECRET_LEN} > ${JWT_SECRET_OUT_PATH}
