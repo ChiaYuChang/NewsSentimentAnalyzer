@@ -21,27 +21,33 @@ import (
 	tokenmaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/tokenMaker"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/form"
+	"github.com/go-playground/mold/v4"
 	val "github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5"
 )
 
 type APIRepo struct {
-	Version     string
-	Service     service.Service
-	View        view.View
-	TokenMaker  tokenmaker.TokenMaker
-	Validate    *val.Validate
-	FormDecoder *form.Decoder
+	Version      string
+	Service      service.Service
+	View         view.View
+	TokenMaker   tokenmaker.TokenMaker
+	Validator    *val.Validate
+	FormDecoder  *form.Decoder
+	FormModifier *mold.Transformer
 }
 
-func NewAPIRepo(ver string, srvc service.Service, view view.View,
-	tokenmaker tokenmaker.TokenMaker, decoder *form.Decoder) APIRepo {
+func NewAPIRepo(
+	ver string, srvc service.Service, view view.View,
+	tokenmaker tokenmaker.TokenMaker, validator *val.Validate,
+	decoder *form.Decoder, modifier *mold.Transformer) APIRepo {
 	return APIRepo{
-		Version:     ver,
-		Service:     srvc,
-		View:        view,
-		TokenMaker:  tokenmaker,
-		FormDecoder: decoder,
+		Version:      ver,
+		Service:      srvc,
+		View:         view,
+		TokenMaker:   tokenmaker,
+		Validator:    validator,
+		FormDecoder:  decoder,
+		FormModifier: modifier,
 	}
 }
 
@@ -68,7 +74,7 @@ func (repo APIRepo) GetWelcome(w http.ResponseWriter, req *http.Request) {
 
 	pageData := object.WelcomePage{
 		Page: object.Page{
-			HeadConent: view.SharedHeadContent,
+			HeadConent: view.SharedHeadContent(),
 			Title:      "Welcome",
 		},
 		Name:             payload.GetUsername(),
@@ -132,7 +138,7 @@ func (repo APIRepo) GetAPIKey(w http.ResponseWriter, req *http.Request) {
 
 	pageData := object.APIKeyPage{
 		Page: object.Page{
-			HeadConent: view.SharedHeadContent,
+			HeadConent: view.SharedHeadContent(),
 			Title:      "API Key",
 		},
 		APIVersion:   repo.Version,
@@ -226,6 +232,14 @@ func (repo APIRepo) PostAPIKey(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	if err := repo.FormModifier.Struct(req.Context(), &apikey); err != nil {
+		return
+	}
+
+	if err := repo.Validator.StructCtx(req.Context(), &apikey); err != nil {
+		return
+	}
+
 	apikey.Key = strings.TrimSpace(apikey.Key)
 	if err := validator.Validate.Struct(apikey); err != nil {
 		ecErr := *ec.MustGetEcErr(ec.ECBadRequest)
@@ -276,7 +290,7 @@ func (repo APIRepo) GetEndpoints(w http.ResponseWriter, req *http.Request) {
 
 	pageData := object.APIEndpointFromDBModel(
 		object.Page{
-			HeadConent: view.SharedHeadContent,
+			HeadConent: view.SharedHeadContent(),
 			Title:      "Endpoints",
 		},
 		repo.Version,
@@ -304,12 +318,17 @@ func (repo APIRepo) GetAdmin(w http.ResponseWriter, req *http.Request) {
 
 	pageData := object.APIAdminPage{
 		Page: object.Page{
-			HeadConent: view.SharedHeadContent,
+			HeadConent: view.SharedHeadContent(),
 			Title:      "admin",
 		},
 	}
 	w.WriteHeader(http.StatusOK)
-	_ = repo.View.ExecuteTemplate(w, "admin.gotmpl", pageData)
+	err := repo.View.ExecuteTemplate(w, "admin.gotmpl", pageData)
+	if err != nil {
+		global.Logger.
+			Err(err).
+			Msg("error executing template admin.gotmpl")
+	}
 }
 
 func (repo APIRepo) GetJob(w http.ResponseWriter, req *http.Request) {
@@ -322,13 +341,9 @@ func (repo APIRepo) GetJob(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	hc := view.NewHeadContent()
-	hc.Script.NewHTMLElement().AddPair("src", "/static/js/job_funcs.js")
-	hc.Script.NewHTMLElement().AddPair("src", "//cdnjs.cloudflare.com/ajax/libs/list.js/2.3.1/list.min.js")
-
 	pageData := object.APIResultPage{
 		Page: object.Page{
-			HeadConent: hc,
+			HeadConent: view.JobPageHeadContent(),
 			Title:      "job",
 		},
 		NJobs:       map[string]int{},
@@ -419,8 +434,17 @@ func (repo APIRepo) PostJob(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if pager.FromJId < 0 || pager.ToJId < 0 || pager.JStatusStr == "" || pager.ParseJIds() != nil {
+	if err := repo.FormModifier.Struct(req.Context(), &pager); err != nil {
 		ecErr := ec.MustGetEcErr(ec.ECBadRequest)
+		ecErr.WithDetails(err.Error())
+		w.WriteHeader(ecErr.HttpStatusCode)
+		w.Write(ecErr.MustToJson())
+		return
+	}
+
+	if err := repo.Validator.StructCtx(req.Context(), &pager); err != nil {
+		ecErr := ec.MustGetEcErr(ec.ECBadRequest)
+		ecErr.WithDetails(err.Error())
 		w.WriteHeader(ecErr.HttpStatusCode)
 		w.Write(ecErr.MustToJson())
 		return

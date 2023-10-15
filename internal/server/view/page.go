@@ -2,12 +2,53 @@ package view
 
 import (
 	"net/http"
+	"sync"
 
 	gnews "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/GNews"
 	newsdata "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/NEWSDATA"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/newsapi"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view/object"
 )
+
+type headContentSingleton struct {
+	headContent object.HeadConent
+	once        sync.Once
+}
+
+var sharedHeadContent headContentSingleton
+var jobPageHeadContent headContentSingleton
+
+func SharedHeadContent() object.HeadConent {
+	sharedHeadContent.once.Do(func() {
+		sharedHeadContent.headContent = NewHeadContent()
+	})
+	return sharedHeadContent.headContent
+}
+
+func JobPageHeadContent() object.HeadConent {
+	jobPageHeadContent.once.Do(func() {
+		jobPageHeadContent.headContent = SharedHeadContent().Copy()
+
+		jobPageHeadContent.headContent.
+			Script.NewHTMLElement().
+			AddPair("src", "/static/js/job_funcs.js")
+
+		jobPageHeadContent.headContent.
+			Script.NewHTMLElement().
+			AddPair("src", "//cdnjs.cloudflare.com/ajax/libs/list.js/2.3.1/list.min.js")
+
+		jobPageHeadContent.headContent.
+			Link.NewHTMLElement().
+			AddPair("rel", "stylesheet").
+			AddPair("href", "/static/css/animation.css")
+
+		jobPageHeadContent.headContent.
+			Link.NewHTMLElement().
+			AddPair("rel", "stylesheet").
+			AddPair("href", "/static/css/jobs.css")
+	})
+	return jobPageHeadContent.headContent
+}
 
 func NewHeadContent() object.HeadConent {
 	head := object.HeadConent{
@@ -86,17 +127,15 @@ func NewHeadContent() object.HeadConent {
 	return head
 }
 
-var SharedHeadContent = NewHeadContent()
-
 var ErrorPage500 = object.ErrorPage{
-	Page:               object.Page{HeadConent: SharedHeadContent, Title: "500 error"},
+	Page:               object.Page{HeadConent: SharedHeadContent(), Title: "500 error"},
 	ErrorCode:          500,
 	ErrorMessage:       "Sorry, unexpected error",
 	ErrorDetail:        "The server encountered an internal error or misconfiguration and was unable to complete your request.",
 	ShouldAutoRedirect: false,
 }
 var ErrorPage400 = object.ErrorPage{
-	Page:               object.Page{HeadConent: SharedHeadContent, Title: "400 error"},
+	Page:               object.Page{HeadConent: SharedHeadContent(), Title: "400 error"},
 	ErrorCode:          http.StatusBadRequest,
 	ErrorMessage:       "Bad request",
 	ErrorDetail:        "There was a problem with your request.",
@@ -104,7 +143,7 @@ var ErrorPage400 = object.ErrorPage{
 }
 
 var ErrorPage401 = object.ErrorPage{
-	Page:               object.Page{HeadConent: SharedHeadContent, Title: "401 error"},
+	Page:               object.Page{HeadConent: SharedHeadContent(), Title: "401 error"},
 	ErrorCode:          http.StatusUnauthorized,
 	ErrorMessage:       "Unauthorized",
 	ErrorDetail:        "You are not authorized to access this page.",
@@ -115,7 +154,7 @@ var ErrorPage401 = object.ErrorPage{
 }
 
 var ErrorPage403 = object.ErrorPage{
-	Page:               object.Page{HeadConent: SharedHeadContent, Title: "403 error"},
+	Page:               object.Page{HeadConent: SharedHeadContent(), Title: "403 error"},
 	ErrorCode:          http.StatusForbidden,
 	ErrorMessage:       "Access denied",
 	ErrorDetail:        "You do not have premission to access this page.",
@@ -123,7 +162,7 @@ var ErrorPage403 = object.ErrorPage{
 }
 
 var ErrorPage404 = object.ErrorPage{
-	Page:               object.Page{HeadConent: SharedHeadContent, Title: "404 error"},
+	Page:               object.Page{HeadConent: SharedHeadContent(), Title: "404 error"},
 	ErrorCode:          http.StatusNotFound,
 	ErrorMessage:       "Page not found",
 	ErrorDetail:        "The page you are looking for may have been moved, deleted, or possibly never existed.",
@@ -131,7 +170,7 @@ var ErrorPage404 = object.ErrorPage{
 }
 
 var ErrorPage429 = object.ErrorPage{
-	Page:               object.Page{HeadConent: SharedHeadContent, Title: "409 error"},
+	Page:               object.Page{HeadConent: SharedHeadContent(), Title: "409 error"},
 	ErrorCode:          http.StatusTooManyRequests,
 	ErrorMessage:       "Too Many Requests",
 	ErrorDetail:        "You have sent too many requests to us recently. Please try again later.",

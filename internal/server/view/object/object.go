@@ -36,6 +36,16 @@ func (hc HeadConent) Content() template.HTML {
 	return hc.content
 }
 
+func (hc1 HeadConent) Copy() HeadConent {
+	hc2 := HeadConent{}
+	hc2.Meta = hc1.Meta.Copy()
+	hc2.Link = hc1.Link.Copy()
+	hc2.Script = hc1.Script.Copy()
+	hc2.hasExec = hc1.hasExec
+	hc2.content = hc1.content
+	return hc2
+}
+
 type Page struct {
 	HeadConent
 	Title string

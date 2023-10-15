@@ -19,7 +19,7 @@ type JobCreateRequest struct {
 	Owner    uuid.UUID `validate:"not_uuid_nil,uuid4"`
 	Status   string    `validate:"required,job_status"`
 	SrcApiID int16     `validate:"required,min=1"`
-	SrcQuery string    `validate:"required,url,min=1"`
+	SrcQuery string    `validate:"required,min=1"`
 	LlmApiID int16     `validate:"required,min=1"`
 	LlmQuery string    `validate:"required,json"`
 }

@@ -2,6 +2,7 @@ package global
 
 import (
 	"encoding/json"
+	"path"
 	"time"
 
 	"go.uber.org/ratelimit"
@@ -89,8 +90,24 @@ func (pwdOpt PasswordOption) String() string {
 
 type AppOption struct {
 	Template     []string     `mapstructure:"template"`
+	Log          string       `mapstructure:"log"`
+	Certificate  SSL          `mapstructure:"ssl"`
 	StaticFile   StaticFile   `mapstructure:"staticFile"`
 	RoutePattern RoutePattern `mapstructure:"routePattern"`
+}
+
+type SSL struct {
+	Path     string `mapstructure:"path"`
+	CertFile string `mapstructure:"certificate"`
+	KeyFile  string `mapstructure:"key"`
+}
+
+func (ssl SSL) CertFilePath() string {
+	return path.Join(ssl.Path, ssl.CertFile)
+}
+
+func (ssl SSL) KeyFilePath() string {
+	return path.Join(ssl.Path, ssl.KeyFile)
 }
 
 type RoutePattern struct {

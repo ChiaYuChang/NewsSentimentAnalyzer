@@ -234,6 +234,11 @@ func setDefaultForOption() {
 	viper.SetDefault("App.StaticFile.SubFolder.image", "/image")
 	viper.SetDefault("App.StaticFile.SubFolder.js", "/js")
 	viper.SetDefault("App.StaticFile.SubFolder.css", "/css")
-
 	viper.SetDefault("App.RoutePattern.StaticPage", "/static/*")
+
+	viper.SetDefault("App.Log", "./log.json")
+
+	viper.SetDefault("App.SSL.Path", "./secrets")
+	viper.SetDefault("App.SSL.CertFile", "server.crt")
+	viper.SetDefault("App.SSL.KeyFile", ".server.key")
 }

@@ -136,7 +136,7 @@ func MD5Hash(title string, publishedAt time.Time, content ...string) (string, er
 	return base64.StdEncoding.EncodeToString(hasher.Sum(nil)), nil
 }
 
-func ToRequest(apiURL, apiMethod, apiKey, apiEndpoint string, body io.Reader, q Query) (*http.Request, error) {
+func ToURL(apiURL, apiMethod, apiKey, apiEndpoint string, q Query) (*url.URL, error) {
 	u, err := url.Parse(apiURL)
 	if err != nil {
 		return nil, err
@@ -149,6 +149,15 @@ func ToRequest(apiURL, apiMethod, apiKey, apiEndpoint string, body io.Reader, q 
 
 	u = u.JoinPath(apiEndpoint)
 	u.RawQuery = v.Encode()
+
+	return u, nil
+}
+
+func ToRequest(apiURL, apiMethod, apiKey, apiEndpoint string, body io.Reader, q Query) (*http.Request, error) {
+	u, err := ToURL(apiURL, apiMethod, apiKey, apiEndpoint, q)
+	if err != nil {
+		return nil, err
+	}
 
 	return http.NewRequest(apiMethod, u.String(), body)
 }

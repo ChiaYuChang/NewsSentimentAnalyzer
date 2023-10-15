@@ -1,0 +1,170 @@
+#detail-table-body th {
+    width: 20%;
+    min-width: 8.5rem;
+    text-align: left;
+}
+
+.job-n {
+    text-align: center;
+    /* background-color: #F6F1F1; */
+    background-color: #FFF;
+    border-radius: 5px;
+    min-width: 2rem;
+    width: 15%;
+    color: #146C94;
+}
+
+
+.job-status-group {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.hide {
+    display: hide;
+}
+
+.job-data,
+.job-data:active,
+.job-data:hover {
+    cursor: pointer;
+}
+
+.job-data:active {
+    transform: translate(2px, 1px);
+}
+
+.job-status-label {
+    display: flex;
+    overflow: hidden;
+    min-width: 4rem;
+    width: 5%;
+    flex-direction: row;
+    justify-content: space-between;
+    border-radius: 5px;
+    border: 1px solid #146C94;
+}
+
+.job-status-label-selected {
+    font-weight: 700;
+}
+
+.job-status-label:hover {
+    cursor: pointer;
+}
+
+.job-status-label:hover+hide {
+    display: block;
+}
+
+.job-status-label:active {
+    transform: translate(2px, 1px);
+}
+
+.job-status {
+    font-weight: bold;
+    text-align: center;
+    text-transform: capitalize;
+    margin: 0 .3rem;
+    padding-left: 0.5rem;
+}
+
+tr .job-status {
+    padding-right: 0.5rem;
+    max-width: 6rem;
+}
+
+.job-status[status="all"] {
+    background-color: #146C94;
+    color: #F6F1F1;
+}
+
+.job-status[status="all"]::before {
+    font-family: "Font Awesome 6 Free";
+    content: "\41";
+    padding-right: .5rem;
+}
+
+.job-status[status="created"] {
+    background-color: #F6F1F1;
+    border: 1px solid #000000;
+    color: #146C94;
+}
+
+.job-status[status="created"]::before {
+    font-family: "Font Awesome 6 Free";
+    content: "\f024";
+    padding-right: .5rem;
+}
+
+.job-status[status="running"] {
+    background-color: #FFBF00;
+    color: #F6F1F1;
+}
+
+.job-status[status="running"]::before {
+    font-family: "Font Awesome 6 Free";
+    content: "\f70c";
+    padding-right: .5rem;
+}
+
+.job-status[status="done"] {
+    background-color: #1cb841;
+    color: #F6F1F1;
+}
+
+.job-status[status="done"]::before {
+    font-family: "Font Awesome 6 Free";
+    content: "\f00c";
+    padding-right: .5rem;
+}
+
+.job-status[status="failed"] {
+    background-color: #ca3c3c;
+    color: #F6F1F1;
+}
+
+.job-status[status="failed"]::before {
+    font-family: "Font Awesome 6 Free";
+    content: "\f071";
+    padding-right: .5rem;
+}
+
+.job-status[status="canceled"] {
+    background-color: #646464;
+    color: #F6F1F1;
+}
+
+.job-status[status="canceled"]::before {
+    font-family: "Font Awesome 6 Free";
+    content: "\f2ed";
+    padding-right: .5rem;
+}
+
+.sort {
+    cursor: pointer;
+    user-select: none;
+}
+
+.sort:hover {
+    background-color: #AFD3E2;
+    color: #146C94;
+    text-decoration: none;
+}
+
+.sort:focus {
+    outline: none;
+}
+
+.sort.desc::before {
+    font-family: "Font Awesome 6 Free";
+    content: "\f0dd";
+    padding-right: .5rem;
+}
+
+.sort.asc::before {
+    font-family: "Font Awesome 6 Free";
+    content: "\f0de";
+    padding-right: .5rem;
+}

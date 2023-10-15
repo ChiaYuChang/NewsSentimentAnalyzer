@@ -2,7 +2,13 @@ var pagerCache = new Map();
 var detailCache = new Map();
 
 addEventListener("DOMContentLoaded", (event) => {
-    showLoadingAnimation()
+    console.log("showLoadingAnimation")
+    showLoadingAnimation();
+
+    console.log("updatePageButton")
+    updatePageButton();
+
+    console.log("getJobs")
     getJobs();
 });
 
@@ -131,7 +137,7 @@ var item_func = function (values) {
     return `
         <tr class='job-data' onclick=${values["onclick"]}>",
         <th class='job-id mono'>${values["job-id"]}</th>",
-        <td><div class='job-status' style='width:90%;text-align:center' status=${values["job-status"]}>${values["job-status"]}</div></td>",
+        <td><div class='job-status' status=${values["job-status"]}>${values["job-status"]}</div></td>",
         <td class='job-news_src'>${values["job-news_src"]}</td>",
         <td class='job-analyzer'>${values["job-analyzer"]}</td>",
         <td class='job-updated_at mono'>${values["job-updated_at"]}</td>",
@@ -143,9 +149,12 @@ function newList(data) {
         data[i]["onclick"] = `getJobDetails(${data[i]["job-id"]})`
     }
 
+    console.log(data)
+
     var options = {
         valueNames: [
-            "job-id", "job-status", "job-news_src", "job-analyzer", "job-created_at", "job-updated_at",
+            "job-id", "job-status", "job-news_src", "job-analyzer",
+            "job-created_at", "job-updated_at",
             { attr: "onclick", name: "job-details" },
         ], item: item_func,
     };
@@ -154,7 +163,7 @@ function newList(data) {
     el.replaceChildren()
 
     jobList = new List('qurey-result', options, data);
-    jobList.sort('job-id', { order: "desc" })
+    // jobList.sort('job-id', { order: "desc" })
 }
 
 async function getJobs() {
@@ -162,17 +171,13 @@ async function getJobs() {
 
     let ckey = getKey(pager.jstatus, pager.page)
     if (pagerCache.has(ckey)) {
-        // debug only
-        // console.log("from cache")
-
+        console.log("use cache")
         let data = pagerCache.get(ckey)["data"];
         pager.fjid = data[data.length - 1]["job-id"];
         pager.tjid = data[0]["job-id"];
         newList(data)
     } else {
-        // debug only
-        // console.log("from query")
-
+        console.log("fetch new data")
         for (const key in pager) {
             fdata.append(key, pager[key]);
         }
@@ -207,9 +212,6 @@ async function getJobDetails(id) {
     var data
     if (detailCache.has(id)) {
         data = detailCache.get(id)
-
-        // debug only
-        // console.log("read from cache")
     } else {
         const response = await fetch(`/v1/job/${id}`);
         if (response.status != 200) {
@@ -219,9 +221,6 @@ async function getJobDetails(id) {
         }
         data = await response.json();
         detailCache.set(id, data)
-
-        // debug only
-        // console.log("read from query")
     }
     const dtbodyEl = document.getElementById("detail-table-body")
     dtbodyEl.replaceChildren()
@@ -282,7 +281,6 @@ async function getJobDetails(id) {
         let th = document.createElement("th")
         th.textContent = f.row_header
         th.setAttribute("scope", "row")
-        th.setAttribute("style", "width:20%;min-width:8.5rem;text-align:left")
 
         let td = document.createElement("td")
         if (f.field_name === "job-analyzer_query") {
@@ -296,7 +294,6 @@ async function getJobDetails(id) {
             div.setAttribute("class", "job-status")
             div.setAttribute("status", data[f.field_name])
             div.textContent = data[f.field_name];
-            div.setAttribute("style", "width:6rem")
             td.appendChild(div)
         } else {
             td.textContent = data[f.field_name]

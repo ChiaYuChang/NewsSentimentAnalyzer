@@ -2,7 +2,7 @@ include .env
 
 build:
 	@go build -o ${BIN_PATH}/${APP_NAME} ./main.go && \
-		chmod +x ./${APP_NAME}
+		chmod +x ${BIN_PATH}/${APP_NAME}
 
 build-wasm:
 	@GOARCH=wasm GOOS=js go build -o ${WASM_PATH}/${WASM_NAME} ./thirdparty/wasm/main.go
@@ -114,7 +114,7 @@ gen-public-key: gen-private-key
 # 	-config ssl.conf
 
 run: docker-up-db build build-wasm
-	./${APP_NAME} -v v1 -c ./config/config.json -s development -h localhost -p 8001
+	${BIN_PATH}/${APP_NAME} -v v1 -c ./config/config.json -s development -h localhost -p 8001
 
 build-milvus-health-check:
 	@go build -o bin/milvus-health-check ./thirdparty/milvus-health-check/main.go && \

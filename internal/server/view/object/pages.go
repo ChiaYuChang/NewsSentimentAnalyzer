@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"path"
+	"strings"
 	"time"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
@@ -133,6 +134,79 @@ type APIAdminPage struct {
 	Page
 }
 
+type PasswordInput struct {
+	IdPrefix              string
+	Name                  string
+	PlaceHolder           string
+	PasswordStrengthCheck bool
+	PasswordCreteria      []PasswordCreterion
+	AlertMessage          string
+}
+
+func (p PasswordInput) ShowAlert() bool {
+	return p.AlertMessage != ""
+}
+
+type PasswordCreterion struct {
+	Id       string
+	Name     string
+	Min, Max int
+	Class    []string
+	Regx     template.JS
+}
+
+var DefaultPasswordCreteria = []PasswordCreterion{
+	{
+		Id:    "new_pwd_length",
+		Name:  "length",
+		Min:   global.AppVar.Password.MinLength,
+		Max:   global.AppVar.Password.MaxLength,
+		Class: []string{"invalid"}, Regx: "/./g",
+	},
+	{
+		Id:    "new_pwd_n_lower",
+		Name:  "lower case",
+		Min:   global.AppVar.Password.MinNumLower,
+		Max:   -1,
+		Class: []string{"invalid"}, Regx: "/[a-z]/g",
+	},
+	{
+		Id:    "new_pwd_n_upper",
+		Name:  "upper case",
+		Min:   global.AppVar.Password.MinNumUpper,
+		Max:   -1,
+		Class: []string{"invalid"}, Regx: "/[A-Z]/g",
+	},
+	{
+		Id:    "new_pwd_n_number",
+		Name:  "digit",
+		Min:   global.AppVar.Password.MinNumDigit,
+		Max:   -1,
+		Class: []string{"invalid"}, Regx: `/\d/g`,
+	},
+	{
+		Id:    "new_pwd_n_special",
+		Name:  "special character",
+		Min:   global.AppVar.Password.MinNumSpecial,
+		Max:   -1,
+		Class: []string{"invalid"}, Regx: `/[-#$.%&@!+=<>*\\/]/g`,
+	},
+}
+
+func (c PasswordCreterion) ClassList() string {
+	return strings.Join(c.Class, " ")
+}
+
+func (c PasswordCreterion) Message() string {
+	if c.Max < 0 {
+		if c.Min == 1 {
+			return fmt.Sprintf("Must contain at least %d %s", c.Min, c.Name)
+		}
+		return fmt.Sprintf("Must contain at least %d %ss", c.Min, c.Name)
+	}
+	return fmt.Sprintf("Must be between %d and %d %ss", c.Min, c.Max, c.Name)
+}
+
 type APIKeyPage struct {
 	Page
 	APIOption
@@ -184,8 +258,10 @@ func APIKeyFromDBModel(page Page, rows []*model.ListAPIKeyRow) APIKeyPage {
 
 type ChangePasswordPage struct {
 	Page
-	ShowPasswordNotMatchAlert         bool
-	ShowShouldNotUsedOldPasswordAlert bool
+	OldPassword PasswordInput
+	NewPassword PasswordInput
+	// ShowPasswordNotMatchAlert         bool
+	// ShowShouldNotUsedOldPasswordAlert bool
 }
 
 type APIEndpointSelectionPage struct {

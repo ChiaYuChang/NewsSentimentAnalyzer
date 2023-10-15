@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"sync"
-	"time"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model"
@@ -15,15 +14,16 @@ import (
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/auth"
 	cookiemaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/cookieMaker"
 	errorhandler "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/errorHandler"
+	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm"
 	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/GNews"
 	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/NEWSDATA"
 	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/newsapi"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/validator"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view"
 	tokenmaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/tokenMaker"
 	"github.com/go-chi/chi/v5"
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
-	"github.com/go-playground/form"
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog"
 	"github.com/spf13/viper"
@@ -37,13 +37,13 @@ func NewRouter(srvc service.Service, rds *redis.Client, vw view.View,
 		os.Exit(1)
 	}
 
-	formDecoder := form.NewDecoder()
-	formDecoder.RegisterCustomTypeFunc(func(vals []string) (interface{}, error) {
-		return time.Parse(time.DateOnly, vals[0])
-	}, time.Time{})
+	auth := auth.NewAuthRepo(
+		viper.GetString("APP_API_VERSION"),
+		srvc, vw, tmaker, validator.Validate, pageform.Decoder, pageform.Modifier)
 
-	auth := auth.NewAuthRepo(viper.GetString("APP_API_VERSION"), srvc, vw, tmaker, formDecoder)
-	apiRepo := api.NewAPIRepo(viper.GetString("APP_API_VERSION"), srvc, vw, tmaker, formDecoder)
+	apiRepo := api.NewAPIRepo(
+		viper.GetString("APP_API_VERSION"),
+		srvc, vw, tmaker, validator.Validate, pageform.Decoder, pageform.Modifier)
 
 	epRepo := apiRepo.EndpointRepo()
 	epChan := make(chan *model.ListAllEndpointRow)

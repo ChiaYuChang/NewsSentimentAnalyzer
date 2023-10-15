@@ -2,6 +2,7 @@ package api
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -61,7 +62,7 @@ func NewEndpointRepo(apiRepo APIRepo, v *val.Validate) EndpointRepo {
 func (repo *EndpointRepo) RegisterEndpointsPageView(apiName string, apiId int16, endpointName, templateName string) error {
 	pageData := object.APIEndpointPage{
 		Page: object.Page{
-			HeadConent: view.SharedHeadContent,
+			HeadConent: view.SharedHeadContent(),
 			Title:      endpointName,
 		},
 		API:      apiName,
@@ -137,7 +138,9 @@ func postEndpoints(repo EndpointRepo, obj pageform.PageForm, w http.ResponseWrit
 		Msg("Get User Info OK")
 
 	if err := req.ParseForm(); err != nil {
-		fmt.Println(err)
+		global.Logger.Error().
+			Err(err).
+			Msg("error while calling .ParseForm method")
 		return
 	}
 	global.Logger.Info().
@@ -145,7 +148,9 @@ func postEndpoints(repo EndpointRepo, obj pageform.PageForm, w http.ResponseWrit
 
 	obj, err := obj.FormDecodeAndValidate(repo.apiRepo.FormDecoder, repo.val, req.PostForm)
 	if err != nil {
-		fmt.Println(err)
+		global.Logger.Error().
+			Err(err).
+			Msg("error while calling .FormDecodeAndValidate method")
 		return
 	}
 	global.Logger.Info().
@@ -160,26 +165,47 @@ func postEndpoints(repo EndpointRepo, obj pageform.PageForm, w http.ResponseWrit
 
 	q, err := client.PageFormHandlerRepo.NewQueryFromPageFrom(apikey.Key, obj)
 	if err != nil {
-		fmt.Println(err)
+		global.Logger.Error().
+			Err(err).
+			Msg("error while calling .NewQueryFromPageFrom method")
+		return
 	}
 
-	repo.apiRepo.Service.Job().Create(
+	jsn, err := json.Marshal(q.Params())
+	if err != nil {
+		global.Logger.Error().
+			Err(err).
+			Msg("error while calling Marshaling params")
+		return
+	}
+
+	id, err := repo.apiRepo.Service.Job().Create(
 		req.Context(), &service.JobCreateRequest{
 			Owner:    userInfo.GetUserID(),
 			Status:   string(model.JobStatusCreated),
 			SrcApiID: apikey.ApiID,
-			SrcQuery: q.Params().ToQueryString(),
+			// SrcQuery: q.Params().ToQueryString(),
+			SrcQuery: string(jsn),
+			LlmApiID: 4,
+			LlmQuery: "{}",
 		},
 	)
 
-	fmt.Fprintf(w,
-		"User: %s(%s)\nAPI: %s\nEndpoint: %s\nQuery: %s\n%s\n",
-		userInfo.GetUsername(),
-		userInfo.GetRole(),
-		obj.API(),
-		obj.Endpoint(),
-		q.Params().ToQueryString(),
-		obj.String(),
-	)
+	if err != nil {
+		global.Logger.Error().
+			Err(err).
+			Msg("error while creating job")
+		return
+	}
+
+	global.Logger.Info().
+		Str("user", userInfo.GetUsername()).
+		Str("role", userInfo.GetRole().String()).
+		Str("api", obj.API()).
+		Str("endpoint", obj.Endpoint()).
+		Str("query", q.Params().ToQueryString()).
+		Int32("job", id).
+		Msg("Job Created OK")
+
 	return
 }

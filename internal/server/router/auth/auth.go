@@ -15,27 +15,36 @@ import (
 	ec "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/errorCode"
 	tokenmaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/tokenMaker"
 	"github.com/go-playground/form"
+	"github.com/go-playground/mold/v4"
+
 	val "github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthRepo struct {
-	APIVersion  string
-	Service     service.Service
-	View        view.View
-	TokenMaker  tokenmaker.TokenMaker
-	FormDecoder *form.Decoder
+	APIVersion   string
+	Service      service.Service
+	View         view.View
+	TokenMaker   tokenmaker.TokenMaker
+	Validator    *val.Validate
+	FormDecoder  *form.Decoder
+	FormModifier *mold.Transformer
 }
 
-func NewAuthRepo(version string, srvc service.Service, view view.View,
-	tokenmaker tokenmaker.TokenMaker, decoder *form.Decoder) AuthRepo {
+func NewAuthRepo(
+	version string, srvc service.Service, view view.View,
+	tokenmaker tokenmaker.TokenMaker, validator *val.Validate,
+	decoder *form.Decoder, modifier *mold.Transformer) AuthRepo {
+
 	return AuthRepo{
-		APIVersion:  version,
-		Service:     srvc,
-		View:        view,
-		TokenMaker:  tokenmaker,
-		FormDecoder: decoder,
+		APIVersion:   version,
+		Service:      srvc,
+		View:         view,
+		TokenMaker:   tokenmaker,
+		Validator:    validator,
+		FormDecoder:  decoder,
+		FormModifier: modifier,
 	}
 }
 
@@ -71,6 +80,31 @@ func (repo AuthRepo) PostSignIn(w http.ResponseWriter, req *http.Request) {
 
 	var auth pageform.AuthInfo
 	repo.FormDecoder.Decode(&auth, req.PostForm)
+	repo.FormModifier.Struct(req.Context(), &auth)
+
+	// if err := repo.Validator.StructCtx(req.Context(), &auth); err != nil {
+	// 	data := object.LoginPage{
+	// 		Page: object.Page{
+	// 			HeadConent: view.NewHeadContent(),
+	// 			Title:      "Sign-In",
+	// 		},
+	// 		Username: auth.Email,
+	// 	}
+
+	// 	vErors := err.(val.ValidationErrors)
+	// 	for _, fError := range vErors {
+	// 		if fError.Tag() == "email" {
+	// 			data.ShowUsernameNotFountAlert = true
+	// 		}
+	// 		if fError.Tag() == "password" {
+	// 			data.ShowPasswordMismatchAlert = true
+	// 		}
+	// 	}
+	// 	repo.View.ExecuteTemplate(w, "login.gotmpl", data)
+	// 	return
+	// }
+
+	global.Logger.Debug().Msg("check db")
 	err, uid, role := repo.Service.User().
 		Login(context.Background(), auth.Email, auth.Password)
 
@@ -99,6 +133,7 @@ func (repo AuthRepo) PostSignIn(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	global.Logger.Debug().Msg("make token")
 	bearer, err := repo.TokenMaker.
 		MakeToken(auth.Email, uid, tokenmaker.ParseRole(role))
 	if err != nil {
@@ -110,7 +145,10 @@ func (repo AuthRepo) PostSignIn(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	global.Logger.Debug().Msg("set cookie")
 	http.SetCookie(w, cookiemaker.NewCookie(cookiemaker.AUTH_COOKIE_KEY, bearer))
+
+	global.Logger.Debug().Msg("redirect")
 	http.Redirect(w, req,
 		fmt.Sprintf("/%s/%s", repo.APIVersion, global.AppVar.App.RoutePattern.Page["welcome"]),
 		http.StatusSeeOther)
@@ -130,8 +168,7 @@ func (repo AuthRepo) GetSignUp(w http.ResponseWriter, req *http.Request) {
 }
 
 func (repo AuthRepo) PostSignUp(w http.ResponseWriter, req *http.Request) {
-	err := req.ParseForm()
-	if err != nil {
+	if err := req.ParseForm(); err != nil {
 		ecErr := ec.MustGetEcErr(ec.ECBadRequest)
 		ecErr.WithDetails(fmt.Sprintf("client error: %s", err))
 		w.Header().Set("Content-Type", "application/json")
@@ -141,8 +178,7 @@ func (repo AuthRepo) PostSignUp(w http.ResponseWriter, req *http.Request) {
 	}
 
 	var signUpInfo pageform.SignUpInfo
-	err = repo.FormDecoder.Decode(&signUpInfo, req.PostForm)
-	if err != nil {
+	if err := repo.FormDecoder.Decode(&signUpInfo, req.PostForm); err != nil {
 		ecErr := ec.MustGetEcErr(ec.ECBadRequest)
 		ecErr.WithDetails(fmt.Sprintf("error while get auth info: %s", err))
 		w.Header().Set("Content-Type", "application/json")
@@ -151,9 +187,17 @@ func (repo AuthRepo) PostSignUp(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	_, err = repo.Service.User().
-		GetAuthInfo(context.Background(), signUpInfo.Email)
-	if err == nil {
+	if err := repo.FormModifier.Struct(req.Context(), &signUpInfo); err != nil {
+		ecErr := ec.MustGetEcErr(ec.ECBadRequest)
+		ecErr.WithDetails(fmt.Sprintf("error while modifying auth info: %s", err))
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(ecErr.HttpStatusCode)
+		w.Write(ecErr.MustToJson())
+		return
+	}
+
+	if _, err := repo.Service.User().
+		GetAuthInfo(context.Background(), signUpInfo.Email); err == nil {
 		w.WriteHeader(http.StatusOK)
 		repo.View.ExecuteTemplate(w, "signup.gotmpl", object.SignUpPage{
 			Page: object.Page{
@@ -163,16 +207,16 @@ func (repo AuthRepo) PostSignUp(w http.ResponseWriter, req *http.Request) {
 			ShowUsernameHasUsedAlert: true,
 		})
 		return
-	}
-
-	if !errors.Is(err, pgx.ErrNoRows) {
-		ecErr := ec.MustGetEcErr(ec.ECServerError)
-		if err != nil {
-			ecErr.WithDetails(fmt.Sprintf("error while get auth info: %s", err))
+	} else {
+		if !errors.Is(err, pgx.ErrNoRows) {
+			ecErr := ec.MustGetEcErr(ec.ECServerError)
+			if err != nil {
+				ecErr.WithDetails(fmt.Sprintf("error while get auth info: %s", err))
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(ecErr.HttpStatusCode)
+			w.Write(ecErr.MustToJson())
 		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(ecErr.HttpStatusCode)
-		w.Write(ecErr.MustToJson())
 	}
 
 	r := &service.UserCreateRequest{
@@ -231,8 +275,20 @@ func (repo AuthRepo) GetChangePassword(w http.ResponseWriter, req *http.Request)
 			HeadConent: view.NewHeadContent(),
 			Title:      "API Key",
 		},
-		ShowPasswordNotMatchAlert:         false,
-		ShowShouldNotUsedOldPasswordAlert: false,
+		OldPassword: object.PasswordInput{
+			IdPrefix:              "old",
+			Name:                  "old-password",
+			PlaceHolder:           "Old Password",
+			PasswordStrengthCheck: false,
+			PasswordCreteria:      nil,
+		},
+		NewPassword: object.PasswordInput{
+			IdPrefix:              "new",
+			Name:                  "new-password",
+			PlaceHolder:           "New Password",
+			PasswordStrengthCheck: true,
+			PasswordCreteria:      object.DefaultPasswordCreteria,
+		},
 	}
 	w.WriteHeader(http.StatusOK)
 	_ = repo.View.ExecuteTemplate(w, "change_password.gotmpl", pageData)
@@ -269,6 +325,19 @@ func (repo AuthRepo) PostChangPassword(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
+	if err := repo.FormModifier.Struct(req.Context(), &changePasswordInfo); err != nil {
+		ecErr := ec.MustGetEcErr(ec.ECBadRequest)
+		ecErr.WithDetails(fmt.Sprintf("error while get auth info: %s", err))
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(ecErr.HttpStatusCode)
+		w.Write(ecErr.MustToJson())
+		return
+	}
+
+	// if err := repo.Validator.StructCtx(req.Context(), &changePasswordInfo); err != nil {
+
+	// }
+
 	if err, _, _ := repo.Service.User().Login(
 		req.Context(), userInfo.GetUsername(),
 		changePasswordInfo.OldPassword); err != nil {
@@ -277,8 +346,21 @@ func (repo AuthRepo) PostChangPassword(w http.ResponseWriter, req *http.Request)
 				HeadConent: view.NewHeadContent(),
 				Title:      "API Key",
 			},
-			ShowPasswordNotMatchAlert:         true,
-			ShowShouldNotUsedOldPasswordAlert: false,
+			OldPassword: object.PasswordInput{
+				IdPrefix:              "old",
+				Name:                  "old-password",
+				PlaceHolder:           "Old Password",
+				PasswordStrengthCheck: false,
+				PasswordCreteria:      nil,
+				AlertMessage:          "Your current password is missing or incorrect.",
+			},
+			NewPassword: object.PasswordInput{
+				IdPrefix:              "new",
+				Name:                  "new-password",
+				PlaceHolder:           "New Password",
+				PasswordStrengthCheck: true,
+				PasswordCreteria:      object.DefaultPasswordCreteria,
+			},
 		}
 		fmt.Println(err)
 		w.WriteHeader(http.StatusOK)
@@ -292,8 +374,21 @@ func (repo AuthRepo) PostChangPassword(w http.ResponseWriter, req *http.Request)
 				HeadConent: view.NewHeadContent(),
 				Title:      "API Key",
 			},
-			ShowPasswordNotMatchAlert:         false,
-			ShowShouldNotUsedOldPasswordAlert: true,
+			OldPassword: object.PasswordInput{
+				IdPrefix:              "old",
+				Name:                  "old-password",
+				PlaceHolder:           "Old Password",
+				PasswordStrengthCheck: false,
+				PasswordCreteria:      nil,
+			},
+			NewPassword: object.PasswordInput{
+				IdPrefix:              "new",
+				Name:                  "new-password",
+				PlaceHolder:           "New Password",
+				PasswordStrengthCheck: true,
+				PasswordCreteria:      object.DefaultPasswordCreteria,
+				AlertMessage:          "Your new password cannot not be the same as your current password.",
+			},
 		}
 		w.WriteHeader(http.StatusOK)
 		_ = repo.View.ExecuteTemplate(w, "change_password.gotmpl", pageData)

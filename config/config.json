@@ -49,6 +49,12 @@
       "views/template/*.gotmpl",
       "views/template/endpoint/*.gotmpl"
     ],
+    "log": "./log.json",
+    "ssl": {
+      "path": "./secrets",
+      "certificate": "server.crt",
+      "key": "server.key"
+    },
     "routePattern": {
       "page": {
         "login": "/login",

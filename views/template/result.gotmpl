@@ -3,7 +3,6 @@
 
 <head>
     {{template "head" .Page.HeadConent}}
-    <link rel="stylesheet" href="/static/css/animation.css" /link>
     <script>
     var nStatus = {
     {{range $key, $val := .NJobs}} {{$key}} : {{$val}},
@@ -27,9 +26,6 @@
         direction: qNext,
     };
     </script>
-    <script src="/static/js/job_funcs.js">  </script>
-
-    <script src="/static/js/list.min.js"></script>
     <title>{{.Page.Title}}</title>
 </head>
 
@@ -40,39 +36,21 @@
             <div class="job-status-group">
                 <div title="All" class="job-status-label job-status job-status-label-selected"
                 onclick='updateQuery("all")' status="all">
-                    <div class="job-status">
-                        <i class="fa-solid fa-a"></i>
-                    </div>
                     <div class="job-n">{{.TotalJobs}}</div>
                 </div>
                 <div title="Created" class="job-status-label job-status" status="created" onclick='updateQuery("created", {{.NCreated}})'>
-                    <div class="job-status">
-                        <i class="fa-regular fa-flag"></i>
-                    </div>
                     <div class="job-n">{{.NCreated}}</div>
                 </div>
                 <div title="Running" class="job-status-label job-status" status="running" onclick='updateQuery("running", {{.NRunning}})'>
-                    <div class="job-status">
-                        <i class="fa-regular fa-person-running"></i>
-                    </div>
                     <div class="job-n">{{.NRunning}}</div>
                 </div>
                 <div title="Done" class="job-status-label job-status" status="done" onclick='updateQuery("done", {{.NDone}})'>
-                    <div class="job-status">
-                        <i class="fa-solid fa-check"></i>
-                    </div>
                     <div class="job-n">{{.NDone}}</div>
                 </div>
                 <div title="Failed"  class="job-status-label job-status" status="failed" onclick='updateQuery("failed", {{.NFailed}})'>
-                    <div class="job-status">
-                        <i class="fa-solid fa-triangle-exclamation"></i>
-                    </div>
                     <div class="job-n">{{.NFailed}}</div>
                 </div>
                 <div  title="Canceled" class="job-status-label job-status" status="canceled" onclick='updateQuery("canceled", {{.NCanceled}})'>
-                    <div class="job-status">
-                        <i class="fa-regular fa-trash-can"></i>
-                    </div>
                     <div class="job-n">{{.NCanceled}}</div>
                 </div>
             </div>
@@ -80,8 +58,8 @@
                 <table id="qurey-result" class="pure-table pure-table-horizontal striped-table">
                     <thead>
                         <tr>
-                            <th class="sort sort-by-id" data-sort="job-id">Id</th>
-                            <th class="sort sort-by-status" data-sort="job-status">Status</th>
+                            <th class="sort sort-by-id" style="width:3rem;" data-sort="job-id">Id</th>
+                            <th class="sort sort-by-status" style="width:6rem;" data-sort="job-status">Status</th>
                             <th class="sort sort-by-news_src" data-sort="job-news_src">News API</th>
                             <th class="sort sort-by-analyzer" data-sort="job-analyzer">LLM</th>
                             <th class="sort sort-by-updated_at" data-sort="job-updated_at">Last Updated</th>

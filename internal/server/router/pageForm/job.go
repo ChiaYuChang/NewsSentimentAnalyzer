@@ -8,13 +8,13 @@ import (
 )
 
 type JobPager struct {
-	JStatusStr string  `form:"jstatus" validate:"required"`
-	FromJId    int32   `form:"fjid" validate:"min=0"`
-	ToJId      int32   `form:"tjid" validate:"min=0"`
-	Page       int     `form:"page" validate:"min=0"`
-	Direction  bool    `form:"direction"`
-	JIdsStr    string  `form:"jids"`
-	JIds       []int32 `form:"-"`
+	JStatusStr string  `mod:"trim"  form:"jstatus"     validate:"required"`
+	FromJId    int32   `            form:"fjid"        validate:"min=0"`
+	ToJId      int32   `            form:"tjid"        validate:"min=0"`
+	Page       int     `            form:"page"        validate:"min=0"`
+	Direction  bool    `            form:"direction"`
+	JIdsStr    string  `mod:"trim"  form:"jids"`
+	JIds       []int32 `            form:"-"`
 }
 
 func (jp *JobPager) ParseJIds() error {

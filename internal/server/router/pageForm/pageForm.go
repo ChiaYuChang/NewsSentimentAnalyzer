@@ -4,9 +4,11 @@ import (
 	"errors"
 	"net/url"
 	"reflect"
+	"time"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/validator"
 	"github.com/go-playground/form"
+	"github.com/go-playground/mold/v4"
 	val "github.com/go-playground/validator/v10"
 )
 
@@ -15,7 +17,20 @@ func init() {
 		LocationValidator.Tag(),
 		LocationValidator.ValFunc(),
 	)
+
+	Decoder = form.NewDecoder()
+	Decoder.RegisterCustomTypeFunc(func(vals []string) (interface{}, error) {
+		if len(vals[0]) == 0 {
+			return time.Time{}, nil
+		}
+		return time.Parse(time.DateOnly, vals[0])
+	}, time.Time{})
+
+	Modifier = mold.New()
 }
+
+var Decoder *form.Decoder
+var Modifier *mold.Transformer
 
 var ErrUnregisteredPageForm = errors.New("unregistered pageform")
 

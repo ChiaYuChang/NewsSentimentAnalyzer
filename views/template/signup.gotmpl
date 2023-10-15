@@ -3,6 +3,20 @@
 
 <head>
     {{template "head" .Page.HeadConent}}
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            criteria.forEach((criterion) => {
+                criterion.element = document.getElementById(criterion.id);
+                console.log(criterion)
+            });
+            const password = document.getElementById("password");
+
+            password.addEventListener("keyup", () => {
+                console.log("password: " + password.value);
+                updateValidationStatus(password.value);
+            });
+        });
+    </script>
     <title>{{.Page.Title}}</title>
 </head>
 
@@ -38,10 +52,7 @@
                             {{end}}
                         </div>
                         {{if .ShowUsernameHasUsedAlert}}
-                        <div class="alert">
-                            <img src="/static/image/symbol_alert.svg" alt="alert" class="alert-icon">
-                            <span>Username already used</span>
-                        </div>
+                        <div class="alert">Username already used</div>
                         {{end}}
                     </li>
                     <li>

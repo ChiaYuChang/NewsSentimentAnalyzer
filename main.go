@@ -133,9 +133,15 @@ func main() {
 		Msgf("API version: %s", viper.GetString("APP_API_VERSION"))
 
 	startAt := time.Now()
+	global.Logger.Info().
+		Msgf("Cert: %s", global.AppVar.App.Certificate.CertFilePath())
+	global.Logger.Info().
+		Msgf("Key : %s", global.AppVar.App.Certificate.KeyFilePath())
 	if err := server.ListenAndServeTLS(
-		"./secrets/server.crt",
-		"./secrets/server.key",
+		// "./secrets/server.crt",
+		// "./secrets/server.key",
+		global.AppVar.App.Certificate.CertFilePath(),
+		global.AppVar.App.Certificate.KeyFilePath(),
 	); err != nil && err != http.ErrServerClosed {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)

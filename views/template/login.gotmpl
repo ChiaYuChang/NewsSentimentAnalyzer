@@ -20,10 +20,7 @@
                          value="{{.Username}}" required>
                     </li>
                     {{if .ShowUsernameNotFountAlert}}
-                    <div class="alert">
-                        <img src="/static/image/symbol_alert.svg" alt="alert" class="alert-icon">
-                        <span>Couldn’t find your Account</span>
-                    </div>
+                    <div class="alert">Couldn’t find your Account</div>
                     {{end}}
                     <li class="data-field">
                         <div class="form-icon">
@@ -32,10 +29,7 @@
                         <input type="password" placeholder="Password" id="password" name="password" minlength="8" class="form-input" required>
                     </li>
                     {{if .ShowPasswordMismatchAlert}}
-                    <div class="alert">
-                        <img src="/static/image/symbol_alert.svg" alt="alert" class="alert-icon">
-                        <span>Wrong password. Please try again.</span>
-                    </div>
+                    <div class="alert">Wrong password. Please try again.</div>
                     </span>{{end}}
                 </ul>
                 <button type="submit" form="auth-info" class="btn">
