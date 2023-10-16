@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"path"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
@@ -155,42 +156,54 @@ type PasswordCreterion struct {
 	Regx     template.JS
 }
 
-var DefaultPasswordCreteria = []PasswordCreterion{
-	{
-		Id:    "new_pwd_length",
-		Name:  "length",
-		Min:   global.AppVar.Password.MinLength,
-		Max:   global.AppVar.Password.MaxLength,
-		Class: []string{"invalid"}, Regx: "/./g",
-	},
-	{
-		Id:    "new_pwd_n_lower",
-		Name:  "lower case",
-		Min:   global.AppVar.Password.MinNumLower,
-		Max:   -1,
-		Class: []string{"invalid"}, Regx: "/[a-z]/g",
-	},
-	{
-		Id:    "new_pwd_n_upper",
-		Name:  "upper case",
-		Min:   global.AppVar.Password.MinNumUpper,
-		Max:   -1,
-		Class: []string{"invalid"}, Regx: "/[A-Z]/g",
-	},
-	{
-		Id:    "new_pwd_n_number",
-		Name:  "digit",
-		Min:   global.AppVar.Password.MinNumDigit,
-		Max:   -1,
-		Class: []string{"invalid"}, Regx: `/\d/g`,
-	},
-	{
-		Id:    "new_pwd_n_special",
-		Name:  "special character",
-		Min:   global.AppVar.Password.MinNumSpecial,
-		Max:   -1,
-		Class: []string{"invalid"}, Regx: `/[-#$.%&@!+=<>*\\/]/g`,
-	},
+type passwordCreteriaSingleton struct {
+	PasswordCreterion []PasswordCreterion
+	sync.Once
+}
+
+var defaultPasswordCreteria passwordCreteriaSingleton
+
+func GetDefaultPasswordCreteria() []PasswordCreterion {
+	defaultPasswordCreteria.Do(func() {
+		defaultPasswordCreteria.PasswordCreterion = []PasswordCreterion{
+			{
+				Id:    "new_pwd_length",
+				Name:  "length",
+				Min:   global.AppVar.Password.MinLength,
+				Max:   global.AppVar.Password.MaxLength,
+				Class: []string{"invalid"}, Regx: "/./g",
+			},
+			{
+				Id:    "new_pwd_n_lower",
+				Name:  "lower case",
+				Min:   global.AppVar.Password.MinNumLower,
+				Max:   -1,
+				Class: []string{"invalid"}, Regx: "/[a-z]/g",
+			},
+			{
+				Id:    "new_pwd_n_upper",
+				Name:  "upper case",
+				Min:   global.AppVar.Password.MinNumUpper,
+				Max:   -1,
+				Class: []string{"invalid"}, Regx: "/[A-Z]/g",
+			},
+			{
+				Id:    "new_pwd_n_number",
+				Name:  "digit",
+				Min:   global.AppVar.Password.MinNumDigit,
+				Max:   -1,
+				Class: []string{"invalid"}, Regx: `/\d/g`,
+			},
+			{
+				Id:    "new_pwd_n_special",
+				Name:  "special character",
+				Min:   global.AppVar.Password.MinNumSpecial,
+				Max:   -1,
+				Class: []string{"invalid"}, Regx: `/[-#$.%&@!+=<>*\\/]/g`,
+			},
+		}
+	})
+	return defaultPasswordCreteria.PasswordCreterion
 }
 
 func (c PasswordCreterion) ClassList() string {

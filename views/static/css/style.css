@@ -254,13 +254,21 @@ header {
     position: relative;
 }
 
-.pwd-stength-check {
+.password-stength-check {
     position: absolute;
     display: none;
-
 }
 
-.password-container input[type='password']:focus+.pwd-stength-check {
+.password-container .password-validity {
+    position: absolute;
+    background-color: transparent;
+    color: green;
+    top: 50%;
+    right: .5rem;
+    transform: translateY(-50%);
+}
+
+.password-container input[type='password']:focus+.password-stength-check {
     z-index: 1;
     display: block;
     font-size: 1rem;

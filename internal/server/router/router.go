@@ -119,6 +119,7 @@ func NewRouter(srvc service.Service, rds *redis.Client, vw view.View,
 
 		r.Get(rp.Page["change-password"], auth.GetChangePassword)
 		r.Post(rp.Page["change-password"], auth.PostChangPassword)
+		r.Patch(rp.Page["change-password"], auth.PatchChangePassword)
 
 		r.Get(rp.Page["admin"], apiRepo.GetAdmin)
 

@@ -2,8 +2,10 @@ package auth
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
@@ -281,13 +283,15 @@ func (repo AuthRepo) GetChangePassword(w http.ResponseWriter, req *http.Request)
 			PlaceHolder:           "Old Password",
 			PasswordStrengthCheck: false,
 			PasswordCreteria:      nil,
+			AlertMessage:          "Your current password is missing or incorrect.",
 		},
 		NewPassword: object.PasswordInput{
 			IdPrefix:              "new",
 			Name:                  "new-password",
 			PlaceHolder:           "New Password",
 			PasswordStrengthCheck: true,
-			PasswordCreteria:      object.DefaultPasswordCreteria,
+			PasswordCreteria:      object.GetDefaultPasswordCreteria(),
+			AlertMessage:          "Your new password cannot not be the same as your current password.",
 		},
 	}
 	w.WriteHeader(http.StatusOK)
@@ -295,121 +299,119 @@ func (repo AuthRepo) GetChangePassword(w http.ResponseWriter, req *http.Request)
 	return
 }
 
-func (repo AuthRepo) PostChangPassword(w http.ResponseWriter, req *http.Request) {
+type ChangePasswordResponse struct {
+	Status             int      `json:"status"`
+	Message            string   `json:"message"`
+	PasswordNotMatched bool     `json:"password_not_matched"`
+	PasswordNotChanged bool     `json:"password_not_changed"`
+	Detail             []string `json:"detail"`
+}
+
+type PatchChangePasswordBody struct {
+	Old string `json:"old"`
+	New string `json:"new"`
+}
+
+func (repo AuthRepo) PatchChangePassword(w http.ResponseWriter, req *http.Request) {
+	jsn := ChangePasswordResponse{}
+
 	userInfo, ok := req.Context().Value(global.CtxUserInfo).(tokenmaker.Payload)
 	if !ok {
-		ecErr := ec.MustGetEcErr(ec.ECServerError)
-		ecErr.WithDetails("user information not found")
+		ecErr := ec.MustGetEcErr(ec.ECBadRequest)
+		jsn.Status = ecErr.HttpStatusCode
+		jsn.Message = ecErr.Message
+		jsn.Detail = append(jsn.Detail,
+			"user information not found",
+			"check your login status",
+		)
+		b, _ := json.Marshal(jsn)
+
 		w.WriteHeader(ecErr.HttpStatusCode)
-		w.Write(ecErr.MustToJson())
+		w.Write(b)
 		return
 	}
 
-	err := req.ParseForm()
+	w.Header().Set("Content-Type", "application/json")
+	body, err := io.ReadAll(req.Body)
 	if err != nil {
 		ecErr := ec.MustGetEcErr(ec.ECBadRequest)
-		ecErr.WithDetails(fmt.Sprintf("client error: %s", err))
-		w.Header().Set("Content-Type", "application/json")
+		jsn.Status = ecErr.HttpStatusCode
+		jsn.Message = ecErr.Message
+		jsn.Detail = append(jsn.Detail, fmt.Sprintf("body reading error: %s", err))
+		b, _ := json.Marshal(jsn)
+
 		w.WriteHeader(ecErr.HttpStatusCode)
-		w.Write(ecErr.MustToJson())
+		w.Write(b)
 		return
 	}
 
-	var changePasswordInfo pageform.ChangePassword
-	if err := repo.FormDecoder.Decode(&changePasswordInfo, req.PostForm); err != nil {
+	var changePasswordInfo PatchChangePasswordBody
+	json.Unmarshal(body, &changePasswordInfo)
+
+	global.Logger.Info().
+		Str("old", changePasswordInfo.Old).
+		Str("new", changePasswordInfo.New).
+		Msg("input")
+
+	if changePasswordInfo.Old == "" || changePasswordInfo.New == "" {
 		ecErr := ec.MustGetEcErr(ec.ECBadRequest)
-		ecErr.WithDetails(fmt.Sprintf("error while get auth info: %s", err))
-		w.Header().Set("Content-Type", "application/json")
+		jsn.Status = ecErr.HttpStatusCode
+		jsn.Message = ecErr.Message
+		jsn.Detail = append(jsn.Detail, "parameter(s) is missing")
+		b, _ := json.MarshalIndent(jsn, "", "    ")
+
 		w.WriteHeader(ecErr.HttpStatusCode)
-		w.Write(ecErr.MustToJson())
+		w.Write(b)
 		return
 	}
 
-	if err := repo.FormModifier.Struct(req.Context(), &changePasswordInfo); err != nil {
+	if changePasswordInfo.Old == changePasswordInfo.New {
 		ecErr := ec.MustGetEcErr(ec.ECBadRequest)
-		ecErr.WithDetails(fmt.Sprintf("error while get auth info: %s", err))
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(ecErr.HttpStatusCode)
-		w.Write(ecErr.MustToJson())
+		jsn.Status = ecErr.HttpStatusCode
+		jsn.Message = ecErr.Message
+		jsn.Detail = append(jsn.Detail, "old password and new password cannot be the same")
+		jsn.PasswordNotChanged = true
+		b, _ := json.MarshalIndent(jsn, "", "    ")
+
+		w.WriteHeader(http.StatusOK)
+		w.Write(b)
 		return
 	}
-
-	// if err := repo.Validator.StructCtx(req.Context(), &changePasswordInfo); err != nil {
-
-	// }
 
 	if err, _, _ := repo.Service.User().Login(
 		req.Context(), userInfo.GetUsername(),
-		changePasswordInfo.OldPassword); err != nil {
-		pageData := object.ChangePasswordPage{
-			Page: object.Page{
-				HeadConent: view.NewHeadContent(),
-				Title:      "API Key",
-			},
-			OldPassword: object.PasswordInput{
-				IdPrefix:              "old",
-				Name:                  "old-password",
-				PlaceHolder:           "Old Password",
-				PasswordStrengthCheck: false,
-				PasswordCreteria:      nil,
-				AlertMessage:          "Your current password is missing or incorrect.",
-			},
-			NewPassword: object.PasswordInput{
-				IdPrefix:              "new",
-				Name:                  "new-password",
-				PlaceHolder:           "New Password",
-				PasswordStrengthCheck: true,
-				PasswordCreteria:      object.DefaultPasswordCreteria,
-			},
-		}
-		fmt.Println(err)
-		w.WriteHeader(http.StatusOK)
-		_ = repo.View.ExecuteTemplate(w, "change_password.gotmpl", pageData)
-		return
-	}
+		changePasswordInfo.Old); err != nil {
+		ecErr := ec.MustGetEcErr(ec.ECUnauthorized)
+		jsn.Status = ecErr.HttpStatusCode
+		jsn.Message = ecErr.Message
+		jsn.PasswordNotMatched = true
+		jsn.Detail = append(jsn.Detail, "password not matched")
+		b, _ := json.MarshalIndent(jsn, "", "    ")
 
-	if changePasswordInfo.OldPassword == changePasswordInfo.NewPassword {
-		pageData := object.ChangePasswordPage{
-			Page: object.Page{
-				HeadConent: view.NewHeadContent(),
-				Title:      "API Key",
-			},
-			OldPassword: object.PasswordInput{
-				IdPrefix:              "old",
-				Name:                  "old-password",
-				PlaceHolder:           "Old Password",
-				PasswordStrengthCheck: false,
-				PasswordCreteria:      nil,
-			},
-			NewPassword: object.PasswordInput{
-				IdPrefix:              "new",
-				Name:                  "new-password",
-				PlaceHolder:           "New Password",
-				PasswordStrengthCheck: true,
-				PasswordCreteria:      object.DefaultPasswordCreteria,
-				AlertMessage:          "Your new password cannot not be the same as your current password.",
-			},
-		}
-		w.WriteHeader(http.StatusOK)
-		_ = repo.View.ExecuteTemplate(w, "change_password.gotmpl", pageData)
+		w.WriteHeader(ecErr.HttpStatusCode)
+		w.Write(b)
 		return
 	}
 
 	if _, err := repo.Service.User().UpdatePassword(
 		req.Context(), &service.UserUpdatePasswordRequest{
 			ID:       userInfo.GetUserID(),
-			Password: changePasswordInfo.NewPassword,
+			Password: changePasswordInfo.New,
 		},
 	); err != nil {
 		ecErr := ec.MustGetEcErr(ec.ECServerError)
-		ecErr.WithDetails(err.Error())
+		jsn.Status = ecErr.HttpStatusCode
+		jsn.Message = ecErr.Message
+		jsn.Detail = append(jsn.Detail, err.Error())
+		b, _ := json.MarshalIndent(jsn, "", "    ")
+
 		w.WriteHeader(ecErr.HttpStatusCode)
-		w.Write(ecErr.MustToJson())
+		w.Write(b)
 		return
 	}
 
-	http.Redirect(w, req,
-		fmt.Sprintf("/%s/%s", repo.APIVersion, global.AppVar.App.RoutePattern.Page["welcome"]),
-		http.StatusSeeOther)
+	b, _ := json.MarshalIndent(jsn, "", "    ")
+	w.WriteHeader(http.StatusOK)
+	w.Write(b)
 	return
 }

@@ -87,8 +87,7 @@ func (repo APIRepo) GetWelcome(w http.ResponseWriter, req *http.Request) {
 		PageSignOut:      global.AppVar.App.RoutePattern.Page["sign-out"],
 	}
 
-	err := repo.View.ExecuteTemplate(w, "welcome.gotmpl", pageData)
-	if err != nil {
+	if err := repo.View.ExecuteTemplate(w, "welcome.gotmpl", pageData); err != nil {
 		global.Logger.
 			Err(err).
 			Msg("error while ExecuteTemplate welcome.gotmpl")
@@ -191,10 +190,11 @@ func (repo APIRepo) DeleteAPIKey(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	fmt.Printf("name: %s(%d), api: %d path: %s\n",
-		userInfo.GetUsername(),
-		userInfo.GetUserID(),
-		apiID, req.URL.Path)
+	global.Logger.Info().
+		Str("name", userInfo.GetUsername()).
+		Int("api_id", apiID).
+		Str("user_role", userInfo.GetRole().String()).
+		Str("path", req.URL.Path)
 
 	_, err = repo.Service.APIKey().Delete(req.Context(), &service.APIKeyDeleteRequest{
 		Owner: userInfo.GetUserID(), ApiID: int16(apiID),
@@ -260,7 +260,10 @@ func (repo APIRepo) PostAPIKey(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(ecErr.HttpStatusCode)
 		w.Write(ecErr.MustToJson())
 	} else {
-		fmt.Printf("API ID: %d, N: %d\n", results.ApiKeyId, results.N)
+		global.Logger.Info().
+			Int16("api_id", apikey.ApiID).
+			Int64("N", results.N).
+			Msg("API key successfully updated/created")
 	}
 
 	http.Redirect(w, req, req.URL.Path, http.StatusSeeOther)
@@ -298,7 +301,12 @@ func (repo APIRepo) GetEndpoints(w http.ResponseWriter, req *http.Request) {
 	)
 
 	w.WriteHeader(http.StatusOK)
-	_ = repo.View.ExecuteTemplate(w, "endpoint.gotmpl", pageData)
+	if err = repo.View.ExecuteTemplate(w, "endpoint.gotmpl", pageData); err != nil {
+		global.Logger.
+			Error().
+			Err(err).
+			Msg("error while ExecuteTemplate endpoint.gotmpl")
+	}
 	return
 }
 
@@ -323,12 +331,13 @@ func (repo APIRepo) GetAdmin(w http.ResponseWriter, req *http.Request) {
 		},
 	}
 	w.WriteHeader(http.StatusOK)
-	err := repo.View.ExecuteTemplate(w, "admin.gotmpl", pageData)
-	if err != nil {
+	if err := repo.View.ExecuteTemplate(w, "admin.gotmpl", pageData); err != nil {
 		global.Logger.
+			Error().
 			Err(err).
 			Msg("error executing template admin.gotmpl")
 	}
+	return
 }
 
 func (repo APIRepo) GetJob(w http.ResponseWriter, req *http.Request) {
@@ -374,7 +383,11 @@ func (repo APIRepo) GetJob(w http.ResponseWriter, req *http.Request) {
 	pageData.NJobs[pageData.TotalJobKey] = jobSummary.TotalJob
 
 	w.WriteHeader(http.StatusOK)
-	_ = repo.View.ExecuteTemplate(w, "result.gotmpl", pageData)
+	if err = repo.View.ExecuteTemplate(w, "result.gotmpl", pageData); err != nil {
+		global.Logger.Error().
+			Err(err).
+			Msg("error executing template result.gotmpl")
+	}
 }
 
 func formatRequest(r *http.Request) string {
