@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {{template "head" .Page.HeadConent}}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/list.js/2.3.1/list.min.js"></script>
+    <link rel="stylesheet" href="/static/css/result_table.css">
+    <script>
+        var data = [
+            {
+                "id": 0,
+                "title": "新北攤商涉用豬肉混充羊肉 最重可罰400萬加坐牢",
+                "link": "https://www.cna.com.tw/news/ahel/202308230179.aspx",
+                "description": "媒體報導，位於新北市的大台北果菜市場某攤商販售羊肉遠低於市價，涉以豬肉魚目混珠。食藥署今天表示，已前往稽查並抽驗，若確實摻偽假冒，最高可罰400萬元並面臨坐牢。",
+                "category": "生活",
+                "pubDate": "2023-08-23",
+            },
+            {
+                "id": 1,
+                "title": "中國單身人口逾2億 專家說因年輕人太宅",
+                "link": "https://www.cna.com.tw/news/acn/202308230192.aspx",
+                "description": "中國年輕未婚單身人口達2.39億人，且初婚年齡延後至28.67歲；有專家表示，調查年輕人為何不婚不戀，原因包括社交圈子固定、太宅及不喜社交，但有網友直言，原因很簡單就是窮。",
+                "category": "兩岸",
+                "pubDate": "2023-08-23",
+            },
+            {
+                "id": 2,
+                "title": "瓦格納首腦疑墜機亡 航跡追蹤網站：墜機前30秒出現問題",
+                "description": "1架巴西航空工業公司製造的「萊格賽600」（Embraer Legacy 600）私人飛機，23日在莫斯科北部的特維爾（Tver）地區墜毀，機上10人全數罹難，據傳機上載有俄國傭兵組織瓦格納集團首腦普里格津（Yevgeny Prigozhin）。航跡追蹤網站「flightradar24」指出，此架飛機在墜毀前30秒以前都很正常，事發前30秒，飛機突然垂直下墜。根據《路透》報導，「flightradar24」主編佩琴尼克（Ian Petchenik）指出，在當地時間傍晚6點19分左右，飛機突然垂直向下墜落，大約在30秒內，飛機從2.8萬英呎高度驟降8000多英呎，「無論發生了些什麼，這一切都來的很快，但在飛機急劇下降之前，沒有任何跡象顯示這架飛機有問題」。",
+                "category": "國際",
+                "pubDate": "2023-08-24",
+            },
+            {
+                "id": 3,
+                "title": "核汙水排入海 中日緊張升溫",
+                "description": "【編譯茅毅、記者謝守真／綜合報導】日本福島第一核電廠廿四日開始向太平洋排放核汙水，引發中國大陸強烈反彈，原定廿八至卅日訪...",
+                "category": "全球",
+                "pubDate": "2023-08-28",
+            },
+        ];
+
+        var new_list
+        function new_list(data) {
+            function item_func(values) {
+                return `<tr>
+                    <td><input type='checkbox' class='pure-checkbox' name='item[${values["id"]}]' id='item-id'></td>
+                    <td>
+                        <h5>${values["title"]}</h5>
+                        <p>${values["description"]}</p>
+                    </td>
+                    <td>${values["pubDate"]}</td>
+                </tr>`;
+            }
+
+            let options = {
+                valueNames: ["title", "description", "category", "pubDate"],
+                item: item_func,
+            };
+            new_list = new List("item-table", options, data)
+        }
+
+        document.addEventListener("DOMContentLoaded", (event) => {
+            new_list(data);
+        })
+
+    </script>
+
+
+    <title>{{.Page.Title}}</title>
+</head>
+
+<body>
+    <section class="width-background">
+        <div class="mid-card">
+            <form action="" method="post" class="data-form">
+                <div class="table-container" id="item-table">
+                    <div class="search-bar">
+                        <label for="search" class="hide"></label>
+                        <input type="search" name="search" id="search" class="fuzzy-search" placeholder="Search...">
+                    </div>
+                    <form action="" class="pure-form">
+                        <table class="pure-table pure-table-horizontal striped-table">
+                            <thead>
+                                <tr>
+                                    <th title="select all" style="width: 1rem; min-width: 1.5rem;">
+                                        <input type="checkbox" name="select-all" id="select-all">
+                                    </th>
+                                    <th title="title" class="sort sort-by-title" data-sort="title">Title and Description
+                                    </th>
+                                    <th title="publication date" class="sort sort-by-pubDate" data-sort="pubDate"
+                                        style="width: 7rem; min-width: 84px;">
+                                        <i class="fa-solid fa-calendar-days"></i>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="list">
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
+                <button type="button" class="btn" onclick="">More</button>
+            </form>
+        </div>
+    </section>
+</body>
+
+</html>

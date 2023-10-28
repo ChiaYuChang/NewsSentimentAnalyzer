@@ -16,7 +16,7 @@
                 <ul class="data-list">
                     <li class="data-field">
                         <label for="keyword">Keywords</label>:
-                        <input type="text" name="keyword" id="keyword" class="form-input">
+                        <input type="text" name="keyword" id="keyword" class="form-input" required>
                     </li>
                     <li class="data-field">
                         <label for="search-in">Search in</label>:
@@ -29,17 +29,21 @@
                     </li>
                     <li class="data-field">
                         <label for="sources">Sources</label>:
-                        <input type="text" name="sources" id="sources" class="form-input">
-                        <p class="footer">
-                            A comma-seperated string of identifiers (maximum 20) for the news sources or blogs you want headlines from.
-                        </p>
+                        <div class="form-input-container">
+                            <input type="text" name="sources" id="sources" class="form-input">
+                            <p class="form-input-desc">
+                                A comma-seperated string of identifiers (maximum 20) for the news sources or blogs you want headlines from.
+                            </p>
+                        </div>
                     </li>
                     <li class="data-field">
                         <label for="domains">Domains</label>:
-                        <input type="text" name="domains" id="domains" class="form-input">
-                        <p class="footer">
-                            A comma-seperated string of domains (eg bbc.co.uk, techcrunch.com, engadget.com) to restrict the search to.
-                        </p>
+                        <div class="form-input-container">
+                            <input type="text" name="domains" id="domains" class="form-input">
+                            <p class="form-input-desc">
+                                A comma-seperated string of domains (eg bbc.co.uk, techcrunch.com, engadget.com) to restrict the search to.
+                            </p>
+                        </div>
                     </li>
                     <li class="data-field">
                         <label for="exclude-domains">Exculde Domains</label>:

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+{{template "head" .Page.HeadConent}}
+<script src="/static/js/selector.js"></script>
+<title>{{.Page.Title}}</title>
+<title>Document</title>
+</head>
+
+<body>
+    <section class="background">
+        <div class="mid-card">
+            <h1>Parameters</h1>
+            <h5>API: <strong>{{.API}}</strong> Endpoint: <strong>{{.Endpoint}}</strong></h5>
+            <form action="" method="post" class="data-form">
+                <ul class="data-list">
+                    <li class="data-field">
+                        <label for="keyword">Keywords</label>:
+                        <input type="text" name="keyword" id="keyword" class="form-input">
+                    </li>
+                    <li class="data-field">
+                        <label for="search-engine-id">Search engine ID</label>:
+                        <div class="form-input-container">
+                            <input type="text" placeholder="0000x0x00xxx00000" name="search-engine-id"
+                                id="search-engine-id" class="form-input" required minlength="17">
+                            <div class="form-input-desc">
+                                Find your <a href="https://programmablesearchengine.google.com/about/"
+                                    class="leave-page-url">Programmable
+                                    Search Engine search ID</a>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="data-field">
+                        <label for="date-restrict-value">Date Restriction</label>:
+                        <input type="number" name="date-restrict-value" id="date-restrict-value" class="form-input" min="0">
+                        <label class="hide" for="date-restrict-unit">Date Restrict Unit</label>
+                        <select name="date-restrict-unit" id="date-restrict-unit" class="form-input"
+                            style="width: 6rem;">
+                            <option value="d">Day</option>
+                            <option value="w">Week</option>
+                            <option value="m">Month</option>
+                            <option value="y">Year</option>
+                        </select>
+                    </li>
+                </ul>
+                <input type="submit" value="Submit" class="btn">
+                <p class="footer">
+                    back to <a href="/{{.Version}}/endpoints" class=" url">endpoints</a> page
+                </p>
+            </form>
+        </div>
+    </section>
+</body>
+
+</html>

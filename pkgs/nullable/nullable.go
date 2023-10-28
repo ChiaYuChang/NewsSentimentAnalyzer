@@ -2,6 +2,7 @@ package nullable
 
 import (
 	"bytes"
+	"log"
 	"strconv"
 	"time"
 )
@@ -12,8 +13,9 @@ type String[T ~string] struct {
 }
 
 func (s *String[T]) UnmarshalJSON(bs []byte) error {
+	log.Println("using NullableString.UnmarshalJSON")
 	if bytes.Equal(bs, []byte("null")) {
-		(*s) = *&String[T]{}
+		(*s) = String[T]{}
 	} else {
 		(*s).Valid = true
 		(*s).Value = T(string(bytes.Trim(bytes.Trim(bs, "\""), "'")))
@@ -28,12 +30,12 @@ func (s *String[T]) MarshalJSON() ([]byte, error) {
 	return []byte("null"), nil
 }
 
-type Int[T ~int] struct {
+type Integer[T ~int] struct {
 	Value T
 	Valid bool
 }
 
-func (i *Int[T]) UnmarshalJSON(bs []byte) error {
+func (i *Integer[T]) UnmarshalJSON(bs []byte) error {
 	if bytes.Equal(bs, []byte("null")) {
 		(*i).Valid = false
 	} else {
@@ -47,7 +49,7 @@ func (i *Int[T]) UnmarshalJSON(bs []byte) error {
 	return nil
 }
 
-func (i *Int[T]) MarshalJSON() ([]byte, error) {
+func (i *Integer[T]) MarshalJSON() ([]byte, error) {
 	if i.Valid {
 		si := strconv.Itoa(int(i.Value))
 		return []byte(si), nil

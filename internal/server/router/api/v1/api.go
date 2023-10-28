@@ -557,3 +557,19 @@ func (repo APIRepo) GetJobDetail(w http.ResponseWriter, req *http.Request) {
 func (repo APIRepo) EndpointRepo() EndpointRepo {
 	return NewEndpointRepo(repo, validator.Validate)
 }
+
+func (repo APIRepo) GetResultSelector(w http.ResponseWriter, req *http.Request) {
+	pageData := object.ResultSecectorPage{
+		Page: object.Page{
+			HeadConent: view.SharedHeadContent(),
+			Title:      "Result Selector",
+		},
+	}
+
+	err := repo.View.ExecuteTemplate(w, "result_selector.gotmpl", pageData)
+	if err != nil {
+		global.Logger.Error().
+			Err(err).
+			Msg("error executing template result_selector.gotmpl")
+	}
+}

@@ -9,9 +9,10 @@ import (
 	"net/http"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
+	"github.com/google/uuid"
+
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client"
-	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api/GNews"
-	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api/NEWSDATA"
+
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model"
 	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
@@ -124,14 +125,34 @@ func (repo EndpointRepo) PostAPIEndpoints(key repoMapKey) (http.HandlerFunc, err
 }
 
 func postEndpoints(repo EndpointRepo, obj pageform.PageForm, w http.ResponseWriter, req *http.Request) {
+	type resp struct {
+		StatusCode      int       `json:"status_code"`
+		Message         string    `json:"message"`
+		Details         []string  `json:"details"`
+		JobId           int32     `json:"job_id"`
+		UserName        string    `json:"user_name"`
+		UserId          uuid.UUID `json:"user_id"`
+		NewsSourceId    int16     `json:"news_source_id"`
+		NewsSourceQuery string    `json:"news_source_query"`
+		LLMId           int16     `json:"llm_id"`
+		LLMQuery        string    `json:"llm_query"`
+	}
+
+	r := resp{Details: []string{}}
+	w.Header().Add("Content-Type", "application/json")
+
 	userInfo, ok := req.Context().Value(global.CtxUserInfo).(tokenmaker.Payload)
 	if !ok {
 		ecErr := ec.MustGetEcErr(ec.ECServerError)
-		ecErr.WithDetails("user information not found")
+		r.StatusCode = ecErr.HttpStatusCode
+		r.Message = ecErr.Message
+		r.Details = append(r.Details, "user information not found")
+		b, _ := json.MarshalIndent(r, "", "    ")
 		w.WriteHeader(ecErr.HttpStatusCode)
-		w.Write(ecErr.MustToJson())
+		w.Write(b)
 		return
 	}
+
 	global.Logger.Info().
 		Str("user_id", userInfo.GetUserID().String()).
 		Str("user_role", userInfo.GetRole().String()).
@@ -148,9 +169,13 @@ func postEndpoints(repo EndpointRepo, obj pageform.PageForm, w http.ResponseWrit
 
 	obj, err := obj.FormDecodeAndValidate(repo.apiRepo.FormDecoder, repo.val, req.PostForm)
 	if err != nil {
-		global.Logger.Error().
-			Err(err).
-			Msg("error while calling .FormDecodeAndValidate method")
+		ecErr := ec.MustGetEcErr(ec.ECBadRequest)
+		r.StatusCode = ecErr.HttpStatusCode
+		r.Message = ecErr.Message
+		r.Details = append(r.Details, err.Error())
+		b, _ := json.MarshalIndent(r, "", "    ")
+		w.WriteHeader(ecErr.HttpStatusCode)
+		w.Write(b)
 		return
 	}
 	global.Logger.Info().
@@ -168,26 +193,35 @@ func postEndpoints(repo EndpointRepo, obj pageform.PageForm, w http.ResponseWrit
 		global.Logger.Error().
 			Err(err).
 			Msg("error while calling .NewQueryFromPageFrom method")
+
+		ecErr := ec.MustGetEcErr(ec.ECServerError)
+		r.StatusCode = ecErr.HttpStatusCode
+		r.Message = ecErr.Message
+		r.Details = append(r.Details, err.Error())
+		b, _ := json.MarshalIndent(r, "", "    ")
+		w.WriteHeader(ecErr.HttpStatusCode)
+		w.Write(b)
 		return
 	}
 
-	jsn, err := json.Marshal(q.Params())
-	if err != nil {
-		global.Logger.Error().
-			Err(err).
-			Msg("error while calling Marshaling params")
-		return
-	}
-
+	// jsn, err := json.Marshal(q.Params())
+	// if err != nil {
+	// 	global.Logger.Error().
+	// 		Err(err).
+	// 		Msg("error while calling Marshaling params")
+	// 	return
+	// }
+	llmId, llmQuery := int16(4), "{}"
 	id, err := repo.apiRepo.Service.Job().Create(
 		req.Context(), &service.JobCreateRequest{
 			Owner:    userInfo.GetUserID(),
 			Status:   string(model.JobStatusCreated),
 			SrcApiID: apikey.ApiID,
 			// SrcQuery: q.Params().ToQueryString(),
-			SrcQuery: string(jsn),
-			LlmApiID: 4,
-			LlmQuery: "{}",
+			// SrcQuery: string(jsn),
+			SrcQuery: q.Params().ToQueryString(),
+			LlmApiID: llmId,
+			LlmQuery: llmQuery,
 		},
 	)
 
@@ -207,5 +241,19 @@ func postEndpoints(repo EndpointRepo, obj pageform.PageForm, w http.ResponseWrit
 		Int32("job", id).
 		Msg("Job Created OK")
 
+	r.StatusCode = http.StatusOK
+	r.Message = "OK"
+	r.JobId = id
+	r.LLMId = llmId
+	r.LLMQuery = llmQuery
+	r.NewsSourceId = apikey.ApiID
+	r.NewsSourceQuery = q.Params().ToQueryString()
+	r.UserId = userInfo.GetUserID()
+	r.UserName = userInfo.GetUsername()
+
+	b, _ := json.MarshalIndent(r, "", "    ")
+	w.WriteHeader(r.StatusCode)
+	w.Write(b)
 	return
 }
+

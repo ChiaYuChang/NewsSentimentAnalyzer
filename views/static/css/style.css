@@ -103,6 +103,11 @@ header {
     margin: 0 auto;
 }
 
+.width-background {
+    display: grid;
+    grid-template-columns: 1fr 8fr 1fr;
+    margin: 0 auto;
+}
 
 .mid-card {
     min-width: 650px;
@@ -144,8 +149,8 @@ header {
 }
 
 .data-field label {
-    width: 8rem;
-    min-width: 140px;
+    width: 12rem;
+    min-width: 155px;
 }
 
 .form-icon {
@@ -167,6 +172,40 @@ header {
 
 .form-input:focus {
     text-align: left;
+}
+
+.form-input-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+
+.form-input-desc {
+    position: absolute;
+    display: none;
+}
+
+.form-input-container .form-input-validity {
+    position: absolute;
+    background-color: transparent;
+    color: green;
+    top: 50%;
+    right: .5rem;
+    transform: translateY(-50%);
+}
+
+.form-input-container input:focus+.form-input-desc {
+    z-index: 1;
+    display: block;
+    font-size: .75rem;
+    background-color: #fdfdfd;
+    top: 2.2rem;
+    left: 0;
+    display: block;
+    padding: 0.5rem 1.0rem;
+    border: #000000 solid 1px;
+    border-radius: 5px;
 }
 
 .hide {
@@ -248,39 +287,6 @@ header {
     width: 0;
 }
 
-.password-container {
-    width: 100%;
-    height: 100%;
-    position: relative;
-}
-
-.password-stength-check {
-    position: absolute;
-    display: none;
-}
-
-.password-container .password-validity {
-    position: absolute;
-    background-color: transparent;
-    color: green;
-    top: 50%;
-    right: .5rem;
-    transform: translateY(-50%);
-}
-
-.password-container input[type='password']:focus+.password-stength-check {
-    z-index: 1;
-    display: block;
-    font-size: 1rem;
-    background-color: white;
-    top: 2.2rem;
-    left: 0;
-    display: block;
-    padding: 0.5rem 1.0rem;
-    border: #000000 solid 1px;
-    border-radius: 5px;
-}
-
 .invalid::before {
     content: "☐";
     width: 1.5rem;
@@ -295,7 +301,6 @@ header {
 .invalid {
     color: #146C94;
 }
-
 
 .valid::before {
     content: "☑";
@@ -313,6 +318,26 @@ header {
 .footer ol {
     padding-left: 1rem;
     line-height: 1.5rem;
+}
+
+.leave-page-url::after {
+    font-family: "Font Awesome 6 Free";
+    content: '\f08e';
+    display: inline-block;
+    padding-left: 3px;
+    vertical-align: middle;
+}
+
+a:link,
+a:visited {
+    text-decoration: none;
+    color: #19A7CE;
+}
+
+a:hover,
+a:active {
+    text-decoration: underline;
+    color: #19A7CE;
 }
 
 sup {

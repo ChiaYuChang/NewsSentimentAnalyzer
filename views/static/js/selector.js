@@ -1,15 +1,21 @@
-function insertSelectElement(where, name, classes, opts) {
+function insertSelectElement(where, index, name, classes, opts) {
     let newSelect = document.createElement("select");
     newSelect.name = name
     newSelect.setAttribute("aria-label", where.id)
     newSelect.classList = classes
-    opts.forEach(o => {
+
+    opts.forEach(opt => {
+        if (index > 0 && opt.value === "") {
+            return
+        }
         newOpt = document.createElement("option")
-        newOpt.value = o.value;
-        newOpt.textContent = o.txt;
+        newOpt.value = opt.value;
+        newOpt.textContent = opt.txt;
         newSelect.appendChild(newOpt);
     });
+
     where.appendChild(newSelect);
+    return newSelect;
 }
 
 function deleteSelectElement(where) {
@@ -27,22 +33,40 @@ function addListenerToBtn(iPosId, iBtnId, dBtnId, maxDiv, opts, alertMsg) {
         const divLimit = maxDiv;
         let counter = 0;
 
-        insertSelectElement(position, `${iPosId}[${counter}]`, "form-input", opts);
+        let fstEle = insertSelectElement(position, counter, `${iPosId}[${counter}]`, "form-input", opts);
         counter++
+        deleteButton.classList.add("pure-button-disabled")
 
-        insertButton.addEventListener("click", function () {
+        insertButton.addEventListener("click", () => {
+            if (fstEle.value === "") {
+                alert(`Please exclude 'All' when selecting multiple ${iPosId}.`);
+                return
+            }
+
             if (counter < divLimit) {
-                insertSelectElement(position, `${iPosId}[${counter}]`, "form-input", opts);
+                insertSelectElement(position, counter, `${iPosId}[${counter}]`, "form-input", opts);
                 counter++;
+                fstEle.classList.add("pure-button-disabled");
+                deleteButton.classList.remove("pure-button-disabled");
             } else {
                 alert(alertMsg);
             }
+
+            if (counter >= divLimit) {
+                insertButton.classList.add("pure-button-disabled")
+            }
         });
 
-        deleteButton.addEventListener("click", function () {
+        deleteButton.addEventListener("click", () => {
             if (counter > 1) {
                 deleteSelectElement(position)
                 counter--;
+                insertButton.classList.remove("pure-button-disabled");
+            }
+
+            if (counter <= 1) {
+                fstEle.classList.remove("pure-button-disabled");
+                deleteButton.classList.add("pure-button-disabled");
             }
         });
     }
@@ -326,8 +350,8 @@ document.addEventListener("DOMContentLoaded", function () {
         { value: "vi", txt: "Vietnamese" },
     ];
 
-    addListenerToBtn("category", "insert-category-btn", "delete-category-btn", 5, categoryOpts, "haha");
-    addListenerToBtn("country", "insert-country-btn", "delete-country-btn", 5, countryOpts, "haha");
-    addListenerToBtn("language", "insert-lang-btn", "delete-lang-btn", 5, languageOpts, "haha");
+    addListenerToBtn("category", "insert-category-btn", "delete-category-btn", 5, categoryOpts, "You can add a maximum of 5 categories.");
+    addListenerToBtn("country", "insert-country-btn", "delete-country-btn", 5, countryOpts, "You can add a maximum of 5 countries.");
+    addListenerToBtn("language", "insert-lang-btn", "delete-lang-btn", 5, languageOpts, "You can add a maximum of 5 languages.");
 
 })

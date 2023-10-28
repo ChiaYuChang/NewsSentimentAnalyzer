@@ -133,7 +133,7 @@ func TestNullableStringT(t *testing.T) {
 
 func TestNullableInt(t *testing.T) {
 	type TestStruct struct {
-		Field nullable.Int[int] `json:"field"`
+		Field nullable.Integer[int] `json:"field"`
 	}
 
 	type testCast struct {
@@ -199,7 +199,7 @@ func TestNullableIntT(t *testing.T) {
 	)
 
 	type TestStruct struct {
-		Role nullable.Int[RoleType] `json:"field"`
+		Role nullable.Integer[RoleType] `json:"field"`
 	}
 
 	type testCast struct {

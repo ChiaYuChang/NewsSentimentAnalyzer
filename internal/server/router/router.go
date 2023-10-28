@@ -12,18 +12,29 @@ import (
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/middleware"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/api/v1"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/auth"
-	cookiemaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/cookieMaker"
-	errorhandler "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/errorHandler"
-	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm"
-	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/GNews"
-	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/NEWSDATA"
-	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/newsapi"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/validator"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view"
+
+	cookiemaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/cookieMaker"
+	errorhandler "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/errorHandler"
+	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm"
 	tokenmaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/tokenMaker"
-	"github.com/go-chi/chi/v5"
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
+
+	// init server side
+	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/GNews"
+	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/GoogleCSE"
+	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/NEWSDATA"
+	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/newsapi"
+
+	// init client side
+	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api/GNews"
+	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api/GoogleCSE"
+	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api/NEWSDATA"
+	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api/newsapi"
+
+	"github.com/go-chi/chi/v5"
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog"
 	"github.com/spf13/viper"
@@ -56,7 +67,22 @@ func NewRouter(srvc service.Service, rds *redis.Client, vw view.View,
 	go func(epRepo api.EndpointRepo, epChan chan *model.ListAllEndpointRow, wg *sync.WaitGroup) {
 		for ep := range epChan {
 			apiName, apiID, endpointName, templateName := ep.ApiName, ep.ApiID, ep.EndpointName, ep.TemplateName
-			_ = epRepo.RegisterEndpointsPageView(apiName, apiID, endpointName, templateName)
+			if err := epRepo.RegisterEndpointsPageView(
+				apiName, apiID, endpointName, templateName); err != nil {
+				global.Logger.
+					Error().
+					Str("api", apiName).
+					Str("endpoint", endpointName).
+					Str("status", "failed").
+					Err(err).Msg("error while registering endpoint")
+			} else {
+				global.Logger.
+					Info().
+					Str("api", apiName).
+					Str("endpoint", endpointName).
+					Str("status", "ok").
+					Msg("add endpoint")
+			}
 		}
 		wg.Done()
 	}(epRepo, epChan, wg)
@@ -118,7 +144,6 @@ func NewRouter(srvc service.Service, rds *redis.Client, vw view.View,
 		r.Delete(rp.Page["apikey"]+"/{id}", apiRepo.DeleteAPIKey)
 
 		r.Get(rp.Page["change-password"], auth.GetChangePassword)
-		r.Post(rp.Page["change-password"], auth.PostChangPassword)
 		r.Patch(rp.Page["change-password"], auth.PatchChangePassword)
 
 		r.Get(rp.Page["admin"], apiRepo.GetAdmin)
@@ -137,17 +162,26 @@ func NewRouter(srvc service.Service, rds *redis.Client, vw view.View,
 					if epGetHandlerFun, err := epRepo.GetAPIEndpoints(key); err == nil {
 						r.Get("/"+key.String(), epGetHandlerFun)
 					} else {
-						fmt.Println(err)
+						global.Logger.
+							Error().
+							Err(err).
+							Msgf("error while .GetAPIEndpoints with key: %s", key.String())
 					}
 
 					if epPostHandlerFun, err := epRepo.PostAPIEndpoints(key); err == nil {
 						r.Post("/"+key.String(), epPostHandlerFun)
 					} else {
-						fmt.Println(err)
+						global.Logger.
+							Error().
+							Err(err).
+							Msgf("error while .PostAPIEndpoints with key: %s", key.String())
 					}
 				}
 				r.Get("/*", errHandlerRepo.NotFound)
 			})
+
+		r.Get("/result", apiRepo.GetResultSelector)
+
 		r.Get(rp.ErrorPage["forbidden"], errHandlerRepo.Forbidden)
 		r.Get("/*", errHandlerRepo.NotFound)
 	})

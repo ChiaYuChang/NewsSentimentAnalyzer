@@ -46,11 +46,11 @@ const (
 type NEWSAPIEverything struct {
 	pageform.SearchIn
 	pageform.TimeRange
-	Keyword        string   `form:"keyword"`
-	Sources        string   `form:"sources"`
-	Domains        string   `form:"domains"`
-	ExcludeDomains string   `form:"exclude-domains"`
-	Language       []string `form:"language" val:"newsapi_lang"`
+	Keyword        string `form:"keyword"`
+	Sources        string `form:"sources"`
+	Domains        string `form:"domains"`
+	ExcludeDomains string `form:"exclude-domains"`
+	Language       string `form:"language" val:"newsapi_lang"`
 }
 
 func (f NEWSAPIEverything) Endpoint() string {
@@ -74,15 +74,15 @@ func (f NEWSAPIEverything) String() string {
 	sb.WriteString(fmt.Sprintf("\t- Search in: %v\n", f.SearchIn))
 	sb.WriteString(fmt.Sprintf("\t- Domains  : %s\n", f.Domains))
 	sb.WriteString(fmt.Sprintf("\t- eDomains : %s\n", f.ExcludeDomains))
-	sb.WriteString(fmt.Sprintf("\t- Language : %s\n", strings.Join(f.Language, ", ")))
+	sb.WriteString(fmt.Sprintf("\t- Language : %s\n", f.Language))
 	sb.WriteString(f.TimeRange.ToString("\t"))
 	return sb.String()
 }
 
 type NEWSAPISources struct {
-	Language []string `form:"language" val:"newsapi_lang"`
-	Country  []string `form:"country"  val:"newsapi_ctry"`
-	Category []string `form:"category" val:"newsapi_cat"`
+	Language string `form:"language" val:"newsapi_lang"`
+	Country  string `form:"country"  val:"newsapi_ctry"`
+	Category string `form:"category" val:"newsapi_cat"`
 }
 
 func (f NEWSAPISources) Endpoint() string {
@@ -101,9 +101,9 @@ func (f NEWSAPISources) FormDecodeAndValidate(
 func (f NEWSAPISources) String() string {
 	sb := strings.Builder{}
 	sb.WriteString("NEWSAPISources:\n")
-	sb.WriteString(fmt.Sprintf("\t- Category: %s\n", strings.Join(f.Category, ", ")))
-	sb.WriteString(fmt.Sprintf("\t- Country : %s\n", strings.Join(f.Country, ", ")))
-	sb.WriteString(fmt.Sprintf("\t- Language: %s\n", strings.Join(f.Language, ", ")))
+	sb.WriteString(fmt.Sprintf("\t- Category: %s\n", f.Category))
+	sb.WriteString(fmt.Sprintf("\t- Country : %s\n", f.Country))
+	sb.WriteString(fmt.Sprintf("\t- Language: %s\n", f.Language))
 	return sb.String()
 }
 

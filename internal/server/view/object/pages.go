@@ -347,3 +347,7 @@ type APIEndpointPage struct {
 	Version  string
 	Endpoint string
 }
+
+type ResultSecectorPage struct {
+	Page
+}
