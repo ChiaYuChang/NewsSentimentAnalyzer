@@ -1,0 +1,4 @@
+INSERT INTO users (
+    id, password, first_name, last_name, role, email, created_at, updated_at
+) VALUES{{ range $i, $u := .Item}}{{if $i}},{{end}}
+    ('{{$u.Id}}', '{{$u.Password}}', '{{$u.FirstName}}', '{{$u.LastName}}', '{{$u.Role}}', '{{$u.Email}}', '{{$u.CreatedAt.Format "2006-01-02 15:04:05"}}', '{{$u.UpdatedAt.Format "2006-01-02 15:04:05"}}'){{ end }};

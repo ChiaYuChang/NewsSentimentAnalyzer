@@ -1,0 +1,2 @@
+DELETE FROM jobs;
+ALTER SEQUENCE jobs_id_seq RESTART WITH 1;

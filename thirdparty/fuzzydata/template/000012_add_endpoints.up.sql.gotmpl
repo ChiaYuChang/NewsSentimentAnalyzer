@@ -1,0 +1,6 @@
+INSERT INTO endpoints (
+    id, name, api_id, template_name, created_at, updated_at
+) VALUES{{ range $i, $ep := .}}{{if $i}},{{end}}
+    ({{ add $i 1 }}, '{{$ep.Name}}', '{{$ep.APIId}}', '{{$ep.TemplateName}}', '{{$ep.CreatedAt.Format "2006-01-02 15:04:05"}}', '{{$ep.UpdatedAt.Format "2006-01-02 15:04:05"}}'){{ end }};
+
+ALTER SEQUENCE endpoints_id_seq RESTART WITH {{.N}};

@@ -1840,4 +1840,6 @@ INSERT INTO jobs (
     (1837, 'fcb76123-83ff-400d-8366-fffa11006830', 'created', 3, 'PQQ5TPDiWG0lZ1wrVFh2I4', 4, '{}', '2023-08-18 08:06:48', '2023-08-18 08:06:48', null),
     (1838, 'e2d8b273-7f09-488e-8406-33ce7000d7aa', 'created', 1, 'WDzI7iA6vDdEy9DQfjWx6l7I97', 4, '{}', '2023-08-18 21:18:03', '2023-08-18 21:18:03', null),
     (1839, 'a9962ea4-bee1-4319-8717-5f73daa225aa', 'done', 3, 'yqrepIzPRBsm0hxNYaHrBF5I', 4, '{}', '2023-08-20 21:21:14', '2023-08-21 10:07:02', null),
-    (1840, '21ce62dd-145a-4bf9-aced-f5b5627287eb', 'running', 2, '5McIxnpvRlqU9p3lSYhLpuHoZSu1C', 4, '{}', '2023-08-22 11:03:03', '2023-08-22 16:05:12', null)
+    (1840, '21ce62dd-145a-4bf9-aced-f5b5627287eb', 'running', 2, '5McIxnpvRlqU9p3lSYhLpuHoZSu1C', 4, '{}', '2023-08-22 11:03:03', '2023-08-22 16:05:12', null);
+
+ALTER SEQUENCE jobs_id_seq RESTART WITH 3000;

@@ -1,1 +1,2 @@
 DELETE FROM apis;
+ALTER SEQUENCE apis_id_seq RESTART WITH 1;

@@ -1,0 +1,6 @@
+INSERT INTO apikeys (
+    id, owner, api_id, key, created_at, updated_at
+) VALUES{{ range $i, $a := .Item}}{{if $i}},{{end}}
+    ({{$a.Id}}, '{{$a.Owner}}', {{$a.APIId}}, '{{$a.Key}}', '{{$a.CreatedAt.Format "2006-01-02 15:04:05"}}', '{{$a.UpdatedAt.Format "2006-01-02 15:04:05"}}'){{ end }};
+
+ALTER SEQUENCE apikeys_id_seq RESTART WITH {{.N}};

@@ -1,0 +1,6 @@
+INSERT INTO apis (
+    id, name, type, image, icon, document_url, created_at, updated_at
+) VALUES {{ range $i, $a := .}}{{if $i}},{{end}}
+    ({{$a.Id}}, '{{$a.Name}}', '{{$a.Type}}', '{{$a.Image}}', '{{$a.Icon}}', '{{$a.DocumentURL}}', '{{$a.CreatedAt.Format "2006-01-02 15:04:05"}}', '{{$a.UpdatedAt.Format "2006-01-02 15:04:05"}}'){{end}};
+
+ALTER SEQUENCE apis_id_seq RESTART WITH {{.N}};

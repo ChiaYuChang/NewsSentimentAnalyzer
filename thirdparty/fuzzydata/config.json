@@ -1,0 +1,185 @@
+{
+    "api": [
+        {
+            "name": "NEWSDATA.IO ",
+            "type": "source",
+            "image": "logo_NEWSDATA.IO.png",
+            "icon": "favicon_NEWSDATA.IO.png",
+            "document_url": "https://newsdata.io/documentation/",
+            "probability": 0.5
+        },
+        {
+            "name": "GNews",
+            "type": "source",
+            "image": "logo_GNews.png",
+            "icon": "favicon_GNews.ico",
+            "document_url": "https://gnews.io/docs/v4",
+            "probability": 0.5
+        },
+        {
+            "name": "NEWS API",
+            "type": "source",
+            "image": "logo_NEWS_API.png",
+            "icon": "favicon_NEWS_API.ico",
+            "document_url": "https://newsapi.org/docs/",
+            "probability": 0.5
+        },
+        {
+            "name": "Google API",
+            "type": "source",
+            "image": "logo_Google_Custom_Search.png",
+            "icon": "favicon-Google.png",
+            "document_url": "https://developers.google.com/custom-search/v1/reference/rest/v1/cse/list",
+            "probability": 0.5
+        },
+        {
+            "name": "OpenAI",
+            "type": "language_model",
+            "image": "logo_ChatGPT.svg",
+            "icon": "favicon_ChatGPT.ico",
+            "document_url": "https://openai.com/blog/introducing-chatgpt-and-whisper-apis",
+            "probability": 1.0
+        }
+    ],
+    "endpoint": [
+        {
+            "name": "Latest News",
+            "api_name": "NEWSDATA.IO",
+            "template_name": "NEWSDATA.IO-latest_news.gotmpl"
+        },
+        {
+            "name": "News Archive",
+            "api_name": "NEWSDATA.IO",
+            "template_name": "NEWSDATA.IO-news_archive.gotmpl"
+        },
+        {
+            "name": "News Sources",
+            "api_name": "NEWSDATA.IO",
+            "template_name": "NEWSDATA.IO-news_sources.gotmpl"
+        },
+        {
+            "name": "Search",
+            "api_name": "GNews",
+            "template_name": "GNews-search.gotmpl"
+        },
+        {
+            "name": "Top Headlines",
+            "api_name": "GNews",
+            "template_name": "GNews-top_headlines.gotmpl"
+        },
+        {
+            "name": "Everything",
+            "api_name": "NEWS API",
+            "template_name": "NewsAPI-everything.gotmpl"
+        },
+        {
+            "name": "Top Headlines",
+            "api_name": "NEWS API",
+            "template_name": "NewsAPI-top_headlines.gotmpl"
+        },
+        {
+            "name": "Sources",
+            "api_name": "NEWS API",
+            "template_name": "NewsAPI-sources.gotmpl"
+        },
+        {
+            "name": "Custom Search",
+            "api_name": "Google API",
+            "template_name": "GoogleCSE.gotmpl"
+        }
+    ],
+    "user": {
+        "special_user": [
+            {
+                "id": "a16f29d3-a37b-4231-b7c1-8c5efa80d14b",
+                "raw_password": "password",
+                "first_name": "Porter",
+                "last_name": "Bird",
+                "role": "user",
+                "email": "text@example.com",
+                "created_at": "2020-08-23T00:58:23+08:00",
+                "updated_at": "2021-06-10T07:13:01+08:00"
+            },
+            {
+                "id": "767e4e5c-c2f9-4d3f-ad00-187bb8c29fa9",
+                "raw_password": "password",
+                "first_name": "Jaxxon",
+                "last_name": "Dixon",
+                "role": "admin",
+                "email": "admin@example.com",
+                "created_at": "2020-06-11T11:29:32+08:00",
+                "updated_at": "2020-12-02T10:10:09+08:00"
+            }
+        ],
+        "n": 50
+    },
+    "job": {
+        "special_job": [
+            {
+                "owner": "a16f29d3-a37b-4231-b7c1-8c5efa80d14b",
+                "status": "running",
+                "src_api_name": "NEWSDATA.IO",
+                "src_query": "category=business%2Ctechnology&country=gb%2Ctw%2Cus&language=en%2Czh&q=Taipei",
+                "llm_api_name": "OpenAI",
+                "llm_query": "{}"
+            },
+            {
+                "owner": "a16f29d3-a37b-4231-b7c1-8c5efa80d14b",
+                "status": "done",
+                "src_api_name": "GNews",
+                "src_query": "country=tw&from=2023-10-01T15%3A59%3A59Z&q=Baseball&to=2023-10-19T16%3A00%3A00Z",
+                "llm_api_name": "OpenAI",
+                "llm_query": "{}"
+            },
+            {
+                "owner": "a16f29d3-a37b-4231-b7c1-8c5efa80d14b",
+                "status": "canceled",
+                "src_api_name": "NEWS API",
+                "src_query": "q=Breath",
+                "llm_api_name": "OpenAI",
+                "llm_query": "{}"
+            },
+            {
+                "owner": "a16f29d3-a37b-4231-b7c1-8c5efa80d14b",
+                "status": "created",
+                "src_api_name": "Google API",
+                "src_query": "c2coff=0&cx=0000x0x00x00000x0&dateRestrict=3d&num=10&q=Hawaii&safe=active",
+                "llm_api_name": "OpenAI",
+                "llm_query": "{}"
+            },
+            {
+                "owner": "767e4e5c-c2f9-4d3f-ad00-187bb8c29fa9",
+                "status": "failed",
+                "src_api_name": "NEWSDATA.IO",
+                "src_query": "category=business%2Ctechnology&country=ar%2Ces%2Cus%2Cza&from=2023-10-01&language=en%2Ces%2Czh&q=iPad&to=2023-10-18",
+                "llm_api_name": "OpenAI",
+                "llm_query": "{}"
+            },
+            {
+                "owner": "767e4e5c-c2f9-4d3f-ad00-187bb8c29fa9",
+                "status": "created",
+                "src_api_name": "GNews",
+                "src_query": "category=technology&country=jp%2Ctw&q=Submarine",
+                "llm_api_name": "OpenAI",
+                "llm_query": "{}"
+            },
+            {
+                "owner": "767e4e5c-c2f9-4d3f-ad00-187bb8c29fa9",
+                "status": "done",
+                "src_api_name": "NEWS API",
+                "src_query": "q=KIA",
+                "llm_api_name": "OpenAI",
+                "llm_query": "{}"
+            },
+            {
+                "owner": "767e4e5c-c2f9-4d3f-ad00-187bb8c29fa9",
+                "status": "running",
+                "src_api_name": "Google API",
+                "src_query": "c2coff=0&cx=0x00x0x00x00xx0x0&dateRestrict=1w&num=10&q=%E4%BB%A5%E5%B7%B4%E6%88%B0%E7%88%AD&safe=active",
+                "llm_api_name": "OpenAI",
+                "llm_query": "{}"
+            }
+        ],
+        "max_job_per_user": 50
+    }
+}
