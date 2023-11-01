@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	cli "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api/GNews"
-	srv "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/GNews"
+	srv "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm/GNews"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/require"
@@ -183,13 +183,17 @@ func TestHeadlinesHandler(t *testing.T) {
 			w.WriteHeader(http.StatusOK)
 			w.Write(j)
 		})
-
+	t.Log("/" + strings.Join([]string{
+		cli.API_PATH,
+		cli.API_VERSION,
+		cli.EPTopHeadlines}, "/"))
 	srvr := httptest.NewServer(mux)
 	defer srvr.Close()
 
 	cPars := make(chan *service.NewsCreateRequest)
 	go func(c <-chan *service.NewsCreateRequest) {
 		for p := range c {
+			require.NotNil(t, p)
 			require.NotEmpty(t, p.Title)
 			require.NotEmpty(t, p.Md5Hash)
 		}
@@ -200,13 +204,13 @@ func TestHeadlinesHandler(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, q)
 
-	qs := q.Params().ToQueryString()
+	qs := q.Encode()
 	require.Contains(t, qs, "country="+strings.Join(pf.Country, "%2C"))
 	require.Contains(t, qs, "lang="+strings.Join(pf.Language, "%2C"))
 	require.NotContains(t, qs, "from=0001-01-01T23%3A59%3A59Z")
 	require.NotContains(t, qs, "to=0001-01-01T23%3A59%3A59Z")
 
-	r, err := q.ToRequest()
+	r, err := q.ToHttpRequest()
 	require.NoError(t, err)
 	require.NotNil(t, r)
 	require.Equal(t, cli.API_HOST, r.URL.Host)

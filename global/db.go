@@ -51,6 +51,7 @@ func ConnectToRedis() *redis.Client {
 			viper.GetString("REDIS_HOST"),
 			viper.GetInt("REDIS_PORT"),
 		),
+		Password:     viper.GetString("REDIS_PASSWORD"),
 		MaxRetries:   viper.GetInt("REDIS_MAX_RETRIES"),
 		ReadTimeout:  viper.GetDuration("REDIS_READ_TIMEOUT"),
 		WriteTimeout: viper.GetDuration("REDIS_WRITE_TIMEOUT"),

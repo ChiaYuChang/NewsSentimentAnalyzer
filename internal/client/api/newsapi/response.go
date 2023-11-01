@@ -162,7 +162,7 @@ func ParseHTTPResponse(resp *http.Response, currPage int) (api.Response, error) 
 	if apiResponse.HasNext() {
 		u, _ := url.Parse(resp.Request.URL.String())
 		v, _ := url.ParseQuery(resp.Request.URL.Query().Encode())
-		v.Set(qPage, strconv.Itoa(currPage+1))
+		v.Set(string(Page), strconv.Itoa(currPage+1))
 		u.RawQuery = v.Encode()
 		apiResponse.nextPageURL = u.String()
 	}

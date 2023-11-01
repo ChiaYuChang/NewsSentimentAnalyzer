@@ -12,9 +12,9 @@ import (
 	"testing"
 	"time"
 
-	cli "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api/newsAPI"
-	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm"
-	srv "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/newsapi"
+	cli "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api/newsapi"
+	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm"
+	srv "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm/newsapi"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/require"
@@ -231,11 +231,11 @@ func TestHeadlinesHandler(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, q)
 
-	qs := q.Params().ToQueryString()
+	qs := q.Encode()
 	require.Contains(t, qs, "country="+pf.Country)
 	require.Contains(t, qs, "category="+pf.Category)
 
-	r, err := q.ToRequest()
+	r, err := q.ToHttpRequest()
 	require.NoError(t, err)
 	require.NotNil(t, r)
 	require.Equal(t, cli.API_HOST, r.URL.Host)
@@ -293,7 +293,7 @@ func TestEverythingHandler(t *testing.T) {
 			Form: ft,
 		},
 		Keyword:  "worldcoin",
-		Language: []string{srv.Chinese},
+		Language: srv.Chinese,
 	}
 
 	type testCase struct {
@@ -348,13 +348,13 @@ func TestEverythingHandler(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, q)
 
-	qs := q.Params().ToQueryString()
+	qs := q.Encode()
 	require.NotContains(t, qs, "searchIn=")
 	require.NotContains(t, qs, "to=")
 	require.Contains(t, qs, "from=2023-06-30")
 	require.Contains(t, qs, fmt.Sprintf("q=%s", pf.Keyword))
 
-	r, err := q.ToRequest()
+	r, err := q.ToHttpRequest()
 	require.NoError(t, err)
 	require.NotNil(t, r)
 	require.Equal(t, cli.API_HOST, r.URL.Host)

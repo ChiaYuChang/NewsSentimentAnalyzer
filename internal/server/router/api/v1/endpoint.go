@@ -9,18 +9,16 @@ import (
 	"net/http"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
-	"github.com/google/uuid"
-
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client"
-
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model"
-	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm"
+	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view/object"
 	ec "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/errorCode"
 	tokenmaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/tokenMaker"
 	val "github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 	"github.com/spf13/viper"
 )
 
@@ -219,7 +217,7 @@ func postEndpoints(repo EndpointRepo, obj pageform.PageForm, w http.ResponseWrit
 			SrcApiID: apikey.ApiID,
 			// SrcQuery: q.Params().ToQueryString(),
 			// SrcQuery: string(jsn),
-			SrcQuery: q.Params().ToQueryString(),
+			SrcQuery: q.Encode(),
 			LlmApiID: llmId,
 			LlmQuery: llmQuery,
 		},
@@ -237,7 +235,7 @@ func postEndpoints(repo EndpointRepo, obj pageform.PageForm, w http.ResponseWrit
 		Str("role", userInfo.GetRole().String()).
 		Str("api", obj.API()).
 		Str("endpoint", obj.Endpoint()).
-		Str("query", q.Params().ToQueryString()).
+		Str("query", q.Encode()).
 		Int32("job", id).
 		Msg("Job Created OK")
 
@@ -247,7 +245,7 @@ func postEndpoints(repo EndpointRepo, obj pageform.PageForm, w http.ResponseWrit
 	r.LLMId = llmId
 	r.LLMQuery = llmQuery
 	r.NewsSourceId = apikey.ApiID
-	r.NewsSourceQuery = q.Params().ToQueryString()
+	r.NewsSourceQuery = q.Encode()
 	r.UserId = userInfo.GetUserID()
 	r.UserName = userInfo.GetUsername()
 
@@ -256,4 +254,3 @@ func postEndpoints(repo EndpointRepo, obj pageform.PageForm, w http.ResponseWrit
 	w.Write(b)
 	return
 }
-

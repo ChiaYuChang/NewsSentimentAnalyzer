@@ -86,6 +86,9 @@ func BindEnv() error {
 		"POSTGRES_PASSWORD_FILE",
 		"POSTGRES_DB_NAME",
 		"TOKEN_SECRET_FILE",
+		"REDIS_HOST",
+		"REDIS_PORT",
+		"REDIS_PASSWORD",
 		"APP_NAME",
 	} {
 		if err := viper.BindEnv(env); err != nil {
@@ -208,6 +211,7 @@ func setDefaultEnvVariable() {
 	viper.SetDefault("REDIS_HOST", "127.0.0.1")
 	viper.SetDefault("REDIS_PORT", 6379)
 	viper.SetDefault("REDIS_DB_NAME", "redis")
+	viper.SetDefault("REDIS_PASSWORD", "password")
 	viper.SetDefault("REDIS_NETWORK", "tcp")
 	viper.SetDefault("REDIS_MAX_RETRIES", 5)
 	viper.SetDefault("REDIS_READ_TIMEOUT", 3*time.Second)

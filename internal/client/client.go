@@ -8,7 +8,7 @@ import (
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api"
-	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm"
+	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
 	"golang.org/x/net/context"
 )
@@ -18,7 +18,7 @@ var ErrHandlerNotFound = errors.New("unregistered handler")
 var ErrUnknownEndpoint = errors.New("unknown endpoint")
 var ErrNotSupportedEndpoint = errors.New("currently not support endpoint")
 
-var PageFormHandlerRepo = NewPageFormHandlerRepo()
+var PageFormHandlerRepo = pageFormHandlerRepo{}
 
 func RegisterPageForm(pf pageform.PageForm, handler PageFormHandler) {
 	PageFormHandlerRepo.RegisterPageForm(pf, handler)
@@ -43,15 +43,11 @@ func (k repoMapKey) String() string {
 }
 
 type PageFormHandler interface {
-	Handle(apikey string, pageForm pageform.PageForm) (api.Query, error)
+	Handle(apikey string, pageForm pageform.PageForm) (api.Request, error)
 	Parse(response *http.Response) (api.Response, error)
 }
 
 type pageFormHandlerRepo map[repoMapKey]PageFormHandler
-
-func NewPageFormHandlerRepo() pageFormHandlerRepo {
-	return pageFormHandlerRepo(make(map[repoMapKey]PageFormHandler))
-}
 
 func (repo pageFormHandlerRepo) RegisterPageForm(pf pageform.PageForm, handler PageFormHandler) error {
 	key := newRepoMapKey(pf.API(), pf.Endpoint())
@@ -62,7 +58,7 @@ func (repo pageFormHandlerRepo) RegisterPageForm(pf pageform.PageForm, handler P
 	return nil
 }
 
-func (repo pageFormHandlerRepo) NewQueryFromPageFrom(apikey string, pf pageform.PageForm) (api.Query, error) {
+func (repo pageFormHandlerRepo) NewQueryFromPageFrom(apikey string, pf pageform.PageForm) (api.Request, error) {
 	key := newRepoMapKey(pf.API(), pf.Endpoint())
 	handler, ok := repo[key]
 	if !ok {
@@ -84,7 +80,7 @@ func (repo pageFormHandlerRepo) Do(cli http.Client, apikey string, pf pageform.P
 		return fmt.Errorf("error while .Handle: %w", err)
 	}
 
-	req, err := q.ToRequest()
+	req, err := q.ToHttpRequest()
 	if err != nil {
 		return fmt.Errorf("error while .ToRequest: %w", err)
 	}

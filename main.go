@@ -11,8 +11,8 @@ import (
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/cookieMaker"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router"
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/cookieMaker"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/validator"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view"
@@ -34,11 +34,21 @@ func main() {
 
 	pgSqlConn, err := global.ConnectToPostgres(context.Background())
 	if err != nil {
+		global.Logger.Error().
+			Str("db", "psql").
+			Str("status", "ok").
+			Err(err).
+			Msg("failed to connect to postgresSQL server")
 		os.Exit(1)
 	}
+	global.Logger.Info().
+		Str("db", "psql").
+		Str("status", "ok").
+		Msg("connected to postgresSQL server")
 	srvc := service.NewService(model.NewPGXStore(pgSqlConn), validator.Validate)
 
 	rds := global.ConnectToRedis()
+
 	rdsStatus := rds.Ping(context.Background())
 	if err := rdsStatus.Err(); err != nil {
 		global.Logger.Err(err).Send()
@@ -127,16 +137,15 @@ func main() {
 		serverCancel()
 	}(signalChan)
 
-	global.Logger.Info().
-		Msgf("Server start at: %s", addr)
-	global.Logger.Info().
-		Msgf("API version: %s", viper.GetString("APP_API_VERSION"))
-
 	startAt := time.Now()
+
 	global.Logger.Info().
-		Msgf("Cert: %s", global.AppVar.App.Certificate.CertFilePath())
-	global.Logger.Info().
-		Msgf("Key : %s", global.AppVar.App.Certificate.KeyFilePath())
+		Str("addr", addr).
+		Str("api verion", viper.GetString("APP_API_VERSION")).
+		Str("cert", global.AppVar.App.Certificate.CertFilePath()).
+		Str("key", global.AppVar.App.Certificate.KeyFilePath()).
+		Msg("Start server")
+
 	if err := server.ListenAndServeTLS(
 		// "./secrets/server.crt",
 		// "./secrets/server.key",

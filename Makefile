@@ -31,11 +31,9 @@ docker-new-redis-container:
 	@docker run --name ${APP_NAME}-redis \
 	-p ${REDIS_PORT}:6379 \
 	-v ${APP_NAME}-redis-volume:/data \
+	-e REDIS_ARGS="--requirepass ${REDIS_PASSWORD}" \
 	-d \
-	${REDIS_IMAGE_TAG} \
-	redis-server \
-	--save 60 1 \
-	--loglevel warning
+	${REDIS_IMAGE_TAG}
 
 docker-create-db:
 	docker exec ${APP_NAME}-postgres psql -U ${POSTGRES_USERNAME} -c "CREATE DATABASE ${POSTGRES_DB_NAME};"

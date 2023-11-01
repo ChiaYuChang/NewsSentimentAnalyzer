@@ -5,14 +5,14 @@ import (
 	"net/url"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api"
-	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm"
-	srv "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/GNews"
+	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm"
+	srv "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm/GNews"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/convert"
 )
 
 func getPage(q url.Values) int {
 	page := 1
-	if pStr := q.Get(qPage); pStr != "" {
+	if pStr := q.Get(string(Page)); pStr != "" {
 		if p, err := convert.StrTo(pStr).Int(); err == nil {
 			page = p
 		}
@@ -22,7 +22,7 @@ func getPage(q url.Values) int {
 
 type TopHeadlinesHandler struct{}
 
-func (hl TopHeadlinesHandler) Handle(apikey string, pf pageform.PageForm) (api.Query, error) {
+func (hl TopHeadlinesHandler) Handle(apikey string, pf pageform.PageForm) (api.Request, error) {
 	data, ok := pf.(srv.GNewsHeadlines)
 	if !ok {
 		return nil, api.ErrTypeAssertionFailure
@@ -51,7 +51,7 @@ func (hl TopHeadlinesHandler) Parse(response *http.Response) (api.Response, erro
 
 type SearchHandler struct{}
 
-func (s SearchHandler) Handle(apikey string, pf pageform.PageForm) (api.Query, error) {
+func (s SearchHandler) Handle(apikey string, pf pageform.PageForm) (api.Request, error) {
 	data, ok := pf.(srv.GNewsSearch)
 	if !ok {
 		return nil, api.ErrTypeAssertionFailure

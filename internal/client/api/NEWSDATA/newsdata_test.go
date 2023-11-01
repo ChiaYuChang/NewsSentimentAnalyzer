@@ -11,8 +11,7 @@ import (
 	"testing"
 
 	cli "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api/NEWSDATA"
-	newsdata "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api/NEWSDATA"
-	srv "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/NEWSDATA"
+	srv "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm/NEWSDATA"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/require"
@@ -235,9 +234,9 @@ func TestLatestNewsHandler(t *testing.T) {
 
 	mux := chi.NewRouter()
 	mux.Get("/"+strings.Join([]string{
-		newsdata.API_PATH,
-		newsdata.API_VERSION,
-		newsdata.EPLatestNews}, "/"),
+		cli.API_PATH,
+		cli.API_VERSION,
+		cli.EPLatestNews}, "/"),
 		func(w http.ResponseWriter, r *http.Request) {
 			_ = r.ParseForm()
 			if r.URL.Query().Get("apikey") != TEST_API_KEY {
@@ -254,7 +253,10 @@ func TestLatestNewsHandler(t *testing.T) {
 			w.WriteHeader(http.StatusOK)
 			w.Write(j)
 		})
-
+	t.Log("/" + strings.Join([]string{
+		cli.API_PATH,
+		cli.API_VERSION,
+		cli.EPLatestNews}, "/"))
 	srvr := httptest.NewServer(mux)
 	defer srvr.Close()
 
@@ -271,11 +273,11 @@ func TestLatestNewsHandler(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, q)
 
-	qs := q.Params().ToQueryString()
+	qs := q.Encode()
 	require.Contains(t, qs, "country=")
 	require.Contains(t, qs, "language=")
 
-	r, err := q.ToRequest()
+	r, err := q.ToHttpRequest()
 	require.NoError(t, err)
 	require.NotNil(t, r)
 	require.Equal(t, cli.API_HOST, r.URL.Host)
@@ -288,7 +290,7 @@ func TestLatestNewsHandler(t *testing.T) {
 	r.URL.Scheme = srvrUrl.Scheme
 	r.URL.Host = srvrUrl.Host
 
-	// t.Log(r.URL)
+	t.Log(r.URL)
 	resp, err := http.DefaultClient.Do(r)
 	require.NoError(t, err)
 	require.NotNil(t, resp)
@@ -326,7 +328,7 @@ func TestLatestNewsHandler(t *testing.T) {
 }
 
 func TestNewsArchiveHandler(t *testing.T) {
-	h := newsdata.NewsArchiveHandler{}
+	h := cli.NewsArchiveHandler{}
 
 	pf := srv.NEWSDATAIONewsArchive{
 		Keyword:  "Typhoon",
@@ -338,7 +340,7 @@ func TestNewsArchiveHandler(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, q)
 
-	qs := q.Params().ToQueryString()
+	qs := q.Encode()
 	t.Log(qs)
 	require.Contains(t, qs, "country=")
 	require.Contains(t, qs, "language=")
@@ -347,7 +349,7 @@ func TestNewsArchiveHandler(t *testing.T) {
 }
 
 func TestNewsSourcesHandler(t *testing.T) {
-	h := newsdata.NewsSourcesHandler{}
+	h := cli.NewsSourcesHandler{}
 
 	pf := srv.NEWSDATAIONewsSources{
 		Language: []string{srv.Chinese, srv.English},
@@ -359,12 +361,12 @@ func TestNewsSourcesHandler(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, q)
 
-	qs := q.Params().ToQueryString()
+	qs := q.Encode()
 	require.Contains(t, qs, "country=")
 	require.Contains(t, qs, "language=")
 	require.Contains(t, qs, "category=")
 
-	r, err := q.ToRequest()
+	r, err := q.ToHttpRequest()
 	require.NoError(t, err)
 	require.NotNil(t, r)
 

@@ -16,17 +16,17 @@ import (
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/validator"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view"
 
-	cookiemaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/cookieMaker"
+	cookiemaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/cookieMaker"
 	errorhandler "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/errorHandler"
-	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm"
 	tokenmaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/tokenMaker"
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
 
 	// init server side
-	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/GNews"
-	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/GoogleCSE"
-	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/NEWSDATA"
-	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/newsapi"
+	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm"
+	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm/GNews"
+	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm/GoogleCSE"
+	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm/NEWSDATA"
+	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm/newsapi"
 
 	// init client side
 	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api/GNews"

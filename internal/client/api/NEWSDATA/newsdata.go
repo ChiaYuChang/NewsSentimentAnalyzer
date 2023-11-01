@@ -6,15 +6,15 @@ import (
 	"time"
 
 	cli "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client"
-	srv "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/NEWSDATA"
+	srv "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm/NEWSDATA"
 )
 
 func init() {
-	cli.PageFormHandlerRepo.RegisterPageForm(
+	cli.RegisterPageForm(
 		srv.NEWSDATAIOLatestNews{}, LatestNewsHandler{})
-	cli.PageFormHandlerRepo.RegisterPageForm(
+	cli.RegisterPageForm(
 		srv.NEWSDATAIONewsArchive{}, NewsArchiveHandler{})
-	cli.PageFormHandlerRepo.RegisterPageForm(
+	cli.RegisterPageForm(
 		srv.NEWSDATAIONewsSources{}, NewsSourcesHandler{})
 }
 

@@ -9,9 +9,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"regexp"
-	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -21,78 +19,8 @@ import (
 
 var ErrTypeAssertionFailure = errors.New("type assertion failure")
 var ErrNotNextPage = errors.New("there are no more pages to query")
-
-type Params map[string][]string
-
-func NewParams() Params {
-	return make(Params)
-}
-
-func (p Params) Add(key, val string) {
-	if val == "" {
-		return
-	}
-	p[key] = append(p[key], val)
-}
-
-func (p Params) AddList(key string, val ...string) {
-	nonEmptyVal := make([]string, 0, len(val))
-	for _, v := range val {
-		if v != "" {
-			nonEmptyVal = append(nonEmptyVal, v)
-		}
-	}
-	p[key] = append(p[key], nonEmptyVal...)
-}
-
-func (p Params) Set(key, val string) {
-	if val == "" {
-		delete(p, key)
-		return
-	}
-	p[key] = []string{val}
-}
-
-func (p Params) SetList(key string, val ...string) {
-	if val == nil {
-		delete(p, key)
-		return
-	}
-	p[key] = val
-}
-
-func (p Params) ToUrlVals() url.Values {
-	val := url.Values{}
-	for k, v := range p {
-		val.Add(k, strings.Join(unique(v), ","))
-	}
-	return val
-}
-
-func unique(v []string) []string {
-	set := map[string]struct{}{}
-	for _, e := range v {
-		set[e] = struct{}{}
-	}
-	u := make([]string, 0, len(set))
-	for k := range set {
-		u = append(u, k)
-	}
-	sort.Sort(sort.StringSlice(u))
-	return u
-}
-
-func (p Params) ToQueryString() string {
-	return p.ToUrlVals().Encode()
-}
-
-func (p Params) ToBeautifulJSON(prefix, indent string) ([]byte, error) {
-	return json.MarshalIndent(p, prefix, indent)
-}
-
-func (p Params) ToJSON() ([]byte, error) {
-	return json.Marshal(map[string][]string(p))
-}
+var ErrNotImplemented = errors.New("not implemented")
+var re = regexp.MustCompile("[\\p{Han}[:alnum:]]")
 
 const QueryOriPageKey = true
 
@@ -100,10 +28,25 @@ func QueryOriginalPageContext(ctx context.Context) context.Context {
 	return context.WithValue(ctx, QueryOriPageKey, true)
 }
 
-type Query interface {
+type Key string
+
+type Request interface {
 	String() string
-	Params() Params
-	ToRequest() (*http.Request, error)
+	ToHttpRequest() (*http.Request, error)
+	json.Marshaler
+	json.Unmarshaler
+	Encode() string
+	Decode(q string) error
+}
+
+type Values interface {
+	Sep() string
+	Add(key Key, val string)
+	Set(key Key, val string)
+	Del(key Key)
+	Get(key Key) string
+	Has(key Key) bool
+	Clone() (Values, error)
 }
 
 type Response interface {
@@ -114,8 +57,6 @@ type Response interface {
 	Len() int
 	ToNews(ctx context.Context, wg *sync.WaitGroup, c chan<- *service.NewsCreateRequest)
 }
-
-var re = regexp.MustCompile("[\\p{Han}[:alnum:]]")
 
 func MD5Hash(title string, publishedAt time.Time, content ...string) (string, error) {
 	hasher := md5.New()
@@ -134,42 +75,4 @@ func MD5Hash(title string, publishedAt time.Time, content ...string) (string, er
 	}
 
 	return base64.StdEncoding.EncodeToString(hasher.Sum(nil)), nil
-}
-
-func ToURL(apiURL, apiMethod, apiKey, apiEndpoint string, q Query) (*url.URL, error) {
-	u, err := url.Parse(apiURL)
-	if err != nil {
-		return nil, err
-	}
-
-	v := q.Params().ToUrlVals()
-	if apiKey != "" {
-		v.Add("apikey", apiKey)
-	}
-
-	u = u.JoinPath(apiEndpoint)
-	u.RawQuery = v.Encode()
-
-	return u, nil
-}
-
-func ToRequest(apiURL, apiMethod, apiKey, apiEndpoint string, body io.Reader, q Query) (*http.Request, error) {
-	u, err := ToURL(apiURL, apiMethod, apiKey, apiEndpoint, q)
-	if err != nil {
-		return nil, err
-	}
-
-	return http.NewRequest(apiMethod, u.String(), body)
-}
-
-func ToBeautifulJSON(q Query, prefix, indent string) ([]byte, error) {
-	return q.Params().ToBeautifulJSON(prefix, indent)
-}
-
-func ToJSON(q Query) ([]byte, error) {
-	return q.Params().ToJSON()
-}
-
-func ToQueryString(q Query) string {
-	return q.Params().ToQueryString()
 }

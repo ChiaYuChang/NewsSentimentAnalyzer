@@ -1,44 +1,45 @@
 package openai
 
 import (
-	"fmt"
-	"net/http"
-	"net/url"
+	"encoding/json"
 )
 
+type EmbeddingsRequest Request[*EmbeddingsRequestBody]
+
 // See https://platform.openai.com/docs/api-reference/embeddings
-type EmbeddingsRequest struct {
-	Model string   `json:"model" validate:"required"`
-	Input []string `json:"input" validate:"required"`
-	User  string   `json:"user,omitempty"`
+func NewEmbeddingsRequest(apikey string) EmbeddingsRequest {
+	return EmbeddingsRequest{
+		Body:   &EmbeddingsRequestBody{},
+		apikey: apikey,
+	}
 }
 
-type EmbeddingsResponse struct {
-	Object string           `json:"object"`
-	Data   []EmbeddingsData `json:"data"`
-	Model  string           `json:"model"`
-	Usage  Usage            `json:"usage"`
+type EmbeddingsRequestBody struct {
+	Model          string   `json:"model"            mod:"default=text-embedding-ada-002"  validate:"required"`
+	Input          []string `json:"input"                                                  validate:"required,max=8192"`
+	EncodingFormat string   `json:"encoding_format"  mod:"float"                           validate:"oneof=float base64"`
+	User           string   `json:"user,omitempty"`
 }
 
-type EmbeddingsData struct {
-	Object    string    `json:"object"`
-	Embedding []float64 `json:"embedding"`
+func (body EmbeddingsRequestBody) MarshalJSON() ([]byte, error) {
+	return json.Marshal(body)
+}
+
+func (body *EmbeddingsRequestBody) UnmarshalJSON(b []byte) error {
+	return json.Unmarshal(b, body)
+}
+
+func (body EmbeddingsRequestBody) String() string {
+	b, _ := json.MarshalIndent(body, "", " ")
+	return string(b)
+}
+
+func (body EmbeddingsRequestBody) Endpoint() string {
+	return EPEmbeddings
+}
+
+type EmbeddingsObject struct {
 	Index     int       `json:"index"`
-}
-
-func NewEmbeddingsRequest() *EmbeddingsRequest {
-	return &EmbeddingsRequest{}
-}
-
-func (req EmbeddingsRequest) URL() *url.URL {
-	u, _ := url.Parse(fmt.Sprintf("%s://%s/%s/%s", URL_SCHEME, URL_HOST, API_VERSION, EPEmbeddings))
-	return u
-}
-
-func (req EmbeddingsRequest) HttpMethod() string {
-	return http.MethodPost
-}
-
-func (req EmbeddingsRequest) ToHttpRequest(apikey string) (*http.Request, error) {
-	return toHttpRequest(req, apikey)
+	Embedding []float64 `json:"embedding"  validate:"min=1"`
+	Object    string    `json:"object"     validate:"oneof=embedding"` // always embedding
 }

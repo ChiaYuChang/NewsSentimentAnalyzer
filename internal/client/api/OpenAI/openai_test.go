@@ -57,13 +57,12 @@ func TestCompletions(t *testing.T) {
 	u, err := url.Parse(srv.URL + "/" + openai.EPCompletions)
 	require.NoError(t, err)
 
-	req := openai.NewCompletionsRequest()
+	req := openai.NewCompletionsRequest("[[::API_KEY::]]")
+	req.Body.Model = "text-davinci-003"
+	req.Body.Prompt = append(req.Body.Prompt, "Say this is a test")
+	req.Body.MaxTokens = 10
 
-	req.Model = "text-davinci-003"
-	req.Prompt = append(req.Prompt, "Say this is a test")
-	req.MaxTokens = 10
-
-	httpReq, err := req.ToHttpRequest("[[::APIKEY::]]")
+	httpReq, err := req.ToHTTPRequest()
 	httpReq.URL = u
 	require.NoError(t, err)
 
@@ -76,7 +75,7 @@ func TestCompletions(t *testing.T) {
 	require.NoError(t, err)
 	defer httpResp.Body.Close()
 
-	var resp openai.CompletionsResponse
+	var resp openai.CompletionsObject
 	err = json.Unmarshal(body, &resp)
 	require.NoError(t, err)
 	require.Equal(t, resp.Id, "cmpl-uqkvlQyYK7bGYrRHQ0eXlWi7")

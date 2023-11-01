@@ -4,9 +4,10 @@ import (
 	"net/http"
 	"sync"
 
-	gnews "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/GNews"
-	newsdata "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/NEWSDATA"
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/newsapi"
+	gnews "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm/GNews"
+	newsdata "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm/NEWSDATA"
+	newsapi "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm/newsapi"
+
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view/object"
 )
 
