@@ -1,0 +1,716 @@
+{
+    "kind": "customsearch#search",
+    "url": {
+        "type": "application/json",
+        "template": "https://www.googleapis.com/customsearch/v1?q={searchTerms}&num={count?}&start={startIndex?}&lr={language?}&safe={safe?}&cx={cx?}&sort={sort?}&filter={filter?}&gl={gl?}&cr={cr?}&googlehost={googleHost?}&c2coff={disableCnTwTranslation?}&hq={hq?}&hl={hl?}&siteSearch={siteSearch?}&siteSearchFilter={siteSearchFilter?}&exactTerms={exactTerms?}&excludeTerms={excludeTerms?}&linkSite={linkSite?}&orTerms={orTerms?}&relatedSite={relatedSite?}&dateRestrict={dateRestrict?}&lowRange={lowRange?}&highRange={highRange?}&searchType={searchType}&fileType={fileType?}&rights={rights?}&imgSize={imgSize?}&imgType={imgType?}&imgColorType={imgColorType?}&imgDominantColor={imgDominantColor?}&alt=json"
+    },
+    "queries": {
+        "previousPage": [
+            {
+                "title": "Google Custom Search - 日本",
+                "totalResults": "26700000",
+                "searchTerms": "日本",
+                "count": 10,
+                "startIndex": 1,
+                "inputEncoding": "utf8",
+                "outputEncoding": "utf8",
+                "safe": "off",
+                "cx": "9145f3d16fbc84871",
+                "cr": "countryTW",
+                "disableCnTwTranslation": "0"
+            }
+        ],
+        "request": [
+            {
+                "title": "Google Custom Search - 日本",
+                "totalResults": "26700000",
+                "searchTerms": "日本",
+                "count": 10,
+                "startIndex": 11,
+                "inputEncoding": "utf8",
+                "outputEncoding": "utf8",
+                "safe": "off",
+                "cx": "9145f3d16fbc84871",
+                "cr": "countryTW",
+                "disableCnTwTranslation": "0"
+            }
+        ],
+        "nextPage": [
+            {
+                "title": "Google Custom Search - 日本",
+                "totalResults": "26700000",
+                "searchTerms": "日本",
+                "count": 10,
+                "startIndex": 21,
+                "inputEncoding": "utf8",
+                "outputEncoding": "utf8",
+                "safe": "off",
+                "cx": "9145f3d16fbc84871",
+                "cr": "countryTW",
+                "disableCnTwTranslation": "0"
+            }
+        ]
+    },
+    "context": {
+        "title": "News"
+    },
+    "searchInformation": {
+        "searchTime": 0.180749,
+        "formattedSearchTime": "0.18",
+        "totalResults": "26700000",
+        "formattedTotalResults": "26,700,000"
+    },
+    "items": [
+        {
+            "kind": "customsearch#result",
+            "title": "日本海底火山8月噴發浮石漂到綠島海域船隻注意| 生活| 中央社CNA",
+            "htmlTitle": "\u003cb\u003e日本\u003c/b\u003e海底火山8月噴發浮石漂到綠島海域船隻注意| 生活| 中央社CNA",
+            "link": "https://www.cna.com.tw/news/ahel/202111300051.aspx",
+            "displayLink": "www.cna.com.tw",
+            "snippet": "Nov 30, 2021 ... 日本小笠原群島海底火山「福德岡之場」今年8月噴發後，產生大量浮石最近隨著洋流漂到綠島海域；水產試驗所提醒海上航行船隻互相通報浮石位置， ...",
+            "htmlSnippet": "Nov 30, 2021 \u003cb\u003e...\u003c/b\u003e \u003cb\u003e日本\u003c/b\u003e小笠原群島海底火山「福德岡之場」今年8月噴發後，產生大量浮石最近隨著洋流漂到綠島海域；水產試驗所提醒海上航行船隻互相通報浮石位置，&nbsp;...",
+            "cacheId": "Vkb0pNh2r-gJ",
+            "formattedUrl": "https://www.cna.com.tw/news/ahel/202111300051.aspx",
+            "htmlFormattedUrl": "https://www.cna.com.tw/news/ahel/202111300051.aspx",
+            "pagemap": {
+                "cse_thumbnail": [
+                    {
+                        "src": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTDAi6w5AzHfa_oYzkJwxfUxJLgcT9IOYAaJKX7BXgibogZXdh_OPxRQVmc",
+                        "width": "259",
+                        "height": "194"
+                    }
+                ],
+                "metatags": [
+                    {
+                        "og:image": "https://imgcdn.cna.com.tw/www/webphotos/WebCover/800/20211130/768x576_341939879517.jpg",
+                        "article:published_time": "2021-11-30T10:16:00+08:00",
+                        "og:image:width": "1024",
+                        "og:type": "article",
+                        "twitter:card": "summary_large_image",
+                        "twitter:title": "日本海底火山8月噴發 浮石漂到綠島海域船隻注意 | 生活 | 中央社 CNA",
+                        "og:site_name": "中央社 CNA",
+                        "author": "中央通訊社",
+                        "og:title": "日本海底火山8月噴發 浮石漂到綠島海域船隻注意 | 生活 | 中央社 CNA",
+                        "og:image:height": "1024",
+                        "dailymotion-domain-verification": "dmh18yyush7adi14v",
+                        "og:description": "日本小笠原群島海底火山「福德岡之場」今年8月噴發後，產生大量浮石最近隨著洋流漂到綠島海域；水產試驗所提醒海上航行船隻互相通報浮石位置，避免浮石堵塞船舶冷卻水管造成損壞。",
+                        "fb:pages": "214159925349838",
+                        "article:author": "https://www.facebook.com/cnanewstaiwan",
+                        "article:publisher": "https://www.facebook.com/cnanewstaiwan",
+                        "twitter:image": "https://imgcdn.cna.com.tw/www/webphotos/WebCover/800/20211130/768x576_341939879517.jpg",
+                        "article:tag": "小笠原群島",
+                        "fb:app_id": "524202197752727",
+                        "article:modified_time": "2021-11-30T18:55:00+08:00",
+                        "viewport": "width=device-width, initial-scale=1.0, maximum-scale=5.0",
+                        "twitter:description": "日本小笠原群島海底火山「福德岡之場」今年8月噴發後，產生大量浮石最近隨著洋流漂到綠島海域；水產試驗所提醒海上航行船隻互相通報浮石位置，避免浮石堵塞船舶冷卻水管造成損壞。",
+                        "fb:admins": "100000193024403",
+                        "og:url": "https://www.cna.com.tw/news/ahel/202111300051.aspx"
+                    }
+                ],
+                "cse_image": [
+                    {
+                        "src": "https://imgcdn.cna.com.tw/www/webphotos/WebCover/800/20211130/768x576_341939879517.jpg"
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "customsearch#result",
+            "title": "日本醬油被推爆業內人揭成分嘆：台灣人最怕的掛上日製就變好香 ...",
+            "htmlTitle": "\u003cb\u003e日本\u003c/b\u003e醬油被推爆業內人揭成分嘆：台灣人最怕的掛上日製就變好香 ...",
+            "link": "https://www.chinatimes.com/realtimenews/20230428000080-260405",
+            "displayLink": "www.chinatimes.com",
+            "snippet": "Apr 28, 2023 ... 近日一款好市多日製醬油被推爆，不少民眾表示相當百搭，早已回夠多次，但對此業內人士有話要說，更分析成分，嘆氣表示，台灣人看到就怕的成分， ...",
+            "htmlSnippet": "Apr 28, 2023 \u003cb\u003e...\u003c/b\u003e 近日一款好市多日製醬油被推爆，不少民眾表示相當百搭，早已回夠多次，但對此業內人士有話要說，更分析成分，嘆氣表示，台灣人看到就怕的成分，&nbsp;...",
+            "cacheId": "XeNDZMERpaMJ",
+            "formattedUrl": "https://www.chinatimes.com/realtimenews/20230428000080-260405",
+            "htmlFormattedUrl": "https://www.chinatimes.com/realtimenews/20230428000080-260405",
+            "pagemap": {
+                "cse_thumbnail": [
+                    {
+                        "src": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSgFSgZqXqeHOLaC6dDIzqKm05l8iy05SVDv9n7xxeAJAKhg1Ey-Tbw2Ssm",
+                        "width": "275",
+                        "height": "183"
+                    }
+                ],
+                "metatags": [
+                    {
+                        "og:image": "https://images.chinatimes.com/newsphoto/2023-04-28/656/20230428000081.jpg",
+                        "og:image:width": "1024",
+                        "twitter:card": "summary_large_image",
+                        "subsection": "新聞",
+                        "copyright": "中時新聞網",
+                        "theme-color": "#ffffff",
+                        "og:site_name": "中時新聞網",
+                        "apple-mobile-web-app-title": "中時新聞網",
+                        "section": "生活",
+                        "source": "中時新聞網",
+                        "medium": "news",
+                        "title": "Infotimes.WwwWeb.ViewModels.ArticleViewModel",
+                        "og:description": "近日一款好市多日製醬油被推爆，不少民眾表示相當百搭，早已回夠多次，但對此業內人士有話要說，更分析成分，嘆氣表示，台灣人看到就怕的成分，只要掛上「日本」瞬間就好棒棒，呼籲大家可以多選購本土醬油。業內人士",
+                        "article:publisher": "https://www.facebook.com/CTfans",
+                        "article:section2": "non-adult",
+                        "fb:admins": "100009177684541",
+                        "lastmod": "2023-04-28T00:45:31+08:00",
+                        "pubdate": "2023-04-28T00:45:47+08:00",
+                        "taboola_recommend": "true",
+                        "application-name": "中時新聞網",
+                        "msapplication-tilecolor": "#dddddd",
+                        "image": "https://images.chinatimes.com/newsphoto/2023-04-28/656/20230428000081.jpg",
+                        "og:type": "article",
+                        "dable:item_id": "20230428000080",
+                        "author": "中時新聞網",
+                        "og:title": "日本醬油被推爆 業內人揭成分嘆：台灣人最怕的掛上日製就變好香 - 生活",
+                        "og:image:height": "683",
+                        "popin_certification": "non_adult",
+                        "fb:pages": "188311137478,102052648187244,300714994690744,1122937374406998,133290163978246,722239474456253,329118253934643,558877360920831",
+                        "article:author": "https://www.facebook.com/CTfans",
+                        "fb:app_id": "1379575469016080",
+                        "dable:author": "中時新聞網",
+                        "viewport": "width=device-width, initial-scale=1.0",
+                        "og:locale": "zh_TW",
+                        "publisher": "中時新聞網",
+                        "og:url": "https://www.chinatimes.com/realtimenews/20230428000080-260405"
+                    }
+                ],
+                "cse_image": [
+                    {
+                        "src": "https://images.chinatimes.com/newsphoto/2023-04-28/656/20230428000081.jpg"
+                    }
+                ],
+                "listitem": [
+                    {
+                        "item": "首頁",
+                        "name": "首頁",
+                        "position": "1"
+                    },
+                    {
+                        "item": "生活",
+                        "name": "生活",
+                        "position": "2"
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "customsearch#result",
+            "title": "日本拉麵店「根本魔界」 他曝1規定：在台灣會被罵死| 網搜追夯事 ...",
+            "htmlTitle": "\u003cb\u003e日本\u003c/b\u003e拉麵店「根本魔界」 他曝1規定：在台灣會被罵死| 網搜追夯事 ...",
+            "link": "https://udn.com/news/story/120912/7554083",
+            "displayLink": "udn.com",
+            "snippet": "4 days ago ... 日本拉麵在台灣十分受歡迎，為了吃上一碗拉麵，許多人願意在門外排隊一兩個小時。不過不少拉麵店規定十分嚴格，在台部落客「日本人的歐吉桑」近日便 ...",
+            "htmlSnippet": "4 days ago \u003cb\u003e...\u003c/b\u003e \u003cb\u003e日本\u003c/b\u003e拉麵在台灣十分受歡迎，為了吃上一碗拉麵，許多人願意在門外排隊一兩個小時。不過不少拉麵店規定十分嚴格，在台部落客「\u003cb\u003e日本\u003c/b\u003e人的歐吉桑」近日便&nbsp;...",
+            "cacheId": "Z512GY-7ILEJ",
+            "formattedUrl": "https://udn.com/news/story/120912/7554083",
+            "htmlFormattedUrl": "https://udn.com/news/story/120912/7554083",
+            "pagemap": {
+                "cse_thumbnail": [
+                    {
+                        "src": "https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcTiGoThtarH-Rn9uqT-N572VqwQutimxNS0cUqHpMHce3v7LmhaJDinU4fO",
+                        "width": "275",
+                        "height": "183"
+                    }
+                ],
+                "website": [
+                    {
+                        "image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/11/05/0/26887006.jpg&s=Y&x=0&y=0&sw=932&sh=621&exp=3600",
+                        "datemodified": "2023-11-06T11:16:55+08:00",
+                        "keywords": "拉麵",
+                        "articlesection": "Oops",
+                        "author": "聯合新聞網",
+                        "name": "日本拉麵店「根本魔界」 他曝1規定：在台灣會被罵死 | 聯合新聞網",
+                        "description": "日本拉麵在台灣十分受歡迎，為了吃上一碗拉麵，許多人願意在門外排隊一兩個小時。不過不少拉麵店規定十分嚴格，在台部落客「日本人的歐吉桑...",
+                        "publisher": "聯合新聞網",
+                        "headline": "日本拉麵店「根本魔界」 他曝1規定：在台灣會被罵死 | 聯合新聞網",
+                        "url": "https://udn.com/news/story/120912/7554083",
+                        "datepublished": "2023-11-06T11:16:55+08:00",
+                        "mainentityofpage": "https://udn.com/news/story/120912/7554083"
+                    }
+                ],
+                "metatags": [
+                    {
+                        "date": "2023-11-06 11:16:55",
+                        "og:image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/11/05/0/26887006.jpg&s=Y&x=0&y=0&sw=932&sh=621&exp=3600",
+                        "og:image:width": "1000",
+                        "copyright": "聯合新聞網",
+                        "subsection": "網搜追夯事",
+                        "twitter:card": "summary_large_image",
+                        "og:site_name": "聯合新聞網",
+                        "twitter:url": "https://udn.com/news/story/120912/7554083",
+                        "section": "Oops",
+                        "title": "日本拉麵店「根本魔界」 他曝1規定：在台灣會被罵死 | 聯合新聞網",
+                        "og:description": "日本拉麵在台灣十分受歡迎，為了吃上一碗拉麵，許多人願意在門外排隊一兩個小時。不過不少拉麵店規定十分嚴格，在台部落客「日本人的歐吉桑」近日便分享一項規定，可能會被台灣顧客罵死，引發網友熱議，更讓他笑稱「日本拉麵店就是魔界的」。",
+                        "article:publisher": "https://www.facebook.com/myudn/",
+                        "twitter:image:alt": "在台日籍部落客分享日本拉麵店「用餐禁止滑手機」一規定，詢問網友能不能接受，笑稱「在台灣會被罵死」。圖／Ingimage",
+                        "twitter:site": "@聯合新聞網",
+                        "news_keywords": "拉麵",
+                        "fb:admins": "100002847892748",
+                        "lastmod": "2023-11-06T11:16:55+08:00",
+                        "pubdate": "2023-11-06T11:16:55+08:00",
+                        "application-name": "聯合新聞網",
+                        "image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/11/05/0/26887006.jpg&s=Y&x=0&y=0&sw=932&sh=621&exp=3600",
+                        "og:type": "article",
+                        "twitter:title": "日本拉麵店「根本魔界」 他曝1規定：在台灣會被罵死 | 聯合新聞網",
+                        "taboola:image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/11/05/0/26887006.jpg&s=Y&x=0&y=0&sw=932&sh=621&exp=3600&w=300",
+                        "author": "聯合新聞網",
+                        "sub_id": "120912",
+                        "og:title": "日本拉麵店「根本魔界」 他曝1規定：在台灣會被罵死 | 聯合新聞網",
+                        "og:image:height": "1000",
+                        "cate_id": "120909",
+                        "fb:pages": "241284961029",
+                        "article:author": "https://www.facebook.com/myudn/",
+                        "url": "https://udn.com/news/story/120912/7554083",
+                        "twitter:image:src": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/11/05/0/26887006.jpg&s=Y&x=0&y=0&sw=932&sh=621&exp=3600",
+                        "fb:app_id": "350231215126101",
+                        "viewport": "width=device-width, initial-scale=1.0, maximum-scale=2.0",
+                        "art_id": "7554083",
+                        "twitter:description": "日本拉麵在台灣十分受歡迎，為了吃上一碗拉麵，許多人願意在門外排隊一兩個小時。不過不少拉麵店規定十分嚴格，在台部落客「日本人的歐吉桑」近日便分享一項規定，可能會被台灣顧客罵死，引發網友熱議，更讓他笑稱「日本拉麵店就是魔界的」。",
+                        "og:locale": "zh_TW",
+                        "publisher": "聯合新聞網",
+                        "og:url": "https://udn.com/news/story/120912/7554083",
+                        "date.available": "2023-11-06 11:16:55",
+                        "channel_id": "2"
+                    }
+                ],
+                "cse_image": [
+                    {
+                        "src": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/11/05/0/26887006.jpg&s=Y&x=0&y=0&sw=932&sh=621&exp=3600"
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "customsearch#result",
+            "title": "市川猿之助事件：日本歌舞伎的華麗與哀愁| 文化視角| 轉角國際udn ...",
+            "htmlTitle": "市川猿之助事件：\u003cb\u003e日本\u003c/b\u003e歌舞伎的華麗與哀愁| 文化視角| 轉角國際udn ...",
+            "link": "https://global.udn.com/global_vision/story/8664/7193104",
+            "displayLink": "global.udn.com",
+            "snippet": "May 27, 2023 ... 日本知名的歌舞伎明星——四代目市川猿之助——在5月18日的一家三人自殺事件後，猿之助目前已轉送醫院療養，近期已由警方針對事件進行調查詢問。",
+            "htmlSnippet": "May 27, 2023 \u003cb\u003e...\u003c/b\u003e \u003cb\u003e日本\u003c/b\u003e知名的歌舞伎明星——四代目市川猿之助——在5月18日的一家三人自殺事件後，猿之助目前已轉送醫院療養，近期已由警方針對事件進行調查詢問。",
+            "cacheId": "pzZvBicpTnkJ",
+            "formattedUrl": "https://global.udn.com/global_vision/story/8664/7193104",
+            "htmlFormattedUrl": "https://global.udn.com/global_vision/story/8664/7193104",
+            "pagemap": {
+                "cse_thumbnail": [
+                    {
+                        "src": "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcQFOrfudwY3_9t8SmyeRkbXzJqdX0oaggwIWl3kHH2AQsXDHXH8UjM_Zu6u",
+                        "width": "275",
+                        "height": "183"
+                    }
+                ],
+                "website": [
+                    {
+                        "image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/05/26/0/22288208.jpg&s=Y&x=0&y=0&sw=1280&sh=853&sl=W&fw=800&exp=3600",
+                        "datemodified": "2023-05-27T10:36:40+08:00",
+                        "keywords": "深度專欄,日本,重磅廣播,藝術,文化",
+                        "articlesection": "文化視角",
+                        "author": "聯合新聞網",
+                        "name": "市川猿之助事件：日本歌舞伎的華麗與哀愁 | 轉角國際 udn Global",
+                        "publisher": "轉角國際 udn Global",
+                        "description": "日本知名的歌舞伎明星——四代目市川猿之助——在5月18日的一家三人自殺事件後，猿之助目前已轉送醫院療養，近期已由警方針對事件進行調查詢...",
+                        "headline": "市川猿之助事件：日本歌舞伎的華麗與哀愁 | 轉角國際 udn Global",
+                        "url": "https://global.udn.com/global_vision/story/8664/7193104",
+                        "datepublished": "2023-05-27T10:36:29+08:00",
+                        "mainentityofpage": "https://global.udn.com/global_vision/story/8664/7193104"
+                    }
+                ],
+                "metatags": [
+                    {
+                        "date": "2023-05-27 10:36:29",
+                        "og:image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/05/26/0/22288208.jpg&s=Y&x=0&y=0&sw=1280&sh=853&sl=W&fw=800&exp=3600",
+                        "twitter:card": "summary",
+                        "og:image:width": "799",
+                        "copyright": "聯合新聞網",
+                        "og:site_name": "轉角國際 udn Global",
+                        "twitter:url": "https://global.udn.com/global_vision/story/8664/7193104",
+                        "section": "文化視角",
+                        "title": "市川猿之助事件：日本歌舞伎的華麗與哀愁 | 轉角國際 udn Global",
+                        "og:description": "日本知名的歌舞伎明星——四代目市川猿之助——在5月18日的一家三人自殺事件後，猿之助目前已轉送醫院療養，近期已由警方針對事件進行調查詢問。目前除了由猿之助親口證實尋短的意圖外，關於實行的動機和細節，尚未有警方調查結果的進一步證實。外界揣測是否與醜聞報導有關，目前也只有演藝公司的簡短回應「報導並非事實」。",
+                        "article:publisher": "https://www.facebook.com/udnglobal/",
+                        "twitter:image:alt": "震驚日本演藝界和社會大眾的市川猿之助事件，顯現了日本歌舞伎世界的華麗與哀愁。市川猿之助一家三人自殺的緣由為何？醜聞報導又有多少內容屬實？猿之助接下來要面對的法律責任，又或者將來還有沒有可能重新踏上歌舞伎的舞台？ 圖／明治座創業百五十周年記念『市川猿之助奮闘歌舞伎公演』",
+                        "twitter:site": "@轉角國際 udn Global",
+                        "news_keywords": "深度專欄,日本,重磅廣播,藝術,文化",
+                        "fb:admins": "100002847892748",
+                        "lastmod": "2023-05-27T10:36:40+08:00",
+                        "pubdate": "2023-05-27T10:36:29+08:00",
+                        "application-name": "轉角國際 udn Global",
+                        "image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/05/26/0/22288208.jpg&s=Y&x=0&y=0&sw=1280&sh=853&sl=W&fw=800&exp=3600",
+                        "og:type": "article",
+                        "twitter:title": "市川猿之助事件：日本歌舞伎的華麗與哀愁 | 轉角國際 udn Global",
+                        "author": "聯合新聞網",
+                        "og:title": "市川猿之助事件：日本歌舞伎的華麗與哀愁 | 轉角國際 udn Global",
+                        "og:image:height": "532",
+                        "origion_common_url": "https://global.udn.com",
+                        "cate_id": "8664",
+                        "fb:pages": "104959119850676",
+                        "article:author": "https://www.facebook.com/udnglobal/",
+                        "url": "https://global.udn.com/global_vision/story/8664/7193104",
+                        "twitter:image:src": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/05/26/0/22288208.jpg&s=Y&x=0&y=0&sw=1280&sh=853&sl=W&fw=800&exp=3600",
+                        "fb:app_id": "1662631110633331",
+                        "viewport": "width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0",
+                        "twitter:description": "日本知名的歌舞伎明星——四代目市川猿之助——在5月18日的一家三人自殺事件後，猿之助目前已轉送醫院療養，近期已由警方針對事件進行調查詢問。目前除了由猿之助親口證實尋短的意圖外，關於實行的動機和細節，尚未有警方調查結果的進一步證實。外界揣測是否與醜聞報導有關，目前也只有演藝公司的簡短回應「報導並非事實」。",
+                        "og:locale": "zh_TW",
+                        "publisher": "轉角國際 udn Global",
+                        "og:url": "https://global.udn.com/global_vision/story/8664/7193104",
+                        "date.available": "2023-05-27 10:36:29",
+                        "channel_id": "1020"
+                    }
+                ],
+                "cse_image": [
+                    {
+                        "src": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/05/26/0/22288208.jpg&s=Y&x=0&y=0&sw=1280&sh=853&sl=W&fw=800&exp=3600"
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "customsearch#result",
+            "title": "日本排核處理水漁業署增加秋刀魚抽驗件數| 生活| 中央社CNA",
+            "htmlTitle": "\u003cb\u003e日本\u003c/b\u003e排核處理水漁業署增加秋刀魚抽驗件數| 生活| 中央社CNA",
+            "link": "https://www.cna.com.tw/news/ahel/202308240152.aspx",
+            "displayLink": "www.cna.com.tw",
+            "snippet": "Aug 24, 2023 ... 日本最快今天將核處理水排入海。中秋烤秋刀魚，食安受關注，漁業署今天表示，已驗漁獲4500多件都安全，今年會驗逾目標3000件，秋刀魚也已加強檢驗； ...",
+            "htmlSnippet": "Aug 24, 2023 \u003cb\u003e...\u003c/b\u003e \u003cb\u003e日本\u003c/b\u003e最快今天將核處理水排入海。中秋烤秋刀魚，食安受關注，漁業署今天表示，已驗漁獲4500多件都安全，今年會驗逾目標3000件，秋刀魚也已加強檢驗；&nbsp;...",
+            "cacheId": "fkAhKTSlI34J",
+            "formattedUrl": "https://www.cna.com.tw/news/ahel/202308240152.aspx",
+            "htmlFormattedUrl": "https://www.cna.com.tw/news/ahel/202308240152.aspx",
+            "pagemap": {
+                "cse_thumbnail": [
+                    {
+                        "src": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdkKLkVKNifyv3FwaDfypXut4wBwEXketx01Iz2yXSDcMZwnZVQxGbMGk1",
+                        "width": "259",
+                        "height": "194"
+                    }
+                ],
+                "metatags": [
+                    {
+                        "og:image": "https://imgcdn.cna.com.tw/www/webphotos/WebCover/800/20230824/1993x1495_708721079122.jpg",
+                        "article:published_time": "2023-08-24T14:14:00+08:00",
+                        "og:image:width": "1024",
+                        "og:type": "article",
+                        "twitter:card": "summary_large_image",
+                        "twitter:title": "日本排核處理水 漁業署增加秋刀魚抽驗件數 | 生活 | 中央社 CNA",
+                        "og:site_name": "中央社 CNA",
+                        "author": "中央通訊社",
+                        "og:title": "日本排核處理水 漁業署增加秋刀魚抽驗件數 | 生活 | 中央社 CNA",
+                        "og:image:height": "1024",
+                        "dailymotion-domain-verification": "dmh18yyush7adi14v",
+                        "og:description": "日本最快今天將核處理水排入海。中秋烤秋刀魚，食安受關注，漁業署今天表示，已驗漁獲4500多件都安全，今年會驗逾目標3000件，秋刀魚也已加強檢驗；上市前是否逐批驗，將再做評估。",
+                        "fb:pages": "214159925349838",
+                        "article:author": "https://www.facebook.com/cnanewstaiwan",
+                        "article:publisher": "https://www.facebook.com/cnanewstaiwan",
+                        "twitter:image": "https://imgcdn.cna.com.tw/www/webphotos/WebCover/800/20230824/1993x1495_708721079122.jpg",
+                        "article:tag": "農業部漁業署",
+                        "fb:app_id": "524202197752727",
+                        "article:modified_time": "2023-08-30T19:33:00+08:00",
+                        "viewport": "width=device-width, initial-scale=1.0, maximum-scale=5.0",
+                        "twitter:description": "日本最快今天將核處理水排入海。中秋烤秋刀魚，食安受關注，漁業署今天表示，已驗漁獲4500多件都安全，今年會驗逾目標3000件，秋刀魚也已加強檢驗；上市前是否逐批驗，將再做評估。",
+                        "fb:admins": "100000193024403",
+                        "og:url": "https://www.cna.com.tw/news/ahel/202308240152.aspx"
+                    }
+                ],
+                "cse_image": [
+                    {
+                        "src": "https://imgcdn.cna.com.tw/www/webphotos/WebCover/800/20230824/1993x1495_708721079122.jpg"
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "customsearch#result",
+            "title": "日本音樂家坂本龍一辭世享壽71歲為電影末代皇帝、俘虜譜曲享譽 ...",
+            "htmlTitle": "\u003cb\u003e日本\u003c/b\u003e音樂家坂本龍一辭世享壽71歲為電影末代皇帝、俘虜譜曲享譽 ...",
+            "link": "https://www.cna.com.tw/news/acul/202304025002.aspx",
+            "displayLink": "www.cna.com.tw",
+            "snippet": "Apr 2, 2023 ... 日本體育報報導，音樂家坂本龍一已於3月28日在東京的一家醫院病逝，享壽71歲。他於2020年6月就對外公佈被醫師診斷為罹患直腸癌，後來癌細胞轉移到肺部 ...",
+            "htmlSnippet": "Apr 2, 2023 \u003cb\u003e...\u003c/b\u003e \u003cb\u003e日本\u003c/b\u003e體育報報導，音樂家坂本龍一已於3月28日在東京的一家醫院病逝，享壽71歲。他於2020年6月就對外公佈被醫師診斷為罹患直腸癌，後來癌細胞轉移到肺部&nbsp;...",
+            "cacheId": "x7_jUawGjyEJ",
+            "formattedUrl": "https://www.cna.com.tw/news/acul/202304025002.aspx",
+            "htmlFormattedUrl": "https://www.cna.com.tw/news/acul/202304025002.aspx",
+            "pagemap": {
+                "cse_thumbnail": [
+                    {
+                        "src": "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcT8FgG75Gf-7T9-lnHnlK-hJ0CaOjP2ysSDGwTfTG2rPz1m0hHvxN5ZPOg",
+                        "width": "310",
+                        "height": "163"
+                    }
+                ],
+                "metatags": [
+                    {
+                        "og:image": "https://imgcdn.cna.com.tw/www/webphotos/WebOg/600/20230402/2000x1050_123221060284.jpg",
+                        "article:published_time": "2023-04-02T20:46:00+08:00",
+                        "og:image:width": "1024",
+                        "og:type": "article",
+                        "twitter:card": "summary_large_image",
+                        "twitter:title": "日本音樂家坂本龍一辭世享壽71歲 為電影末代皇帝、俘虜譜曲享譽國際[影] | 文化 | 中央社 CNA",
+                        "og:site_name": "中央社 CNA",
+                        "author": "中央通訊社",
+                        "og:title": "日本音樂家坂本龍一辭世享壽71歲 為電影末代皇帝、俘虜譜曲享譽國際[影] | 文化 | 中央社 CNA",
+                        "og:image:height": "1024",
+                        "dailymotion-domain-verification": "dmh18yyush7adi14v",
+                        "og:description": "日本體育報報導，音樂家坂本龍一已於3月28日在東京的一家醫院病逝，享壽71歲。他於2020年6月就對外公佈被醫師診斷為罹患直腸癌，後來癌細胞轉移到肺部等器官。",
+                        "fb:pages": "214159925349838",
+                        "article:author": "https://www.facebook.com/cnanewstaiwan",
+                        "article:publisher": "https://www.facebook.com/cnanewstaiwan",
+                        "twitter:image": "https://imgcdn.cna.com.tw/www/webphotos/WebCover/800/20230402/2000x1500_041254193632.jpg",
+                        "article:tag": "坂本龍一",
+                        "fb:app_id": "524202197752727",
+                        "article:modified_time": "2023-04-03T08:46:00+08:00",
+                        "viewport": "width=device-width, initial-scale=1.0, maximum-scale=5.0",
+                        "twitter:description": "日本體育報報導，音樂家坂本龍一已於3月28日在東京的一家醫院病逝，享壽71歲。他於2020年6月就對外公佈被醫師診斷為罹患直腸癌，後來癌細胞轉移到肺部等器官。",
+                        "fb:admins": "100000193024403",
+                        "og:url": "https://www.cna.com.tw/news/acul/202304025002.aspx"
+                    }
+                ],
+                "cse_image": [
+                    {
+                        "src": "https://imgcdn.cna.com.tw/www/webphotos/WebOg/600/20230402/2000x1050_123221060284.jpg"
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "customsearch#result",
+            "title": "日本硫磺島外海火山噴發形成新島嶼長約300公尺[影] | 國際| 中央社CNA",
+            "htmlTitle": "\u003cb\u003e日本\u003c/b\u003e硫磺島外海火山噴發形成新島嶼長約300公尺[影] | 國際| 中央社CNA",
+            "link": "https://www.cna.com.tw/news/aopl/202311100111.aspx",
+            "displayLink": "www.cna.com.tw",
+            "snippet": "6 hours ago ... 日本小笠原群島的硫磺島外海10月發生火山噴發，氣象廳昨天宣布噴出的岩石已堆積成約南北300公尺長的陸地，也是首度確認硫磺島的外海出現新島嶼。",
+            "htmlSnippet": "6 hours ago \u003cb\u003e...\u003c/b\u003e \u003cb\u003e日本\u003c/b\u003e小笠原群島的硫磺島外海10月發生火山噴發，氣象廳昨天宣布噴出的岩石已堆積成約南北300公尺長的陸地，也是首度確認硫磺島的外海出現新島嶼。",
+            "cacheId": "IQLqS0IqS9EJ",
+            "formattedUrl": "https://www.cna.com.tw/news/aopl/202311100111.aspx",
+            "htmlFormattedUrl": "https://www.cna.com.tw/news/aopl/202311100111.aspx",
+            "pagemap": {
+                "cse_thumbnail": [
+                    {
+                        "src": "https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcSxmggtkC9tvZsvq0r1QXMqgpHegHDMCGi0JmtsaDh1GRFlwhJgsKUUJg",
+                        "width": "135",
+                        "height": "71"
+                    }
+                ],
+                "metatags": [
+                    {
+                        "og:image": "https://imgcdn.cna.com.tw/www/webphotos/WebOg/600/20231110/600x315_081113299813.jpg",
+                        "article:published_time": "2023-11-10T13:04:00+08:00",
+                        "og:image:width": "1024",
+                        "og:type": "article",
+                        "twitter:card": "summary_large_image",
+                        "twitter:title": "日本硫磺島外海火山噴發形成新島嶼 長約300公尺[影] | 國際 | 中央社 CNA",
+                        "og:site_name": "中央社 CNA",
+                        "author": "中央通訊社",
+                        "og:title": "日本硫磺島外海火山噴發形成新島嶼 長約300公尺[影] | 國際 | 中央社 CNA",
+                        "og:image:height": "1024",
+                        "dailymotion-domain-verification": "dmh18yyush7adi14v",
+                        "og:description": "日本小笠原群島的硫磺島外海10月發生火山噴發，氣象廳昨天宣布噴出的岩石已堆積成約南北300公尺長的陸地，也是首度確認硫磺島的外海出現新島嶼。",
+                        "fb:pages": "214159925349838",
+                        "article:author": "https://www.facebook.com/cnanewstaiwan",
+                        "article:publisher": "https://www.facebook.com/cnanewstaiwan",
+                        "twitter:image": "https://imgcdn.cna.com.tw/www/webphotos/WebCover/800/20231110/1873x1405_930916137133.jpg",
+                        "article:tag": "氣象廳",
+                        "fb:app_id": "524202197752727",
+                        "article:modified_time": "2023-11-10T13:17:00+08:00",
+                        "viewport": "width=device-width, initial-scale=1.0, maximum-scale=5.0",
+                        "twitter:description": "日本小笠原群島的硫磺島外海10月發生火山噴發，氣象廳昨天宣布噴出的岩石已堆積成約南北300公尺長的陸地，也是首度確認硫磺島的外海出現新島嶼。",
+                        "fb:admins": "100000193024403",
+                        "og:url": "https://www.cna.com.tw/news/aopl/202311100111.aspx"
+                    }
+                ],
+                "cse_image": [
+                    {
+                        "src": "https://imgcdn.cna.com.tw/www/webphotos/WebOg/600/20231110/600x315_081113299813.jpg"
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "customsearch#result",
+            "title": "日本人過年擺設羽子板趨吉避凶保護女性吉祥物| 國際| 中央社CNA",
+            "htmlTitle": "\u003cb\u003e日本\u003c/b\u003e人過年擺設羽子板趨吉避凶保護女性吉祥物| 國際| 中央社CNA",
+            "link": "https://www.cna.com.tw/news/aopl/202112310198.aspx",
+            "displayLink": "www.cna.com.tw",
+            "snippet": "Dec 31, 2021 ... 日本過年吉祥物相當多，包括押繪羽子板。這是將日本的傳統工藝技術運用在羽子板上，再施以精密手工技巧營造出立體感，是象徵趨吉避凶賀歲、守護女性的 ...",
+            "htmlSnippet": "Dec 31, 2021 \u003cb\u003e...\u003c/b\u003e \u003cb\u003e日本\u003c/b\u003e過年吉祥物相當多，包括押繪羽子板。這是將\u003cb\u003e日本\u003c/b\u003e的傳統工藝技術運用在羽子板上，再施以精密手工技巧營造出立體感，是象徵趨吉避凶賀歲、守護女性的&nbsp;...",
+            "cacheId": "BbV0MqpfY_8J",
+            "formattedUrl": "https://www.cna.com.tw/news/aopl/202112310198.aspx",
+            "htmlFormattedUrl": "https://www.cna.com.tw/news/aopl/202112310198.aspx",
+            "pagemap": {
+                "cse_thumbnail": [
+                    {
+                        "src": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcT9Dy0mu1v8-B-agZXoq-RKfF2LVV60GHrDG4h-JlOYZEsael7olrTzGuU",
+                        "width": "259",
+                        "height": "194"
+                    }
+                ],
+                "metatags": [
+                    {
+                        "og:image": "https://imgcdn.cna.com.tw/www/WebPhotos/1024/20211231/1024x768_20211231000094.jpg",
+                        "article:published_time": "2021-12-31T17:58:00+08:00",
+                        "og:image:width": "1024",
+                        "og:type": "article",
+                        "twitter:card": "summary_large_image",
+                        "twitter:title": "日本人過年擺設羽子板 趨吉避凶保護女性吉祥物 | 國際 | 中央社 CNA",
+                        "og:site_name": "中央社 CNA",
+                        "author": "中央通訊社",
+                        "og:title": "日本人過年擺設羽子板 趨吉避凶保護女性吉祥物 | 國際 | 中央社 CNA",
+                        "og:image:height": "1024",
+                        "dailymotion-domain-verification": "dmh18yyush7adi14v",
+                        "og:description": "日本過年吉祥物相當多，包括押繪羽子板。這是將日本的傳統工藝技術運用在羽子板上，再施以精密手工技巧營造出立體感，是象徵趨吉避凶賀歲、守護女性的吉祥物品。",
+                        "fb:pages": "214159925349838",
+                        "article:author": "https://www.facebook.com/cnanewstaiwan",
+                        "article:publisher": "https://www.facebook.com/cnanewstaiwan",
+                        "twitter:image": "https://imgcdn.cna.com.tw/www/WebPhotos/1024/20211231/1024x768_20211231000094.jpg",
+                        "article:tag": "日本",
+                        "fb:app_id": "524202197752727",
+                        "article:modified_time": "2021-12-31T18:14:00+08:00",
+                        "viewport": "width=device-width, initial-scale=1.0, maximum-scale=5.0",
+                        "twitter:description": "日本過年吉祥物相當多，包括押繪羽子板。這是將日本的傳統工藝技術運用在羽子板上，再施以精密手工技巧營造出立體感，是象徵趨吉避凶賀歲、守護女性的吉祥物品。",
+                        "fb:admins": "100000193024403",
+                        "og:url": "https://www.cna.com.tw/news/aopl/202112310198.aspx"
+                    }
+                ],
+                "cse_image": [
+                    {
+                        "src": "https://imgcdn.cna.com.tw/www/WebPhotos/1024/20211231/1024x768_20211231000094.jpg"
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "customsearch#result",
+            "title": "從未出席委員會日本網紅參議員東谷義和遭除名｜ 公視新聞網PNN",
+            "htmlTitle": "從未出席委員會\u003cb\u003e日本\u003c/b\u003e網紅參議員東谷義和遭除名｜ 公視新聞網PNN",
+            "link": "https://news.pts.org.tw/article/627414",
+            "displayLink": "news.pts.org.tw",
+            "snippet": "Mar 15, 2023 ... 去年7月以網路紅人身份，當選日本參議院不分區議員的東谷義和，因為長年待在海外，從來不出席院會和委員會，經過14日懲戒委員會決議，以及參院全院3分 ...",
+            "htmlSnippet": "Mar 15, 2023 \u003cb\u003e...\u003c/b\u003e 去年7月以網路紅人身份，當選\u003cb\u003e日本\u003c/b\u003e參議院不分區議員的東谷義和，因為長年待在海外，從來不出席院會和委員會，經過14日懲戒委員會決議，以及參院全院3分&nbsp;...",
+            "cacheId": "Ydp_5dncoyoJ",
+            "formattedUrl": "https://news.pts.org.tw/article/627414",
+            "htmlFormattedUrl": "https://news.pts.org.tw/article/627414",
+            "pagemap": {
+                "cse_thumbnail": [
+                    {
+                        "src": "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcTGBCaCJi2MLTSUAlPOn5278Q1X9r-mS3igaUrEDa-7eRA0L1JykkAdIAgH",
+                        "width": "300",
+                        "height": "168"
+                    }
+                ],
+                "metatags": [
+                    {
+                        "og:image": "https://news-data.pts.org.tw/media/136743/cover.jpg",
+                        "article:published_time": "2023-03-15T13:36:23+08:00",
+                        "twitter:card": "summary",
+                        "theme-color": "#000000",
+                        "og:site_name": "公視新聞網 PNN",
+                        "apple-mobile-web-app-title": "公視新聞",
+                        "msapplication-tileimage": "/images/pwa-pts-icon/pwa-pts-icon-512x512.png",
+                        "og:description": "去年7月以網路紅人身份，當選日本參議院不分區議員的東谷義和，因為長年待在海外，從來不出席院會和委員會，經過14日懲戒委員會決議，以及參院全院3分之2通過，成為日本戰後行憲72年來，第3位遭除名的國會議員。而因為長期缺席遭除名，則是戰後的首例。",
+                        "twitter:creator": "@pnnpts",
+                        "twitter:image": "https://news-data.pts.org.tw/media/136743/cover.jpg",
+                        "twitter:site": "@pnnpts",
+                        "article:modified_time": "2023-03-15T13:36:23+08:00",
+                        "lastmod": "2023-03-15T13:36:23+08:00",
+                        "pubdate": "2023-03-15T13:36:23+08:00",
+                        "og:article:author": "徐家仁／編譯",
+                        "application-name": "公視新聞",
+                        "msapplication-tilecolor": "#ffffff",
+                        "article:section": "全球",
+                        "og:type": "article",
+                        "twitter:title": "從未出席委員會 日本網紅參議員東谷義和遭除名",
+                        "author": "徐家仁／編譯",
+                        "og:title": "從未出席委員會 日本網紅參議員東谷義和遭除名 ｜ 公視新聞網 PNN",
+                        "fb:app_id": "466487386878484",
+                        "apple-mobile-web-app-status-bar-style": "black",
+                        "viewport": "width=device-width, initial-scale=1, shrink-to-fit=no",
+                        "twitter:description": "去年7月以網路紅人身份，當選日本參議院不分區議員的東谷義和，因為長年待在海外，從來不出席院會和委員會，經過14日懲戒委員會決議，以及參院全院3分之2通過，成為日本戰後行憲72年來，第3位遭除名的國會議員。而因為長期缺席遭除名，則是戰後的首例。",
+                        "apple-mobile-web-app-capable": "yes",
+                        "mobile-web-app-capable": "yes",
+                        "og:url": "https://news.pts.org.tw/article/627414"
+                    }
+                ],
+                "cse_image": [
+                    {
+                        "src": "https://news-data.pts.org.tw/media/136743/cover.jpg"
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "customsearch#result",
+            "title": "日本女大胃王大腸癌逝享年59歲「化療不到一年」最後身影曝光- 娛樂 ...",
+            "htmlTitle": "\u003cb\u003e日本\u003c/b\u003e女大胃王大腸癌逝享年59歲「化療不到一年」最後身影曝光- 娛樂 ...",
+            "link": "https://www.chinatimes.com/realtimenews/20230317001190-260404",
+            "displayLink": "www.chinatimes.com",
+            "snippet": "Mar 17, 2023 ... 日本女子大胃王菅原初代參加綜藝節目《火力全開大胃王》走紅，還一度創下10分鐘吃399碗蕎麥麵的驚人紀錄，不過卻爆出她罹患大腸癌於3月9日逝世， ...",
+            "htmlSnippet": "Mar 17, 2023 \u003cb\u003e...\u003c/b\u003e \u003cb\u003e日本\u003c/b\u003e女子大胃王菅原初代參加綜藝節目《火力全開大胃王》走紅，還一度創下10分鐘吃399碗蕎麥麵的驚人紀錄，不過卻爆出她罹患大腸癌於3月9日逝世，&nbsp;...",
+            "cacheId": "4M55iR1lPSYJ",
+            "formattedUrl": "https://www.chinatimes.com/realtimenews/20230317001190-260404",
+            "htmlFormattedUrl": "https://www.chinatimes.com/realtimenews/20230317001190-260404",
+            "pagemap": {
+                "cse_thumbnail": [
+                    {
+                        "src": "https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcTjO4dEa3HbW9GmXZRn1LsrzTp4fJKwj4Apo0dUXX0LcNsLrsTbUkQ1xe0",
+                        "width": "278",
+                        "height": "181"
+                    }
+                ],
+                "metatags": [
+                    {
+                        "og:image": "https://images.chinatimes.com/newsphoto/2023-03-17/656/20230317001194.jpg",
+                        "og:image:width": "1024",
+                        "twitter:card": "summary_large_image",
+                        "subsection": "新聞",
+                        "copyright": "中時新聞網",
+                        "theme-color": "#ffffff",
+                        "og:site_name": "中時新聞網",
+                        "apple-mobile-web-app-title": "中時新聞網",
+                        "section": "娛樂",
+                        "source": "中時新聞網",
+                        "medium": "news",
+                        "title": "Infotimes.WwwWeb.ViewModels.ArticleViewModel",
+                        "og:description": "日本女子大胃王菅原初代參加綜藝節目《火力全開大胃王》走紅，還一度創下10分鐘吃399碗蕎麥麵的驚人紀錄，不過卻爆出她罹患大腸癌於3月9日逝世，享年59歲。根據日媒綜合報導，菅原初代2022年6月被診斷出罹患大腸癌，",
+                        "article:publisher": "https://www.facebook.com/CTfans",
+                        "article:section2": "non-adult",
+                        "fb:admins": "100009177684541",
+                        "lastmod": "2023-03-17T08:30:29+08:00",
+                        "pubdate": "2023-03-17T08:32:53+08:00",
+                        "taboola_recommend": "true",
+                        "application-name": "中時新聞網",
+                        "msapplication-tilecolor": "#dddddd",
+                        "image": "https://images.chinatimes.com/newsphoto/2023-03-17/656/20230317001194.jpg",
+                        "og:type": "article",
+                        "dable:item_id": "20230317001190",
+                        "author": "中時新聞網",
+                        "og:title": "日本女大胃王大腸癌逝享年59歲 「化療不到一年」最後身影曝光 - 娛樂",
+                        "og:image:height": "669",
+                        "popin_certification": "non_adult",
+                        "fb:pages": "188311137478,102052648187244,300714994690744,1122937374406998,133290163978246,722239474456253,329118253934643,558877360920831",
+                        "article:author": "https://www.facebook.com/CTfans",
+                        "fb:app_id": "1379575469016080",
+                        "dable:author": "中時新聞網",
+                        "viewport": "width=device-width, initial-scale=1.0",
+                        "og:locale": "zh_TW",
+                        "publisher": "中時新聞網",
+                        "og:url": "https://www.chinatimes.com/realtimenews/20230317001190-260404"
+                    }
+                ],
+                "cse_image": [
+                    {
+                        "src": "https://images.chinatimes.com/newsphoto/2023-03-17/656/20230317001194.jpg"
+                    }
+                ],
+                "listitem": [
+                    {
+                        "item": "首頁",
+                        "name": "首頁",
+                        "position": "1"
+                    },
+                    {
+                        "item": "娛樂",
+                        "name": "娛樂",
+                        "position": "2"
+                    }
+                ]
+            }
+        }
+    ]
+}

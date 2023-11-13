@@ -1,26 +1,30 @@
 package newsapi_test
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"os"
-	"strings"
-	"sync"
+	"path"
 	"testing"
 	"time"
 
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api/newsapi"
 	cli "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api/newsapi"
 	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm"
 	srv "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm/newsapi"
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
+	"github.com/google/uuid"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/require"
 )
 
-const TEST_API_KEY = "00000xxxx00000xxxxx0xx0000x00xxx"
+const TEST_API_KEY = "[[:TEST_API_KEY:]]"
+
+var TEST_USER_ID, _ = uuid.Parse("741428c7-1ae0-4622-b615-9d44a141ff23")
 
 func TestParseResponseBody(t *testing.T) {
 	type testCase struct {
@@ -88,7 +92,7 @@ func TestParseResponseBody(t *testing.T) {
 					require.NotNil(t, apiErrResponse)
 					require.Empty(t, apiErrResponse.Code)
 				} else {
-					apiResponse, err := cli.ParseResponse(respJson, 0)
+					apiResponse, err := cli.ParseResponse(respJson)
 					require.NoError(t, err)
 					require.NotNil(t, apiResponse)
 					require.NotEmpty(t, apiResponse)
@@ -159,7 +163,7 @@ func TestParseResponse(t *testing.T) {
 			func(t *testing.T) {
 				resp, err := http.DefaultClient.Get(srvr.URL + tc.RoutePattern)
 				require.NoError(t, err)
-				apiresp, err := cli.ParseHTTPResponse(resp, 0)
+				apiresp, err := cli.ParseHTTPResponse(resp)
 				if tc.StatusCode == http.StatusOK {
 					require.NoError(t, err)
 					require.Equal(t, apiresp.GetStatus(), "ok")
@@ -171,228 +175,158 @@ func TestParseResponse(t *testing.T) {
 	}
 }
 
-func TestHeadlinesHandler(t *testing.T) {
-	h := cli.TopHeadlinesHandler{}
-
-	pf := srv.NEWSAPITopHeadlines{
-		Keyword:  "世大運",
-		Country:  srv.Taiwan,
-		Category: srv.Sports,
-	}
-
+func TestHandlers(t *testing.T) {
 	type testCase struct {
 		Name     string
+		Handler  client.PageFormHandler
+		PageForm pageform.PageForm
+		Endpoint string
 		Filename map[string]string
 	}
-
-	tc := testCase{
-		Name: "latest news",
-		Filename: map[string]string{
-			"":  "example_response/top-headlines_1.json",
-			"2": "example_response/top-headlines_2.json",
-			"3": "example_response/top-headlines_3.json",
-		},
-	}
-
-	mux := chi.NewRouter()
-	mux.Get("/"+strings.Join([]string{
-		cli.API_VERSION,
-		cli.EPTopHeadlines}, "/"),
-		func(w http.ResponseWriter, r *http.Request) {
-			_ = r.ParseForm()
-			if r.URL.Query().Get("apikey") != TEST_API_KEY {
-				j, _ := os.ReadFile("example_response/error_ApiKeyInvalid.json")
-				w.Header().Set("Content-Type", "application/json")
-				w.WriteHeader(http.StatusUnauthorized)
-				w.Write(j)
-				return
-			}
-
-			page := r.URL.Query().Get("page")
-			j, _ := os.ReadFile(tc.Filename[page])
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			w.Write(j)
-		})
-
-	srvr := httptest.NewServer(mux)
-	defer srvr.Close()
-
-	cPars := make(chan *service.NewsCreateRequest)
-	go func(c <-chan *service.NewsCreateRequest) {
-		for p := range c {
-			require.NotEmpty(t, p.Title)
-			require.NotEmpty(t, p.Md5Hash)
-		}
-	}(cPars)
-	wg := &sync.WaitGroup{}
-
-	q, err := h.Handle(TEST_API_KEY, pf)
-	require.NoError(t, err)
-	require.NotNil(t, q)
-
-	qs := q.Encode()
-	require.Contains(t, qs, "country="+pf.Country)
-	require.Contains(t, qs, "category="+pf.Category)
-
-	r, err := q.ToHttpRequest()
-	require.NoError(t, err)
-	require.NotNil(t, r)
-	require.Equal(t, cli.API_HOST, r.URL.Host)
-	require.Equal(t, cli.API_SCHEME, r.URL.Scheme)
-	require.Contains(t, r.URL.RawQuery, "apikey="+TEST_API_KEY)
-
-	srvrUrl, err := url.Parse(srvr.URL)
-	require.NoError(t, err)
-
-	r.URL.Scheme = srvrUrl.Scheme
-	r.URL.Host = srvrUrl.Host
-
-	rs := []*http.Request{r}
-	for i := 0; i < len(rs); i++ {
-		resp, err := http.DefaultClient.Do(rs[i])
-		require.NoError(t, err)
-		require.NotNil(t, resp)
-		require.Equal(t, http.StatusOK, resp.StatusCode)
-
-		apiResp, err := h.Parse(resp)
-		require.NoError(t, err)
-		require.NotNil(t, apiResp)
-		require.Equal(t, "ok", apiResp.GetStatus())
-
-		if i < len(tc.Filename)-1 {
-			require.True(t, apiResp.HasNext())
-			r, err = apiResp.NextPageRequest(nil)
-			require.NoError(t, err)
-			rs = append(rs, r)
-		} else {
-			require.False(t, apiResp.HasNext())
-		}
-
-		wg.Add(1)
-		go apiResp.ToNews(context.Background(), wg, cPars)
-		require.Greater(t, len(tc.Filename), i)
-	}
-
-	wg.Wait()
-	close(cPars)
-}
-
-func TestEverythingHandler(t *testing.T) {
-	h := cli.EverythingHandler{}
 
 	ft, err := time.Parse(time.DateOnly, "2023-06-30")
 	require.NoError(t, err)
 
-	pf := srv.NEWSAPIEverything{
-		SearchIn: pageform.SearchIn{
-			InTitle:       true,
-			InDescription: true,
-			InContent:     true},
-		TimeRange: pageform.TimeRange{
-			Form: ft,
+	tcs := []testCase{
+		{
+			Name:    "top-headlines",
+			Handler: cli.TopHeadlinesHandler{},
+			PageForm: srv.NEWSAPITopHeadlines{
+				Keyword:  "世大運",
+				Country:  srv.Taiwan,
+				Category: srv.Sports,
+			},
+			Filename: map[string]string{
+				"":  "example_response/top-headlines_1.json",
+				"2": "example_response/top-headlines_2.json",
+				"3": "example_response/top-headlines_3.json",
+			},
+			Endpoint: cli.EPTopHeadlines,
 		},
-		Keyword:  "worldcoin",
-		Language: srv.Chinese,
-	}
-
-	type testCase struct {
-		Name     string
-		Filename map[string]string
-	}
-
-	tc := testCase{
-		Name: "latest news",
-		Filename: map[string]string{
-			"":  "example_response/everything_1.json",
-			"2": "example_response/everything_2.json",
-			"3": "example_response/everything_3.json",
-			"4": "example_response/everything_4.json",
+		{
+			Name:    "everything",
+			Handler: cli.EverythingHandler{},
+			PageForm: srv.NEWSAPIEverything{
+				SearchIn: pageform.SearchIn{
+					InTitle:       true,
+					InDescription: true,
+					InContent:     true},
+				TimeRange: pageform.TimeRange{
+					Form: ft,
+				},
+				Keyword:  "worldcoin",
+				Language: srv.Chinese,
+			},
+			Filename: map[string]string{
+				"":  "example_response/everything_1.json",
+				"2": "example_response/everything_2.json",
+				"3": "example_response/everything_3.json",
+				"4": "example_response/everything_4.json",
+			},
+			Endpoint: cli.EPEverything,
 		},
 	}
 
+	// setup test server
 	mux := chi.NewRouter()
-	mux.Get("/"+strings.Join([]string{
-		cli.API_VERSION,
-		cli.EPEverything}, "/"),
-		func(w http.ResponseWriter, r *http.Request) {
-			_ = r.ParseForm()
-			if r.URL.Query().Get("apikey") != TEST_API_KEY {
-				j, _ := os.ReadFile("example_response/error_ApiKeyInvalid.json")
+	for i := range tcs {
+		tc := tcs[i]
+		mux.Get("/"+path.Join(cli.API_VERSION, tc.Endpoint),
+			func(w http.ResponseWriter, r *http.Request) {
+				_ = r.ParseForm()
+				if !(r.URL.Query().Get("apikey") != TEST_API_KEY ||
+					r.Header.Get("X-Api-Key") != TEST_API_KEY ||
+					r.Header.Get("Authorization") != TEST_API_KEY) {
+					j, _ := os.ReadFile("example_response/error_ApiKeyInvalid.json")
+					w.Header().Set("Content-Type", "application/json")
+					w.WriteHeader(http.StatusUnauthorized)
+					w.Write(j)
+					return
+				}
+
+				page := r.URL.Query().Get("page")
+				j, _ := os.ReadFile(tc.Filename[page])
 				w.Header().Set("Content-Type", "application/json")
-				w.WriteHeader(http.StatusUnauthorized)
+				w.WriteHeader(http.StatusOK)
 				w.Write(j)
-				return
-			}
-
-			page := r.URL.Query().Get("page")
-			j, _ := os.ReadFile(tc.Filename[page])
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			w.Write(j)
-		})
-
+			})
+	}
 	srvr := httptest.NewServer(mux)
 	defer srvr.Close()
-
-	cPars := make(chan *service.NewsCreateRequest)
-	go func(c <-chan *service.NewsCreateRequest) {
-		for p := range c {
-			require.NotEmpty(t, p.Title)
-			require.NotEmpty(t, p.Md5Hash)
-		}
-	}(cPars)
-	wg := &sync.WaitGroup{}
-
-	q, err := h.Handle(TEST_API_KEY, pf)
-	require.NoError(t, err)
-	require.NotNil(t, q)
-
-	qs := q.Encode()
-	require.NotContains(t, qs, "searchIn=")
-	require.NotContains(t, qs, "to=")
-	require.Contains(t, qs, "from=2023-06-30")
-	require.Contains(t, qs, fmt.Sprintf("q=%s", pf.Keyword))
-
-	r, err := q.ToHttpRequest()
-	require.NoError(t, err)
-	require.NotNil(t, r)
-	require.Equal(t, cli.API_HOST, r.URL.Host)
-	require.Equal(t, cli.API_SCHEME, r.URL.Scheme)
-	require.Contains(t, r.URL.RawQuery, "apikey="+TEST_API_KEY)
 
 	srvrUrl, err := url.Parse(srvr.URL)
 	require.NoError(t, err)
 
-	r.URL.Scheme = srvrUrl.Scheme
-	r.URL.Host = srvrUrl.Host
+	for i := range tcs {
+		tc := tcs[i]
+		t.Run(tc.Name, func(t *testing.T) {
+			// mock a redis db
+			Cache := map[string]*api.PreviewCache{}
+			NItem := 0
 
-	rs := []*http.Request{r}
-	for i := 0; i < len(rs); i++ {
-		resp, err := http.DefaultClient.Do(rs[i])
-		require.NoError(t, err)
-		require.NotNil(t, resp)
-		require.Equal(t, http.StatusOK, resp.StatusCode)
-
-		apiResp, err := h.Parse(resp)
-		require.NoError(t, err)
-		require.NotNil(t, apiResp)
-		require.Equal(t, "ok", apiResp.GetStatus())
-
-		if i < len(tc.Filename)-1 {
-			require.True(t, apiResp.HasNext())
-			r, err = apiResp.NextPageRequest(nil)
+			// user first request
+			req, err := tc.Handler.Handle(TEST_API_KEY, tc.PageForm)
 			require.NoError(t, err)
-			rs = append(rs, r)
-		} else {
-			require.False(t, apiResp.HasNext())
-		}
+			require.NotNil(t, req)
 
-		wg.Add(1)
-		go apiResp.ToNews(context.Background(), wg, cPars)
-		require.Greater(t, len(tc.Filename), i)
+			ckey, cache := req.ToPreviewCache(TEST_USER_ID)
+			Cache[ckey] = cache
+			require.NotZero(t, ckey)
+			require.NotNil(t, cache)
+
+			for i := 1; i <= 10; i++ {
+				httpReq, err := req.ToHttpRequest()
+				require.NoError(t, err)
+				require.NotNil(t, httpReq)
+				httpReq.URL.Scheme = srvrUrl.Scheme
+				httpReq.URL.Host = srvrUrl.Host
+
+				require.Contains(t, httpReq.URL.String(), tc.Endpoint)
+
+				if i == 1 {
+					// page=1 is default
+					require.NotContains(t, httpReq.URL.RawQuery, "page=")
+				} else {
+					require.Contains(t, httpReq.URL.RawQuery, fmt.Sprintf("page=%d", i))
+				}
+
+				httpResp, err := http.DefaultClient.Do(httpReq)
+				require.NoError(t, err)
+				require.NotNil(t, httpResp)
+				require.Equal(t, http.StatusOK, httpResp.StatusCode)
+
+				// parse response
+				resp, err := tc.Handler.Parse(httpResp)
+				require.NoError(t, err)
+				require.NotNil(t, resp)
+				require.Equal(t, "ok", resp.GetStatus())
+
+				next, prev := resp.ToNewsItemList()
+				// update cache
+				cache, ok := Cache[ckey]
+				require.True(t, ok)
+				cache.SetNextPage(next)
+
+				if next.Equal(api.IntLastPageToken) {
+					// last page
+					require.Nil(t, prev)
+					require.Equal(t, 0, len(prev))
+					require.Equal(t, len(tc.Filename), i)
+					break
+				} else {
+					require.Less(t, 0, len(prev))
+					NItem += len(prev)
+
+					// append items to cache
+					cache.NewsItem = append(cache.NewsItem, prev...)
+					Cache[ckey] = cache
+				}
+				// next client request comes in
+				// build request from cache
+				req, err = newsapi.RequestFromPreviewCache(cache)
+				require.NoError(t, err)
+			}
+			require.Equal(t, NItem, len(Cache[ckey].NewsItem))
+		})
 	}
-
-	wg.Wait()
-	close(cPars)
 }

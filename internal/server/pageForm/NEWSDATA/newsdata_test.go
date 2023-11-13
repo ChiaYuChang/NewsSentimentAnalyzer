@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	newsdata "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/NEWSDATA"
+	newsdata "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm/NEWSDATA"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/validator"
 	"github.com/go-playground/form"
 	mod "github.com/go-playground/mold/v4/modifiers"

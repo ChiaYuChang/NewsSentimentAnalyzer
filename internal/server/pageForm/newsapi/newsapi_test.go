@@ -3,7 +3,7 @@ package newsapi_test
 import (
 	"testing"
 
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/newsapi"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm/newsapi"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/validator"
 	val "github.com/go-playground/validator/v10"
 	"github.com/stretchr/testify/require"

@@ -20,9 +20,13 @@ import (
 
 type Response struct {
 	Status      string    `json:"status"`
-	TotalResult int       `json:"totalResults"`
+	TotalResult int       `json:"total_results"`
 	Articles    []Article `json:"articles"`
-	nextPageURL string    `json:"-"`
+	CurrPage    int       `json:"current_page"`
+}
+
+func (resp Response) ContentProcessFunc(c string) (string, error) {
+	return c, nil
 }
 
 // Retrieve whether the request was successful or not
@@ -35,14 +39,6 @@ func (resp Response) HasNext() bool {
 	return resp.Len() > 0
 }
 
-// Get requery for the next page.
-func (resp Response) NextPageRequest(body io.Reader) (*http.Request, error) {
-	if resp.HasNext() {
-		return http.NewRequest(API_METHOD, resp.nextPageURL, body)
-	}
-	return nil, api.ErrNotNextPage
-}
-
 // return the number of the articles in the response
 func (resp Response) Len() int {
 	return len(resp.Articles)
@@ -52,6 +48,26 @@ func (resp Response) Len() int {
 func (resp Response) String() string {
 	b, _ := json.MarshalIndent(resp, "", "\t")
 	return string(b)
+}
+
+func (resp Response) ToNewsItemList() (api.NextPageToken, []api.NewsPreview) {
+	if !resp.HasNext() {
+		return api.IntLastPageToken, nil
+	}
+
+	preview := make([]api.NewsPreview, resp.Len())
+	for i, article := range resp.Articles {
+		preview[i] = api.NewsPreview{
+			Id:          i,
+			Title:       article.Title,
+			Link:        article.Link,
+			Description: article.Description,
+			Category:    "",
+			Content:     article.Content,
+			PubDate:     time.Time(article.PublishedAt),
+		}
+	}
+	return api.IntNextPageToken(resp.CurrPage + 1), preview
 }
 
 // convert response to model.CreateNewsParams and return by a channel
@@ -139,7 +155,20 @@ func (as ArticleSource) String() string {
 	return fmt.Sprintf("Source: %s (%s)", as.Name, as.Id)
 }
 
-func ParseHTTPResponse(resp *http.Response, currPage int) (api.Response, error) {
+func extractCurrPageFromResp(resp *http.Response) (int, error) {
+	pageStr := resp.Request.URL.Query().Get(string(Page))
+	if pageStr == "" {
+		pageStr = "1"
+	}
+
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		return 0, fmt.Errorf("error while converting page string to int: %w", err)
+	}
+	return page, nil
+}
+
+func ParseHTTPResponse(resp *http.Response) (api.Response, error) {
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("error while reading response body: %w", err)
@@ -154,30 +183,28 @@ func ParseHTTPResponse(resp *http.Response, currPage int) (api.Response, error) 
 		return nil, apiErrResponse.ToError(resp.StatusCode)
 	}
 
-	apiResponse, err := ParseResponse(body, currPage)
+	apiResponse, err := ParseResponse(body)
 	if err != nil {
 		return nil, err
 	}
 
-	if apiResponse.HasNext() {
-		u, _ := url.Parse(resp.Request.URL.String())
-		v, _ := url.ParseQuery(resp.Request.URL.Query().Encode())
-		v.Set(string(Page), strconv.Itoa(currPage+1))
-		u.RawQuery = v.Encode()
-		apiResponse.nextPageURL = u.String()
+	page, err := extractCurrPageFromResp(resp)
+	if err != nil {
+		return nil, err
 	}
+	apiResponse.CurrPage = page
 	return apiResponse, err
 }
 
-func ParseErrorResponse(b []byte) (*APIError, error) {
-	var respErr *APIError
+func ParseErrorResponse(b []byte) (*ErrorResponse, error) {
+	var respErr *ErrorResponse
 	if err := json.Unmarshal(b, &respErr); err != nil {
 		return nil, fmt.Errorf("error while unmarshaling body: %v", err)
 	}
 	return respErr, nil
 }
 
-func ParseResponse(b []byte, currPage int) (*Response, error) {
+func ParseResponse(b []byte) (*Response, error) {
 	var apiResponse Response
 	if err := json.Unmarshal(b, &apiResponse); err != nil {
 		return nil, fmt.Errorf("error while unmarshaling body of error response: %v", err)

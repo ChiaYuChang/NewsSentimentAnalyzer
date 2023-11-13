@@ -1,33 +1,38 @@
 package googlecse
 
 import (
-	"bytes"
-	"context"
-	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api"
-	"google.golang.org/api/googleapi"
+	srv "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm/GoogleCSE"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/convert"
+	"github.com/google/uuid"
 )
 
 const (
-	qpKeyword                      = "q"
-	qpEnableChineseSearch          = "c2coff"
-	qpSearchEngineId               = "cx"
-	qpGeoLocation                  = "gl"
-	qpSaveLevel                    = "safe"
-	qpLanguage                     = "lr"
-	qpEnableDuplicateContentFilter = "filter"
-	qpDateRestrict                 = "dateRestrict"
-	qpSiteSearch                   = "siteSearch"
-	qpSiteSearchFilter             = "siteSearchFilter"
-	qpExactTerms                   = "exactTerms"
-	qpExcludeTerms                 = "excludeTerms"
-	qpPageSize                     = "num"
-	qpStart                        = "start"
+	qpKeyword                      api.Key = "q"
+	qpEnableChineseSearch          api.Key = "c2coff"
+	qpSearchEngineId               api.Key = "cx"
+	qpGeoLocation                  api.Key = "gl"
+	qpSaveLevel                    api.Key = "safe"
+	qpLanguage                     api.Key = "lr"
+	qpEnableDuplicateContentFilter api.Key = "filter"
+	qpDateRestrict                 api.Key = "dateRestrict"
+	qpSiteSearch                   api.Key = "siteSearch"
+	qpSiteSearchFilter             api.Key = "siteSearchFilter"
+	qpExactTerms                   api.Key = "exactTerms"
+	qpExcludeTerms                 api.Key = "excludeTerms"
+	qpPageSize                     api.Key = "num"
+	qpStart                        api.Key = "start"
+	qpAPIKey                       api.Key = "key"
 )
+
+var ErrRequiredFieldMissing = errors.New("required field is missing")
 
 // cseChineseSearch is a type for Chinese search.
 // See https://developers.google.com/custom-search/v1/reference/rest/v1/cse/list
@@ -135,33 +140,13 @@ func (f cseSiteSearchFilter) ToParam() string {
 type Request struct {
 	*api.RequestProto
 	SearchEngineId string `json:"search_engine_id,omitempty"`
-	// APIKey                 string                    `json:"apikey,omitempty"`
-	// Query                  string                    `json:"query"`
-	// ChineseSearch          cseChineseSearch          `json:"chinese_search,omitempty"`
-	// GeoLocation            string                    `json:"geo_location,omitempty"`
-	// SafeLevel              cseSafeLevel              `json:"safe_level,omitempty"`
-	// Language               string                    `json:"language,omitempty"`
-	// DuplicateContentFilter cseDuplicateContentFilter `json:"duplicate_content_filter,omitempty"`
-	// DateRestrict           string                    `json:"date_restrict,omitempty"`
-	// SiteSearch             string                    `json:"site_search,omitempty"`
-	// SiteSearchFilter       cseSiteSearchFilter       `json:"site_search_filter,omitempty"`
-	// ExactTerms             string                    `json:"exact_terms,omitempty"`
-	// ExcludeTerms           string                    `json:"exclude_terms,omitempty"`
-	// PageSize               int64                     `json:"page_size,omitempty"`
-	// More                   [][2]string               `json:"more,omitempty"`
-	// Start                  uint32                    `json:"start,omit"`
-	CallOpts []googleapi.CallOption `json:"-"`
-	// params                 api.ParamsMap             `json:"-"`
+	Start          int    `json:"start,omit"`
+	PageSize       int    `json:"page_size,omitempty"`
+	// CallOpts       []googleapi.CallOption `json:"-"`
 }
 
-func NewSearchRequest(ctx context.Context, apikey string, engId string,
-	opt ...googleapi.CallOption) (*Request, error) {
-
-	if apikey == "" {
-		return nil, ErrRequiredFieldMissing
-	}
-
-	if engId == "" {
+func NewRequest(apikey string, engId string) (*Request, error) {
+	if apikey == "" || engId == "" {
 		return nil, ErrRequiredFieldMissing
 	}
 
@@ -170,96 +155,161 @@ func NewSearchRequest(ctx context.Context, apikey string, engId string,
 	req.Add(qpEnableChineseSearch, EnableChineseSearch.ToParam())
 	req.Add(qpSaveLevel, EnableSafeSearch.ToParam())
 	req.Add(qpEnableDuplicateContentFilter, EnableDuplicateContentFilter.ToParam())
-	req.Set(qpPageSize, "10")
-	req.Set(qpStart, "1")
 	return &Request{
 		RequestProto:   req,
 		SearchEngineId: engId,
-		CallOpts:       opt,
+		Start:          1,
+		PageSize:       DEFAULT_PAGE_SIZE,
 	}, nil
 }
 
-func (r *Request) SetKeyword(keyword string) *Request {
-	r.Set(qpKeyword, keyword)
-	return r
+func (req *Request) SetKeyword(keyword string) *Request {
+	req.Set(qpKeyword, keyword)
+	return req
 }
 
-func (r *Request) SetChineseSearch(c2off cseChineseSearch) *Request {
-	r.Set(qpEnableChineseSearch, c2off.ToParam())
-	return r
+func (req *Request) SetChineseSearch(c2off cseChineseSearch) *Request {
+	req.Set(qpEnableChineseSearch, c2off.ToParam())
+	return req
 }
 
-func (r *Request) SetGeoLocation(gl string) *Request {
-	r.Set(qpGeoLocation, gl)
-	return r
+func (req *Request) SetGeoLocation(gl string) *Request {
+	req.Set(qpGeoLocation, gl)
+	return req
 }
 
-func (r *Request) SetSafeLevel(safe cseSafeLevel) *Request {
-	r.Set(qpSaveLevel, safe.ToParam())
-	return r
+func (req *Request) SetSafeLevel(safe cseSafeLevel) *Request {
+	req.Set(qpSaveLevel, safe.ToParam())
+	return req
 }
 
-func (r *Request) SetLanguage(lr string) *Request {
-	r.Set(qpLanguage, lr)
-	return r
+func (req *Request) SetLanguage(lr string) *Request {
+	req.Set(qpLanguage, lr)
+	return req
 }
 
-func (r *Request) SetEngineId(engId string) *Request {
-	r.SearchEngineId = engId
-	return r
+func (req *Request) SetEngineId(engId string) *Request {
+	req.SearchEngineId = engId
+	return req
 }
 
-func (r *Request) SetDuplicateContentFilter(filter cseDuplicateContentFilter) *Request {
-	r.Set(qpEnableDuplicateContentFilter, filter.ToParam())
-	return r
+func (req *Request) SetDuplicateContentFilter(filter cseDuplicateContentFilter) *Request {
+	req.Set(qpEnableDuplicateContentFilter, filter.ToParam())
+	return req
 }
 
-func (r *Request) SetDateRestict(dateRestict string) *Request {
-	r.Set(qpDateRestrict, dateRestict)
-	return r
+func (req *Request) SetDateRestict(dateRestict string) *Request {
+	req.Set(qpDateRestrict, dateRestict)
+	return req
 }
 
-func (r *Request) SetSiteSearch(site string, filter cseSiteSearchFilter) *Request {
-	r.Set(qpSiteSearch, site)
-	r.Set(qpSiteSearchFilter, filter.ToParam())
-	return r
+func (req *Request) SetSiteSearch(site string, filter cseSiteSearchFilter) *Request {
+	req.Set(qpSiteSearch, site)
+	req.Set(qpSiteSearchFilter, filter.ToParam())
+	return req
 }
 
-func (r *Request) WithExactTerm(term string) *Request {
-	r.Add(qpExactTerms, term)
-	return r
+func (req *Request) WithExactTerm(term string) *Request {
+	req.Add(qpExactTerms, term)
+	return req
 }
 
-func (r *Request) WithExcludeTerm(term string) *Request {
-	r.Add(qpExcludeTerms, term)
-	return r
+func (req *Request) WithExcludeTerm(term string) *Request {
+	req.Add(qpExcludeTerms, term)
+	return req
 }
 
-func (r *Request) WithPageSize(pagesize int) *Request {
-	r.Set(qpPageSize, strconv.Itoa(pagesize))
-	return r
+func (req *Request) SetPageSize(pagesize int) *Request {
+	req.Set(qpPageSize, strconv.Itoa(pagesize))
+	return req
 }
 
-func (r *Request) SetStart(start int) *Request {
-	r.Set(qpStart, strconv.Itoa(start))
-	return r
+func (req *Request) SetStart(start int) *Request {
+	req.Set(qpStart, strconv.Itoa(start))
+	return req
 }
 
-func (r *Request) String() string {
-	return r.Encode()
+func (req Request) String() string {
+	return req.Encode()
 }
 
-func (q *Request) Endpoint() string {
-	return EPCustomSearch
+func (req *Request) SetEndpoint(ep string) (*Request, error) {
+	switch ep {
+	case srv.EPCustomSearch, EPCustomSearch:
+		req.RequestProto.SetEndpoint(EPCustomSearch)
+	case srv.EPSiteRestricted, EPSiteRestricted:
+		req.RequestProto.SetEndpoint(EPSiteRestricted)
+	default:
+		return nil, client.ErrUnknownEndpoint
+	}
+	return req, nil
 }
 
-func (q *Request) ToHttpRequest() (*http.Request, error) {
-	b, err := json.Marshal(q.Values)
+func (req *Request) ToHttpRequest() (*http.Request, error) {
+	httpReq, err := http.NewRequest(API_METHOD, API_URL, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	return q.RequestProto.ToHTTPRequest(API_URL, API_METHOD, bytes.NewBuffer(b))
+	p, err := req.Params.Clone()
+	if err != nil {
+		return nil, err
+	}
+	p.Add(qpSearchEngineId, req.SearchEngineId)
+	p.Add(qpAPIKey, req.APIKey())
+
+	if req.PageSize != 10 {
+		p.Add(qpPageSize, strconv.Itoa(req.PageSize))
+	}
+
+	if req.Start != 1 {
+		p.Add(qpStart, strconv.Itoa(req.Start))
+	}
+
+	httpReq.URL.RawQuery = p.Encode()
+	return httpReq, nil
 }
 
-var ErrRequiredFieldMissing = errors.New("required field is missing")
+func (req Request) ToPreviewCache(uid uuid.UUID) (cKey string, c *api.PreviewCache) {
+	other := map[string]string{}
+	other[qpSearchEngineId.String()] = req.SearchEngineId
+	other[qpPageSize.String()] = strconv.Itoa(req.PageSize)
+
+	return req.RequestProto.ToPreviewCache(
+		uid, api.IntNextPageToken(req.Start+req.PageSize), other)
+}
+
+func RequestFromPreviewCache(cq api.CacheQuery) (api.Request, error) {
+	if cq.NextPage.Equal(api.IntLastPageToken) {
+		// last page
+		return nil, api.ErrNotNextPage
+	}
+
+	engId, ok := cq.Other[qpSearchEngineId.String()]
+	if !ok {
+		return nil, ErrRequiredFieldMissing
+	}
+
+	req, err := NewRequest(cq.APIKey, engId)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Values, err = url.ParseQuery(cq.RawQuery)
+	if err != nil {
+		return nil, fmt.Errorf("error while parsing raw query: %w", err)
+
+	}
+
+	req.PageSize = DEFAULT_PAGE_SIZE
+	ps, ok := cq.Other[qpPageSize.String()]
+	if ok && ps != "10" {
+		// default value is 10, so we ignore it if it's not 10.
+		if i, err := convert.StrTo(ps).Int(); err == nil {
+			req.PageSize = i
+		}
+	}
+
+	req.Start = int(cq.NextPage.(api.IntNextPageToken))
+	return req, nil
+}

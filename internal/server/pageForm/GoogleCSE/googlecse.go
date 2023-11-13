@@ -21,7 +21,10 @@ func init() {
 const API_NAME = "Google API"
 const API_VERSION = "v1"
 
-const EPCustomSearch string = "Custom Search"
+const (
+	EPCustomSearch   string = "Custom Search"
+	EPSiteRestricted string = "Site Restricted "
+)
 
 type GoogleCSE struct {
 	Keyword           string `form:"keyword"`

@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
+	"time"
+
+	"github.com/google/uuid"
 )
 
 type RequestProto struct {
@@ -44,38 +46,33 @@ func (reqproto RequestProto) String() string {
 	return reqproto.Encode()
 }
 
-func (reqproto RequestProto) ToHttpRequest(apiURL, apiMethod string,
-	body io.Reader, req Request) (*http.Request, error) {
-	u, err := reqproto.ToURL(apiURL, apiMethod)
-	if err != nil {
-		return nil, err
-	}
-
-	return http.NewRequest(apiMethod, u.String(), body)
-}
-
-func (reqproto RequestProto) ToURL(apiURL, apiMethod string) (*url.URL, error) {
-	u, err := url.Parse(apiURL)
-	if err != nil {
-		return nil, err
-	}
-	if apiMethod == http.MethodGet {
-		u = u.JoinPath(reqproto.ep)
-		u.RawQuery = reqproto.Encode()
-	}
-	return u, nil
-}
-
+// return a request object with given url and http method, rawquery will not be appended
 func (reqproto RequestProto) ToHTTPRequest(apiURL, apiMethod string, body io.Reader) (*http.Request, error) {
-	u, err := reqproto.ToURL(apiURL, apiMethod)
-	if err != nil {
-		return nil, err
+	ep := reqproto.Endpoint()
+	if ep != "" {
+		apiURL += "/" + ep
 	}
-
-	return http.NewRequest(apiMethod, u.String(), body)
+	return http.NewRequest(apiMethod, apiURL, body)
 }
 
 func (reqproto RequestProto) AddAPIKeyToQuery(req *http.Request, key Key) *http.Request {
 	req.URL.RawQuery = fmt.Sprintf("%s=%s&%s", key, reqproto.apikey, req.URL.RawQuery)
 	return req
+}
+
+func (reqproto RequestProto) ToPreviewCache(uid uuid.UUID, next NextPageToken, other map[string]string) (cKey string, c *PreviewCache) {
+	c = &PreviewCache{
+		Query: CacheQuery{
+			UserId:   uid,
+			APIKey:   reqproto.APIKey(),
+			APIEP:    reqproto.Endpoint(),
+			RawQuery: reqproto.Encode(),
+			Body:     "",
+			NextPage: next,
+			Other:    other,
+		},
+		NewsItem:  []NewsPreview{},
+		CreatedAt: time.Now().UTC(),
+	}
+	return c.Key(), c
 }

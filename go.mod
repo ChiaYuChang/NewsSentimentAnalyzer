@@ -1,6 +1,6 @@
 module github.com/ChiaYuChang/NewsSentimentAnalyzer
 
-go 1.20
+go 1.21
 
 require (
 	github.com/PuerkitoBio/goquery v1.8.1
@@ -15,6 +15,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/jackc/pgx/v5 v5.3.1
 	github.com/milvus-io/milvus-sdk-go/v2 v2.3.0
+	github.com/nitishm/go-rejson/v4 v4.1.1-0.20230331060235-d2aa875760e4
 	github.com/redis/go-redis/v9 v9.0.2
 	github.com/rs/zerolog v1.29.1
 	github.com/spf13/pflag v1.0.5
@@ -53,6 +54,7 @@ require (
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/jackc/puddle/v2 v2.2.0 // indirect
+	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect

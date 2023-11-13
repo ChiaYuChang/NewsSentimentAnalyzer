@@ -16,19 +16,19 @@ func (h LatestNewsHandler) Handle(apikey string, pf pageform.PageForm) (api.Requ
 		return nil, api.ErrTypeAssertionFailure
 	}
 
-	q, err := newRequest(apikey).
+	req, err := NewRequest(apikey).
 		SetEndpoint(data.Endpoint())
 	if err != nil {
 		return nil, err
 	}
 
-	q.WithKeywords(data.Keyword).
+	req.WithKeywords(data.Keyword).
 		WithDomain(data.Domains).
 		WithLanguage(data.Language...).
 		WithCountry(data.Country...).
 		WithCategory(data.Category...)
 
-	return q, nil
+	return req, nil
 }
 
 func (h LatestNewsHandler) Parse(resp *http.Response) (api.Response, error) {
@@ -44,13 +44,13 @@ func (h NewsArchiveHandler) Handle(apikey string, pf pageform.PageForm) (api.Req
 	}
 	data.TimeRange.ToUTC()
 
-	q, err := newRequest(apikey).
+	req, err := NewRequest(apikey).
 		SetEndpoint(data.Endpoint())
 	if err != nil {
 		return nil, err
 	}
 
-	q.WithKeywords(data.Keyword).
+	req.WithKeywords(data.Keyword).
 		WithDomain(data.Domains).
 		WithLanguage(data.Language...).
 		WithCountry(data.Country...).
@@ -58,7 +58,7 @@ func (h NewsArchiveHandler) Handle(apikey string, pf pageform.PageForm) (api.Req
 		WithFrom(data.Form).
 		WithTo(data.To)
 
-	return q, nil
+	return req, nil
 }
 
 func (h NewsArchiveHandler) Parse(resp *http.Response) (api.Response, error) {
@@ -70,16 +70,16 @@ type NewsSourcesHandler struct{}
 func (h NewsSourcesHandler) Handle(apikey string, pf pageform.PageForm) (api.Request, error) {
 	data := pf.(newsdata.NEWSDATAIONewsSources)
 
-	q, err := newRequest(apikey).SetEndpoint(data.Endpoint())
+	req, err := NewRequest(apikey).SetEndpoint(data.Endpoint())
 	if err != nil {
 		return nil, err
 	}
 
-	q.WithLanguage(data.Language...).
+	req.WithLanguage(data.Language...).
 		WithCountry(data.Country...).
 		WithCategory(data.Category...)
 
-	return q, nil
+	return req, nil
 }
 
 func (h NewsSourcesHandler) Parse(resp *http.Response) (api.Response, error) {

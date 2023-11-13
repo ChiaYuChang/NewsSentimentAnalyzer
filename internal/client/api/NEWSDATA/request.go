@@ -3,11 +3,13 @@ package newsdata
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api"
-	newsdata "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm/NEWSDATA"
+	srv "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm/NEWSDATA"
+	"github.com/google/uuid"
 )
 
 const (
@@ -28,73 +30,74 @@ const (
 
 type Request struct {
 	*api.RequestProto
+	Page string
 }
 
-func newRequest(apikey string) *Request {
-	r := api.NewRequestProtoType(",")
-	r.SetApiKey(apikey)
-	return &Request{RequestProto: r}
+func NewRequest(apikey string) *Request {
+	req := api.NewRequestProtoType(",")
+	req.SetApiKey(apikey)
+	return &Request{RequestProto: req}
 }
 
 // Keywords or phrases to search for in the article body.
-func (r *Request) WithKeywords(keyword string) *Request {
-	r.Set(Keyword, keyword)
-	return r
+func (req *Request) WithKeywords(keyword string) *Request {
+	req.Set(Keyword, keyword)
+	return req
 }
 
 // Keywords or phrases to search for in the article title.
-func (r *Request) WithKeywordsInTitle(keyword string) *Request {
-	r.Add(KeywordInTitle, keyword)
-	return r
+func (req *Request) WithKeywordsInTitle(keyword string) *Request {
+	req.Add(KeywordInTitle, keyword)
+	return req
 }
 
 // The 2-letter code of the country you want to get headlines for.
-func (r *Request) WithCountry(country ...string) *Request {
+func (req *Request) WithCountry(country ...string) *Request {
 	for _, c := range country {
-		r.Add(Country, c)
+		req.Add(Country, c)
 	}
-	return r
+	return req
 }
 
 // Find sources that display news in a specific language
-func (r *Request) WithLanguage(lang ...string) *Request {
+func (req *Request) WithLanguage(lang ...string) *Request {
 	for _, l := range lang {
-		r.Add(Language, l)
+		req.Add(Language, l)
 	}
-	return r
+	return req
 }
 
 // The domains to restrict the search to.
-func (r *Request) WithDomain(domain string) *Request {
-	r.Add(Domain, domain)
-	return r
+func (req *Request) WithDomain(domain string) *Request {
+	req.Add(Domain, domain)
+	return req
 }
 
 // Find sources that display news of this category.
-func (r *Request) WithCategory(category ...string) *Request {
+func (req *Request) WithCategory(category ...string) *Request {
 	for _, c := range category {
-		r.Add(Category, c)
+		req.Add(Category, c)
 	}
-	return r
+	return req
 }
 
 // Token for retrieving next page.
-func (r *Request) WithNextPage(page string) *Request {
-	r.Set(Page, page)
-	return r
+func (req *Request) WithPage(page string) *Request {
+	req.Page = page
+	return req
 }
 
-func (r *Request) withTime(t time.Time, format string, key api.Key) *Request {
+func (req *Request) withTime(t time.Time, format string, key api.Key) *Request {
 	if t.After(API_MIN_TIME) {
-		r.Set(key, t.Format(format))
+		req.Set(key, t.Format(format))
 	}
-	return r
+	return req
 }
 
 // A date and optional time for the oldest article allowed.
-func (r *Request) WithFrom(t time.Time) *Request {
-	r.withTime(t, API_TIME_FORMAT, FromTime)
-	return r
+func (req *Request) WithFrom(t time.Time) *Request {
+	req.withTime(t, API_TIME_FORMAT, FromTime)
+	return req
 }
 
 // A date and optional time for the newest article allowed.
@@ -103,31 +106,67 @@ func (r *Request) WithTo(t time.Time) *Request {
 	return r
 }
 
-func (r *Request) SetEndpoint(ep string) (*Request, error) {
-	fmt.Println("Set endpoint to: ", ep)
-
+func (req *Request) SetEndpoint(ep string) (*Request, error) {
 	switch ep {
-	case newsdata.EPLatestNews:
-		r.RequestProto.SetEndpoint(EPLatestNews)
-	case newsdata.EPNewsArchive:
-		r.RequestProto.SetEndpoint(EPNewsArchive)
-	case newsdata.EPNewsSources:
-		r.RequestProto.SetEndpoint(EPNewsSources)
-	case newsdata.EPCrypto:
-		r.RequestProto.SetEndpoint(EPCrypto)
+	case srv.EPLatestNews, EPLatestNews:
+		req.RequestProto.SetEndpoint(EPLatestNews)
+	case srv.EPNewsArchive, EPNewsArchive:
+		req.RequestProto.SetEndpoint(EPNewsArchive)
+	case srv.EPNewsSources, EPNewsSources:
+		req.RequestProto.SetEndpoint(EPNewsSources)
+	case srv.EPCrypto, EPCrypto:
+		req.RequestProto.SetEndpoint(EPCrypto)
 	default:
 		return nil, client.ErrUnknownEndpoint
 	}
-	return r, nil
+	return req, nil
 }
 
-func (r *Request) ToHttpRequest() (*http.Request, error) {
-	req, err := r.RequestProto.
-		ToHTTPRequest(API_URL, API_METHOD, nil)
+func (req *Request) ToHttpRequest() (*http.Request, error) {
+	httpReq, err := req.RequestProto.ToHTTPRequest(API_URL, API_METHOD, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	req = r.AddAPIKeyToQuery(req, APIKey)
+	p, err := req.Params.Clone()
+	if err != nil {
+		return nil, err
+	}
+
+	if req.Page != "" {
+		p.Set(Page, req.Page)
+	}
+	httpReq.URL.RawQuery = p.Encode()
+	httpReq.Header.Set("X-ACCESS-KEY", req.APIKey())
+	return httpReq, nil
+}
+
+func (req Request) ToPreviewCache(uid uuid.UUID) (cKey string, c *api.PreviewCache) {
+	return req.RequestProto.ToPreviewCache(uid, api.StrNextPageToken(req.Page), nil)
+}
+
+func RequestFromPreviewCache(cq api.CacheQuery) (api.Request, error) {
+	if cq.NextPage.Equal(api.StrLastPageToken) {
+		return nil, api.ErrNotNextPage
+	}
+
+	var err error
+	req := NewRequest(cq.APIKey)
+	_, err = req.SetEndpoint(cq.APIEP)
+	if err != nil {
+		return nil, fmt.Errorf("error while set endpoint: %w", err)
+	}
+
+	req.Values, err = url.ParseQuery(cq.RawQuery)
+	if err != nil {
+		return nil, fmt.Errorf("error while parsing raw query: %w", err)
+	}
+
+	token, ok := cq.NextPage.(api.StrNextPageToken)
+	if !ok {
+		return nil, api.ErrNextTokenAssertionFailure
+	}
+
+	req = req.WithPage(string(token))
 	return req, nil
 }

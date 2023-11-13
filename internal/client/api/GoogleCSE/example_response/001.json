@@ -1,0 +1,858 @@
+{
+    "kind": "customsearch#search",
+    "url": {
+        "type": "application/json",
+        "template": "https://www.googleapis.com/customsearch/v1?q={searchTerms}&num={count?}&start={startIndex?}&lr={language?}&safe={safe?}&cx={cx?}&sort={sort?}&filter={filter?}&gl={gl?}&cr={cr?}&googlehost={googleHost?}&c2coff={disableCnTwTranslation?}&hq={hq?}&hl={hl?}&siteSearch={siteSearch?}&siteSearchFilter={siteSearchFilter?}&exactTerms={exactTerms?}&excludeTerms={excludeTerms?}&linkSite={linkSite?}&orTerms={orTerms?}&relatedSite={relatedSite?}&dateRestrict={dateRestrict?}&lowRange={lowRange?}&highRange={highRange?}&searchType={searchType}&fileType={fileType?}&rights={rights?}&imgSize={imgSize?}&imgType={imgType?}&imgColorType={imgColorType?}&imgDominantColor={imgDominantColor?}&alt=json"
+    },
+    "queries": {
+        "request": [
+            {
+                "title": "Google Custom Search - 日本",
+                "totalResults": "26700000",
+                "searchTerms": "日本",
+                "count": 10,
+                "startIndex": 1,
+                "inputEncoding": "utf8",
+                "outputEncoding": "utf8",
+                "safe": "off",
+                "cx": "9145f3d16fbc84871",
+                "cr": "countryTW",
+                "disableCnTwTranslation": "0"
+            }
+        ],
+        "nextPage": [
+            {
+                "title": "Google Custom Search - 日本",
+                "totalResults": "26700000",
+                "searchTerms": "日本",
+                "count": 10,
+                "startIndex": 11,
+                "inputEncoding": "utf8",
+                "outputEncoding": "utf8",
+                "safe": "off",
+                "cx": "9145f3d16fbc84871",
+                "cr": "countryTW",
+                "disableCnTwTranslation": "0"
+            }
+        ]
+    },
+    "context": {
+        "title": "News"
+    },
+    "searchInformation": {
+        "searchTime": 0.569894,
+        "formattedSearchTime": "0.57",
+        "totalResults": "26700000",
+        "formattedTotalResults": "26,700,000"
+    },
+    "items": [
+        {
+            "kind": "customsearch#result",
+            "title": "經濟日報社論／日本貨幣政策鬆動金融掀巨變| 社論| 評論| 聯合新聞網",
+            "htmlTitle": "經濟日報社論／\u003cb\u003e日本\u003c/b\u003e貨幣政策鬆動金融掀巨變| 社論| 評論| 聯合新聞網",
+            "link": "https://udn.com/news/story/7338/7558514",
+            "displayLink": "udn.com",
+            "snippet": "3 days ago ... 日本金融體系正在發生十年一度的大變革。三大銀行之一的三菱UFJ宣布11月6日起，十年定存利率上調100倍；三菱UFJ宣布...",
+            "htmlSnippet": "3 days ago \u003cb\u003e...\u003c/b\u003e \u003cb\u003e日本\u003c/b\u003e金融體系正在發生十年一度的大變革。三大銀行之一的三菱UFJ宣布11月6日起，十年定存利率上調100倍；三菱UFJ宣布...",
+            "cacheId": "QHpKcX4qHyAJ",
+            "formattedUrl": "https://udn.com/news/story/7338/7558514",
+            "htmlFormattedUrl": "https://udn.com/news/story/7338/7558514",
+            "pagemap": {
+                "cse_thumbnail": [
+                    {
+                        "src": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSpk3mpdxeV52ADpTtOFHLJMLJNPAJPWUzpCBP9GQuOkQgzXfCFSdImGBk",
+                        "width": "275",
+                        "height": "183"
+                    }
+                ],
+                "website": [
+                    {
+                        "image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2021/03/02/realtime/11810264.jpg&s=Y&x=0&y=112&sw=1241&sh=827&exp=3600",
+                        "datemodified": "2023-11-09T02:46:04+08:00",
+                        "keywords": "社論",
+                        "articlesection": "評論",
+                        "author": "聯合新聞網",
+                        "name": "經濟日報社論／日本貨幣政策鬆動 金融掀巨變 | 聯合新聞網",
+                        "description": "日本金融體系正在發生十年一度的大變革。三大銀行之一的三菱UFJ宣布11月6日起，十年定存利率上調100倍；三菱UFJ宣布...",
+                        "publisher": "聯合新聞網",
+                        "headline": "經濟日報社論／日本貨幣政策鬆動 金融掀巨變 | 聯合新聞網",
+                        "url": "https://udn.com/news/story/7338/7558514",
+                        "datepublished": "2023-11-08T03:20:56+08:00",
+                        "mainentityofpage": "https://udn.com/news/story/7338/7558514"
+                    }
+                ],
+                "metatags": [
+                    {
+                        "date": "2023-11-08 03:20:56",
+                        "og:image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2021/03/02/realtime/11810264.jpg&s=Y&x=0&y=112&sw=1241&sh=827&exp=3600",
+                        "og:image:width": "1000",
+                        "copyright": "聯合新聞網",
+                        "subsection": "社論",
+                        "twitter:card": "summary_large_image",
+                        "og:site_name": "聯合新聞網",
+                        "twitter:url": "https://udn.com/news/story/7338/7558514",
+                        "section": "評論",
+                        "title": "經濟日報社論／日本貨幣政策鬆動 金融掀巨變 | 聯合新聞網",
+                        "og:description": "日本金融體系正在發生十年一度的大變革。三大銀行之一的三菱UFJ宣布11月6日起，十年定存利率上調100倍；三菱UFJ宣布...",
+                        "article:publisher": "https://www.facebook.com/myudn/",
+                        "twitter:image:alt": "日本三菱UFJ銀行。路透",
+                        "twitter:site": "@聯合新聞網",
+                        "news_keywords": "社論",
+                        "fb:admins": "100002847892748",
+                        "lastmod": "2023-11-09T02:46:04+08:00",
+                        "pubdate": "2023-11-08T03:20:56+08:00",
+                        "application-name": "聯合新聞網",
+                        "image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2021/03/02/realtime/11810264.jpg&s=Y&x=0&y=112&sw=1241&sh=827&exp=3600",
+                        "og:type": "article",
+                        "twitter:title": "經濟日報社論／日本貨幣政策鬆動 金融掀巨變 | 聯合新聞網",
+                        "taboola:image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2021/03/02/realtime/11810264.jpg&s=Y&x=0&y=112&sw=1241&sh=827&exp=3600&w=300",
+                        "author": "聯合新聞網",
+                        "sub_id": "7338",
+                        "og:title": "經濟日報社論／日本貨幣政策鬆動 金融掀巨變 | 聯合新聞網",
+                        "og:image:height": "1000",
+                        "cate_id": "6643",
+                        "fb:pages": "241284961029",
+                        "article:author": "https://www.facebook.com/myudn/",
+                        "url": "https://udn.com/news/story/7338/7558514",
+                        "twitter:image:src": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2021/03/02/realtime/11810264.jpg&s=Y&x=0&y=112&sw=1241&sh=827&exp=3600",
+                        "fb:app_id": "350231215126101",
+                        "viewport": "width=device-width, initial-scale=1.0, maximum-scale=2.0",
+                        "art_id": "7558514",
+                        "twitter:description": "日本金融體系正在發生十年一度的大變革。三大銀行之一的三菱UFJ宣布11月6日起，十年定存利率上調100倍；三菱UFJ宣布...",
+                        "og:locale": "zh_TW",
+                        "publisher": "聯合新聞網",
+                        "og:url": "https://udn.com/news/story/7338/7558514",
+                        "date.available": "2023-11-08 03:20:56",
+                        "channel_id": "2"
+                    }
+                ],
+                "cse_image": [
+                    {
+                        "src": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2021/03/02/realtime/11810264.jpg&s=Y&x=0&y=112&sw=1241&sh=827&exp=3600"
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "customsearch#result",
+            "title": "日本教師多工過勞成常態反過勞死團體盼改變工作模式｜ 公視新聞網 ...",
+            "htmlTitle": "\u003cb\u003e日本\u003c/b\u003e教師多工過勞成常態反過勞死團體盼改變工作模式｜ 公視新聞網 ...",
+            "link": "https://news.pts.org.tw/article/615446",
+            "displayLink": "news.pts.org.tw",
+            "snippet": "Dec 23, 2022 ... 日本國、高中教師過勞，甚至死亡的狀況，層出不窮，因為除了負責管理、清潔、監督學生通勤安全外，他們還得身兼社團老師，每星期上班時數超過60小時是 ...",
+            "htmlSnippet": "Dec 23, 2022 \u003cb\u003e...\u003c/b\u003e \u003cb\u003e日本\u003c/b\u003e國、高中教師過勞，甚至死亡的狀況，層出不窮，因為除了負責管理、清潔、監督學生通勤安全外，他們還得身兼社團老師，每星期上班時數超過60小時是&nbsp;...",
+            "cacheId": "EYQgEhF4GzgJ",
+            "formattedUrl": "https://news.pts.org.tw/article/615446",
+            "htmlFormattedUrl": "https://news.pts.org.tw/article/615446",
+            "pagemap": {
+                "cse_thumbnail": [
+                    {
+                        "src": "https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcRNv1_jFZNCeGeKyqunKX8pDZXXWt0BmO-e4N5LGQCuHb0G2O8VHpJD3iFf",
+                        "width": "300",
+                        "height": "168"
+                    }
+                ],
+                "metatags": [
+                    {
+                        "og:image": "https://news-data.pts.org.tw/media/119775/cover.jpg",
+                        "article:published_time": "2022-12-23T16:43:00+08:00",
+                        "twitter:card": "summary",
+                        "theme-color": "#000000",
+                        "og:site_name": "公視新聞網 PNN",
+                        "apple-mobile-web-app-title": "公視新聞",
+                        "msapplication-tileimage": "/images/pwa-pts-icon/pwa-pts-icon-512x512.png",
+                        "og:description": "日本國、高中教師過勞，甚至死亡的狀況，層出不窮，因為除了負責管理、清潔、監督學生通勤安全外，他們還得身兼社團老師，每星期上班時數超過60小時是常態。有過勞死教師的遺孀，就以教師的身分帶領日本中部地區的反教師過勞死團體「勇於發聲，拒絕過勞」，期盼改變老師的工作模式。",
+                        "twitter:creator": "@pnnpts",
+                        "twitter:image": "https://news-data.pts.org.tw/media/119775/cover.jpg",
+                        "twitter:site": "@pnnpts",
+                        "article:modified_time": "2022-12-26T13:27:15+08:00",
+                        "lastmod": "2022-12-26T13:27:15+08:00",
+                        "pubdate": "2022-12-23T16:43:00+08:00",
+                        "og:article:author": "陳詩童／編譯",
+                        "application-name": "公視新聞",
+                        "msapplication-tilecolor": "#ffffff",
+                        "article:section": "生活",
+                        "og:type": "article",
+                        "twitter:title": "日本教師多工過勞成常態 反過勞死團體盼改變工作模式",
+                        "author": "陳詩童／編譯",
+                        "og:title": "日本教師多工過勞成常態 反過勞死團體盼改變工作模式 ｜ 公視新聞網 PNN",
+                        "fb:app_id": "466487386878484",
+                        "apple-mobile-web-app-status-bar-style": "black",
+                        "viewport": "width=device-width, initial-scale=1, shrink-to-fit=no",
+                        "twitter:description": "日本國、高中教師過勞，甚至死亡的狀況，層出不窮，因為除了負責管理、清潔、監督學生通勤安全外，他們還得身兼社團老師，每星期上班時數超過60小時是常態。有過勞死教師的遺孀，就以教師的身分帶領日本中部地區的反教師過勞死團體「勇於發聲，拒絕過勞」，期盼改變老師的工作模式。",
+                        "apple-mobile-web-app-capable": "yes",
+                        "mobile-web-app-capable": "yes",
+                        "og:url": "https://news.pts.org.tw/article/615446"
+                    }
+                ],
+                "cse_image": [
+                    {
+                        "src": "https://news-data.pts.org.tw/media/119775/cover.jpg"
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "customsearch#result",
+            "title": "蔡阿嘎新片酸「日本5家難吃連鎖店」挨轟！旅台日本作家：沒遇過 ...",
+            "htmlTitle": "蔡阿嘎新片酸「\u003cb\u003e日本\u003c/b\u003e5家難吃連鎖店」挨轟！旅台\u003cb\u003e日本\u003c/b\u003e作家：沒遇過 ...",
+            "link": "https://udn.com/news/story/7270/7210522",
+            "displayLink": "udn.com",
+            "snippet": "Jun 3, 2023 ... 蔡阿嘎新片酸「日本5家難吃連鎖店」挨轟！旅台日本作家：沒遇過覺得なか卯不好吃的人 · ①吉野家. 吉野家的米比較乾燥的，有些人覺得米的水分不夠多 · ② ...",
+            "htmlSnippet": "Jun 3, 2023 \u003cb\u003e...\u003c/b\u003e 蔡阿嘎新片酸「\u003cb\u003e日本\u003c/b\u003e5家難吃連鎖店」挨轟！旅台\u003cb\u003e日本\u003c/b\u003e作家：沒遇過覺得なか卯不好吃的人 &middot; ①吉野家. 吉野家的米比較乾燥的，有些人覺得米的水分不夠多 &middot; ②&nbsp;...",
+            "cacheId": "E9TyER4dEewJ",
+            "formattedUrl": "https://udn.com/news/story/7270/7210522",
+            "htmlFormattedUrl": "https://udn.com/news/story/7270/7210522",
+            "pagemap": {
+                "cse_thumbnail": [
+                    {
+                        "src": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcQ4tpxxYT3qlOnSBt9smhFKe8FoJJ7xAH9e2IIwCWPVbNO3rCdEPNLzAQec",
+                        "width": "275",
+                        "height": "183"
+                    }
+                ],
+                "website": [
+                    {
+                        "image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/06/03/realtime/22422454.jpg&s=Y&x=71&y=0&sw=657&sh=439&exp=3600",
+                        "datemodified": "2023-06-03T20:28:28+08:00",
+                        "keywords": "日本,餐廳,親子",
+                        "articlesection": "生活",
+                        "author": "聯合新聞網",
+                        "name": "蔡阿嘎新片酸「日本5家難吃連鎖店」挨轟！旅台日本作家：沒遇過覺得なか卯不好吃的人 | 聯合新聞網",
+                        "description": "YouTuber蔡阿嘎近日發表「日本5家超難吃的連鎖地雷店」，影片一出就引發網友砲轟，讓蔡阿嘎緊急下架影片並公開道歉。對...",
+                        "publisher": "聯合新聞網",
+                        "headline": "蔡阿嘎新片酸「日本5家難吃連鎖店」挨轟！旅台日本作家：沒遇過覺得なか卯不好吃的人 | 聯合新聞網",
+                        "url": "https://udn.com/news/story/7270/7210522",
+                        "datepublished": "2023-06-03T15:42:16+08:00",
+                        "mainentityofpage": "https://udn.com/news/story/7270/7210522"
+                    }
+                ],
+                "metatags": [
+                    {
+                        "date": "2023-06-03 15:42:16",
+                        "og:image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/06/03/realtime/22422454.jpg&s=Y&x=71&y=0&sw=657&sh=439&exp=3600",
+                        "og:image:width": "1000",
+                        "copyright": "聯合新聞網",
+                        "subsection": "流行消費",
+                        "twitter:card": "summary_large_image",
+                        "og:site_name": "聯合新聞網",
+                        "twitter:url": "https://udn.com/news/story/7270/7210522",
+                        "section": "生活",
+                        "title": "蔡阿嘎新片酸「日本5家難吃連鎖店」挨轟！旅台日本作家：沒遇過覺得なか卯不好吃的人 | 聯合新聞網",
+                        "og:description": "YouTuber蔡阿嘎近日發表「日本5家超難吃的連鎖地雷店」，影片一出就引發網友砲轟，讓蔡阿嘎緊急下架影片並公開道歉。對...",
+                        "article:publisher": "https://www.facebook.com/myudn/",
+                        "twitter:image:alt": "蔡阿嘎拍攝「日本5家難吃地雷店」的影片，引起網友砲轟。圖／擷取自日本人的歐吉桑 ・台湾在住の日本人のおじさん粉絲頁",
+                        "twitter:site": "@聯合新聞網",
+                        "news_keywords": "日本,餐廳,親子",
+                        "fb:admins": "100002847892748",
+                        "lastmod": "2023-06-03T20:28:28+08:00",
+                        "pubdate": "2023-06-03T15:42:16+08:00",
+                        "application-name": "聯合新聞網",
+                        "image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/06/03/realtime/22422454.jpg&s=Y&x=71&y=0&sw=657&sh=439&exp=3600",
+                        "og:type": "article",
+                        "twitter:title": "蔡阿嘎新片酸「日本5家難吃連鎖店」挨轟！旅台日本作家：沒遇過覺得なか卯不好吃的人 | 聯合新聞網",
+                        "taboola:image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/06/03/realtime/22422454.jpg&s=Y&x=71&y=0&sw=657&sh=439&exp=3600&w=300",
+                        "author": "聯合新聞網",
+                        "sub_id": "7270",
+                        "og:title": "蔡阿嘎新片酸「日本5家難吃連鎖店」挨轟！旅台日本作家：沒遇過覺得なか卯不好吃的人 | 聯合新聞網",
+                        "og:image:height": "1000",
+                        "cate_id": "6649",
+                        "fb:pages": "241284961029",
+                        "article:author": "https://www.facebook.com/myudn/",
+                        "url": "https://udn.com/news/story/7270/7210522",
+                        "twitter:image:src": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/06/03/realtime/22422454.jpg&s=Y&x=71&y=0&sw=657&sh=439&exp=3600",
+                        "fb:app_id": "350231215126101",
+                        "viewport": "width=device-width, initial-scale=1.0, maximum-scale=2.0",
+                        "art_id": "7210522",
+                        "twitter:description": "YouTuber蔡阿嘎近日發表「日本5家超難吃的連鎖地雷店」，影片一出就引發網友砲轟，讓蔡阿嘎緊急下架影片並公開道歉。對...",
+                        "og:locale": "zh_TW",
+                        "publisher": "聯合新聞網",
+                        "og:url": "https://udn.com/news/story/7270/7210522",
+                        "date.available": "2023-06-03 15:42:16",
+                        "channel_id": "2"
+                    }
+                ],
+                "cse_image": [
+                    {
+                        "src": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/06/03/realtime/22422454.jpg&s=Y&x=71&y=0&sw=657&sh=439&exp=3600"
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "customsearch#result",
+            "title": "道歉作為一種藝術：日本平成年代的「謝罪文化」 | 文化視角| 轉角 ...",
+            "htmlTitle": "道歉作為一種藝術：\u003cb\u003e日本\u003c/b\u003e平成年代的「謝罪文化」 | 文化視角| 轉角 ...",
+            "link": "https://global.udn.com/global_vision/story/8664/3762689",
+            "displayLink": "global.udn.com",
+            "snippet": "Apr 19, 2019 ... 謝罪記者會在昭和時代（1926-1989）幾乎少之又少，然而時序進入平成之後，卻是三天兩頭就有謝罪新聞，可以說平成時代就是「謝罪時代」。",
+            "htmlSnippet": "Apr 19, 2019 \u003cb\u003e...\u003c/b\u003e 謝罪記者會在昭和時代（1926-1989）幾乎少之又少，然而時序進入平成之後，卻是三天兩頭就有謝罪新聞，可以說平成時代就是「謝罪時代」。",
+            "cacheId": "lCEVI34UwbEJ",
+            "formattedUrl": "https://global.udn.com/global_vision/story/8664/3762689",
+            "htmlFormattedUrl": "https://global.udn.com/global_vision/story/8664/3762689",
+            "pagemap": {
+                "cse_thumbnail": [
+                    {
+                        "src": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcSREc_g5HQqETlkA-loQ2_2y5-elcaZV5vxrF3lSS404yZVIlFDgXaJYSw",
+                        "width": "275",
+                        "height": "183"
+                    }
+                ],
+                "website": [
+                    {
+                        "image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2019/04/18/99/6195499.jpg&s=Y&x=0&y=0&sw=1179&sh=786&sl=W&fw=800&exp=3600",
+                        "datemodified": "2019-04-30T21:20:03+08:00",
+                        "keywords": "日本,文化",
+                        "articlesection": "文化視角",
+                        "author": "聯合新聞網",
+                        "name": "道歉作為一種藝術：日本平成年代的「謝罪文化」 | 轉角國際 udn Global",
+                        "publisher": "轉角國際 udn Global",
+                        "description": "謝罪記者會在昭和時代（1926-1989）幾乎少之又少，然而時序進入平成之後，卻是三天兩頭就有謝罪新聞，可以說平成時代就是「謝罪時代」。會有這...",
+                        "headline": "道歉作為一種藝術：日本平成年代的「謝罪文化」 | 轉角國際 udn Global",
+                        "url": "https://global.udn.com/global_vision/story/8664/3762689",
+                        "datepublished": "2019-04-19T15:15:48+08:00",
+                        "mainentityofpage": "https://global.udn.com/global_vision/story/8664/3762689"
+                    }
+                ],
+                "metatags": [
+                    {
+                        "date": "2019-04-19 15:15:48",
+                        "og:image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2019/04/18/99/6195499.jpg&s=Y&x=0&y=0&sw=1179&sh=786&sl=W&fw=800&exp=3600",
+                        "twitter:card": "summary",
+                        "og:image:width": "799",
+                        "copyright": "聯合新聞網",
+                        "og:site_name": "轉角國際 udn Global",
+                        "twitter:url": "https://global.udn.com/global_vision/story/8664/3762689",
+                        "section": "文化視角",
+                        "title": "道歉作為一種藝術：日本平成年代的「謝罪文化」 | 轉角國際 udn Global",
+                        "og:description": "謝罪記者會在昭和時代（1926-1989）幾乎少之又少，然而時序進入平成之後，卻是三天兩頭就有謝罪新聞，可以說平成時代就是「謝罪時代」。會有這樣的現象，主要是因為日本從戰後的經濟巔峰，在進入平成時代後，因泡沫經濟崩潰而進入蕭條的年代。除了泡沫經濟崩潰之外，平成時代也是網路的時代，因網路的發達，訊息流通日益快速，讓許多事件在第一時間就傳遍日本全國，可謂是壞事傳千里。一但成為主角，如果在第一時間沒有道歉止血，只會持續延燒，這也助長了謝罪記者會的普及化。",
+                        "article:publisher": "https://www.facebook.com/udnglobal/",
+                        "twitter:image:alt": "綜觀平成時代的三十年，謝罪記者會相當多，幾乎成了平成的代名詞。 圖／《日本語 語感の辞典》",
+                        "twitter:site": "@轉角國際 udn Global",
+                        "news_keywords": "日本,文化",
+                        "fb:admins": "100002847892748",
+                        "lastmod": "2019-04-30T21:20:03+08:00",
+                        "pubdate": "2019-04-19T15:15:48+08:00",
+                        "application-name": "轉角國際 udn Global",
+                        "image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2019/04/18/99/6195499.jpg&s=Y&x=0&y=0&sw=1179&sh=786&sl=W&fw=800&exp=3600",
+                        "og:type": "article",
+                        "twitter:title": "道歉作為一種藝術：日本平成年代的「謝罪文化」 | 轉角國際 udn Global",
+                        "author": "聯合新聞網",
+                        "og:title": "道歉作為一種藝術：日本平成年代的「謝罪文化」 | 轉角國際 udn Global",
+                        "og:image:height": "531",
+                        "origion_common_url": "https://global.udn.com",
+                        "cate_id": "8664",
+                        "fb:pages": "104959119850676",
+                        "article:author": "https://www.facebook.com/udnglobal/",
+                        "url": "https://global.udn.com/global_vision/story/8664/3762689",
+                        "twitter:image:src": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2019/04/18/99/6195499.jpg&s=Y&x=0&y=0&sw=1179&sh=786&sl=W&fw=800&exp=3600",
+                        "fb:app_id": "1662631110633331",
+                        "viewport": "width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0",
+                        "twitter:description": "謝罪記者會在昭和時代（1926-1989）幾乎少之又少，然而時序進入平成之後，卻是三天兩頭就有謝罪新聞，可以說平成時代就是「謝罪時代」。會有這樣的現象，主要是因為日本從戰後的經濟巔峰，在進入平成時代後，因泡沫經濟崩潰而進入蕭條的年代。除了泡沫經濟崩潰之外，平成時代也是網路的時代，因網路的發達，訊息流通日益快速，讓許多事件在第一時間就傳遍日本全國，可謂是壞事傳千里。一但成為主角，如果在第一時間沒有道歉止血，只會持續延燒，這也助長了謝罪記者會的普及化。",
+                        "og:locale": "zh_TW",
+                        "publisher": "轉角國際 udn Global",
+                        "og:url": "https://global.udn.com/global_vision/story/8664/3762689",
+                        "date.available": "2019-04-19 15:15:48",
+                        "channel_id": "1020"
+                    }
+                ],
+                "cse_image": [
+                    {
+                        "src": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2019/04/18/99/6195499.jpg&s=Y&x=0&y=0&sw=1179&sh=786&sl=W&fw=800&exp=3600"
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "customsearch#result",
+            "title": "日本富山豪雨成災議員赤池伸彥籲撤離反遭土石活埋｜ 公視新聞網PNN",
+            "htmlTitle": "\u003cb\u003e日本\u003c/b\u003e富山豪雨成災議員赤池伸彥籲撤離反遭土石活埋｜ 公視新聞網PNN",
+            "link": "https://news.pts.org.tw/article/646145",
+            "displayLink": "news.pts.org.tw",
+            "snippet": "Jul 13, 2023 ... 日本本州富山縣南礪市降下創紀錄豪雨，議員赤池伸彥凌晨親赴當地呼籲居民撤離，卻遭遇土石崩塌。下午警消尋獲遺體，享壽65歲。",
+            "htmlSnippet": "Jul 13, 2023 \u003cb\u003e...\u003c/b\u003e \u003cb\u003e日本\u003c/b\u003e本州富山縣南礪市降下創紀錄豪雨，議員赤池伸彥凌晨親赴當地呼籲居民撤離，卻遭遇土石崩塌。下午警消尋獲遺體，享壽65歲。",
+            "cacheId": "j-HrTUQIsckJ",
+            "formattedUrl": "https://news.pts.org.tw/article/646145",
+            "htmlFormattedUrl": "https://news.pts.org.tw/article/646145",
+            "pagemap": {
+                "cse_thumbnail": [
+                    {
+                        "src": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTGGuo_pMg-CoYzZayipvcegMAqVnr5jj6BcnB_JJThKkwZP-qh6KycjDcO",
+                        "width": "266",
+                        "height": "190"
+                    }
+                ],
+                "metatags": [
+                    {
+                        "og:image": "https://news-data.pts.org.tw/media/162773/cover.jpg",
+                        "article:published_time": "2023-07-13T17:58:59+08:00",
+                        "twitter:card": "summary",
+                        "theme-color": "#000000",
+                        "og:site_name": "公視新聞網 PNN",
+                        "apple-mobile-web-app-title": "公視新聞",
+                        "msapplication-tileimage": "/images/pwa-pts-icon/pwa-pts-icon-512x512.png",
+                        "og:description": "日本本州富山縣南礪市降下創紀錄豪雨，議員赤池伸彥凌晨親赴當地呼籲居民撤離，卻遭遇土石崩塌。下午警消尋獲遺體，享壽65歲。",
+                        "twitter:creator": "@pnnpts",
+                        "twitter:image": "https://news-data.pts.org.tw/media/162773/cover.jpg",
+                        "twitter:site": "@pnnpts",
+                        "article:modified_time": "2023-07-13T17:58:59+08:00",
+                        "lastmod": "2023-07-13T17:58:59+08:00",
+                        "pubdate": "2023-07-13T17:58:59+08:00",
+                        "og:article:author": "徐珮華／綜合報導",
+                        "application-name": "公視新聞",
+                        "msapplication-tilecolor": "#ffffff",
+                        "article:section": "全球",
+                        "og:type": "article",
+                        "twitter:title": "日本富山豪雨成災 議員赤池伸彥籲撤離反遭土石活埋",
+                        "author": "徐珮華／綜合報導",
+                        "og:title": "日本富山豪雨成災 議員赤池伸彥籲撤離反遭土石活埋 ｜ 公視新聞網 PNN",
+                        "fb:app_id": "466487386878484",
+                        "apple-mobile-web-app-status-bar-style": "black",
+                        "viewport": "width=device-width, initial-scale=1, shrink-to-fit=no",
+                        "twitter:description": "日本本州富山縣南礪市降下創紀錄豪雨，議員赤池伸彥凌晨親赴當地呼籲居民撤離，卻遭遇土石崩塌。下午警消尋獲遺體，享壽65歲。",
+                        "apple-mobile-web-app-capable": "yes",
+                        "mobile-web-app-capable": "yes",
+                        "og:url": "https://news.pts.org.tw/article/646145"
+                    }
+                ],
+                "cse_image": [
+                    {
+                        "src": "https://news-data.pts.org.tw/media/162773/cover.jpg"
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "customsearch#result",
+            "title": "兩國關係惡化俄羅斯「片面公告」：不再接受日本協助非核化| 國際 ...",
+            "htmlTitle": "兩國關係惡化俄羅斯「片面公告」：不再接受\u003cb\u003e日本\u003c/b\u003e協助非核化| 國際 ...",
+            "link": "https://udn.com/news/story/6809/7564600",
+            "displayLink": "udn.com",
+            "snippet": "8 hours ago ... 日本多家媒體報導，俄羅斯政府已片面終止與日本的非核化合作。一般認為與俄烏戰爭爆發後，日俄關係惡化有關。官房長官松野博一今...",
+            "htmlSnippet": "8 hours ago \u003cb\u003e...\u003c/b\u003e \u003cb\u003e日本\u003c/b\u003e多家媒體報導，俄羅斯政府已片面終止與\u003cb\u003e日本\u003c/b\u003e的非核化合作。一般認為與俄烏戰爭爆發後，日俄關係惡化有關。官房長官松野博一今...",
+            "cacheId": "F4kRcSC5raAJ",
+            "formattedUrl": "https://udn.com/news/story/6809/7564600",
+            "htmlFormattedUrl": "https://udn.com/news/story/6809/7564600",
+            "pagemap": {
+                "cse_thumbnail": [
+                    {
+                        "src": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1d5MWCROujFVswILqIhDzbSgoG6mdF0AbRyA5umP98KGpVL9xg1mOE5Y",
+                        "width": "150",
+                        "height": "100"
+                    }
+                ],
+                "website": [
+                    {
+                        "image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/11/10/realtime/27043132.jpg&s=Y&x=0&y=0&sw=4502&sh=3001&exp=3600",
+                        "datemodified": "2023-11-10T13:17:27+08:00",
+                        "keywords": "日本,俄羅斯,潛艦",
+                        "articlesection": "全球",
+                        "author": "聯合新聞網",
+                        "name": "兩國關係惡化 俄羅斯「片面公告」：不再接受日本協助非核化 | 聯合新聞網",
+                        "description": "日本多家媒體報導，俄羅斯政府已片面終止與日本的非核化合作。一般認為與俄烏戰爭爆發後，日俄關係惡化有關。官房長官松野博一今...",
+                        "publisher": "聯合新聞網",
+                        "headline": "兩國關係惡化 俄羅斯「片面公告」：不再接受日本協助非核化 | 聯合新聞網",
+                        "url": "https://udn.com/news/story/6809/7564600",
+                        "datepublished": "2023-11-10T10:40:55+08:00",
+                        "mainentityofpage": "https://money.udn.com/money/story/5599/7564600"
+                    }
+                ],
+                "metatags": [
+                    {
+                        "date": "2023-11-10 10:40:55",
+                        "og:image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/11/10/realtime/27043132.jpg&s=Y&x=0&y=0&sw=4502&sh=3001&exp=3600",
+                        "og:image:width": "1000",
+                        "copyright": "聯合新聞網",
+                        "subsection": "國際焦點",
+                        "twitter:card": "summary_large_image",
+                        "og:site_name": "聯合新聞網",
+                        "twitter:url": "https://udn.com/news/story/6809/7564600",
+                        "section": "全球",
+                        "title": "兩國關係惡化 俄羅斯「片面公告」：不再接受日本協助非核化 | 聯合新聞網",
+                        "og:description": "日本多家媒體報導，俄羅斯政府已片面終止與日本的非核化合作。一般認為與俄烏戰爭爆發後，日俄關係惡化有關。官房長官松野博一今...",
+                        "article:publisher": "https://www.facebook.com/myudn/",
+                        "twitter:image:alt": "俄羅斯政府片面終止與日本的非核化合作，日政府表達遺憾。圖為俄羅斯防長梅維迪夫（中）巡視莫斯科外郊區的軍事訓練營。歐新社",
+                        "twitter:site": "@聯合新聞網",
+                        "news_keywords": "日本,俄羅斯,潛艦",
+                        "fb:admins": "100002847892748",
+                        "lastmod": "2023-11-10T13:17:27+08:00",
+                        "pubdate": "2023-11-10T10:40:55+08:00",
+                        "application-name": "聯合新聞網",
+                        "image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/11/10/realtime/27043132.jpg&s=Y&x=0&y=0&sw=4502&sh=3001&exp=3600",
+                        "og:type": "article",
+                        "twitter:title": "兩國關係惡化 俄羅斯「片面公告」：不再接受日本協助非核化 | 聯合新聞網",
+                        "taboola:image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/11/10/realtime/27043132.jpg&s=Y&x=0&y=0&sw=4502&sh=3001&exp=3600&w=300",
+                        "author": "聯合新聞網",
+                        "sub_id": "6809",
+                        "og:title": "兩國關係惡化 俄羅斯「片面公告」：不再接受日本協助非核化 | 聯合新聞網",
+                        "og:image:height": "1000",
+                        "cate_id": "7225",
+                        "fb:pages": "241284961029",
+                        "article:author": "https://www.facebook.com/myudn/",
+                        "url": "https://udn.com/news/story/6809/7564600",
+                        "twitter:image:src": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/11/10/realtime/27043132.jpg&s=Y&x=0&y=0&sw=4502&sh=3001&exp=3600",
+                        "fb:app_id": "350231215126101",
+                        "viewport": "width=device-width, initial-scale=1.0, maximum-scale=2.0",
+                        "art_id": "7564600",
+                        "twitter:description": "日本多家媒體報導，俄羅斯政府已片面終止與日本的非核化合作。一般認為與俄烏戰爭爆發後，日俄關係惡化有關。官房長官松野博一今...",
+                        "og:locale": "zh_TW",
+                        "publisher": "聯合新聞網",
+                        "og:url": "https://udn.com/news/story/6809/7564600",
+                        "date.available": "2023-11-10 10:40:55",
+                        "channel_id": "2"
+                    }
+                ],
+                "cse_image": [
+                    {
+                        "src": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/11/10/realtime/27043132.jpg&s=Y&x=0&y=0&sw=4502&sh=3001&exp=3600"
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "customsearch#result",
+            "title": "以為在日本！他赴陸驚「比台灣先進」 嘆：小確幸會害死我們| 網搜追 ...",
+            "htmlTitle": "以為在\u003cb\u003e日本\u003c/b\u003e！他赴陸驚「比台灣先進」 嘆：小確幸會害死我們| 網搜追 ...",
+            "link": "https://udn.com/news/story/120912/7562715",
+            "displayLink": "udn.com",
+            "snippet": "1 day ago ... 前AV導演圤智雨近來到中國大陸西塘、上海參加活動，他發現當地有2項優點勝過台灣，不禁大嘆優越感全消失，自己才是退化的一群，甚至直言「我們的小確 ...",
+            "htmlSnippet": "1 day ago \u003cb\u003e...\u003c/b\u003e 前AV導演圤智雨近來到中國大陸西塘、上海參加活動，他發現當地有2項優點勝過台灣，不禁大嘆優越感全消失，自己才是退化的一群，甚至直言「我們的小確&nbsp;...",
+            "cacheId": "QttjZ3Kbrd0J",
+            "formattedUrl": "https://udn.com/news/story/120912/7562715",
+            "htmlFormattedUrl": "https://udn.com/news/story/120912/7562715",
+            "pagemap": {
+                "cse_thumbnail": [
+                    {
+                        "src": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcQhsa3LGXHB3VXcIrGbW3rd3Jl2yvA4fyvmKfjvLigsUzPs_Uf2PNss8PI",
+                        "width": "275",
+                        "height": "183"
+                    }
+                ],
+                "website": [
+                    {
+                        "image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/11/09/0/27015069.jpg&s=Y&x=79&y=3&sw=767&sh=511&exp=3600",
+                        "datemodified": "2023-11-09T20:57:15+08:00",
+                        "keywords": "日本,上海,Instagram",
+                        "articlesection": "Oops",
+                        "author": "聯合新聞網",
+                        "name": "以為在日本！他赴陸驚「比台灣先進」 嘆：小確幸會害死我們 | 聯合新聞網",
+                        "description": "前AV導演圤智雨近來到中國大陸西塘、上海參加活動，他發現當地有2項優點勝過台灣，不禁大嘆優越感全消失，自己才是退化的一群，甚至直言「我...",
+                        "publisher": "聯合新聞網",
+                        "headline": "以為在日本！他赴陸驚「比台灣先進」 嘆：小確幸會害死我們 | 聯合新聞網",
+                        "url": "https://udn.com/news/story/120912/7562715",
+                        "datepublished": "2023-11-09T15:17:31+08:00",
+                        "mainentityofpage": "https://udn.com/news/story/120912/7562715"
+                    }
+                ],
+                "metatags": [
+                    {
+                        "date": "2023-11-09 15:17:31",
+                        "og:image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/11/09/0/27015069.jpg&s=Y&x=79&y=3&sw=767&sh=511&exp=3600",
+                        "og:image:width": "1000",
+                        "copyright": "聯合新聞網",
+                        "subsection": "網搜追夯事",
+                        "twitter:card": "summary_large_image",
+                        "og:site_name": "聯合新聞網",
+                        "twitter:url": "https://udn.com/news/story/120912/7562715",
+                        "section": "Oops",
+                        "title": "以為在日本！他赴陸驚「比台灣先進」 嘆：小確幸會害死我們 | 聯合新聞網",
+                        "og:description": "前AV導演圤智雨近來到中國大陸西塘、上海參加活動，他發現當地有2項優點勝過台灣，不禁大嘆優越感全消失，自己才是退化的一群，甚至直言「我們的小確幸可能會害死我們」。",
+                        "article:publisher": "https://www.facebook.com/myudn/",
+                        "twitter:image:alt": "上海街景。 圖／ingimage",
+                        "twitter:site": "@聯合新聞網",
+                        "news_keywords": "日本,上海,Instagram",
+                        "fb:admins": "100002847892748",
+                        "lastmod": "2023-11-09T20:57:15+08:00",
+                        "pubdate": "2023-11-09T15:17:31+08:00",
+                        "application-name": "聯合新聞網",
+                        "image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/11/09/0/27015069.jpg&s=Y&x=79&y=3&sw=767&sh=511&exp=3600",
+                        "og:type": "article",
+                        "twitter:title": "以為在日本！他赴陸驚「比台灣先進」 嘆：小確幸會害死我們 | 聯合新聞網",
+                        "taboola:image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/11/09/0/27015069.jpg&s=Y&x=79&y=3&sw=767&sh=511&exp=3600&w=300",
+                        "author": "聯合新聞網",
+                        "sub_id": "120912",
+                        "og:title": "以為在日本！他赴陸驚「比台灣先進」 嘆：小確幸會害死我們 | 聯合新聞網",
+                        "og:image:height": "1000",
+                        "cate_id": "120909",
+                        "fb:pages": "241284961029",
+                        "article:author": "https://www.facebook.com/myudn/",
+                        "url": "https://udn.com/news/story/120912/7562715",
+                        "twitter:image:src": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/11/09/0/27015069.jpg&s=Y&x=79&y=3&sw=767&sh=511&exp=3600",
+                        "fb:app_id": "350231215126101",
+                        "viewport": "width=device-width, initial-scale=1.0, maximum-scale=2.0",
+                        "art_id": "7562715",
+                        "twitter:description": "前AV導演圤智雨近來到中國大陸西塘、上海參加活動，他發現當地有2項優點勝過台灣，不禁大嘆優越感全消失，自己才是退化的一群，甚至直言「我們的小確幸可能會害死我們」。",
+                        "og:locale": "zh_TW",
+                        "publisher": "聯合新聞網",
+                        "og:url": "https://udn.com/news/story/120912/7562715",
+                        "date.available": "2023-11-09 15:17:31",
+                        "channel_id": "2"
+                    }
+                ],
+                "cse_image": [
+                    {
+                        "src": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/11/09/0/27015069.jpg&s=Y&x=79&y=3&sw=767&sh=511&exp=3600"
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "customsearch#result",
+            "title": "文化衝擊？陸人在日本澡堂見「這幕」超震驚知情人指正常 ...",
+            "htmlTitle": "文化衝擊？陸人在\u003cb\u003e日本\u003c/b\u003e澡堂見「這幕」超震驚知情人指正常 ...",
+            "link": "https://udn.com/news/story/6810/7558319",
+            "displayLink": "udn.com",
+            "snippet": "3 days ago ... 不少人會選擇出國旅遊，但到了各個國家，也需要入境隨俗、尊重他們的民俗風情。一位大陸網友在小紅書上指出，自己近日到日本旅遊時，竟然看到爸爸帶著 ...",
+            "htmlSnippet": "3 days ago \u003cb\u003e...\u003c/b\u003e 不少人會選擇出國旅遊，但到了各個國家，也需要入境隨俗、尊重他們的民俗風情。一位大陸網友在小紅書上指出，自己近日到\u003cb\u003e日本\u003c/b\u003e旅遊時，竟然看到爸爸帶著&nbsp;...",
+            "cacheId": "xMt37VVjQ_QJ",
+            "formattedUrl": "https://udn.com/news/story/6810/7558319",
+            "htmlFormattedUrl": "https://udn.com/news/story/6810/7558319",
+            "pagemap": {
+                "cse_thumbnail": [
+                    {
+                        "src": "https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcTBLlx96IBhgd_rFvLDCa2n0qzCzWWbl9OA2MFh-29D6mDtcWetseC_6nBm",
+                        "width": "275",
+                        "height": "183"
+                    }
+                ],
+                "website": [
+                    {
+                        "image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/11/07/0/26957922.jpg&s=Y&x=0&y=0&sw=1280&sh=853&exp=3600",
+                        "datemodified": "2023-11-08T09:54:46+08:00",
+                        "keywords": "日本,浴室,溫泉,爸爸,家人,出國旅遊",
+                        "articlesection": "全球",
+                        "author": "聯合新聞網",
+                        "name": "文化衝擊？陸人在日本澡堂見「這幕」超震驚 知情人指正常：少見多怪 | 聯合新聞網",
+                        "description": "不少人會選擇出國旅遊，但到了各個國家，也需要入境隨俗、尊重他們的民俗風情。一位大陸網友在小紅書上指出，自己近日到日本旅遊時，竟然看...",
+                        "publisher": "聯合新聞網",
+                        "headline": "文化衝擊？陸人在日本澡堂見「這幕」超震驚 知情人指正常：少見多怪 | 聯合新聞網",
+                        "url": "https://udn.com/news/story/6810/7558319",
+                        "datepublished": "2023-11-07T22:27:41+08:00",
+                        "mainentityofpage": "https://udn.com/news/story/6810/7558319"
+                    }
+                ],
+                "metatags": [
+                    {
+                        "date": "2023-11-07 22:27:41",
+                        "og:image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/11/07/0/26957922.jpg&s=Y&x=0&y=0&sw=1280&sh=853&exp=3600",
+                        "og:image:width": "1000",
+                        "copyright": "聯合新聞網",
+                        "subsection": "奇聞不要看",
+                        "twitter:card": "summary_large_image",
+                        "og:site_name": "聯合新聞網",
+                        "twitter:url": "https://udn.com/news/story/6810/7558319",
+                        "section": "全球",
+                        "title": "文化衝擊？陸人在日本澡堂見「這幕」超震驚 知情人指正常：少見多怪 | 聯合新聞網",
+                        "og:description": "不少人會選擇出國旅遊，但到了各個國家，也需要入境隨俗、尊重他們的民俗風情。一位大陸網友在小紅書上指出，自己近日到日本旅遊時，竟然看到爸爸帶著女兒進了男澡堂…",
+                        "article:publisher": "https://www.facebook.com/myudn/",
+                        "twitter:image:alt": "一位大陸網友指出，自己近日到日本旅遊時，竟然看到爸爸帶著女兒進了男澡堂，媽媽則帶著男孩走進女澡堂，令他十分震驚。情境示意圖。圖／Ingimage",
+                        "twitter:site": "@聯合新聞網",
+                        "news_keywords": "日本,浴室,溫泉,爸爸,家人,出國旅遊",
+                        "fb:admins": "100002847892748",
+                        "lastmod": "2023-11-08T09:54:46+08:00",
+                        "pubdate": "2023-11-07T22:27:41+08:00",
+                        "application-name": "聯合新聞網",
+                        "image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/11/07/0/26957922.jpg&s=Y&x=0&y=0&sw=1280&sh=853&exp=3600",
+                        "og:type": "article",
+                        "twitter:title": "文化衝擊？陸人在日本澡堂見「這幕」超震驚 知情人指正常：少見多怪 | 聯合新聞網",
+                        "taboola:image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/11/07/0/26957922.jpg&s=Y&x=0&y=0&sw=1280&sh=853&exp=3600&w=300",
+                        "author": "聯合新聞網",
+                        "sub_id": "6810",
+                        "og:title": "文化衝擊？陸人在日本澡堂見「這幕」超震驚 知情人指正常：少見多怪 | 聯合新聞網",
+                        "og:image:height": "1000",
+                        "cate_id": "7225",
+                        "fb:pages": "241284961029",
+                        "article:author": "https://www.facebook.com/myudn/",
+                        "url": "https://udn.com/news/story/6810/7558319",
+                        "twitter:image:src": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/11/07/0/26957922.jpg&s=Y&x=0&y=0&sw=1280&sh=853&exp=3600",
+                        "fb:app_id": "350231215126101",
+                        "viewport": "width=device-width, initial-scale=1.0, maximum-scale=2.0",
+                        "art_id": "7558319",
+                        "twitter:description": "不少人會選擇出國旅遊，但到了各個國家，也需要入境隨俗、尊重他們的民俗風情。一位大陸網友在小紅書上指出，自己近日到日本旅遊時，竟然看到爸爸帶著女兒進了男澡堂…",
+                        "og:locale": "zh_TW",
+                        "publisher": "聯合新聞網",
+                        "og:url": "https://udn.com/news/story/6810/7558319",
+                        "date.available": "2023-11-07 22:27:41",
+                        "channel_id": "2"
+                    }
+                ],
+                "cse_image": [
+                    {
+                        "src": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/11/07/0/26957922.jpg&s=Y&x=0&y=0&sw=1280&sh=853&exp=3600"
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "customsearch#result",
+            "title": "全球震盪中日本經濟再起！？ | 雜誌| 聯合新聞網",
+            "htmlTitle": "全球震盪中\u003cb\u003e日本\u003c/b\u003e經濟再起！？ | 雜誌| 聯合新聞網",
+            "link": "https://udn.com/news/story/6868/7347889",
+            "displayLink": "udn.com",
+            "snippet": "Aug 5, 2023 ... 若是無法擺脫通貨緊縮，日本經濟發展無法重回景氣的軌道。對日本經濟前景抱持謹慎態度的評論家認為，目前日本的通貨膨脹是暫時現象，主要是俄烏戰爭帶來的 ...",
+            "htmlSnippet": "Aug 5, 2023 \u003cb\u003e...\u003c/b\u003e 若是無法擺脫通貨緊縮，\u003cb\u003e日本\u003c/b\u003e經濟發展無法重回景氣的軌道。對\u003cb\u003e日本\u003c/b\u003e經濟前景抱持謹慎態度的評論家認為，目前\u003cb\u003e日本\u003c/b\u003e的通貨膨脹是暫時現象，主要是俄烏戰爭帶來的&nbsp;...",
+            "cacheId": "sg9RrJrpd8wJ",
+            "formattedUrl": "https://udn.com/news/story/6868/7347889",
+            "htmlFormattedUrl": "https://udn.com/news/story/6868/7347889",
+            "pagemap": {
+                "cse_thumbnail": [
+                    {
+                        "src": "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcQ9mrYk9EAHh5lKVZob7w1Qrysg0XzAA9ivMzkhTV8nT8c27pYhp1wsKxU",
+                        "width": "275",
+                        "height": "183"
+                    }
+                ],
+                "website": [
+                    {
+                        "image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/08/04/draft/23751267.jpg&s=Y&x=0&y=0&sw=800&sh=533&exp=3600",
+                        "datemodified": "2023-08-05T15:38:22+08:00",
+                        "articlesection": "商業企管",
+                        "author": "聯合新聞網",
+                        "name": "全球震盪中 日本經濟再起！？ | 聯合新聞網",
+                        "description": "2023年之後，長期陷入停滯的日本經濟，開始出現復甦的跡象。首先是2023年4月的核心消費者物價指數較去年同期上漲4.1%，創下日本泡沫經濟以來的最...",
+                        "publisher": "雜誌",
+                        "headline": "全球震盪中 日本經濟再起！？ | 聯合新聞網",
+                        "url": "https://udn.com/news/story/6868/7347889",
+                        "datepublished": "2023-08-05T15:38:22+08:00",
+                        "mainentityofpage": "https://udn.com/news/story/6868/7347889"
+                    }
+                ],
+                "metatags": [
+                    {
+                        "date": "2023-08-05 15:38:22",
+                        "og:image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/08/04/draft/23751267.jpg&s=Y&x=0&y=0&sw=800&sh=533&exp=3600",
+                        "og:image:width": "1000",
+                        "copyright": "聯合新聞網",
+                        "subsection": "能力雜誌",
+                        "twitter:card": "summary_large_image",
+                        "og:site_name": "雜誌",
+                        "twitter:url": "https://udn.com/news/story/6868/7347889",
+                        "section": "商業企管",
+                        "title": "全球震盪中 日本經濟再起！？ | 聯合新聞網",
+                        "og:description": "2023年之後，長期陷入停滯的日本經濟，開始出現復甦的跡象。首先是2023年4月的核心消費者物價指數較去年同期上漲4.1%，創下日本泡沫經濟以來的最大漲幅。",
+                        "article:publisher": "https://www.facebook.com/myudn/",
+                        "twitter:site": "@雜誌",
+                        "fb:admins": "100002847892748",
+                        "lastmod": "2023-08-05T15:38:22+08:00",
+                        "pubdate": "2023-08-05T15:38:22+08:00",
+                        "application-name": "雜誌",
+                        "image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/08/04/draft/23751267.jpg&s=Y&x=0&y=0&sw=800&sh=533&exp=3600",
+                        "og:type": "article",
+                        "twitter:title": "全球震盪中 日本經濟再起！？ | 聯合新聞網",
+                        "taboola:image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/08/04/draft/23751267.jpg&s=Y&x=0&y=0&sw=800&sh=533&exp=3600&w=300",
+                        "author": "聯合新聞網",
+                        "sub_id": "6868",
+                        "og:title": "全球震盪中 日本經濟再起！？ | 聯合新聞網",
+                        "og:image:height": "1000",
+                        "cate_id": "6821",
+                        "fb:pages": "241284961029",
+                        "article:author": "https://www.facebook.com/myudn/",
+                        "url": "https://udn.com/news/story/6868/7347889",
+                        "twitter:image:src": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/08/04/draft/23751267.jpg&s=Y&x=0&y=0&sw=800&sh=533&exp=3600",
+                        "fb:app_id": "350231215126101",
+                        "viewport": "width=device-width, initial-scale=1.0, maximum-scale=2.0",
+                        "art_id": "7347889",
+                        "twitter:description": "2023年之後，長期陷入停滯的日本經濟，開始出現復甦的跡象。首先是2023年4月的核心消費者物價指數較去年同期上漲4.1%，創下日本泡沫經濟以來的最大漲幅。",
+                        "og:locale": "zh_TW",
+                        "publisher": "雜誌",
+                        "og:url": "https://udn.com/news/story/6868/7347889",
+                        "date.available": "2023-08-05 15:38:22",
+                        "channel_id": "1015"
+                    }
+                ],
+                "cse_image": [
+                    {
+                        "src": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/08/04/draft/23751267.jpg&s=Y&x=0&y=0&sw=800&sh=533&exp=3600"
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "customsearch#result",
+            "title": "GDP排名被經濟負成長的德國超車日本怎麼了？ | 全球財經| 全球| 聯合 ...",
+            "htmlTitle": "GDP排名被經濟負成長的德國超車\u003cb\u003e日本\u003c/b\u003e怎麼了？ | 全球財經| 全球| 聯合 ...",
+            "link": "https://udn.com/news/story/6811/7557161",
+            "displayLink": "udn.com",
+            "snippet": "3 days ago ... 國際貨幣基金組織10月中釋出2023年全球GDP排名，沒想到，經濟負成長的德國竟小勝日本，搶下美、中兩強後的季軍。除了德日在搶「老三」，印度會是下個 ...",
+            "htmlSnippet": "3 days ago \u003cb\u003e...\u003c/b\u003e 國際貨幣基金組織10月中釋出2023年全球GDP排名，沒想到，經濟負成長的德國竟小勝\u003cb\u003e日本\u003c/b\u003e，搶下美、中兩強後的季軍。除了德日在搶「老三」，印度會是下個&nbsp;...",
+            "cacheId": "NCo3Jp7qS80J",
+            "formattedUrl": "https://udn.com/news/story/6811/7557161",
+            "htmlFormattedUrl": "https://udn.com/news/story/6811/7557161",
+            "pagemap": {
+                "cse_thumbnail": [
+                    {
+                        "src": "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcRdYmj7FOQRZiWGN8dixghb3LFtfEtM7nnLe3HJsx27dmZJ0HM4Wxll_bk",
+                        "width": "275",
+                        "height": "183"
+                    }
+                ],
+                "website": [
+                    {
+                        "image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/11/07/0/26947440.jpg&s=Y&x=0&y=0&sw=1000&sh=667&exp=3600",
+                        "datemodified": "2023-11-07T18:40:56+08:00",
+                        "keywords": "日本經濟,德國,日本央行,日圓,IMF,GDP",
+                        "articlesection": "全球",
+                        "author": "聯合新聞網",
+                        "name": "GDP排名被經濟負成長的德國超車 日本怎麼了？ | 聯合新聞網",
+                        "description": "國際貨幣基金組織10月中釋出2023年全球GDP排名，沒想到，經濟負成長的德國竟小勝日本，搶下美、中兩強後的季軍。除了德日在搶「老三」，印度會...",
+                        "publisher": "聯合新聞網",
+                        "headline": "GDP排名被經濟負成長的德國超車 日本怎麼了？ | 聯合新聞網",
+                        "url": "https://udn.com/news/story/6811/7557161",
+                        "datepublished": "2023-11-07T15:30:10+08:00",
+                        "mainentityofpage": "https://udn.com/news/story/6811/7557161"
+                    }
+                ],
+                "metatags": [
+                    {
+                        "date": "2023-11-07 15:30:10",
+                        "og:image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/11/07/0/26947440.jpg&s=Y&x=0&y=0&sw=1000&sh=667&exp=3600",
+                        "og:image:width": "1000",
+                        "copyright": "聯合新聞網",
+                        "subsection": "全球財經",
+                        "twitter:card": "summary_large_image",
+                        "og:site_name": "聯合新聞網",
+                        "twitter:url": "https://udn.com/news/story/6811/7557161",
+                        "section": "全球",
+                        "title": "GDP排名被經濟負成長的德國超車 日本怎麼了？ | 聯合新聞網",
+                        "og:description": "國際貨幣基金組織10月中釋出2023年全球GDP排名，沒想到，經濟負成長的德國竟小勝日本，搶下美、中兩強後的季軍。除了德日在搶「老三」，印度會是下個加入賽局的黑馬？",
+                        "article:publisher": "https://www.facebook.com/myudn/",
+                        "twitter:image:alt": "難道，日本「失落的三十年」已然成真？情境示意圖，圖片來源／Ingimage。",
+                        "twitter:site": "@聯合新聞網",
+                        "news_keywords": "日本經濟,德國,日本央行,日圓,IMF,GDP",
+                        "fb:admins": "100002847892748",
+                        "lastmod": "2023-11-07T18:40:56+08:00",
+                        "pubdate": "2023-11-07T15:30:10+08:00",
+                        "application-name": "聯合新聞網",
+                        "image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/11/07/0/26947440.jpg&s=Y&x=0&y=0&sw=1000&sh=667&exp=3600",
+                        "og:type": "article",
+                        "twitter:title": "GDP排名被經濟負成長的德國超車 日本怎麼了？ | 聯合新聞網",
+                        "taboola:image": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/11/07/0/26947440.jpg&s=Y&x=0&y=0&sw=1000&sh=667&exp=3600&w=300",
+                        "author": "聯合新聞網",
+                        "sub_id": "6811",
+                        "og:title": "GDP排名被經濟負成長的德國超車 日本怎麼了？ | 聯合新聞網",
+                        "og:image:height": "1000",
+                        "cate_id": "7225",
+                        "fb:pages": "241284961029",
+                        "article:author": "https://www.facebook.com/myudn/",
+                        "url": "https://udn.com/news/story/6811/7557161",
+                        "twitter:image:src": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/11/07/0/26947440.jpg&s=Y&x=0&y=0&sw=1000&sh=667&exp=3600",
+                        "fb:app_id": "350231215126101",
+                        "viewport": "width=device-width, initial-scale=1.0, maximum-scale=2.0",
+                        "art_id": "7557161",
+                        "twitter:description": "國際貨幣基金組織10月中釋出2023年全球GDP排名，沒想到，經濟負成長的德國竟小勝日本，搶下美、中兩強後的季軍。除了德日在搶「老三」，印度會是下個加入賽局的黑馬？",
+                        "og:locale": "zh_TW",
+                        "publisher": "聯合新聞網",
+                        "og:url": "https://udn.com/news/story/6811/7557161",
+                        "date.available": "2023-11-07 15:30:10",
+                        "channel_id": "2"
+                    }
+                ],
+                "cse_image": [
+                    {
+                        "src": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2023/11/07/0/26947440.jpg&s=Y&x=0&y=0&sw=1000&sh=667&exp=3600"
+                    }
+                ]
+            }
+        }
+    ]
+}

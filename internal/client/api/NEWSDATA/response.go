@@ -21,10 +21,13 @@ type Response struct {
 	TotalResult int       `json:"totalResults"`
 	Articles    []Article `json:"results"`
 	NextPage    string    `json:"nextPage"`
-	nextPageURL string    `json:"-"`
 }
 
-// return response status success/error
+func (resp Response) ContentProcessFunc(c string) (string, error) {
+	return c, nil
+}
+
+// return response status (must be either "success" or "error")
 func (resp Response) GetStatus() string {
 	return resp.Status
 }
@@ -32,13 +35,6 @@ func (resp Response) GetStatus() string {
 // return url for querying next page
 func (resp *Response) HasNext() bool {
 	return resp.NextPage != ""
-}
-
-func (resp *Response) NextPageRequest(body io.Reader) (*http.Request, error) {
-	if resp.HasNext() {
-		return http.NewRequest(API_METHOD, resp.nextPageURL, body)
-	}
-	return nil, api.ErrNotNextPage
 }
 
 // return the number of the articles in the response
@@ -49,6 +45,26 @@ func (resp Response) Len() int {
 func (resp Response) String() string {
 	b, _ := json.MarshalIndent(resp, "", "\t")
 	return string(b)
+}
+
+func (resp Response) ToNewsItemList() (next api.NextPageToken, preview []api.NewsPreview) {
+	if !resp.HasNext() {
+		return api.StrLastPageToken, nil
+	}
+
+	preview = make([]api.NewsPreview, len(resp.Articles))
+	for i, article := range resp.Articles {
+		preview[i] = api.NewsPreview{
+			Id:          i,
+			Title:       article.Title,
+			Link:        article.Link,
+			Description: article.Description,
+			Category:    "",
+			Content:     article.Content,
+			PubDate:     time.Time(article.PublishedAt),
+		}
+	}
+	return api.StrNextPageToken(resp.NextPage), preview
 }
 
 // convert response to model.CreateNewsParams and return by a channel
@@ -147,18 +163,11 @@ func ParseHTTPResponse(resp *http.Response) (*Response, error) {
 		return nil, err
 	}
 
-	if apiResponse.HasNext() {
-		u, _ := url.Parse(resp.Request.URL.String())
-		v, _ := url.ParseQuery(resp.Request.URL.Query().Encode())
-		v.Add(string(Page), apiResponse.NextPage)
-		u.RawQuery = v.Encode()
-		apiResponse.nextPageURL = u.String()
-	}
 	return apiResponse, err
 }
 
-func ParseErrorResponse(b []byte) (*APIError, error) {
-	var respErr *APIError
+func ParseErrorResponse(b []byte) (*ErrorResponse, error) {
+	var respErr *ErrorResponse
 	err := json.Unmarshal(b, &respErr)
 	if err != nil {
 		return nil, fmt.Errorf("error while unmarshaling body: %v", err)

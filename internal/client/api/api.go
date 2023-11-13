@@ -7,20 +7,24 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"regexp"
 	"strings"
-	"sync"
 	"time"
 
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
+	"github.com/google/uuid"
 )
 
 var ErrTypeAssertionFailure = errors.New("type assertion failure")
 var ErrNotNextPage = errors.New("there are no more pages to query")
 var ErrNotImplemented = errors.New("not implemented")
+var ErrEndOfQuery = errors.New("end of query")
+var ErrNextTokenAssertionFailure = errors.New("next token assertion failure")
+
 var re = regexp.MustCompile("[\\p{Han}[:alnum:]]")
+
+const StrLastPageToken = StrNextPageToken("$")
+const IntLastPageToken = IntNextPageToken(-1)
 
 const QueryOriPageKey = true
 
@@ -30,6 +34,10 @@ func QueryOriginalPageContext(ctx context.Context) context.Context {
 
 type Key string
 
+func (k Key) String() string {
+	return string(k)
+}
+
 type Request interface {
 	String() string
 	ToHttpRequest() (*http.Request, error)
@@ -37,25 +45,16 @@ type Request interface {
 	json.Unmarshaler
 	Encode() string
 	Decode(q string) error
-}
-
-type Values interface {
-	Sep() string
-	Add(key Key, val string)
-	Set(key Key, val string)
-	Del(key Key)
-	Get(key Key) string
-	Has(key Key) bool
-	Clone() (Values, error)
+	ToPreviewCache(uid uuid.UUID) (cKey string, c *PreviewCache)
 }
 
 type Response interface {
 	String() string
 	GetStatus() string
 	HasNext() bool
-	NextPageRequest(body io.Reader) (*http.Request, error)
+	ToNewsItemList() (next NextPageToken, preview []NewsPreview)
 	Len() int
-	ToNews(ctx context.Context, wg *sync.WaitGroup, c chan<- *service.NewsCreateRequest)
+	ContentProcessFunc(c string) (string, error)
 }
 
 func MD5Hash(title string, publishedAt time.Time, content ...string) (string, error) {

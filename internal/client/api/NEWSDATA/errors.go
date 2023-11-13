@@ -8,13 +8,13 @@ import (
 	ec "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/errorCode"
 )
 
-type APIError struct {
+type ErrorResponse struct {
 	Status string            `json:"status"`
 	Result map[string]string `json:"results"`
 }
 
 // see https://newsdata.io/documentation/#http-response-codes
-func (apiErr APIError) ToError(code int) error {
+func (er ErrorResponse) ToError(code int) error {
 	var ecCode ec.ErrorCode
 	switch code {
 	case http.StatusOK:
@@ -35,19 +35,19 @@ func (apiErr APIError) ToError(code int) error {
 		ecCode = ec.ECServerError
 	}
 
-	if apiErr.Result["message"] != "" {
+	if er.Result["message"] != "" {
 		return ec.MustGetErr(ecCode).(*ec.Error).
-			WithDetails(apiErr.Result["message"])
+			WithDetails(er.Result["message"])
 	}
 	return ec.MustGetErr(ecCode)
 }
 
-func (apiErr APIError) String() string {
+func (er ErrorResponse) String() string {
 	sb := strings.Builder{}
 	sb.WriteString("Api Error:\n")
-	if len(apiErr.Result) > 0 {
+	if len(er.Result) > 0 {
 		sb.WriteString("\t- Result:\n")
-		for key, val := range apiErr.Result {
+		for key, val := range er.Result {
 			sb.WriteString(fmt.Sprintf("\t  - %s: %s\n", key, val))
 		}
 	}

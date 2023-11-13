@@ -1,23 +1,28 @@
 package gnews_test
 
 import (
-	"context"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"os"
+	"path"
 	"strings"
-	"sync"
 	"testing"
 
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api"
 	cli "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api/GNews"
 	srv "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm/GNews"
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
+
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
 
-const TEST_API_KEY = "0x0x000x0000x00x0xx0xxxxx0xx0000"
+const TEST_API_KEY = "[[:TEST_API_KEY:]]"
+
+var TEST_USER_ID, _ = uuid.Parse("741428c7-1ae0-4622-b615-9d44a141ff23")
 
 func TestParseResponseBody(t *testing.T) {
 	type testCase struct {
@@ -62,7 +67,7 @@ func TestParseResponseBody(t *testing.T) {
 					require.NoError(t, err)
 					require.NotEmpty(t, apiErrResponse.Error)
 				} else {
-					apiResponse, err := cli.ParseResponse(respJson, 0)
+					apiResponse, err := cli.ParseResponse(respJson)
 					require.NoError(t, err)
 					require.NotNil(t, apiResponse)
 				}
@@ -126,7 +131,7 @@ func TestParseResponse(t *testing.T) {
 			func(t *testing.T) {
 				resp, err := http.DefaultClient.Get(srvr.URL + tc.RoutePattern)
 				require.NoError(t, err)
-				apiresp, err := cli.ParseHTTPResponse(resp, 0)
+				apiresp, err := cli.ParseHTTPResponse(resp)
 				if tc.StatusCode == http.StatusOK {
 					require.NoError(t, err)
 					require.Equal(t, apiresp.GetStatus(), "success")
@@ -162,11 +167,15 @@ func TestHeadlinesHandler(t *testing.T) {
 		},
 	}
 
-	mux := chi.NewRouter()
-	mux.Get("/"+strings.Join([]string{
+	p := path.Join(
 		cli.API_PATH,
 		cli.API_VERSION,
-		cli.EPTopHeadlines}, "/"),
+		cli.EPTopHeadlines,
+	)
+
+	// new test server
+	mux := chi.NewRouter()
+	mux.Get("/"+p,
 		func(w http.ResponseWriter, r *http.Request) {
 			_ = r.ParseForm()
 			if r.URL.Query().Get("apikey") != TEST_API_KEY {
@@ -178,77 +187,93 @@ func TestHeadlinesHandler(t *testing.T) {
 			}
 
 			page := r.URL.Query().Get("page")
-			j, _ := os.ReadFile(tc.Filename[page])
 			w.Header().Set("Content-Type", "application/json")
+			j, _ := os.ReadFile(tc.Filename[page])
 			w.WriteHeader(http.StatusOK)
 			w.Write(j)
 		})
-	t.Log("/" + strings.Join([]string{
-		cli.API_PATH,
-		cli.API_VERSION,
-		cli.EPTopHeadlines}, "/"))
 	srvr := httptest.NewServer(mux)
 	defer srvr.Close()
-
-	cPars := make(chan *service.NewsCreateRequest)
-	go func(c <-chan *service.NewsCreateRequest) {
-		for p := range c {
-			require.NotNil(t, p)
-			require.NotEmpty(t, p.Title)
-			require.NotEmpty(t, p.Md5Hash)
-		}
-	}(cPars)
-	wg := &sync.WaitGroup{}
-
-	q, err := h.Handle(TEST_API_KEY, pf)
-	require.NoError(t, err)
-	require.NotNil(t, q)
-
-	qs := q.Encode()
-	require.Contains(t, qs, "country="+strings.Join(pf.Country, "%2C"))
-	require.Contains(t, qs, "lang="+strings.Join(pf.Language, "%2C"))
-	require.NotContains(t, qs, "from=0001-01-01T23%3A59%3A59Z")
-	require.NotContains(t, qs, "to=0001-01-01T23%3A59%3A59Z")
-
-	r, err := q.ToHttpRequest()
-	require.NoError(t, err)
-	require.NotNil(t, r)
-	require.Equal(t, cli.API_HOST, r.URL.Host)
-	require.Equal(t, cli.API_SCHEME, r.URL.Scheme)
-	require.Contains(t, r.URL.RawQuery, "apikey="+TEST_API_KEY)
 
 	srvrUrl, err := url.Parse(srvr.URL)
 	require.NoError(t, err)
 
-	r.URL.Scheme = srvrUrl.Scheme
-	r.URL.Host = srvrUrl.Host
+	// mock a database
+	Cache := map[string]*api.PreviewCache{}
+	NItem := 0
 
-	rs := []*http.Request{r}
-	for i := 0; i < len(rs); i++ {
-		resp, err := http.DefaultClient.Do(r)
+	// user's first request
+	req, err := h.Handle(TEST_API_KEY, pf)
+	require.NoError(t, err)
+	require.NotNil(t, req)
+
+	ckey, cache := req.ToPreviewCache(TEST_USER_ID)
+	Cache[ckey] = cache
+	require.NotZero(t, ckey)
+	require.NotNil(t, cache)
+
+	for i := 1; i <= 10; i++ {
+		// make API request
+		httpReq, err := req.ToHttpRequest()
 		require.NoError(t, err)
-		require.NotNil(t, resp)
-		require.Equal(t, http.StatusOK, resp.StatusCode)
+		require.NotNil(t, httpReq)
+		httpReq.URL.Scheme = srvrUrl.Scheme
+		httpReq.URL.Host = srvrUrl.Host
 
-		apiResp, err := h.Parse(resp)
-		require.NoError(t, err)
-		require.NotNil(t, apiResp)
-		require.Equal(t, "success", apiResp.GetStatus())
-
-		if i < len(tc.Filename)-1 {
-			require.True(t, apiResp.HasNext())
-			r, err = apiResp.NextPageRequest(nil)
-			require.NoError(t, err)
-			rs = append(rs, r)
+		require.Contains(t, httpReq.URL.String(), cli.EPTopHeadlines)
+		if i == 1 {
+			// page=1 is default
+			require.NotContains(t, httpReq.URL.RawQuery, "page=")
 		} else {
-			require.False(t, apiResp.HasNext())
+			require.Contains(t, httpReq.URL.RawQuery, fmt.Sprintf("page=%d", i))
 		}
 
-		wg.Add(1)
-		go apiResp.ToNews(context.Background(), wg, cPars)
-		require.Greater(t, len(tc.Filename), i)
-	}
+		httpResp, err := http.DefaultClient.Do(httpReq)
+		require.NoError(t, err)
+		require.NotNil(t, httpResp)
+		require.Equal(t, http.StatusOK, httpResp.StatusCode)
 
-	wg.Wait()
-	close(cPars)
+		// parse response
+		resp, err := h.Parse(httpResp)
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+		require.Equal(t, "success", resp.GetStatus())
+
+		next, prev := resp.ToNewsItemList()
+
+		// update next token in cache
+		cache, ok := Cache[ckey]
+		require.True(t, ok)
+		cache.SetNextPage(next)
+
+		if next.Equal(api.IntLastPageToken) {
+			// last page
+			require.Nil(t, prev)
+			require.Equal(t, 0, len(prev))
+			require.Equal(t, len(tc.Filename), i)
+			break
+		} else {
+			require.Less(t, 0, len(prev))
+			NItem += len(prev)
+
+			// append items to cache
+			cache.NewsItem = append(cache.NewsItem, prev...)
+			Cache[ckey] = cache
+		}
+
+		// next client request comes in
+		// build request from cache
+		req, err = cli.RequestFromPreviewCache(cache)
+		require.NoError(t, err)
+	}
+	require.Equal(t, NItem, len(Cache[ckey].NewsItem))
+}
+
+func TestSep(t *testing.T) {
+	text := "...構。（資料照，路透）\n2023/05/25 11:11\n首次上稿...颱風眼也能用肉眼清晰可見。\n隸屬美國國家航空暨太空總署（NASA）的太空人海因斯（Bob Hines），推特帳號..."
+	s := strings.ReplaceAll(text, "。\n\r", "\n")
+	s = strings.ReplaceAll(s, "。\n", "。"+global.SEPToken)
+	s = strings.ReplaceAll(s, "\n", "")
+	s = global.CLSToken + s
+	t.Log(s)
 }

@@ -29,6 +29,10 @@ var API_MIN_TIME, _ = time.Parse(time.DateOnly, "1900-01-01")
 var API_URL = fmt.Sprintf("%s://%s/%s/%s", API_SCHEME, API_HOST, API_PATH, API_VERSION)
 
 const (
-	EPCustomSearch string = ""
-	EPSiteRestrict string = "siterestrict"
+	DEFAULT_PAGE_SIZE = 10
+)
+
+const (
+	EPCustomSearch   string = ""
+	EPSiteRestricted string = "siterestrict"
 )

@@ -1,7 +1,9 @@
 package newsapi
 
 import (
+	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 	"time"
 
@@ -9,6 +11,7 @@ import (
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api"
 	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm/newsapi"
+	"github.com/google/uuid"
 )
 
 const (
@@ -25,6 +28,11 @@ const (
 	Page           api.Key = "page"
 	FromTime       api.Key = "from"
 	ToTime         api.Key = "to"
+	APIKey         api.Key = "apikey"
+)
+
+const (
+	AuthorizationHeader = "X-Api-Key"
 )
 
 type SearchInField string
@@ -58,9 +66,10 @@ const (
 
 type Request struct {
 	*api.RequestProto
+	Page int
 }
 
-func newRequest(apikey string) *Request {
+func NewRequest(apikey string) *Request {
 	r := api.NewRequestProtoType(",")
 	r.SetApiKey(apikey)
 
@@ -144,6 +153,11 @@ func (r *Request) WithPageSize(ps int) *Request {
 	return r
 }
 
+func (r *Request) WithPage(page int) *Request {
+	r.Page = page
+	return r
+}
+
 // The 2-letter ISO 3166-1 code of the country you want to get headlines for.
 func (r *Request) WithCountry(country ...string) *Request {
 	for _, c := range country {
@@ -197,9 +211,9 @@ func (r *Request) WithTo(t time.Time) *Request {
 
 func (r *Request) SetEndpoint(ep string) (*Request, error) {
 	switch ep {
-	case newsapi.EPEverything:
+	case newsapi.EPEverything, EPEverything:
 		r.RequestProto.SetEndpoint(EPEverything)
-	case newsapi.EPTopHeadlines:
+	case newsapi.EPTopHeadlines, EPTopHeadlines:
 		r.RequestProto.SetEndpoint(EPTopHeadlines)
 	case newsapi.EPSources:
 		return nil, client.ErrNotSupportedEndpoint
@@ -210,11 +224,50 @@ func (r *Request) SetEndpoint(ep string) (*Request, error) {
 }
 
 func (r *Request) ToHttpRequest() (*http.Request, error) {
-	req, err := r.RequestProto.ToHTTPRequest(API_URL, API_METHOD, nil)
+	httpReq, err := r.RequestProto.ToHTTPRequest(API_URL, API_METHOD, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	req = r.AddAPIKeyToQuery(req, "apikey")
+	p, err := r.Params.Clone()
+	if err != nil {
+		return nil, err
+	}
+
+	httpReq.Header.Set(AuthorizationHeader, r.APIKey())
+	if r.Page > 1 {
+		// default: page=1
+		p.Set(Page, strconv.Itoa(r.Page))
+	}
+	httpReq.URL.RawQuery = p.Encode()
+	return httpReq, nil
+}
+
+func (r Request) ToPreviewCache(uid uuid.UUID) (cKey string, c *api.PreviewCache) {
+	return r.RequestProto.ToPreviewCache(uid, api.IntNextPageToken(1), nil)
+}
+
+func RequestFromPreviewCache(c *api.PreviewCache) (api.Request, error) {
+	if c.Query.NextPage.Equal(api.IntLastPageToken) {
+		return nil, api.ErrEndOfQuery
+	}
+
+	var err error
+	req := NewRequest(c.Query.APIKey)
+	_, err = req.SetEndpoint(c.Query.APIEP)
+	if err != nil {
+		return nil, fmt.Errorf("error while set endpoint: %w", err)
+	}
+
+	req.Values, err = url.ParseQuery(c.Query.RawQuery)
+	if err != nil {
+		return nil, err
+	}
+
+	i, ok := c.Query.NextPage.(api.IntNextPageToken)
+	if !ok {
+		return nil, api.ErrTypeAssertionFailure
+	}
+	req = req.WithPage(int(i))
 	return req, nil
 }

@@ -4,13 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"sync"
 
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api"
 	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm"
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
-	"golang.org/x/net/context"
 )
 
 var ErrPageFormHandlerHasBeenRegistered = errors.New("the PageFormHandler has already been registered")
@@ -68,67 +64,67 @@ func (repo pageFormHandlerRepo) NewQueryFromPageFrom(apikey string, pf pageform.
 	return handler.Handle(apikey, pf)
 }
 
-func (repo pageFormHandlerRepo) Do(cli http.Client, apikey string, pf pageform.PageForm) error {
-	key := newRepoMapKey(pf.API(), pf.Endpoint())
-	handler, ok := repo[key]
-	if !ok {
-		return ErrHandlerNotFound
-	}
+// func (repo pageFormHandlerRepo) Do(cli http.Client, apikey string, pf pageform.PageForm) error {
+// 	key := newRepoMapKey(pf.API(), pf.Endpoint())
+// 	handler, ok := repo[key]
+// 	if !ok {
+// 		return ErrHandlerNotFound
+// 	}
 
-	q, err := handler.Handle(apikey, pf)
-	if err != nil {
-		return fmt.Errorf("error while .Handle: %w", err)
-	}
+// 	q, err := handler.Handle(apikey, pf)
+// 	if err != nil {
+// 		return fmt.Errorf("error while .Handle: %w", err)
+// 	}
 
-	req, err := q.ToHttpRequest()
-	if err != nil {
-		return fmt.Errorf("error while .ToRequest: %w", err)
-	}
+// 	req, err := q.ToHttpRequest()
+// 	if err != nil {
+// 		return fmt.Errorf("error while .ToRequest: %w", err)
+// 	}
 
-	cPars := make(chan *service.NewsCreateRequest)
-	go func() {
-		for p := range cPars {
-			global.Logger.
-				Info().
-				Str("md5", p.Md5Hash).
-				Str("title", p.Title).
-				Time("publish_at", p.PublishedAt.UTC()).
-				Msg("Create an article")
-		}
-	}()
+// 	cPars := make(chan *service.NewsCreateRequest)
+// 	go func() {
+// 		for p := range cPars {
+// 			global.Logger.
+// 				Info().
+// 				Str("md5", p.Md5Hash).
+// 				Str("title", p.Title).
+// 				Time("publish_at", p.PublishedAt.UTC()).
+// 				Msg("Create an article")
+// 		}
+// 	}()
 
-	reqs := []*http.Request{req}
-	ctx, cancel := context.WithCancel(context.Background())
-	wg := &sync.WaitGroup{}
-	for i := 0; i < len(reqs); i++ {
-		httpResp, err := cli.Do(reqs[i])
-		if err != nil {
-			cancel()
-			return err
-		}
+// 	reqs := []*http.Request{req}
+// 	ctx, cancel := context.WithCancel(context.Background())
+// 	wg := &sync.WaitGroup{}
+// 	for i := 0; i < len(reqs); i++ {
+// 		httpResp, err := cli.Do(reqs[i])
+// 		if err != nil {
+// 			cancel()
+// 			return err
+// 		}
 
-		resp, err := handler.Parse(httpResp)
-		if err != nil {
-			cancel()
-			return err
-		}
+// 		resp, err := handler.Parse(httpResp)
+// 		if err != nil {
+// 			cancel()
+// 			return err
+// 		}
 
-		if resp.HasNext() {
-			next, err := resp.NextPageRequest(nil)
-			if err != nil {
-				cancel()
-				return err
-			}
-			reqs = append(reqs, next)
-		}
+// 		if resp.HasNext() {
+// 			next, err := resp.NextPageRequest(nil)
+// 			if err != nil {
+// 				cancel()
+// 				return err
+// 			}
+// 			reqs = append(reqs, next)
+// 		}
 
-		wg.Add(1)
-		go func(wg *sync.WaitGroup) {
-			defer wg.Done()
-			resp.ToNews(ctx, wg, cPars)
-		}(wg)
-	}
-	wg.Wait()
-	close(cPars)
-	return nil
-}
+// 		wg.Add(1)
+// 		go func(wg *sync.WaitGroup) {
+// 			defer wg.Done()
+// 			resp.ToNews(ctx, wg, cPars)
+// 		}(wg)
+// 	}
+// 	wg.Wait()
+// 	close(cPars)
+// 	return nil
+// }

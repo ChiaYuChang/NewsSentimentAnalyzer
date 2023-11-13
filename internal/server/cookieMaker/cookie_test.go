@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/cookieMaker"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/cookieMaker"
 )
 
 func TestCookieMaker(t *testing.T) {

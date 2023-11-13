@@ -2,23 +2,11 @@ package newsapi
 
 import (
 	"net/http"
-	"net/url"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api"
 	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm"
 	srv "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm/newsapi"
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/convert"
 )
-
-func getPage(q url.Values) int {
-	page := 1
-	if pStr := q.Get(string(Page)); pStr != "" {
-		if p, err := convert.StrTo(pStr).Int(); err == nil {
-			page = p
-		}
-	}
-	return page
-}
 
 type EverythingHandler struct{}
 
@@ -29,7 +17,7 @@ func (hl EverythingHandler) Handle(apikey string, pf pageform.PageForm) (api.Req
 	}
 	data.TimeRange.ToUTC()
 
-	q, err := newRequest(apikey).
+	r, err := NewRequest(apikey).
 		SetEndpoint(data.Endpoint())
 	if err != nil {
 		return nil, err
@@ -38,7 +26,7 @@ func (hl EverythingHandler) Handle(apikey string, pf pageform.PageForm) (api.Req
 	var si SearchInField
 	si.Parse(data.SearchIn)
 
-	q.WithKeywords(data.Keyword).
+	r.WithKeywords(data.Keyword).
 		WithSources(data.Sources).
 		WithDomains(data.Domains).
 		WithExcludeDomains(data.ExcludeDomains).
@@ -46,12 +34,11 @@ func (hl EverythingHandler) Handle(apikey string, pf pageform.PageForm) (api.Req
 		WithLanguage(data.Language).
 		WithFrom(data.Form).
 		WithTo(data.To)
-	return q, nil
+	return r, nil
 }
 
 func (hl EverythingHandler) Parse(response *http.Response) (api.Response, error) {
-	page := getPage(response.Request.URL.Query())
-	return ParseHTTPResponse(response, page)
+	return ParseHTTPResponse(response)
 }
 
 type TopHeadlinesHandler struct{}
@@ -62,7 +49,7 @@ func (hl TopHeadlinesHandler) Handle(apikey string, pf pageform.PageForm) (api.R
 		return nil, api.ErrTypeAssertionFailure
 	}
 
-	q, err := newRequest(apikey).
+	q, err := NewRequest(apikey).
 		SetEndpoint(data.Endpoint())
 	if err != nil {
 		return nil, err
@@ -76,8 +63,7 @@ func (hl TopHeadlinesHandler) Handle(apikey string, pf pageform.PageForm) (api.R
 }
 
 func (hl TopHeadlinesHandler) Parse(response *http.Response) (api.Response, error) {
-	page := getPage(response.Request.URL.Query())
-	return ParseHTTPResponse(response, page)
+	return ParseHTTPResponse(response)
 }
 
 type SourcesHandler struct{}
@@ -88,7 +74,7 @@ func (hl SourcesHandler) Handle(apikey string, pf pageform.PageForm) (api.Reques
 		return nil, api.ErrTypeAssertionFailure
 	}
 
-	q, err := newRequest(apikey).
+	q, err := NewRequest(apikey).
 		SetEndpoint(data.Endpoint())
 	if err != nil {
 		return nil, err
@@ -101,6 +87,5 @@ func (hl SourcesHandler) Handle(apikey string, pf pageform.PageForm) (api.Reques
 }
 
 func (hl SourcesHandler) Parse(response *http.Response) (api.Response, error) {
-	page := getPage(response.Request.URL.Query())
-	return ParseHTTPResponse(response, page)
+	return ParseHTTPResponse(response)
 }

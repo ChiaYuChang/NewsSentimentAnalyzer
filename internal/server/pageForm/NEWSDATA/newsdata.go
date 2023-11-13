@@ -44,10 +44,10 @@ const (
 )
 
 const (
-	EPLatestNews  string = "Latest News"
-	EPNewsArchive string = "News Archive"
-	EPNewsSources string = "News Sources"
-	EPCrypto      string = "Crypto"
+	EPLatestNews  = "Latest News"
+	EPNewsArchive = "News Archive"
+	EPNewsSources = "News Sources"
+	EPCrypto      = "Crypto"
 )
 
 type NEWSDATAIOLatestNews struct {

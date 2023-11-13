@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"strings"
 
-	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm"
+	pf "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm"
 	"github.com/go-playground/form"
 	val "github.com/go-playground/validator/v10"
 )
@@ -21,7 +21,7 @@ const (
 
 type OpenAICompletions struct {
 	Model     string   `form:"model"                 mod:"default=gpt-3.5-turbo" validate:"required"`
-	Prompt    []string `form:"prompt"                                                  validate:"required"`
+	Prompt    []string `form:"prompt"                                            validate:"required"`
 	MaxTokens int      `form:"max_tokens,omitempty"`
 	N         int      `form:"n,omitempty"           mod:"default=1"             validate:"gt=0"`
 }
@@ -35,8 +35,8 @@ func (f OpenAICompletions) API() string {
 }
 
 func (f OpenAICompletions) FormDecodeAndValidate(
-	decoder *form.Decoder, val *val.Validate, postForm url.Values) (pageform.PageForm, error) {
-	return pageform.FormDecodeAndValidate[OpenAICompletions](decoder, val, postForm)
+	decoder *form.Decoder, val *val.Validate, postForm url.Values) (pf.PageForm, error) {
+	return pf.FormDecodeAndValidate[OpenAICompletions](decoder, val, postForm)
 }
 
 func (f OpenAICompletions) String() string {

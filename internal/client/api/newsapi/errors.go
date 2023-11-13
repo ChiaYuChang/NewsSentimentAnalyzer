@@ -9,7 +9,7 @@ import (
 	ec "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/errorCode"
 )
 
-type APIError struct {
+type ErrorResponse struct {
 	Status  string `json:"status"`
 	Code    int    `json:"-"`
 	ErrCode string `json:"code"`
@@ -17,7 +17,7 @@ type APIError struct {
 }
 
 // See https://newsapi.org/docs/errors
-func (apiErr APIError) ToError(code int) error {
+func (er ErrorResponse) ToError(code int) error {
 	var ecCode ec.ErrorCode
 	switch code {
 	case http.StatusOK:
@@ -32,17 +32,17 @@ func (apiErr APIError) ToError(code int) error {
 		ecCode = ec.ECBadRequest
 	}
 
-	if apiErr.Message != "" {
+	if er.Message != "" {
 		return ec.MustGetErr(ecCode).(*ec.Error).
-			WithDetails(apiErr.Message)
+			WithDetails(er.Message)
 	}
 	return ec.MustGetErr(ecCode)
 }
 
-func (apiErr APIError) String() string {
+func (er ErrorResponse) String() string {
 	sb := strings.Builder{}
 	sb.WriteString("Api Error:\n")
-	sb.WriteString("\t- Status Code: " + strconv.Itoa(apiErr.Code) + "\n")
-	sb.WriteString(fmt.Sprintf("\t- Message    : (%s) %s\n", apiErr.ErrCode, apiErr.Message))
+	sb.WriteString("\t- Status Code: " + strconv.Itoa(er.Code) + "\n")
+	sb.WriteString(fmt.Sprintf("\t- Message    : (%s) %s\n", er.ErrCode, er.Message))
 	return sb.String()
 }

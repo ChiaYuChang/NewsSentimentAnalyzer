@@ -8,11 +8,11 @@ import (
 	ec "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/errorCode"
 )
 
-type APIError struct {
+type ErrorResponse struct {
 	Error []string `json:"errors"`
 }
 
-func (apiErr APIError) ToError(code int) error {
+func (er ErrorResponse) ToError(code int) error {
 	var ecCode ec.ErrorCode
 	switch code {
 	case http.StatusOK:
@@ -33,19 +33,19 @@ func (apiErr APIError) ToError(code int) error {
 		ecCode = ec.ECBadRequest
 	}
 
-	if len(apiErr.Error) != 0 {
+	if len(er.Error) != 0 {
 		return ec.MustGetErr(ecCode).(*ec.Error).
-			WithDetails(apiErr.Error...)
+			WithDetails(er.Error...)
 	}
 	return ec.MustGetErr(ecCode)
 }
 
-func (apiErr APIError) String() string {
+func (er ErrorResponse) String() string {
 	sb := strings.Builder{}
 	sb.WriteString("Api Error:\n")
-	if len(apiErr.Error) > 0 {
+	if len(er.Error) > 0 {
 		sb.WriteString("\t- Error:\n")
-		for _, val := range apiErr.Error {
+		for _, val := range er.Error {
 			sb.WriteString(fmt.Sprintf("\t  - %s\n", val))
 		}
 	}

@@ -2,22 +2,31 @@ package newsdata_test
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"os"
-	"strings"
-	"sync"
+	"path"
 	"testing"
+	"time"
 
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api"
 	cli "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api/NEWSDATA"
+	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm"
 	srv "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm/NEWSDATA"
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
+	"github.com/joho/godotenv"
+	"github.com/nitishm/go-rejson/v4"
+	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/require"
 )
 
-const TEST_API_KEY = "pub_00000x0000x00xx0x0000xxxx00x00xx0xx002"
+const TEST_API_KEY = "[[:TEST_API_KEY:]]"
+
+var TEST_USER_ID, _ = uuid.Parse("741428c7-1ae0-4622-b615-9d44a141ff23")
 
 func TestParseResponseBody(t *testing.T) {
 	type testCase struct {
@@ -211,120 +220,133 @@ func TestParseResponse(t *testing.T) {
 }
 
 func TestLatestNewsHandler(t *testing.T) {
-	h := cli.LatestNewsHandler{}
-
-	pf := srv.NEWSDATAIOLatestNews{
-		Keyword:  "Typhoon AND Taiwan",
-		Language: []string{srv.Chinese, srv.English},
-		Country:  []string{srv.Taiwan, srv.UnitedStates},
-	}
-
 	type testCase struct {
-		Name     string
-		Filename map[string]string
+		Name         string
+		Handler      client.PageFormHandler
+		PageForm     pageform.PageForm
+		RawQueryTest func(t *testing.T, rawquery string)
+		Endpoint     string
+		Filename     map[string]string
 	}
 
-	tc := testCase{
-		Name: "latest news",
+	tcs := []testCase{{
+		Name:    "lastest-news",
+		Handler: cli.LatestNewsHandler{},
+		PageForm: srv.NEWSDATAIOLatestNews{
+			Keyword:  "Typhoon AND Taiwan",
+			Language: []string{srv.Chinese, srv.English},
+			Country:  []string{srv.Taiwan, srv.UnitedStates},
+		},
+		RawQueryTest: nil,
 		Filename: map[string]string{
 			"": "example_response/latest_news_1.json",
 			"16903560911db4c680d9b2461ebe967794a90f1b3f": "example_response/latest_news_2.json",
 		},
-	}
+		Endpoint: cli.EPLatestNews,
+	}}
 
 	mux := chi.NewRouter()
-	mux.Get("/"+strings.Join([]string{
-		cli.API_PATH,
-		cli.API_VERSION,
-		cli.EPLatestNews}, "/"),
-		func(w http.ResponseWriter, r *http.Request) {
-			_ = r.ParseForm()
-			if r.URL.Query().Get("apikey") != TEST_API_KEY {
-				j, _ := os.ReadFile("example_response/error_Unauthorized.json")
-				w.Header().Set("Content-Type", "application/json")
-				w.WriteHeader(http.StatusUnauthorized)
-				w.Write(j)
-				return
-			}
+	for i := range tcs {
+		tc := tcs[i]
+		mux.Get("/"+path.Join(cli.API_PATH, cli.API_VERSION, tc.Endpoint),
+			func(w http.ResponseWriter, r *http.Request) {
+				_ = r.ParseForm()
 
-			page := r.URL.Query().Get("page")
-			j, _ := os.ReadFile(tc.Filename[page])
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			w.Write(j)
-		})
-	t.Log("/" + strings.Join([]string{
-		cli.API_PATH,
-		cli.API_VERSION,
-		cli.EPLatestNews}, "/"))
+				w.Header().Set("Content-Type", "application/json")
+				if !(r.URL.Query().Get("apikey") == TEST_API_KEY ||
+					r.Header.Get("X-ACCESS-KEY") == TEST_API_KEY) {
+					j, _ := os.ReadFile("example_response/error_Unauthorized.json")
+					w.WriteHeader(http.StatusUnauthorized)
+					w.Write(j)
+					return
+				}
+
+				page := r.URL.Query().Get("page")
+				j, _ := os.ReadFile(tc.Filename[page])
+				w.WriteHeader(http.StatusOK)
+				w.Write(j)
+			})
+	}
 	srvr := httptest.NewServer(mux)
 	defer srvr.Close()
-
-	cPars := make(chan *service.NewsCreateRequest)
-	go func(c <-chan *service.NewsCreateRequest) {
-		for p := range c {
-			require.NotEmpty(t, p.Title)
-			require.NotEmpty(t, p.Md5Hash)
-		}
-	}(cPars)
-	wg := &sync.WaitGroup{}
-
-	q, err := h.Handle(TEST_API_KEY, pf)
-	require.NoError(t, err)
-	require.NotNil(t, q)
-
-	qs := q.Encode()
-	require.Contains(t, qs, "country=")
-	require.Contains(t, qs, "language=")
-
-	r, err := q.ToHttpRequest()
-	require.NoError(t, err)
-	require.NotNil(t, r)
-	require.Equal(t, cli.API_HOST, r.URL.Host)
-	require.Equal(t, cli.API_SCHEME, r.URL.Scheme)
-	require.Contains(t, r.URL.RawQuery, "apikey="+TEST_API_KEY)
 
 	srvrUrl, err := url.Parse(srvr.URL)
 	require.NoError(t, err)
 
-	r.URL.Scheme = srvrUrl.Scheme
-	r.URL.Host = srvrUrl.Host
+	for i := range tcs {
+		tc := tcs[i]
+		t.Run(tc.Name, func(t *testing.T) {
+			Cache := map[string]*api.PreviewCache{}
+			NItem := 0
 
-	t.Log(r.URL)
-	resp, err := http.DefaultClient.Do(r)
-	require.NoError(t, err)
-	require.NotNil(t, resp)
-	require.Equal(t, http.StatusOK, resp.StatusCode)
+			// user's first request
+			req, err := tc.Handler.Handle(TEST_API_KEY, tc.PageForm)
+			require.NoError(t, err)
+			require.NotNil(t, req)
 
-	apiResp, err := h.Parse(resp)
-	require.NoError(t, err)
-	require.NotNil(t, apiResp)
-	require.Equal(t, "success", apiResp.GetStatus())
-	require.True(t, apiResp.HasNext())
+			ckey, cache := req.ToPreviewCache(TEST_USER_ID)
+			Cache[ckey] = cache
+			require.NotZero(t, ckey)
+			require.NotNil(t, cache)
 
-	wg.Add(1)
-	go apiResp.ToNews(context.Background(), wg, cPars)
+			// should stop when i == len(tc.Filename)
+			for i := 1; i <= len(tc.Filename)+1; i++ {
+				httpReq, err := req.ToHttpRequest()
+				require.NoError(t, err)
+				require.NotNil(t, httpReq)
+				httpReq.URL.Scheme = srvrUrl.Scheme
+				httpReq.URL.Host = srvrUrl.Host
 
-	r, err = apiResp.NextPageRequest(nil)
-	require.NoError(t, err)
-	require.Contains(t, r.URL.String(), "16903560911db4c680d9b2461ebe967794a90f1b3f")
+				require.Contains(t, httpReq.URL.String(), tc.Endpoint)
 
-	resp, err = http.DefaultClient.Do(r)
-	require.NoError(t, err)
-	require.NotNil(t, resp)
-	require.Equal(t, http.StatusOK, resp.StatusCode)
+				if i == 1 {
+					require.NotContains(t, httpReq.URL.RawQuery, "page=")
+				} else {
+					require.Contains(t, httpReq.URL.RawQuery, "page=")
+				}
 
-	apiResp, err = h.Parse(resp)
-	require.NoError(t, err)
-	require.NotNil(t, apiResp)
-	require.Equal(t, "success", apiResp.GetStatus())
-	require.False(t, apiResp.HasNext())
+				if tc.RawQueryTest != nil {
+					tc.RawQueryTest(t, httpReq.URL.RawQuery)
+				}
 
-	wg.Add(1)
-	go apiResp.ToNews(context.Background(), wg, cPars)
+				httpResp, err := http.DefaultClient.Do(httpReq)
+				require.NoError(t, err)
+				require.NotNil(t, httpResp)
+				require.Equal(t, http.StatusOK, httpResp.StatusCode)
 
-	wg.Wait()
-	close(cPars)
+				resp, err := tc.Handler.Parse(httpResp)
+				require.NoError(t, err)
+				require.NotNil(t, resp)
+				require.Equal(t, "success", resp.GetStatus())
+
+				next, prev := resp.ToNewsItemList()
+				// update cache
+				cache, ok := Cache[ckey]
+				require.True(t, ok)
+				cache.SetNextPage(next)
+
+				if next.Equal(api.StrLastPageToken) {
+					require.Nil(t, prev)
+					require.Equal(t, 0, len(prev))
+					require.Equal(t, len(tc.Filename), i)
+					break
+				} else {
+					require.Less(t, 0, len(prev))
+					NItem += len(prev)
+
+					// append items to cache
+					cache.NewsItem = append(cache.NewsItem, prev...)
+					Cache[ckey] = cache
+				}
+
+				// next client request comes in
+				// build request from cache
+				req, err = cli.RequestFromPreviewCache(cache.Query)
+				require.NoError(t, err)
+			}
+			require.Equal(t, NItem, len(Cache[ckey].NewsItem))
+		})
+	}
 }
 
 func TestNewsArchiveHandler(t *testing.T) {
@@ -371,4 +393,166 @@ func TestNewsSourcesHandler(t *testing.T) {
 	require.NotNil(t, r)
 
 	t.Log(r.URL.String())
+}
+
+func TestWriteToRedis(t *testing.T) {
+	err := godotenv.Load("../../../../.env")
+	if err != nil {
+		t.Log("skip test, .env file not found")
+		return
+	}
+
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     os.Getenv("REDIS_HOST") + ":" + os.Getenv("REDIS_PORT"),
+		Password: os.Getenv("REDIS_PASSWORD"),
+	})
+
+	if err := rdb.Ping(context.Background()).Err(); err != nil {
+		t.Log("skip test, failed to connect to redis")
+		return
+	}
+
+	rh := rejson.NewReJSONHandler()
+	defer rdb.Close()
+
+	rh.SetGoRedisClientWithContext(context.Background(), rdb)
+	h := cli.LatestNewsHandler{}
+
+	pf := srv.NEWSDATAIOLatestNews{
+		Keyword:  "Typhoon AND Taiwan",
+		Language: []string{srv.Chinese, srv.English},
+		Country:  []string{srv.Taiwan, srv.UnitedStates},
+	}
+
+	type testCase struct {
+		Name     string
+		Filename map[string]string
+	}
+
+	tc := testCase{
+		Name: "latest news",
+		Filename: map[string]string{
+			"": "example_response/latest_news_1.json",
+			"16903560911db4c680d9b2461ebe967794a90f1b3f": "example_response/latest_news_2.json",
+		},
+	}
+
+	p := path.Join(
+		cli.API_PATH,
+		cli.API_VERSION,
+		cli.EPLatestNews,
+	)
+
+	mux := chi.NewRouter()
+	mux.Get("/"+p,
+		func(w http.ResponseWriter, r *http.Request) {
+			_ = r.ParseForm()
+
+			if !(r.URL.Query().Get("apikey") == TEST_API_KEY || r.Header.Get("X-ACCESS-KEY") == TEST_API_KEY) {
+				j, _ := os.ReadFile("example_response/error_Unauthorized.json")
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusUnauthorized)
+				w.Write(j)
+				return
+			}
+
+			page := r.URL.Query().Get("page")
+			j, _ := os.ReadFile(tc.Filename[page])
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			w.Write(j)
+		})
+	srvr := httptest.NewServer(mux)
+	defer srvr.Close()
+
+	srvrUrl, err := url.Parse(srvr.URL)
+	require.NoError(t, err)
+	NItem := 0
+
+	// user's first request
+	req, err := h.Handle(TEST_API_KEY, pf)
+	require.NoError(t, err)
+	require.NotNil(t, req)
+
+	ckey, cache := req.ToPreviewCache(TEST_USER_ID)
+	require.NotZero(t, ckey)
+	require.NotNil(t, cache)
+
+	err = cache.AddRandomSalt(64)
+	require.NoError(t, err)
+
+	ctx := context.Background()
+	rhResp, err := rh.JSONSet(ckey, ".", cache)
+	require.NoError(t, err)
+	require.Equal(t, "OK", rhResp.(string))
+	t.Log(ckey)
+	rdb.Expire(ctx, ckey, 20*time.Minute)
+
+	// should stop when i == len(tc.Filename)
+	for i := 1; i <= len(tc.Filename)+1; i++ {
+		httpReq, err := req.ToHttpRequest()
+		require.NoError(t, err)
+		require.NotNil(t, httpReq)
+		httpReq.URL.Scheme = srvrUrl.Scheme
+		httpReq.URL.Host = srvrUrl.Host
+
+		if i == 1 {
+			require.NotContains(t, httpReq.URL.RawQuery, "page=")
+		} else {
+			require.Contains(t, httpReq.URL.RawQuery, "page=")
+		}
+
+		httpResp, err := http.DefaultClient.Do(httpReq)
+		require.NoError(t, err)
+		require.NotNil(t, httpResp)
+		require.Equal(t, http.StatusOK, httpResp.StatusCode)
+
+		resp, err := h.Parse(httpResp)
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+		require.Equal(t, "success", resp.GetStatus())
+
+		next, prev := resp.ToNewsItemList()
+		// update cache
+		rh.JSONSet(ckey, ".query.next_page", next)
+		cache.SetNextPage(next)
+
+		if next.Equal(api.StrLastPageToken) {
+			require.Nil(t, prev)
+			require.Equal(t, 0, len(prev))
+			require.Equal(t, len(tc.Filename), i)
+			break
+		} else {
+			require.Less(t, 0, len(prev))
+			NItem += len(prev)
+
+			// append items to cache
+			for j := range prev {
+				rh.JSONArrAppend(ckey, ".news_item", prev[j])
+			}
+		}
+
+		// next client request comes in
+		// build request from cache
+		b, err := rh.JSONGet(ckey, ".query")
+		if err != nil {
+			require.NoError(t, err)
+		}
+
+		var cq api.CacheQuery
+		err = json.Unmarshal(b.([]byte), &cq)
+		require.NoError(t, err)
+
+		req, err = cli.RequestFromPreviewCache(cq)
+		require.NoError(t, err)
+	}
+
+	b, err := rh.JSONGet(ckey, ".")
+	if err != nil {
+		require.NoError(t, err)
+	}
+
+	err = json.Unmarshal(b.([]byte), cache)
+	require.NoError(t, err)
+	require.Equal(t, NItem, cache.Len())
 }

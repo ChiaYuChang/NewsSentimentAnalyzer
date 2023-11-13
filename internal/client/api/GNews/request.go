@@ -1,13 +1,16 @@
 package gnews
 
 import (
+	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 	"time"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api"
 	srv "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm/GNews"
+	"github.com/google/uuid"
 )
 
 // query parameters
@@ -33,10 +36,10 @@ const (
 
 type Request struct {
 	*api.RequestProto
-	Page int
+	Page api.IntNextPageToken
 }
 
-func newQuery(apikey string) *Request {
+func NewRequest(apikey string) *Request {
 	r := api.NewRequestProtoType(",")
 	r.SetApiKey(apikey)
 
@@ -133,7 +136,9 @@ func (r *Request) WithTo(t time.Time) *Request {
 
 // Only for paid user. Set the number of articles in a single page.
 func (r *Request) WithPage(n int) *Request {
-	r.Page = n
+	if n > 1 {
+		r.Page = api.IntNextPageToken(n)
+	}
 	return r
 }
 
@@ -146,9 +151,9 @@ func (r *Request) WithExpand() *Request {
 // Set endpoints
 func (r *Request) SetEndpoint(ep string) (*Request, error) {
 	switch ep {
-	case srv.EPTopHeadlines:
+	case srv.EPTopHeadlines, EPTopHeadlines:
 		r.RequestProto.SetEndpoint(EPTopHeadlines)
-	case srv.EPSearch:
+	case srv.EPSearch, EPSearch:
 		r.RequestProto.SetEndpoint(EPSearch)
 	default:
 		return nil, client.ErrUnknownEndpoint
@@ -158,11 +163,53 @@ func (r *Request) SetEndpoint(ep string) (*Request, error) {
 
 // generate a http.Request
 func (r *Request) ToHttpRequest() (*http.Request, error) {
-	req, err := r.RequestProto.ToHTTPRequest(API_URL, API_METHOD, nil)
+	httpReq, err := r.RequestProto.ToHTTPRequest(API_URL, API_METHOD, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	req = r.AddAPIKeyToQuery(req, APIKey)
+	p, err := r.Params.Clone()
+	if err != nil {
+		return nil, err
+	}
+
+	p.Set(APIKey, r.APIKey())
+	if r.Page > 1 {
+		p.Set(Page, strconv.Itoa(int(r.Page)))
+	}
+	httpReq.URL.RawQuery = p.Encode()
+	return httpReq, nil
+}
+
+func (r Request) ToPreviewCache(uid uuid.UUID) (cKey string, c *api.PreviewCache) {
+	if r.Page == 0 {
+		return r.RequestProto.ToPreviewCache(uid, api.IntNextPageToken(1), nil)
+	}
+	return r.RequestProto.ToPreviewCache(uid, r.Page, nil)
+}
+
+func RequestFromPreviewCache(c *api.PreviewCache) (api.Request, error) {
+	if c.Query.NextPage.Equal(api.IntLastPageToken) {
+		return nil, api.ErrNotNextPage
+	}
+
+	var err error
+	req := NewRequest(c.Query.APIKey)
+	_, err = req.SetEndpoint(c.Query.APIEP)
+	if err != nil {
+		return nil, fmt.Errorf("error while set endpoint: %w", err)
+	}
+
+	req.Values, err = url.ParseQuery(c.Query.RawQuery)
+	if err != nil {
+		return nil, fmt.Errorf("error while parsing raw query: %w", err)
+	}
+
+	token, ok := c.Query.NextPage.(api.IntNextPageToken)
+	if !ok {
+		return nil, api.ErrNextTokenAssertionFailure
+	}
+
+	req = req.WithPage(int(token))
 	return req, nil
 }

@@ -110,7 +110,7 @@ func (p *Params) Decode(q string) error {
 	return nil
 }
 
-func (p0 *Params) Clone() (Values, error) {
+func (p0 *Params) Clone() (*Params, error) {
 	b, err := json.Marshal(p0)
 	if err != nil {
 		return nil, err

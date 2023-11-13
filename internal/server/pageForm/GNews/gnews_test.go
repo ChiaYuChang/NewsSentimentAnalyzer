@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	gnews "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/pageForm/GNews"
+	gnews "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm/GNews"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/validator"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/form"
