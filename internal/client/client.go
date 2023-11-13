@@ -54,7 +54,7 @@ func (repo pageFormHandlerRepo) RegisterPageForm(pf pageform.PageForm, handler P
 	return nil
 }
 
-func (repo pageFormHandlerRepo) NewQueryFromPageFrom(apikey string, pf pageform.PageForm) (api.Request, error) {
+func (repo pageFormHandlerRepo) NewRequestFromPageFrom(apikey string, pf pageform.PageForm) (api.Request, error) {
 	key := newRepoMapKey(pf.API(), pf.Endpoint())
 	handler, ok := repo[key]
 	if !ok {

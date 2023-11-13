@@ -186,7 +186,7 @@ func postEndpoints(repo EndpointRepo, obj pageform.PageForm, w http.ResponseWrit
 		},
 	)
 
-	q, err := client.PageFormHandlerRepo.NewQueryFromPageFrom(apikey.Key, obj)
+	q, err := client.PageFormHandlerRepo.NewRequestFromPageFrom(apikey.Key, obj)
 	if err != nil {
 		global.Logger.Error().
 			Err(err).

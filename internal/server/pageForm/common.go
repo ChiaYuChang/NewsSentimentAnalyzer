@@ -56,9 +56,9 @@ func (s SearchIn) String() string {
 }
 
 type TimeRange struct {
-	Form     time.Time `form:"from-time"`
-	To       time.Time `form:"to-time"`
-	Location string    `form:"timezone"  validate:"required,loc"`
+	Form     time.Time `           form:"from-time"`
+	To       time.Time `           form:"to-time"`
+	Location string    `mod:"trim" form:"timezone"  validate:"required,loc"`
 }
 
 func (tr TimeRange) String() string {

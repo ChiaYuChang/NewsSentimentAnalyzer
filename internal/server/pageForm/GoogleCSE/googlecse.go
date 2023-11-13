@@ -27,17 +27,17 @@ const (
 )
 
 type GoogleCSE struct {
-	Keyword           string `form:"keyword"`
+	Keyword           string `form:"keyword"              validate:"required"`
 	SearchEngineID    string `form:"search-engine-id"     validate:"required"`
 	DateRestrictValue int    `form:"date-restrict-value"  validate:"gte=0"`
-	DateRestrictUnit  string `form:"date-restrict-unit"`
+	DateRestrictUnit  string `form:"date-restrict-unit"   validate:"oneof=d w m y"`
 }
 
 func (f GoogleCSE) DateRestrict() string {
 	if f.DateRestrictValue == 0 {
 		return ""
 	}
-	return fmt.Sprintf("%d%s", f.DateRestrictValue, f.DateRestrictUnit)
+	return fmt.Sprintf("%s%d", f.DateRestrictUnit, f.DateRestrictValue)
 }
 
 func (f GoogleCSE) Endpoint() string {

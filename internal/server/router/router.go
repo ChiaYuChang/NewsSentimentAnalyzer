@@ -16,13 +16,13 @@ import (
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/validator"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view"
 
-	cookiemaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/cookieMaker"
-	errorhandler "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/errorHandler"
-	tokenmaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/tokenMaker"
+	cm "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/cookieMaker"
+	eh "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/errorHandler"
+	tm "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/tokenMaker"
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
 
 	// init server side
-	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm"
+	pf "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm"
 	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm/GNews"
 	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm/GoogleCSE"
 	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm/NEWSDATA"
@@ -41,8 +41,8 @@ import (
 )
 
 func NewRouter(srvc service.Service, rds *redis.Client, vw view.View,
-	tmaker tokenmaker.TokenMaker, cmaker *cookiemaker.CookieMaker) *chi.Mux {
-	errHandlerRepo, err := errorhandler.NewErrorHandlerRepo(vw.Template.Lookup("errorpage.gotmpl"))
+	tmaker tm.TokenMaker, cmaker *cm.CookieMaker) *chi.Mux {
+	errHandlerRepo, err := eh.NewErrorHandlerRepo(vw.Template.Lookup("errorpage.gotmpl"))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error while errorhandler.NewErrorHandlerRepo: %s", err)
 		os.Exit(1)
@@ -50,11 +50,11 @@ func NewRouter(srvc service.Service, rds *redis.Client, vw view.View,
 
 	auth := auth.NewAuthRepo(
 		viper.GetString("APP_API_VERSION"),
-		srvc, vw, tmaker, validator.Validate, pageform.Decoder, pageform.Modifier)
+		srvc, vw, tmaker, validator.Validate, pf.Decoder, pf.Modifier)
 
 	apiRepo := api.NewAPIRepo(
 		viper.GetString("APP_API_VERSION"),
-		srvc, vw, tmaker, validator.Validate, pageform.Decoder, pageform.Modifier)
+		srvc, vw, tmaker, validator.Validate, pf.Decoder, pf.Modifier)
 
 	epRepo := apiRepo.EndpointRepo()
 	epChan := make(chan *model.ListAllEndpointRow)

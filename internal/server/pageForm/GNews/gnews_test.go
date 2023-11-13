@@ -125,10 +125,10 @@ func TestGnewsFormValidation(t *testing.T) {
 			resp, err := cli.Do(req)
 			require.NoError(t, err)
 			// require.Equal(t, http.StatusOK, resp.StatusCode)
+			defer resp.Body.Close()
 
 			body, err := io.ReadAll(resp.Body)
 			require.NoError(t, err)
-			defer resp.Body.Close()
 			require.NoError(t, val.Var(string(body), "json"))
 			require.Contains(t, string(body), tTime.Format(time.DateOnly))
 			require.Contains(t, string(body), fTime.Format(time.DateOnly))

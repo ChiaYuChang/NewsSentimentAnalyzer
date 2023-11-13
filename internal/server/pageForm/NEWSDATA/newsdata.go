@@ -52,11 +52,11 @@ const (
 
 type NEWSDATAIOLatestNews struct {
 	// IncludeContent // currently not yet support
-	Keyword  string   `form:"keyword"  validate:"max=512"`
-	Domains  string   `form:"domains"  validate:"max=5"`
-	Language []string `form:"language" validate:"max=5,newsdata_lang"`
-	Country  []string `form:"country"  validate:"max=5,newsdata_ctry"`
-	Category []string `form:"category" validate:"max=5,newsdata_cat"`
+	Keyword  string   `mod:"trim"  form:"keyword"  validate:"max=512"`
+	Domains  string   `mod:"trim"  form:"domains"  validate:"max=5"`
+	Language []string `            form:"language" validate:"max=5,newsdata_lang"`
+	Country  []string `            form:"country"  validate:"max=5,newsdata_ctry"`
+	Category []string `            form:"category" validate:"max=5,newsdata_cat"`
 }
 
 func (f NEWSDATAIOLatestNews) Endpoint() string {
@@ -85,11 +85,11 @@ func (f NEWSDATAIOLatestNews) String() string {
 
 type NEWSDATAIONewsArchive struct {
 	pageform.TimeRange
-	Keyword  string   `form:"keyword"  validate:"max=512"`
-	Domains  string   `form:"domains"  validate:"max=512"`
-	Language []string `form:"language" validate:"max=5,newsdata_lang"`
-	Country  []string `form:"country"  validate:"max=5,newsdata_ctry"`
-	Category []string `form:"category" validate:"max=5,newsdata_cat"`
+	Keyword  string   `mod:"trim"  form:"keyword"  validate:"max=512"`
+	Domains  string   `mod:"trim"  form:"domains"  validate:"max=512"`
+	Language []string `            form:"language" validate:"max=5,newsdata_lang"`
+	Country  []string `            form:"country"  validate:"max=5,newsdata_ctry"`
+	Category []string `            form:"category" validate:"max=5,newsdata_cat"`
 }
 
 func (f NEWSDATAIONewsArchive) Endpoint() string {
