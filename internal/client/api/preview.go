@@ -3,7 +3,6 @@ package api
 import (
 	"crypto"
 	"crypto/rand"
-	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -14,13 +13,13 @@ import (
 )
 
 type NewsPreview struct {
-	Id          int       `json:"id"               redis:"id"`
-	Title       string    `json:"title"            redis:"title"`
-	Link        string    `json:"link"             redis:"link"`
-	Description string    `json:"description"      redis:"description"`
-	Category    string    `json:"category"         redis:"category"`
-	Content     string    `json:"content"          redis:"content"`
-	PubDate     time.Time `json:"publication_date" redis:"publication_date"`
+	Id          int       `json:"id"                  redis:"id"`
+	Title       string    `json:"title"               redis:"title"`
+	Link        string    `json:"link"                redis:"link"`
+	Description string    `json:"description"         redis:"description"`
+	Category    string    `json:"category,omitempty"  redis:"category"`
+	Content     string    `json:"content"             redis:"content"`
+	PubDate     time.Time `json:"publication_date"    redis:"publication_date"`
 }
 
 type PreviewCache struct {
@@ -47,14 +46,14 @@ func (cache *PreviewCache) AddRandomSalt(l int) error {
 	return cache.Query.AddRandomSalt(l)
 }
 
-func (cache PreviewCache) Key() string {
+func (cache PreviewCache) Key(prefix, suffix string) string {
 	salt, _ := hex.DecodeString(cache.Query.Salt)
 
 	hasher := crypto.MD5.New()
 	hasher.Write([]byte(cache.Query.UserId.String()))
 	hasher.Write(salt)
 	hasher.Write([]byte(cache.CreatedAt.UTC().Format(time.RFC3339)))
-	return base64.StdEncoding.EncodeToString(hasher.Sum(nil))
+	return fmt.Sprintf("%s%s%s", prefix, hex.EncodeToString(hasher.Sum(nil)), suffix)
 }
 
 func (cache *PreviewCache) SetNextPage(token any) error {
@@ -64,11 +63,10 @@ func (cache *PreviewCache) SetNextPage(token any) error {
 type CacheQuery struct {
 	UserId   uuid.UUID         `json:"user_id"              redis:"user_id"`
 	Salt     string            `json:"salt"                 redis:"salt"`
-	APIKey   string            `json:"api_key"              redis:"api_key"`
-	APIEP    string            `json:"api_ep"               redis:"api_ep"`
+	API      API               `json:"api"                  redis:"api"`
 	NextPage NextPageToken     `json:"next_page,omitempty"  redis:"next_page"`
-	RawQuery string            `json:"raw_query"            redis:"raw_query"`
-	Body     string            `json:"body"                 redis:"body"`
+	RawQuery string            `json:"raw_query,omitempty"  redis:"raw_query"`
+	Body     string            `json:"body,omitempty"       redis:"body"`
 	Other    map[string]string `json:"other,omitempty"      redis:"other"`
 }
 
@@ -127,6 +125,12 @@ func (cq *CacheQuery) UnmarshalJSON(data []byte) error {
 
 	(*cq) = CacheQuery(*tmp.InnerCacheQuery)
 	return nil
+}
+
+type API struct {
+	Key      string `json:"key"       redis:"key"`
+	Name     string `json:"name"      redis:"name"`
+	Endpoint string `json:"endpoint"  redis:"endpoint"`
 }
 
 type Preview struct {

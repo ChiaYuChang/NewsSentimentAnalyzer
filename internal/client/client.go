@@ -16,25 +16,25 @@ var ErrNotSupportedEndpoint = errors.New("currently not support endpoint")
 
 var PageFormHandlerRepo = pageFormHandlerRepo{}
 
-func RegisterPageForm(pf pageform.PageForm, handler PageFormHandler) {
-	PageFormHandlerRepo.RegisterPageForm(pf, handler)
+func RegisterPageForm(pf pageform.PageForm, handler PageFormHandler, mapping map[string]string) {
+	PageFormHandlerRepo.RegisterPageForm(pf, handler, mapping)
 }
 
-type repoMapKey [2]string
+type ClientRepoKey [2]string
 
-func newRepoMapKey(apiName string, endpointName string) repoMapKey {
-	return repoMapKey{apiName, endpointName}
+func NewRepoMapKey(apiName string, endpointName string) ClientRepoKey {
+	return ClientRepoKey{apiName, endpointName}
 }
 
-func (k repoMapKey) APIName() string {
+func (k ClientRepoKey) APIName() string {
 	return k[0]
 }
 
-func (k repoMapKey) EndpointName() string {
+func (k ClientRepoKey) EndpointName() string {
 	return k[1]
 }
 
-func (k repoMapKey) String() string {
+func (k ClientRepoKey) String() string {
 	return fmt.Sprintf("%s-%s", k[0], k[1])
 }
 
@@ -43,19 +43,26 @@ type PageFormHandler interface {
 	Parse(response *http.Response) (api.Response, error)
 }
 
-type pageFormHandlerRepo map[repoMapKey]PageFormHandler
+type pageFormHandlerRepo map[ClientRepoKey]PageFormHandler
 
-func (repo pageFormHandlerRepo) RegisterPageForm(pf pageform.PageForm, handler PageFormHandler) error {
-	key := newRepoMapKey(pf.API(), pf.Endpoint())
+func (repo pageFormHandlerRepo) RegisterPageForm(
+	pf pageform.PageForm, handler PageFormHandler, mapping map[string]string) error {
+	key := NewRepoMapKey(pf.API(), pf.Endpoint())
 	if _, ok := repo[key]; ok {
 		return ErrPageFormHandlerHasBeenRegistered
 	}
 	repo[key] = handler
+	if mapping != nil {
+		if ep, ok := mapping[pf.Endpoint()]; ok {
+			key := NewRepoMapKey(pf.API(), ep)
+			repo[key] = handler
+		}
+	}
 	return nil
 }
 
-func (repo pageFormHandlerRepo) NewRequestFromPageFrom(apikey string, pf pageform.PageForm) (api.Request, error) {
-	key := newRepoMapKey(pf.API(), pf.Endpoint())
+func (repo pageFormHandlerRepo) Handle(apikey string, pf pageform.PageForm) (api.Request, error) {
+	key := NewRepoMapKey(pf.API(), pf.Endpoint())
 	handler, ok := repo[key]
 	if !ok {
 		return nil, ErrHandlerNotFound
@@ -63,6 +70,10 @@ func (repo pageFormHandlerRepo) NewRequestFromPageFrom(apikey string, pf pagefor
 
 	return handler.Handle(apikey, pf)
 }
+
+// func (repo pageFormHandlerRepo) Parse(response *http.Response) (api.Response, error) {
+
+// }
 
 // func (repo pageFormHandlerRepo) Do(cli http.Client, apikey string, pf pageform.PageForm) error {
 // 	key := newRepoMapKey(pf.API(), pf.Endpoint())

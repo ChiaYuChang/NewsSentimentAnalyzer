@@ -20,6 +20,7 @@ func (hl CSEHandler) Handle(apikey string, pf pageform.PageForm) (api.Request, e
 	if err != nil {
 		return nil, err
 	}
+	req.SetEndpoint(pf.Endpoint())
 
 	req = req.SetKeyword(data.Keyword).
 		SetDateRestict(data.DateRestrict())

@@ -10,7 +10,7 @@ import (
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api"
 	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm"
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm/newsapi"
+	srv "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm/newsapi"
 	"github.com/google/uuid"
 )
 
@@ -70,7 +70,7 @@ type Request struct {
 }
 
 func NewRequest(apikey string) *Request {
-	r := api.NewRequestProtoType(",")
+	r := api.NewRequestProtoType(srv.API_NAME, ",")
 	r.SetApiKey(apikey)
 
 	return &Request{RequestProto: r}
@@ -211,11 +211,11 @@ func (r *Request) WithTo(t time.Time) *Request {
 
 func (r *Request) SetEndpoint(ep string) (*Request, error) {
 	switch ep {
-	case newsapi.EPEverything, EPEverything:
+	case srv.EPEverything, EPEverything:
 		r.RequestProto.SetEndpoint(EPEverything)
-	case newsapi.EPTopHeadlines, EPTopHeadlines:
+	case srv.EPTopHeadlines, EPTopHeadlines:
 		r.RequestProto.SetEndpoint(EPTopHeadlines)
-	case newsapi.EPSources:
+	case srv.EPSources:
 		return nil, client.ErrNotSupportedEndpoint
 	default:
 		return nil, client.ErrUnknownEndpoint
@@ -253,8 +253,8 @@ func RequestFromPreviewCache(c *api.PreviewCache) (api.Request, error) {
 	}
 
 	var err error
-	req := NewRequest(c.Query.APIKey)
-	_, err = req.SetEndpoint(c.Query.APIEP)
+	req := NewRequest(c.Query.API.Key)
+	_, err = req.SetEndpoint(c.Query.API.Endpoint)
 	if err != nil {
 		return nil, fmt.Errorf("error while set endpoint: %w", err)
 	}

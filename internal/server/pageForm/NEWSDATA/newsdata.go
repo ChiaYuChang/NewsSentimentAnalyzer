@@ -7,6 +7,7 @@ import (
 
 	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/validator"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view/object"
 	"github.com/go-playground/form"
 	val "github.com/go-playground/validator/v10"
 )
@@ -50,6 +51,41 @@ const (
 	EPCrypto      = "Crypto"
 )
 
+func SelectionOpts() []object.SelectOpts {
+	return []object.SelectOpts{
+		{
+			OptMap:         Category,
+			MaxDiv:         5,
+			DefaultValue:   "",
+			DefaultText:    "all",
+			InsertButtonId: "insert-category-btn",
+			DeleteButtonId: "delete-category-btn",
+			PositionId:     "category",
+			AlertMessage:   "You can only add up to 5 countries in a single query",
+		},
+		{
+			OptMap:         Language,
+			MaxDiv:         5,
+			DefaultValue:   "",
+			DefaultText:    "all",
+			InsertButtonId: "insert-lang-btn",
+			DeleteButtonId: "delete-lang-btn",
+			PositionId:     "language",
+			AlertMessage:   "You can only add up to 5 languages in a single query",
+		},
+		{
+			OptMap:         Country,
+			MaxDiv:         5,
+			DefaultValue:   "",
+			DefaultText:    "all",
+			InsertButtonId: "insert-country-btn",
+			DeleteButtonId: "delete-country-btn",
+			PositionId:     "country",
+			AlertMessage:   "You can only add up to 5 categories in a single query",
+		},
+	}
+}
+
 type NEWSDATAIOLatestNews struct {
 	// IncludeContent // currently not yet support
 	Keyword  string   `mod:"trim"  form:"keyword"  validate:"max=512"`
@@ -81,6 +117,14 @@ func (f NEWSDATAIOLatestNews) String() string {
 	sb.WriteString(fmt.Sprintf("\t- Country : %s\n", strings.Join(f.Country, ", ")))
 	sb.WriteString(fmt.Sprintf("\t- Language: %s\n", strings.Join(f.Language, ", ")))
 	return sb.String()
+}
+
+func (f NEWSDATAIOLatestNews) Key() pageform.PageFormRepoKey {
+	return pageform.NewPageFormRepoKey(f.API(), f.Endpoint())
+}
+
+func (f NEWSDATAIOLatestNews) SelectionOpts() []object.SelectOpts {
+	return SelectionOpts()
 }
 
 type NEWSDATAIONewsArchive struct {
@@ -117,6 +161,14 @@ func (f NEWSDATAIONewsArchive) String() string {
 	return sb.String()
 }
 
+func (f NEWSDATAIONewsArchive) Key() pageform.PageFormRepoKey {
+	return pageform.NewPageFormRepoKey(f.API(), f.Endpoint())
+}
+
+func (f NEWSDATAIONewsArchive) SelectionOpts() []object.SelectOpts {
+	return SelectionOpts()
+}
+
 type NEWSDATAIONewsSources struct {
 	Language []string `form:"language" validate:"max=5,newsdata_lang"`
 	Country  []string `form:"country"  validate:"max=5,newsdata_ctry"`
@@ -143,6 +195,14 @@ func (f NEWSDATAIONewsSources) String() string {
 	sb.WriteString(fmt.Sprintf("\t- Country : %s\n", strings.Join(f.Country, ", ")))
 	sb.WriteString(fmt.Sprintf("\t- Language: %s\n", strings.Join(f.Language, ", ")))
 	return sb.String()
+}
+
+func (f NEWSDATAIONewsSources) Key() pageform.PageFormRepoKey {
+	return pageform.NewPageFormRepoKey(f.API(), f.Endpoint())
+}
+
+func (f NEWSDATAIONewsSources) SelectionOpts() []object.SelectOpts {
+	return SelectionOpts()
 }
 
 type IncludeContent struct {

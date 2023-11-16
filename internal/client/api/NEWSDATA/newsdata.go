@@ -11,11 +11,19 @@ import (
 
 func init() {
 	cli.RegisterPageForm(
-		srv.NEWSDATAIOLatestNews{}, LatestNewsHandler{})
+		srv.NEWSDATAIOLatestNews{},
+		LatestNewsHandler{},
+		EPform2client)
+
 	cli.RegisterPageForm(
-		srv.NEWSDATAIONewsArchive{}, NewsArchiveHandler{})
+		srv.NEWSDATAIONewsArchive{},
+		NewsArchiveHandler{},
+		EPform2client)
+
 	cli.RegisterPageForm(
-		srv.NEWSDATAIONewsSources{}, NewsSourcesHandler{})
+		srv.NEWSDATAIONewsSources{},
+		NewsSourcesHandler{},
+		EPform2client)
 }
 
 const (
@@ -41,3 +49,10 @@ const (
 	EPNewsArchive string = "archive"
 	EPNewsSources string = "sources"
 )
+
+var EPform2client = map[string]string{
+	srv.EPLatestNews:  EPLatestNews,
+	srv.EPCrypto:      EPCrypto,
+	srv.EPNewsArchive: EPNewsArchive,
+	srv.EPNewsSources: EPNewsSources,
+}

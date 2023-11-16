@@ -1,0 +1,12 @@
+document.addEventListener("DOMContentLoaded", function () {
+    getTimeZone()
+    {{range .}}
+    let {{.PositionId}}Opts = [
+        {{$optMap := .OptMap}}
+        { value: "{{.DefaultValue}}", txt: "{{.DefaultText}}"},
+        {{range $key := .SortedOptKey}}
+        { value: "{{$key}}", txt: "{{index $optMap $key}}" },{{end}}
+    ];
+    addListenerToBtn("{{.PositionId}}", "{{.InsertButtonId}}", "{{.DeleteButtonId}}", {{.MaxDiv}}, {{.PositionId}}Opts, "{{.AlertMessage}}");
+    {{end}}
+})

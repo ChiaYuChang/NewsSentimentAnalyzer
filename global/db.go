@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/cache"
 	"github.com/jackc/pgx/v5"
 	"github.com/redis/go-redis/v9"
 	"github.com/spf13/viper"
@@ -44,8 +45,8 @@ func ConnectToPostgres(ctx context.Context) (*pgx.Conn, error) {
 	return conn, nil
 }
 
-func ConnectToRedis() *redis.Client {
-	return redis.NewClient(&redis.Options{
+func ConnectToRedis(ctx context.Context) *cache.RedsiStore {
+	opts := &redis.Options{
 		Network: viper.GetString("REDIS_NETWORK"),
 		Addr: fmt.Sprintf("%s:%d",
 			viper.GetString("REDIS_HOST"),
@@ -57,5 +58,6 @@ func ConnectToRedis() *redis.Client {
 		WriteTimeout: viper.GetDuration("REDIS_WRITE_TIMEOUT"),
 		PoolFIFO:     viper.GetBool("REDIS_FIFO"),
 		PoolSize:     viper.GetInt("REDIS_POOLSIZE"),
-	})
+	}
+	return cache.NewRedsiStore(ctx, opts)
 }

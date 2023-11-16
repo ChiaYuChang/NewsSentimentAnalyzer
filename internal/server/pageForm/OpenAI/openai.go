@@ -6,7 +6,9 @@ import (
 	"net/url"
 	"strings"
 
+	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm"
 	pf "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view/object"
 	"github.com/go-playground/form"
 	val "github.com/go-playground/validator/v10"
 )
@@ -39,6 +41,10 @@ func (f OpenAICompletions) FormDecodeAndValidate(
 	return pf.FormDecodeAndValidate[OpenAICompletions](decoder, val, postForm)
 }
 
+func (f OpenAICompletions) SelectionOpts() []object.SelectOpts {
+	return nil
+}
+
 func (f OpenAICompletions) String() string {
 	sb := strings.Builder{}
 	sb.WriteString("OpenAI Completions\n")
@@ -50,6 +56,10 @@ func (f OpenAICompletions) String() string {
 		sb.WriteString(fmt.Sprintf("\t\t - %s\n", p))
 	}
 	return sb.String()
+}
+
+func (f OpenAICompletions) Key() pageform.PageFormRepoKey {
+	return pageform.NewPageFormRepoKey(f.API(), f.Endpoint())
 }
 
 type OpenAIChatCompletions struct {

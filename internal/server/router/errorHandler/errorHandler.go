@@ -2,52 +2,59 @@ package errorhandler
 
 import (
 	"bytes"
+	"compress/gzip"
+	"context"
+	"crypto/sha1"
+	"encoding/base64"
 	"errors"
+	"fmt"
 	"html/template"
 	"net/http"
+	"time"
 
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
 	cookiemaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/cookieMaker"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view/object"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/cache"
+	"github.com/redis/go-redis/v9"
 )
 
 type ErrorPage string
 
 type ErrorHandlerRepo struct {
-	page               map[int][]byte
+	code2key           map[int]string
+	code2page          map[int]object.ErrorPage
+	cache              *cache.RedsiStore
 	tmpl               *template.Template
 	DefaultClientError int
 	DefaultServerError int
 }
 
-func NewErrorHandlerRepo(tmpl *template.Template) (ErrorHandlerRepo, error) {
+func NewErrorHandlerRepo(tmpl *template.Template, store *cache.RedsiStore) (ErrorHandlerRepo, error) {
 	if tmpl == nil {
 		return ErrorHandlerRepo{}, errors.New("a nil templated are provided")
 	}
 
 	repo := ErrorHandlerRepo{
-		page:               map[int][]byte{},
+		code2key:           map[int]string{},
 		tmpl:               tmpl,
+		cache:              store,
 		DefaultClientError: http.StatusBadRequest,
 		DefaultServerError: http.StatusInternalServerError,
 	}
 
-	type epages struct {
-		epage  object.ErrorPage
-		status int
+	repo.code2page = map[int]object.ErrorPage{
+		http.StatusBadRequest:          view.ErrorPage400,
+		http.StatusUnauthorized:        view.ErrorPage401,
+		http.StatusForbidden:           view.ErrorPage403,
+		http.StatusNotFound:            view.ErrorPage404,
+		http.StatusTooManyRequests:     view.ErrorPage429,
+		http.StatusInternalServerError: view.ErrorPage500,
 	}
 
-	eps := []epages{
-		{epage: view.ErrorPage400, status: http.StatusBadRequest},
-		{epage: view.ErrorPage401, status: http.StatusUnauthorized},
-		{epage: view.ErrorPage403, status: http.StatusForbidden},
-		{epage: view.ErrorPage404, status: http.StatusNotFound},
-		{epage: view.ErrorPage429, status: http.StatusTooManyRequests},
-		{epage: view.ErrorPage500, status: http.StatusInternalServerError},
-	}
-
-	for _, ep := range eps {
-		if err := repo.RegisterErrorPage(ep.status, ep.epage); err != nil {
+	for code, page := range repo.code2page {
+		if err := repo.RegisterErrorPage(code, page); err != nil {
 			return repo, nil
 		}
 	}
@@ -55,27 +62,64 @@ func NewErrorHandlerRepo(tmpl *template.Template) (ErrorHandlerRepo, error) {
 }
 
 func (repo *ErrorHandlerRepo) RegisterErrorPage(statusCode int, epage object.ErrorPage) error {
-	buffer := bytes.NewBufferString("")
-	if err := repo.tmpl.Execute(buffer, epage); err != nil {
+	buf := bytes.NewBuffer(nil)
+	gz, _ := gzip.NewWriterLevel(buf, gzip.BestCompression)
+
+	if err := repo.tmpl.Execute(gz, epage); err != nil {
 		return err
 	}
-	repo.page[statusCode] = buffer.Bytes()
+
+	if err := gz.Close(); err != nil {
+		return err
+	}
+	ctext := buf.Bytes()
+
+	hasher := sha1.New()
+	hasher.Write(ctext)
+	key := fmt.Sprintf(
+		"error-page-%d-%s",
+		statusCode,
+		base64.StdEncoding.EncodeToString(hasher.Sum(nil)))
+
+	cmd := repo.cache.Set(context.TODO(), key, ctext, global.CacheExpireLong)
+	if cmd.Err() != nil {
+		return fmt.Errorf("error while caching error page: %w", cmd.Err())
+	}
+	repo.code2key[statusCode] = key
+
+	global.Logger.
+		Info().
+		Str("redis-key", key).
+		Time("expiration", time.Now().Add(global.CacheExpireLong)).
+		Msg("add page cache to redis")
+
 	return nil
 }
 
 func (repo ErrorHandlerRepo) fetchErrorPage(httpEC int, w http.ResponseWriter, r *http.Request) {
-	page, ok := repo.page[httpEC]
+	key, ok := repo.code2key[httpEC]
 	if !ok {
 		if httpEC >= 400 && httpEC < 500 {
 			// 400 Bad Request
-			page = repo.page[repo.DefaultClientError]
+			key = repo.code2key[repo.DefaultClientError]
 		} else {
 			// 500 Internal Server Error
-			page = repo.page[repo.DefaultServerError]
+			key = repo.code2key[repo.DefaultServerError]
 		}
 	}
+
+	cmd := repo.cache.Get(context.TODO(), key)
+
+	b, err := cmd.Bytes()
+	if err == redis.Nil {
+		repo.RegisterErrorPage(httpEC, repo.code2page[httpEC])
+	}
+	_ = repo.cache.ExpireGT(context.TODO(), key, global.CacheExpireLong)
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("Content-Encoding", "gzip")
 	w.WriteHeader(httpEC)
-	w.Write(page)
+	w.Write(b)
 }
 
 func (repo ErrorHandlerRepo) SeeOther(url string) http.HandlerFunc {

@@ -11,9 +11,14 @@ import (
 
 func init() {
 	cli.RegisterPageForm(
-		srv.GNewsHeadlines{}, TopHeadlinesHandler{})
+		srv.GNewsHeadlines{},
+		TopHeadlinesHandler{},
+		EPform2client)
+
 	cli.RegisterPageForm(
-		srv.GNewsSearch{}, SearchHandler{})
+		srv.GNewsSearch{},
+		SearchHandler{},
+		EPform2client)
 }
 
 const (
@@ -34,3 +39,8 @@ const (
 	EPTopHeadlines = "top-headlines"
 	EPSearch       = "search"
 )
+
+var EPform2client = map[string]string{
+	srv.EPSearch:       EPSearch,
+	srv.EPTopHeadlines: EPTopHeadlines,
+}

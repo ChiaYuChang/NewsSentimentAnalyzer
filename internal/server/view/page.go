@@ -1,13 +1,12 @@
 package view
 
 import (
+	"bytes"
+	"html/template"
 	"net/http"
 	"sync"
 
-	gnews "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm/GNews"
-	newsdata "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm/NEWSDATA"
-	newsapi "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm/newsapi"
-
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view/object"
 )
 
@@ -128,6 +127,20 @@ func NewHeadContent() object.HeadConent {
 	return head
 }
 
+func NewEndPointOptSelector(tmpl *template.Template, opts []object.SelectOpts) ([]byte, error) {
+	script := bytes.NewBufferString("")
+
+	if err := tmpl.Execute(script, opts); err != nil {
+		return nil, err
+	}
+
+	minifiedScript := bytes.NewBufferString("")
+	if err := global.Minifier().Minify("application/javascript", minifiedScript, script); err != nil {
+		return nil, err
+	}
+	return minifiedScript.Bytes(), nil
+}
+
 var ErrorPage500 = object.ErrorPage{
 	Page:               object.Page{HeadConent: SharedHeadContent(), Title: "500 error"},
 	ErrorCode:          500,
@@ -178,101 +191,4 @@ var ErrorPage429 = object.ErrorPage{
 	ShouldAutoRedirect: false,
 }
 
-var NEWSDATASelectOpts = []object.SelectOpts{
-	{
-		OptMap:         newsdata.Country,
-		MaxDiv:         5,
-		DefaultValue:   "",
-		DefaultText:    "all",
-		InsertButtonId: "insert-category-btn",
-		DeleteButtonId: "delete-category-btn",
-		PositionId:     "category",
-		AlertMessage:   "You can only add up to 5 categories in a single query",
-	},
-	{
-		OptMap:         newsdata.Category,
-		MaxDiv:         5,
-		DefaultValue:   "",
-		DefaultText:    "all",
-		InsertButtonId: "insert-country-btn",
-		DeleteButtonId: "delete-country-btn",
-		PositionId:     "country",
-		AlertMessage:   "You can only add up to 5 countries in a single query",
-	},
-	{
-		OptMap:         newsdata.Language,
-		MaxDiv:         5,
-		DefaultValue:   "",
-		DefaultText:    "all",
-		InsertButtonId: "insert-lang-btn",
-		DeleteButtonId: "delete-lang-btn",
-		PositionId:     "language",
-		AlertMessage:   "You can only add up to 5 languages in a single query",
-	},
-}
-
-var GnewsSelectOpts = []object.SelectOpts{
-	{
-		OptMap:         gnews.Category,
-		MaxDiv:         5,
-		DefaultValue:   "",
-		DefaultText:    "all",
-		InsertButtonId: "insert-category-btn",
-		DeleteButtonId: "delete-category-btn",
-		PositionId:     "category",
-		AlertMessage:   "You can only add up to 5 categories in a single query",
-	},
-	{
-		OptMap:         gnews.Country,
-		MaxDiv:         5,
-		DefaultValue:   "",
-		DefaultText:    "all",
-		InsertButtonId: "insert-country-btn",
-		DeleteButtonId: "delete-country-btn",
-		PositionId:     "country",
-		AlertMessage:   "You can only add up to 5 countries in a single query",
-	},
-	{
-		OptMap:         gnews.Language,
-		MaxDiv:         5,
-		DefaultValue:   "",
-		DefaultText:    "all",
-		InsertButtonId: "insert-lang-btn",
-		DeleteButtonId: "delete-lang-btn",
-		PositionId:     "language",
-		AlertMessage:   "You can only add up to 5 languages in a single query",
-	},
-}
-
-var NewsAPISelectOpts = []object.SelectOpts{
-	{
-		OptMap:         newsapi.Category,
-		MaxDiv:         5,
-		DefaultValue:   "",
-		DefaultText:    "all",
-		InsertButtonId: "insert-category-btn",
-		DeleteButtonId: "delete-category-btn",
-		PositionId:     "category",
-		AlertMessage:   "You can only add up to 5 categories in a single query",
-	},
-	{
-		OptMap:         newsapi.Country,
-		MaxDiv:         5,
-		DefaultValue:   "",
-		DefaultText:    "all",
-		InsertButtonId: "insert-country-btn",
-		DeleteButtonId: "delete-country-btn",
-		PositionId:     "country",
-		AlertMessage:   "You can only add up to 5 countries in a single query",
-	},
-	{
-		OptMap:         newsapi.Language,
-		MaxDiv:         5,
-		DefaultValue:   "",
-		DefaultText:    "all",
-		InsertButtonId: "insert-lang-btn",
-		DeleteButtonId: "delete-lang-btn",
-		PositionId:     "language",
-		AlertMessage:   "You can only add up to 5 languages in a single query",
-	},
-}
+var GnewsSelectOpts = []object.SelectOpts{}

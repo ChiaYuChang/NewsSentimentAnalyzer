@@ -34,7 +34,7 @@ type Request struct {
 }
 
 func NewRequest(apikey string) *Request {
-	req := api.NewRequestProtoType(",")
+	req := api.NewRequestProtoType(srv.API_NAME, ",")
 	req.SetApiKey(apikey)
 	return &Request{RequestProto: req}
 }
@@ -151,8 +151,8 @@ func RequestFromPreviewCache(cq api.CacheQuery) (api.Request, error) {
 	}
 
 	var err error
-	req := NewRequest(cq.APIKey)
-	_, err = req.SetEndpoint(cq.APIEP)
+	req := NewRequest(cq.API.Key)
+	_, err = req.SetEndpoint(cq.API.Endpoint)
 	if err != nil {
 		return nil, fmt.Errorf("error while set endpoint: %w", err)
 	}

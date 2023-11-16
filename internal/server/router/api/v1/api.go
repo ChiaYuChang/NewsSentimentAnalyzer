@@ -5,17 +5,18 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model"
+	cm "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/cookieMaker"
 	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/validator"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view/object"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/cache"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/convert"
 	ec "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/errorCode"
 	tokenmaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/tokenMaker"
@@ -30,21 +31,25 @@ type APIRepo struct {
 	Version      string
 	Service      service.Service
 	View         view.View
+	Cache        *cache.RedsiStore
 	TokenMaker   tokenmaker.TokenMaker
+	CookieMaker  *cm.CookieMaker
 	Validator    *val.Validate
 	FormDecoder  *form.Decoder
 	FormModifier *mold.Transformer
 }
 
 func NewAPIRepo(
-	ver string, srvc service.Service, view view.View,
-	tokenmaker tokenmaker.TokenMaker, validator *val.Validate,
-	decoder *form.Decoder, modifier *mold.Transformer) APIRepo {
+	ver string, srvc service.Service, view view.View, cache *cache.RedsiStore,
+	tokenmaker tokenmaker.TokenMaker, cookiemaker *cm.CookieMaker,
+	validator *val.Validate, decoder *form.Decoder, modifier *mold.Transformer) APIRepo {
 	return APIRepo{
 		Version:      ver,
 		Service:      srvc,
 		View:         view,
+		Cache:        cache,
 		TokenMaker:   tokenmaker,
+		CookieMaker:  cookiemaker,
 		Validator:    validator,
 		FormDecoder:  decoder,
 		FormModifier: modifier,
@@ -52,12 +57,12 @@ func NewAPIRepo(
 }
 
 func (repo APIRepo) HealthCheck(w http.ResponseWriter, req *http.Request) {
-	m := make(map[string]string)
-	m["status code"] = strconv.Itoa(http.StatusOK)
-	m["status"] = "OK"
-	m["message"] = "News Sentiment Analyzer (nsa)"
+	j, _ := json.Marshal(map[string]any{
+		"status code": http.StatusOK,
+		"status":      "OK",
+		"message":     "News Sentiment Analyzer (nsa)",
+	})
 
-	j, _ := json.Marshal(m)
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(j))
 }

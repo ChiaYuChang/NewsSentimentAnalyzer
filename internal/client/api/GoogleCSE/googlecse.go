@@ -11,7 +11,9 @@ import (
 
 func init() {
 	cli.RegisterPageForm(
-		srv.GoogleCSE{}, CSEHandler{})
+		srv.GoogleCSE{},
+		CSEHandler{},
+		EPform2client)
 }
 
 const (
@@ -36,3 +38,8 @@ const (
 	EPCustomSearch   string = ""
 	EPSiteRestricted string = "siterestrict"
 )
+
+var EPform2client = map[string]string{
+	srv.EPCustomSearch:   EPCustomSearch,
+	srv.EPSiteRestricted: EPSiteRestricted,
+}

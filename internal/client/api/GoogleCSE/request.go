@@ -150,7 +150,7 @@ func NewRequest(apikey string, engId string) (*Request, error) {
 		return nil, ErrRequiredFieldMissing
 	}
 
-	req := api.NewRequestProtoType("")
+	req := api.NewRequestProtoType(srv.API_NAME, "")
 	req.SetApiKey(apikey)
 	req.Add(qpEnableChineseSearch, EnableChineseSearch.ToParam())
 	req.Add(qpSaveLevel, EnableSafeSearch.ToParam())
@@ -290,7 +290,7 @@ func RequestFromPreviewCache(cq api.CacheQuery) (api.Request, error) {
 		return nil, ErrRequiredFieldMissing
 	}
 
-	req, err := NewRequest(cq.APIKey, engId)
+	req, err := NewRequest(cq.API.Key, engId)
 	if err != nil {
 		return nil, err
 	}

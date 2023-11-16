@@ -55,7 +55,8 @@ func NewAuthRepo(
 func (repo AuthRepo) GetSignIn(w http.ResponseWriter, req *http.Request) {
 	if _, err := req.Cookie(cookiemaker.AUTH_COOKIE_KEY); err == nil {
 		http.Redirect(w, req,
-			fmt.Sprintf("/%s/%s", repo.APIVersion, global.AppVar.App.RoutePattern.Page["welcome"]),
+			fmt.Sprintf("/%s/%s", repo.APIVersion,
+				global.AppVar.App.RoutePattern.Page["welcome"]),
 			http.StatusSeeOther)
 	}
 
@@ -85,28 +86,6 @@ func (repo AuthRepo) PostSignIn(w http.ResponseWriter, req *http.Request) {
 	var auth pageform.AuthInfo
 	repo.FormDecoder.Decode(&auth, req.PostForm)
 	repo.FormModifier.Struct(req.Context(), &auth)
-
-	// if err := repo.Validator.StructCtx(req.Context(), &auth); err != nil {
-	// 	data := object.LoginPage{
-	// 		Page: object.Page{
-	// 			HeadConent: view.NewHeadContent(),
-	// 			Title:      "Sign-In",
-	// 		},
-	// 		Username: auth.Email,
-	// 	}
-
-	// 	vErors := err.(val.ValidationErrors)
-	// 	for _, fError := range vErors {
-	// 		if fError.Tag() == "email" {
-	// 			data.ShowUsernameNotFountAlert = true
-	// 		}
-	// 		if fError.Tag() == "password" {
-	// 			data.ShowPasswordMismatchAlert = true
-	// 		}
-	// 	}
-	// 	repo.View.ExecuteTemplate(w, "login.gotmpl", data)
-	// 	return
-	// }
 
 	global.Logger.Debug().Msg("check db")
 	err, uid, role := repo.Service.User().

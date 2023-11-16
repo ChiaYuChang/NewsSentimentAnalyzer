@@ -18,6 +18,7 @@ import (
 
 	cm "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/cookieMaker"
 	eh "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/router/errorHandler"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/cache"
 	tm "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/tokenMaker"
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
 
@@ -35,14 +36,13 @@ import (
 	_ "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api/newsapi"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog"
 	"github.com/spf13/viper"
 )
 
-func NewRouter(srvc service.Service, rds *redis.Client, vw view.View,
+func NewRouter(srvc service.Service, rds *cache.RedsiStore, vw view.View,
 	tmaker tm.TokenMaker, cmaker *cm.CookieMaker) *chi.Mux {
-	errHandlerRepo, err := eh.NewErrorHandlerRepo(vw.Template.Lookup("errorpage.gotmpl"))
+	errHandlerRepo, err := eh.NewErrorHandlerRepo(vw.Template.Lookup("errorpage.gotmpl"), rds)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error while errorhandler.NewErrorHandlerRepo: %s", err)
 		os.Exit(1)
@@ -54,7 +54,7 @@ func NewRouter(srvc service.Service, rds *redis.Client, vw view.View,
 
 	apiRepo := api.NewAPIRepo(
 		viper.GetString("APP_API_VERSION"),
-		srvc, vw, tmaker, validator.Validate, pf.Decoder, pf.Modifier)
+		srvc, vw, rds, tmaker, cmaker, validator.Validate, pf.Decoder, pf.Modifier)
 
 	epRepo := apiRepo.EndpointRepo()
 	epChan := make(chan *model.ListAllEndpointRow)
@@ -103,7 +103,7 @@ func NewRouter(srvc service.Service, rds *redis.Client, vw view.View,
 	)
 
 	qureyRateLimiter := middleware.NewRedisRateLimiter(
-		rds,
+		rds.Client,
 		global.AppVar.RateLimiter.User.N,
 		global.AppVar.RateLimiter.User.Per,
 	)
@@ -175,6 +175,15 @@ func NewRouter(srvc service.Service, rds *redis.Client, vw view.View,
 							Error().
 							Err(err).
 							Msgf("error while .PostAPIEndpoints with key: %s", key.String())
+					}
+
+					if epGetAPISelectOptionsHandlerFun, err := epRepo.GetAPISelectOptions(key); err == nil {
+						r.Get(fmt.Sprintf("/%s/opts.js", key.String()), epGetAPISelectOptionsHandlerFun)
+					} else {
+						global.Logger.
+							Error().
+							Err(err).
+							Msgf("error while .GetAPISelectOptions with key: %s", key.String())
 					}
 				}
 				r.Get("/*", errHandlerRepo.NotFound)

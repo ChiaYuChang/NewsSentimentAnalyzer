@@ -10,13 +10,16 @@ import (
 )
 
 type RequestProto struct {
-	ep     string
-	apikey string
+	api     string
+	ep      string
+	apikey  string
+	cPrefix string
+	cSuffix string
 	*Params
 }
 
-func NewRequestProtoType(sep string) *RequestProto {
-	return &RequestProto{Params: NewParams(sep)}
+func NewRequestProtoType(api, sep string) *RequestProto {
+	return &RequestProto{api: api, Params: NewParams(sep)}
 }
 
 // api endpoint setter
@@ -33,6 +36,16 @@ func (reqproto RequestProto) Endpoint() string {
 // apikey setter
 func (reqproto *RequestProto) SetApiKey(apikey string) *RequestProto {
 	reqproto.apikey = apikey
+	return reqproto
+}
+
+func (reqproto *RequestProto) SetCacheKeyPrefix(prefix string) *RequestProto {
+	reqproto.cPrefix = prefix
+	return reqproto
+}
+
+func (reqproto *RequestProto) SetCacheKeySuffix(suffix string) *RequestProto {
+	reqproto.cSuffix = suffix
 	return reqproto
 }
 
@@ -63,9 +76,12 @@ func (reqproto RequestProto) AddAPIKeyToQuery(req *http.Request, key Key) *http.
 func (reqproto RequestProto) ToPreviewCache(uid uuid.UUID, next NextPageToken, other map[string]string) (cKey string, c *PreviewCache) {
 	c = &PreviewCache{
 		Query: CacheQuery{
-			UserId:   uid,
-			APIKey:   reqproto.APIKey(),
-			APIEP:    reqproto.Endpoint(),
+			UserId: uid,
+			API: API{
+				Key:      reqproto.apikey,
+				Name:     reqproto.api,
+				Endpoint: reqproto.ep,
+			},
 			RawQuery: reqproto.Encode(),
 			Body:     "",
 			NextPage: next,
@@ -74,5 +90,6 @@ func (reqproto RequestProto) ToPreviewCache(uid uuid.UUID, next NextPageToken, o
 		NewsItem:  []NewsPreview{},
 		CreatedAt: time.Now().UTC(),
 	}
-	return c.Key(), c
+	_ = c.AddRandomSalt(CACHE_KEY_SALE_LEN)
+	return c.Key(CACHE_KEY_PREFIX, CACHE_KEY_SUFFIX), c
 }

@@ -7,6 +7,7 @@ import (
 
 	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/validator"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view/object"
 	"github.com/go-playground/form"
 	val "github.com/go-playground/validator/v10"
 )
@@ -46,6 +47,41 @@ const (
 	EPTopHeadlines string = "Top Headlines"
 )
 
+func SelectionOpts() []object.SelectOpts {
+	return []object.SelectOpts{
+		{
+			OptMap:         Category,
+			MaxDiv:         5,
+			DefaultValue:   "",
+			DefaultText:    "all",
+			InsertButtonId: "insert-category-btn",
+			DeleteButtonId: "delete-category-btn",
+			PositionId:     "category",
+			AlertMessage:   "You can only add up to 5 categories in a single query",
+		},
+		{
+			OptMap:         Country,
+			MaxDiv:         5,
+			DefaultValue:   "",
+			DefaultText:    "all",
+			InsertButtonId: "insert-country-btn",
+			DeleteButtonId: "delete-country-btn",
+			PositionId:     "country",
+			AlertMessage:   "You can only add up to 5 countries in a single query",
+		},
+		{
+			OptMap:         Language,
+			MaxDiv:         5,
+			DefaultValue:   "",
+			DefaultText:    "all",
+			InsertButtonId: "insert-lang-btn",
+			DeleteButtonId: "delete-lang-btn",
+			PositionId:     "language",
+			AlertMessage:   "You can only add up to 5 languages in a single query",
+		},
+	}
+}
+
 type GNewsHeadlines struct {
 	pageform.TimeRange
 	Keyword  string   `form:"keyword"`
@@ -71,6 +107,14 @@ func (f GNewsHeadlines) String() string {
 	sb.WriteString(fmt.Sprintf("\t- Language: %s\n", strings.Join(f.Language, ", ")))
 	sb.WriteString(f.TimeRange.ToString("\t"))
 	return sb.String()
+}
+
+func (f GNewsHeadlines) Key() pageform.PageFormRepoKey {
+	return pageform.NewPageFormRepoKey(f.API(), f.Endpoint())
+}
+
+func (f GNewsHeadlines) SelectionOpts() []object.SelectOpts {
+	return SelectionOpts()
 }
 
 func (f GNewsHeadlines) FormDecodeAndValidate(
@@ -108,4 +152,12 @@ func (f GNewsSearch) String() string {
 	sb.WriteString(fmt.Sprintf("\t- Language : %s\n", strings.Join(f.Language, ", ")))
 	sb.WriteString(f.TimeRange.ToString("\t"))
 	return sb.String()
+}
+
+func (f GNewsSearch) Key() pageform.PageFormRepoKey {
+	return pageform.NewPageFormRepoKey(f.API(), f.Endpoint())
+}
+
+func (f GNewsSearch) SelectionOpts() []object.SelectOpts {
+	return SelectionOpts()
 }

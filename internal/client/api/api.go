@@ -15,6 +15,8 @@ import (
 	"github.com/google/uuid"
 )
 
+// Errors
+
 var ErrTypeAssertionFailure = errors.New("type assertion failure")
 var ErrNotNextPage = errors.New("there are no more pages to query")
 var ErrNotImplemented = errors.New("not implemented")
@@ -23,8 +25,16 @@ var ErrNextTokenAssertionFailure = errors.New("next token assertion failure")
 
 var re = regexp.MustCompile("[\\p{Han}[:alnum:]]")
 
-const StrLastPageToken = StrNextPageToken("$")
-const IntLastPageToken = IntNextPageToken(-1)
+const (
+	StrLastPageToken = StrNextPageToken("$")
+	IntLastPageToken = IntNextPageToken(-1)
+)
+
+const (
+	CACHE_KEY_PREFIX   = "preview-cache-"
+	CACHE_KEY_SUFFIX   = ""
+	CACHE_KEY_SALE_LEN = 32
+)
 
 const QueryOriPageKey = true
 

@@ -2,16 +2,25 @@ package object
 
 import (
 	"bytes"
+	"encoding/json"
 	"html/template"
 	"sort"
 )
 
 type HeadConent struct {
-	Meta    *HTMLElementList
-	Link    *HTMLElementList
-	Script  *HTMLElementList
-	hasExec bool
-	content template.HTML
+	Meta    *HTMLElementList `json:"meta"`
+	Link    *HTMLElementList `json:"link"`
+	Script  *HTMLElementList `json:"script"`
+	hasExec bool             `json:"-"`
+	content template.HTML    `json:"-"`
+}
+
+func (hc *HeadConent) FromJson(data []byte, tmpl *template.Template) error {
+	err := json.Unmarshal(data, hc)
+	if err != nil {
+		return err
+	}
+	return hc.Execute(tmpl)
 }
 
 func (hc *HeadConent) Execute(tmpl *template.Template) error {
@@ -80,10 +89,20 @@ type SelectOpts struct {
 }
 
 func (sopt SelectOpts) SortedOptKey() []string {
-	keys := make([]string, 0, len(sopt.OptMap))
-	for key := range sopt.OptMap {
-		keys = append(keys, key)
+	revMap := make(map[string]string, len(sopt.OptMap))
+	for k, v := range sopt.OptMap {
+		revMap[v] = k
 	}
-	sort.Sort(sort.StringSlice(keys))
+
+	revKeys := make([]string, 0, len(revMap))
+	for rkey := range revMap {
+		revKeys = append(revKeys, rkey)
+	}
+	sort.Sort(sort.StringSlice(revKeys))
+
+	keys := make([]string, 0, len(revMap))
+	for _, rkey := range revKeys {
+		keys = append(keys, revMap[rkey])
+	}
 	return keys
 }

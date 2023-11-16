@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view/object"
 	"github.com/go-playground/form"
 	val "github.com/go-playground/validator/v10"
 )
@@ -62,4 +63,12 @@ func (f GoogleCSE) String() string {
 func (f GoogleCSE) FormDecodeAndValidate(
 	decoder *form.Decoder, val *val.Validate, postForm url.Values) (pageform.PageForm, error) {
 	return pageform.FormDecodeAndValidate[GoogleCSE](decoder, val, postForm)
+}
+
+func (f GoogleCSE) Key() pageform.PageFormRepoKey {
+	return pageform.NewPageFormRepoKey(f.API(), f.Endpoint())
+}
+
+func (f GoogleCSE) SelectionOpts() []object.SelectOpts {
+	return nil
 }

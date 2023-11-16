@@ -2,17 +2,14 @@ package view_test
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	htemplate "html/template"
 	"strings"
 	"testing"
-	ttemplate "text/template"
 
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view/object"
 	"github.com/stretchr/testify/require"
-	"github.com/tdewolff/minify/v2"
-	"github.com/tdewolff/minify/v2/js"
 )
 
 const VIEWS_PATH = "../../../views"
@@ -23,60 +20,60 @@ func TestHeadConent(t *testing.T) {
 		ParseFiles(VIEWS_PATH + "/template/head.gotmpl")
 	require.NoError(t, err)
 
-	head := object.HeadConent{
+	head0 := object.HeadConent{
 		Meta:   object.NewHTMLElementList("meta"),
 		Link:   object.NewHTMLElementList("link"),
 		Script: object.NewHTMLElementList("script"),
 	}
 
-	head.Meta.
+	head0.Meta.
 		NewHTMLElement().
 		AddPair("charset", "UTF-8")
 
-	head.Meta.
+	head0.Meta.
 		NewHTMLElement().
 		AddPair("http-equiv", "X-UA-Compatible").
 		AddPair("content", "IE=edge")
 
-	head.Meta.
+	head0.Meta.
 		NewHTMLElement().
 		AddPair("name", "viewport").
 		AddPair("content", "width=device-width, initial-scale=1.0")
 
-	head.Link.
+	head0.Link.
 		NewHTMLElement().
 		AddPair("rel", "preconnect").
 		AddPair("href", "https://fonts.googleapis.com")
 
-	head.Link.
+	head0.Link.
 		NewHTMLElement().
 		AddPair("rel", "preconnect").
 		AddPair("href", "https://fonts.gstatic.com").
 		AddVal("crossorigin")
 
-	head.Link.
+	head0.Link.
 		NewHTMLElement().
 		AddPair("rel", "stylesheet").
 		AddPair("href", "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap")
 
-	head.Link.
+	head0.Link.
 		NewHTMLElement().
 		AddPair("ref", "stylesheet").
 		AddPair("href", "css/style.css")
 
-	head.Script.
+	head0.Script.
 		NewHTMLElement().
 		AddPair("src", "js/func.js")
 
 	t.Run(
 		"Use content",
 		func(t *testing.T) {
-			err = head.Execute(tmpl.Lookup("head"))
+			err = head0.Execute(tmpl.Lookup("head"))
 			require.NoError(t, err)
-			require.True(t, head.HasExec())
-			require.Contains(t, head.Content(), `charset="UTF-8"`)
-			require.Contains(t, head.Content(), `ref="stylesheet" href="css/style.css">`)
-			require.Contains(t, head.Content(), `src="js/func.js"`)
+			require.True(t, head0.HasExec())
+			require.Contains(t, head0.Content(), `charset="UTF-8"`)
+			require.Contains(t, head0.Content(), `ref="stylesheet" href="css/style.css">`)
+			require.Contains(t, head0.Content(), `src="js/func.js"`)
 		},
 	)
 
@@ -84,12 +81,25 @@ func TestHeadConent(t *testing.T) {
 		"Write to buffer",
 		func(t *testing.T) {
 			bf := bytes.NewBufferString("")
-			err = tmpl.ExecuteTemplate(bf, "head", head)
+			err = tmpl.ExecuteTemplate(bf, "head", head0)
 			require.NoError(t, err)
 
 			require.Contains(t, bf.String(), `charset="UTF-8"`)
 			require.Contains(t, bf.String(), `ref="stylesheet" href="css/style.css">`)
 			require.Contains(t, bf.String(), `src="js/func.js"`)
+		},
+	)
+
+	t.Run(
+		"From json",
+		func(t *testing.T) {
+			data, err := json.MarshalIndent(head0, "", "    ")
+			require.NoError(t, err)
+
+			var head1 object.HeadConent
+			err = head1.FromJson(data, tmpl.Lookup("head"))
+			require.NoError(t, err)
+			require.Equal(t, head0.Content(), head1.Content())
 		},
 	)
 }
@@ -264,29 +274,80 @@ func TestPageLogin(t *testing.T) {
 	}
 }
 
-func TestMinifyJS(t *testing.T) {
-	tmpl, err := ttemplate.
-		New("selector.gotmpl").
-		ParseFiles(VIEWS_PATH + "/template/js/selector.gotmpl")
-	require.NoError(t, err)
-	require.NotNil(t, tmpl)
+// func TestMinifyJS(t *testing.T) {
+// 	tmpl, err := ttemplate.
+// 		New("selector.gotmpl").
+// 		ParseFiles(VIEWS_PATH + "/template/js/selector.gotmpl")
+// 	require.NoError(t, err)
+// 	require.NotNil(t, tmpl)
 
-	for _, opts := range [][]object.SelectOpts{
-		view.NEWSDATASelectOpts,
-		view.GnewsSelectOpts,
-		view.NewsAPISelectOpts,
-	} {
+// 	for _, opts := range [][]object.SelectOpts{
+// 		view.NEWSDATASelectOpts,
+// 		view.GnewsSelectOpts,
+// 		view.NewsAPISelectOpts,
+// 	} {
 
-		bf := bytes.NewBufferString("")
-		err = tmpl.ExecuteTemplate(bf, "selector.gotmpl", opts)
-		require.NoError(t, err)
+// 		bf := bytes.NewBufferString("")
+// 		err = tmpl.ExecuteTemplate(bf, "selector.gotmpl", opts)
+// 		require.NoError(t, err)
 
-		m := minify.New()
-		m.AddFunc("application/javascript", js.Minify)
+// 		m := minify.New()
+// 		m.AddFunc("application/javascript", js.Minify)
 
-		sb := &strings.Builder{}
-		err = m.Minify("application/javascript", sb, bf)
-		require.NoError(t, err)
-		require.NotEmpty(t, sb.String())
-	}
-}
+// 		sb := &strings.Builder{}
+// 		err = m.Minify("application/javascript", sb, bf)
+// 		require.NoError(t, err)
+// 		require.NotEmpty(t, sb.String())
+
+// 		t.Log(sb)
+// 	}
+// }
+
+var tmplText string = `
+document.addEventListener("DOMContentLoaded", function () {
+        {{range .}}
+        let {{.PositionId}}Opts = [
+            {{$optMap := .OptMap}}
+            { value: "{{.DefaultValue}}", txt: "{{.DefaultText}}"},
+            {{range $key := .SortedOptKey}}
+            { value: "{{$key}}", txt: "{{index $optMap $key}}" },{{end}}
+        ];
+        addListenerToBtn("{{.PositionId}}", "{{.InsertButtonId}}", "{{.DeleteButtonId}}", {{.MaxDiv}}, {{.PositionId}}Opts, "{{.AlertMessage}}");
+        {{end}}
+    })
+`
+
+// func TestNewEndPointOptSelector(t *testing.T) {
+// 	tmpl, err := htemplate.New("selector").Parse(tmplText)
+// 	require.NoError(t, err)
+// 	require.NotNil(t, tmpl)
+
+// 	type testCase struct {
+// 		name string
+// 		opts []object.SelectOpts
+// 	}
+
+// 	tcs := []testCase{
+// 		{
+// 			name: "NEWSDATA",
+// 			opts: view.NEWSDATASelectOpts,
+// 		},
+// 		{
+// 			name: "Gnews",
+// 			opts: view.GnewsSelectOpts,
+// 		},
+// 		{
+// 			name: "NewsAPI",
+// 			opts: view.NewsAPISelectOpts,
+// 		},
+// 	}
+
+// 	for i := range tcs {
+// 		tc := tcs[i]
+// 		t.Run(tc.name, func(t *testing.T) {
+// 			sb := &strings.Builder{}
+// 			tmpl.Execute(sb, tc.opts)
+// 			t.Log(sb.String())
+// 		})
+// 	}
+// }

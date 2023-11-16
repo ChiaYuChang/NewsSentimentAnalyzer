@@ -11,11 +11,19 @@ import (
 
 func init() {
 	cli.RegisterPageForm(
-		srv.NEWSAPITopHeadlines{}, TopHeadlinesHandler{})
+		srv.NEWSAPITopHeadlines{},
+		TopHeadlinesHandler{},
+		EPform2client)
+
 	cli.RegisterPageForm(
-		srv.NEWSAPIEverything{}, EverythingHandler{})
+		srv.NEWSAPIEverything{},
+		EverythingHandler{},
+		EPform2client)
+
 	cli.RegisterPageForm(
-		srv.NEWSAPISources{}, SourcesHandler{})
+		srv.NEWSAPISources{},
+		SourcesHandler{},
+		EPform2client)
 }
 
 const (
@@ -48,3 +56,9 @@ const (
 	EPTopHeadlines string = "top-headlines"
 	EPSources      string = "top-headlines/sources"
 )
+
+var EPform2client = map[string]string{
+	srv.EPEverything:   EPEverything,
+	srv.EPTopHeadlines: EPTopHeadlines,
+	srv.EPSources:      EPSources,
+}

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/validator"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view/object"
 	"github.com/go-playground/form"
 	"github.com/go-playground/mold/v4"
 	val "github.com/go-playground/validator/v10"
@@ -34,17 +35,17 @@ var Modifier *mold.Transformer
 
 var ErrUnregisteredPageForm = errors.New("unregistered pageform")
 
-type pageFormRepoKey [2]string
+type PageFormRepoKey [2]string
 
-func NewPageFormRepoKey(api, endpoint string) pageFormRepoKey {
-	return pageFormRepoKey{api, endpoint}
+func NewPageFormRepoKey(api, endpoint string) PageFormRepoKey {
+	return PageFormRepoKey{api, endpoint}
 }
 
-func (k pageFormRepoKey) API() string {
+func (k PageFormRepoKey) API() string {
 	return k[0]
 }
 
-func (k pageFormRepoKey) Endpoint() string {
+func (k PageFormRepoKey) Endpoint() string {
 	return k[1]
 }
 
@@ -62,7 +63,7 @@ func Get(api, endpoint string) (PageForm, error) {
 	return PageFormRepo.Get(api, endpoint)
 }
 
-type pageFormRepo map[pageFormRepoKey]PageForm
+type pageFormRepo map[PageFormRepoKey]PageForm
 
 func (pfr pageFormRepo) Add(pf PageForm) {
 	pfr[NewPageFormRepoKey(pf.API(), pf.Endpoint())] = pf
@@ -85,6 +86,8 @@ type PageForm interface {
 	FormDecodeAndValidate(decoder *form.Decoder, val *val.Validate, postForm url.Values) (PageForm, error)
 	API() string
 	String() string
+	SelectionOpts() []object.SelectOpts
+	Key() PageFormRepoKey
 }
 
 func FormDecode[T PageForm](decoder *form.Decoder, postForm url.Values) (T, error) {

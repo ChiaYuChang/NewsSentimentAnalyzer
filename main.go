@@ -32,7 +32,7 @@ func main() {
 	global.NewGlobalLogger(logfile)
 	fmt.Println(global.AppVar.String())
 
-	pgSqlConn, err := global.ConnectToPostgres(context.Background())
+	pgSqlConn, err := global.ConnectToPostgres(context.TODO())
 	if err != nil {
 		global.Logger.Error().
 			Str("db", "psql").
@@ -47,7 +47,7 @@ func main() {
 		Msg("connected to postgresSQL server")
 	srvc := service.NewService(model.NewPGXStore(pgSqlConn), validator.Validate)
 
-	rds := global.ConnectToRedis()
+	rds := global.ConnectToRedis(context.TODO())
 
 	rdsStatus := rds.Ping(context.Background())
 	if err := rdsStatus.Err(); err != nil {

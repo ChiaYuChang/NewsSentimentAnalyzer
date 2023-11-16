@@ -39,8 +39,7 @@ func (srvc userService) Login(ctx context.Context, email, password string) (err 
 		return bcrypt.ErrMismatchedHashAndPassword, uuid.Nil, ""
 	}
 
-	var auth *model.GetUserAuthRow
-	auth, err = srvc.GetAuthInfo(ctx, email)
+	auth, err := srvc.GetAuthInfo(ctx, email)
 	if err != nil {
 		return err, uuid.Nil, ""
 	}

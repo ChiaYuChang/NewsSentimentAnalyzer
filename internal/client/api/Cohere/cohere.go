@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api"
+	srv "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm/Cohere"
 )
 
 const (
@@ -42,7 +43,7 @@ type WordEmbeddingRequest struct {
 }
 
 func NewWordEmbeddingRequest(apikey string) WordEmbeddingRequest {
-	req := WordEmbeddingRequest{api.NewRequestProtoType("")}
+	req := WordEmbeddingRequest{api.NewRequestProtoType(srv.API_NAME, "")}
 	req.SetEndpoint(EPWordEmbedding)
 	req.SetApiKey(apikey)
 	return req

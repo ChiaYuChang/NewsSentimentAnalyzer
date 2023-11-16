@@ -1,6 +1,8 @@
 package newsapi
 
-import "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/validator"
+import (
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/validator"
+)
 
 var Category = map[string]string{
 	Business:      "Business",

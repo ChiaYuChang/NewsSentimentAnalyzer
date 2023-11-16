@@ -1,47 +1,84 @@
 package object
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"html/template"
 	"strings"
 )
 
+var ErrUnknownAttrType = errors.New("unknown attr type")
+
 type HTMLElementList struct {
-	tag string
-	e   []*HTMLElement
+	Tag string         `json:"tag"`
+	Ele []*HTMLElement `json:"elements"`
 }
 
 func NewHTMLElementList(tag string) *HTMLElementList {
 	return &HTMLElementList{
-		tag: tag,
-		e:   make([]*HTMLElement, 0),
+		Tag: tag,
+		Ele: make([]*HTMLElement, 0),
 	}
 }
 
 func (el *HTMLElementList) NewHTMLElement(attrs ...HTMLAttr) *HTMLElement {
-	e := NewHTMLElement(el.tag, attrs...)
-	(*el).e = append((*el).e, e)
+	e := NewHTMLElement(el.Tag, attrs...)
+	(*el).Ele = append((*el).Ele, e)
 	return e
 }
 
 func (el HTMLElementList) Element() []*HTMLElement {
-	return el.e
+	return el.Ele
 }
 
 func (el1 *HTMLElementList) Copy() *HTMLElementList {
-	el2 := NewHTMLElementList(el1.tag)
-	el2.e = make([]*HTMLElement, len(el1.e))
-	for i, e := range el1.e {
-		el2.e[i] = e.Copy()
+	el2 := NewHTMLElementList(el1.Tag)
+	el2.Ele = make([]*HTMLElement, len(el1.Ele))
+	for i, e := range el1.Ele {
+		el2.Ele[i] = e.Copy()
 	}
 	return el2
 }
 
 type HTMLElement struct {
-	Attr          []HTMLAttr
-	IsSelfClosing bool
-	Content       template.HTML
-	Tag           string
+	Attr          []HTMLAttr    `json:"attr"`
+	IsSelfClosing bool          `json:"id_self_closing"`
+	Content       template.HTML `json:"content"`
+	Tag           string        `json:"tag"`
+}
+
+func (e *HTMLElement) UnmarshalJSON(data []byte) error {
+	type InnerHTMLElement HTMLElement
+
+	el := struct {
+		*InnerHTMLElement
+		Attr []any `json:"attr"`
+	}{}
+
+	err := json.Unmarshal(data, &el)
+	if err != nil {
+		return err
+	}
+
+	for _, a := range el.Attr {
+		switch v := a.(type) {
+		case map[string]any:
+			el.InnerHTMLElement.Attr = append(
+				el.InnerHTMLElement.Attr, HTMLAttrPair{
+					Tag: v["tag"].(string),
+					Val: v["val"].(string),
+				})
+		case string:
+			el.InnerHTMLElement.Attr = append(
+				el.InnerHTMLElement.Attr, HTMLAttrVal(v))
+		default:
+			return ErrUnknownAttrType
+		}
+	}
+
+	(*e) = HTMLElement(*el.InnerHTMLElement)
+	return nil
 }
 
 type HTMLAttr interface {
@@ -109,7 +146,8 @@ func (e HTMLElement) String() string {
 }
 
 type HTMLAttrPair struct {
-	Tag, Val string
+	Tag string `json:"tag"`
+	Val string `json:"val"`
 }
 
 func (p HTMLAttrPair) ToHTMLAttr() template.HTMLAttr {

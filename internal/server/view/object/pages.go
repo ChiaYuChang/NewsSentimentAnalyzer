@@ -229,15 +229,15 @@ type APIKeyPage struct {
 }
 
 type APIOption struct {
-	Source   map[int16]string
-	Analyzer map[int16]string
+	Source   map[int16]string `json:"source"`
+	Analyzer map[int16]string `json:"analyzer"`
 }
 
 type APIKey struct {
-	ID   int16
-	Name string
-	Icon string
-	Key  string
+	ID   int16  `json:"id"`
+	Name string `json:"name"`
+	Icon string `json:"icon"`
+	Key  string `json:"key"`
 }
 
 func (apikey APIKey) InputID() string {
@@ -343,9 +343,14 @@ func APIEndpointFromDBModel(page Page, apiVer string, rows []*model.ListEndpoint
 
 type APIEndpointPage struct {
 	Page
-	API      string
-	Version  string
-	Endpoint string
+	API        string
+	SelectOpts []SelectOpts
+	Version    string
+	Endpoint   string
+}
+
+func (apiEP APIEndpointPage) HasSelectOpts() bool {
+	return len(apiEP.SelectOpts) > 0
 }
 
 type ResultSecectorPage struct {
