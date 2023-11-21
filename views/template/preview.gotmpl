@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {{template "head" .Page.HeadConent}}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/list.js/2.3.1/list.min.js"></script>
+    <script src="/static/js/preview_funcs.js"></script>
+    <link rel="stylesheet" href="/static/css/result_table.css">
+    <title>{{.Page.Title}}</title>
+</head>
+
+<body>
+    <section class="width-background">
+        <div class="mid-card">
+            <form action="" method="post" class="data-form">
+                <div class="table-container" id="item-table">
+                    <div class="search-bar">
+                        <label for="search" class="hide"></label>
+                        <input type="search" name="search" id="search" class="fuzzy-search" placeholder="Search...">
+                    </div>
+                    <form action="" class="pure-form">
+                        <table class="pure-table pure-table-horizontal striped-table">
+                            <thead>
+                                <tr>
+                                    <th title="select all" style="width: 1rem; min-width: 1.5rem;">
+                                        <input type="checkbox" name="select-all" id="select-all">
+                                    </th>
+                                    <th title="title" class="sort sort-by-title" data-sort="title">Title and Description
+                                    </th>
+                                    <th title="publication date" class="sort sort-by-pubDate" data-sort="pubDate"
+                                        style="width: 7rem; min-width: 84px;">
+                                        <i class="fa-solid fa-calendar-days"></i>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="list">
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
+                <button type="button" class="btn" onclick="getPreviewItems(pcid)">More</button>
+            </form>
+        </div>
+    </section>
+</body>
+
+</html>

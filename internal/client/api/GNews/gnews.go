@@ -10,12 +10,12 @@ import (
 )
 
 func init() {
-	cli.RegisterPageForm(
+	cli.RegisterHandler(
 		srv.GNewsHeadlines{},
 		TopHeadlinesHandler{},
 		EPform2client)
 
-	cli.RegisterPageForm(
+	cli.RegisterHandler(
 		srv.GNewsSearch{},
 		SearchHandler{},
 		EPform2client)

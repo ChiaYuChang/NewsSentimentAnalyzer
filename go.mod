@@ -17,6 +17,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/milvus-io/milvus-sdk-go/v2 v2.3.0
 	github.com/nitishm/go-rejson/v4 v4.1.1-0.20230331060235-d2aa875760e4
+	github.com/oklog/ulid/v2 v2.1.0
 	github.com/redis/go-redis/v9 v9.0.2
 	github.com/rs/zerolog v1.29.1
 	github.com/spf13/pflag v1.0.5
@@ -86,4 +87,5 @@ require (
 	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
+	nhooyr.io/websocket v1.8.10 // indirect
 )

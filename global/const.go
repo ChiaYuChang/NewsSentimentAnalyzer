@@ -20,3 +20,15 @@ const (
 	CacheExpireShort    time.Duration = 3 * time.Minute     //  3 minutes
 	CacheExpireInstant  time.Duration = 10 * time.Second    // 10 seconds
 )
+
+const (
+	PREVIEW_CACHE_KEY_PREFIX   = "PCID-"
+	PREVIEW_CACHE_KEY_SUFFIX   = ""
+	PREVIEW_CACHE_KEY_SALT_LEN = 32
+)
+
+const (
+	JWT_SECRET_CACHE_PREFIX = "JWT-SECRET-"
+	JWT_SECRET_CACHE_SUFFIX = ""
+	JWT_SECRET_CACHE_NUM    = 3
+)

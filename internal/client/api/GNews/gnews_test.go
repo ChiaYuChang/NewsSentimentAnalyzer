@@ -200,20 +200,23 @@ func TestHeadlinesHandler(t *testing.T) {
 
 	// mock a database
 	Cache := map[string]*api.PreviewCache{}
-	NItem := 0
+	NItem := 9
 
 	// user's first request
-	req, err := h.Handle(TEST_API_KEY, pf)
+	ckey, cache, err := h.Handle(TEST_API_KEY, TEST_USER_ID, pf)
 	require.NoError(t, err)
-	require.NotNil(t, req)
+	require.NotEmpty(t, ckey)
+	require.NotNil(t, cache)
 
-	ckey, cache := req.ToPreviewCache(TEST_USER_ID)
 	Cache[ckey] = cache
 	require.NotZero(t, ckey)
 	require.NotNil(t, cache)
 
 	for i := 1; i <= 10; i++ {
 		// make API request
+		req, err := h.RequestFromCacheQuery(cache.Query)
+		require.NoError(t, err)
+
 		httpReq, err := req.ToHttpRequest()
 		require.NoError(t, err)
 		require.NotNil(t, httpReq)
@@ -246,24 +249,20 @@ func TestHeadlinesHandler(t *testing.T) {
 		require.True(t, ok)
 		cache.SetNextPage(next)
 
-		if next.Equal(api.IntLastPageToken) {
-			// last page
-			require.Nil(t, prev)
-			require.Equal(t, 0, len(prev))
-			require.Equal(t, len(tc.Filename), i)
-			break
-		} else {
-			require.Less(t, 0, len(prev))
-			NItem += len(prev)
-
+		if len(prev) > 0 {
 			// append items to cache
 			cache.NewsItem = append(cache.NewsItem, prev...)
 			Cache[ckey] = cache
+
+		}
+
+		if next.Equal(api.IntLastPageToken) {
+			break
 		}
 
 		// next client request comes in
 		// build request from cache
-		req, err = cli.RequestFromPreviewCache(cache)
+		req, err = h.RequestFromCacheQuery(cache.Query)
 		require.NoError(t, err)
 	}
 	require.Equal(t, NItem, len(Cache[ckey].NewsItem))

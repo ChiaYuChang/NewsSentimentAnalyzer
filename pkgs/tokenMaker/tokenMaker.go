@@ -87,6 +87,7 @@ type Payload interface {
 	GetUsername() string
 	GetUserInfo() UserInfo
 	GetUserID() uuid.UUID
+	GetSecretID() uuid.UUID
 	GetSessionID() string
 	fmt.Stringer
 }
@@ -94,6 +95,7 @@ type Payload interface {
 type UserInfo struct {
 	UserName  string    `json:"username"`
 	Role      Role      `json:"role"`
+	SID       uuid.UUID `json:"sid"`
 	UID       uuid.UUID `json:"uid"`
 	Timestamp int64     `json:"timestamp"`
 }

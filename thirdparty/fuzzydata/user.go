@@ -11,8 +11,8 @@ import (
 )
 
 var UserRole = []model.Role{
-	model.RoleUser,
-	model.RoleAdmin,
+	RoleUser,
+	RoleAdmin,
 }
 
 type Password []byte
@@ -37,8 +37,9 @@ type UserItem struct {
 	UpdatedAt   time.Time  `json:"updated_at"`
 }
 
-func (u UserItem) Password() ([]byte, error) {
-	return bcrypt.GenerateFromPassword(u.RawPassword, bcrypt.DefaultCost)
+func (u UserItem) Password() (string, error) {
+	b, err := bcrypt.GenerateFromPassword(u.RawPassword, bcrypt.DefaultCost)
+	return string(b), err
 }
 
 func NewUsers(n int) User {
@@ -49,24 +50,24 @@ func NewUsers(n int) User {
 	var rts []time.Time
 	rts = rg.GenRdnTimes(2, TIME_MIN, TIME_MAX)
 	us.Item[0] = UserItem{
-		Id:          uuid.New(),
-		RawPassword: []byte("password"),
+		Id:          TEST_USER_UID,
+		RawPassword: []byte(TEST_USER_PASSWORD),
 		FirstName:   rg.Must(rg.Alphabet.GenRdmString(3 + rand.Intn(17))),
 		LastName:    rg.Must(rg.Alphabet.GenRdmString(3 + rand.Intn(17))),
-		Role:        UserRole[0],
-		Email:       "test@example.com",
+		Role:        RoleUser,
+		Email:       TEST_USER_EAMIL,
 		CreatedAt:   rts[0],
 		UpdatedAt:   rts[1],
 	}
 
 	rts = rg.GenRdnTimes(2, TIME_MIN, TIME_MAX)
 	us.Item[1] = UserItem{
-		Id:          uuid.New(),
-		RawPassword: []byte("password"),
+		Id:          TEST_ADMIN_USER_UID,
+		RawPassword: []byte(TEST_USER_PASSWORD),
 		FirstName:   rg.Must(rg.Alphabet.GenRdmString(3 + rand.Intn(17))),
 		LastName:    rg.Must(rg.Alphabet.GenRdmString(3 + rand.Intn(17))),
-		Role:        UserRole[1],
-		Email:       "admin@example.com",
+		Role:        RoleAdmin,
+		Email:       TEST_ADMIN_USER_EAMIL,
 		CreatedAt:   rts[0],
 		UpdatedAt:   rts[1],
 	}

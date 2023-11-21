@@ -3,6 +3,7 @@ package gnews
 import (
 	"bytes"
 	"context"
+	"crypto/rand"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -15,6 +16,7 @@ import (
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/parser"
+	"github.com/oklog/ulid/v2"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
@@ -65,8 +67,9 @@ func (resp Response) ToNewsItemList() (next api.NextPageToken, preview []api.New
 			global.Logger.Error().Err(err).Msg("content processing failed")
 			continue
 		}
+		id, _ := ulid.New(ulid.Timestamp(time.Now()), rand.Reader)
 		preview[i] = api.NewsPreview{
-			Id:          i,
+			Id:          id,
 			Title:       article.Title,
 			Link:        article.Link,
 			Description: article.Description,

@@ -145,7 +145,7 @@ func (req Request) ToPreviewCache(uid uuid.UUID) (cKey string, c *api.PreviewCac
 	return req.RequestProto.ToPreviewCache(uid, api.StrNextPageToken(req.Page), nil)
 }
 
-func RequestFromPreviewCache(cq api.CacheQuery) (api.Request, error) {
+func RequestFromCacheQuery(cq api.CacheQuery) (api.Request, error) {
 	if cq.NextPage.Equal(api.StrLastPageToken) {
 		return nil, api.ErrNotNextPage
 	}

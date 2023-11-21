@@ -2,13 +2,8 @@ var pagerCache = new Map();
 var detailCache = new Map();
 
 addEventListener("DOMContentLoaded", (event) => {
-    console.log("showLoadingAnimation")
     showLoadingAnimation();
-
-    console.log("updatePageButton")
     updatePageButton();
-
-    console.log("getJobs")
     getJobs();
 });
 
@@ -89,9 +84,8 @@ function updatePageButton() {
 }
 
 function updateQuery(jstatus, n) {
+    // status not change
     if (pager.jstatus === jstatus) {
-        // debug only
-        // console.log(`current status "${jstatus}" not change`)
         return
     }
 
@@ -149,8 +143,6 @@ function newList(data) {
         data[i]["onclick"] = `getJobDetails(${data[i]["job-id"]})`
     }
 
-    console.log(data)
-
     var options = {
         valueNames: [
             "job-id", "job-status", "job-news_src", "job-analyzer",
@@ -171,13 +163,13 @@ async function getJobs() {
 
     let ckey = getKey(pager.jstatus, pager.page)
     if (pagerCache.has(ckey)) {
-        console.log("use cache")
+        // use cache
         let data = pagerCache.get(ckey)["data"];
         pager.fjid = data[data.length - 1]["job-id"];
         pager.tjid = data[0]["job-id"];
         newList(data)
     } else {
-        console.log("fetch new data")
+        // fetch new data
         for (const key in pager) {
             fdata.append(key, pager[key]);
         }
@@ -228,7 +220,7 @@ async function getJobDetails(id) {
     detailEl.setAttribute("job-id", data["job-id"]);
 
     tr = document.createElement("tr")
-    var detailsfields = [
+    var detailsFields = [
         {
             "row_header": "Job ID",
             "field_name": "job-id",
@@ -276,7 +268,7 @@ async function getJobDetails(id) {
         },
     ]
 
-    detailsfields.forEach((f) => {
+    detailsFields.forEach((f) => {
         let tr = document.createElement("tr")
         let th = document.createElement("th")
         th.textContent = f.row_header

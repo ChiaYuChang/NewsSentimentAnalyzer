@@ -30,12 +30,6 @@ const (
 	IntLastPageToken = IntNextPageToken(-1)
 )
 
-const (
-	CACHE_KEY_PREFIX   = "preview-cache-"
-	CACHE_KEY_SUFFIX   = ""
-	CACHE_KEY_SALE_LEN = 32
-)
-
 const QueryOriPageKey = true
 
 func QueryOriginalPageContext(ctx context.Context) context.Context {

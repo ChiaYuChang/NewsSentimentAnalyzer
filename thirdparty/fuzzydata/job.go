@@ -10,11 +10,11 @@ import (
 )
 
 var JobStatus = []model.JobStatus{
-	model.JobStatusCreated,
-	model.JobStatusRunning,
-	model.JobStatusDone,
-	model.JobStatusFailed,
-	model.JobStatusCanceled,
+	JobStatusCreated,
+	JobStatusRunning,
+	JobStatusDone,
+	JobStatusFailed,
+	JobStatusCanceled,
 }
 
 type Job struct {
@@ -50,6 +50,8 @@ func (t NullableTime) Format(layout string) string {
 }
 
 func NewJobs(maxJobN int, apis []APIItem, users []UserItem) Job {
+	minJobN := MIN_NUM_JOBS
+
 	srcApis := []int{}
 	llmApis := []int{}
 	for _, api := range apis {
@@ -66,9 +68,12 @@ func NewJobs(maxJobN int, apis []APIItem, users []UserItem) Job {
 
 	jss := NewSampler(JobStatus, []float64{0.3, 0.3, 0.3, 0.07, 0.03})
 	for i := 0; i < len(users); i++ {
-		n := rand.Intn(maxJobN-20) + 20
 		owner := users[i]
-		// fmt.Println(owner.Id, n)
+		n := rand.Intn(maxJobN-minJobN) + minJobN
+		if owner.Id == TEST_ADMIN_USER_UID || owner.Id == TEST_USER_UID {
+			n = maxJobN
+		}
+
 		for j := 0; j < n; j++ {
 			srcApi := apis[srcApis[rand.Intn(len(srcApis))]-1]
 			llmApi := apis[llmApis[rand.Intn(len(llmApis))]-1]
@@ -94,9 +99,9 @@ func NewJobs(maxJobN int, apis []APIItem, users []UserItem) Job {
 		switch jobs.Item[i].Status {
 		default:
 			ut = ct
-		case "running", "done", "failed":
+		case JobStatusRunning, JobStatusDone, JobStatusFailed:
 			ut = rg.GenRdnTime(cts[i], TIME_MAX)
-		case "canceled":
+		case JobStatusCanceled:
 			ut = rg.GenRdnTime(cts[i], TIME_MAX)
 			// dt = NullableTime{Time: ut, Valid: true}
 		}

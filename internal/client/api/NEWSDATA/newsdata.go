@@ -10,17 +10,17 @@ import (
 )
 
 func init() {
-	cli.RegisterPageForm(
+	cli.RegisterHandler(
 		srv.NEWSDATAIOLatestNews{},
 		LatestNewsHandler{},
 		EPform2client)
 
-	cli.RegisterPageForm(
+	cli.RegisterHandler(
 		srv.NEWSDATAIONewsArchive{},
 		NewsArchiveHandler{},
 		EPform2client)
 
-	cli.RegisterPageForm(
+	cli.RegisterHandler(
 		srv.NEWSDATAIONewsSources{},
 		NewsSourcesHandler{},
 		EPform2client)

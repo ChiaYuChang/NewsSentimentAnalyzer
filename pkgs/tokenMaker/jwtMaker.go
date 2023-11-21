@@ -1,11 +1,15 @@
 package tokenmaker
 
 import (
+	"context"
+	"crypto/rand"
 	"fmt"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/cache"
 	ec "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/errorCode"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
@@ -90,6 +94,10 @@ func (c JWTClaims) GetUserID() uuid.UUID {
 	return c.UID
 }
 
+func (c JWTClaims) GetSecretID() uuid.UUID {
+	return c.SID
+}
+
 func (c JWTClaims) GetSessionID() string {
 	return fmt.Sprintf("%s-%s",
 		strconv.FormatInt(c.Timestamp, 10),
@@ -168,17 +176,21 @@ type JWTMaker struct {
 	secret      []byte
 	ExpireAfter time.Duration
 	ValidAfter  time.Duration
-	SignMethod  jwt.SigningMethod
-	Options     map[string]JWTClaimsOpt
+	Cache       *struct {
+		Store *cache.RedsiStore
+		Key   []string
+	}
+	SignMethod jwt.SigningMethod
+	Options    map[string]JWTClaimsOpt
 }
 
 func NewJWTMaker(secret []byte, signMethodAlg string, signMethodSize int, expireAfter, validAfter time.Duration) JWTMaker {
 	return JWTMaker{
-		secret,
-		expireAfter,
-		validAfter,
-		GetJWTSignMethod(signMethodAlg, signMethodSize),
-		map[string]JWTClaimsOpt{}}
+		secret:      secret,
+		ExpireAfter: expireAfter,
+		ValidAfter:  validAfter,
+		SignMethod:  GetJWTSignMethod(signMethodAlg, signMethodSize),
+		Options:     map[string]JWTClaimsOpt{}}
 }
 
 func NewJWTMakerWithDefaultVal() JWTMaker {
@@ -197,10 +209,25 @@ func (jm JWTMaker) GetSecret() []byte {
 	return srct
 }
 
+func (jm *JWTMaker) SetCacheStore(store *cache.RedsiStore) {
+	jm.Cache.Store = store
+	jm.Cache.Key = make([]string, global.JWT_SECRET_CACHE_NUM)
+}
+
+func (jm *JWTMaker) GetSecretFromStore(ctx context.Context, key string) {
+	jm.Cache.Store.Get(ctx, key)
+}
+
 func (jm *JWTMaker) UpdateSecret(secret []byte) *JWTMaker {
 	jm.secret = make([]byte, len(secret))
 	copy(jm.secret, secret)
 	return jm
+}
+
+func (jm *JWTMaker) UpdateRandomSecret() ([]byte, *JWTMaker) {
+	secret := make([]byte, len(jm.secret))
+	_, _ = rand.Read(secret)
+	return secret, jm.UpdateSecret(secret)
 }
 
 func (jm *JWTMaker) WithSigningMethod(alg string, size int) *JWTMaker {
@@ -227,6 +254,10 @@ func (jm JWTMaker) MakeToken(username string, uid uuid.UUID, role Role) (string,
 			UID:       uid,
 			Timestamp: time.Now().Unix(),
 		},
+	}
+	if jm.Cache != nil {
+		// TODO read secret from db
+		claims.SID = uuid.UUID{}
 	}
 
 	claims.IssuedAt = jwt.NewNumericDate(currTime)

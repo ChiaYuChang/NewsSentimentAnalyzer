@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model"
 	cm "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/cookieMaker"
 	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm"
@@ -25,6 +27,7 @@ import (
 	"github.com/go-playground/mold/v4"
 	val "github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5"
+	"github.com/redis/go-redis/v9"
 )
 
 type APIRepo struct {
@@ -522,7 +525,7 @@ func (repo APIRepo) GetJobDetail(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	req.ParseForm()
+	_ = req.ParseForm()
 	jIdStr := chi.URLParam(req, "jId")
 	jId, err := convert.StrTo(jIdStr).Int()
 	w.Header().Set("Content-Type", "application/json")
@@ -577,4 +580,138 @@ func (repo APIRepo) GetResultSelector(w http.ResponseWriter, req *http.Request) 
 			Err(err).
 			Msg("error executing template result_selector.gotmpl")
 	}
+}
+
+func (repo APIRepo) GetPreview(w http.ResponseWriter, req *http.Request) {
+	pageData := object.ResultSecectorPage{
+		Page: object.Page{
+			HeadConent: view.SharedHeadContent(),
+			Title:      "Result Selector",
+		},
+	}
+
+	_ = req.ParseForm()
+	err := repo.View.ExecuteTemplate(w, "preview.gotmpl", pageData)
+	if err != nil {
+		global.Logger.Error().
+			Err(err).
+			Msg("error executing template preivew.gotmpl")
+	}
+}
+
+type PreviewResponse struct {
+	Error *PreviewError     `json:"error,omitempty"`
+	Items []api.NewsPreview `json:"items"`
+}
+
+type PreviewError struct {
+	Code        int      `json:"code,omitempty"`
+	Message     string   `json:"message,omitempty"`
+	Detail      []string `json:"details,omitempty"`
+	RedirectURL string   `json:"url,omitempty"`
+}
+
+func (repo APIRepo) GetFetchNextPage(w http.ResponseWriter, req *http.Request) {
+	_ = req.ParseForm()
+	pcid := chi.URLParam(req, "pcid")
+
+	prev, ecErr := repo.getFetchNextPage(pcid)
+	for i := range prev {
+		// remove content before marshaling
+		prev[i].Content = ""
+	}
+
+	respObj := PreviewResponse{Items: prev}
+	if ecErr != nil {
+		respObj.Error = &PreviewError{
+			Code:    ecErr.HttpStatusCode,
+			Message: ecErr.Message,
+			Detail:  ecErr.Details,
+		}
+		switch ecErr.HttpStatusCode {
+		case http.StatusBadRequest:
+			respObj.Error.RedirectURL = global.AppVar.App.RoutePattern.ErrorPage["bad-request"]
+		case http.StatusGone:
+			respObj.Error.RedirectURL = global.AppVar.App.RoutePattern.ErrorPage["gone"]
+		case http.StatusInternalServerError:
+			respObj.Error.RedirectURL = global.AppVar.App.RoutePattern.ErrorPage["internal-server-error"]
+		}
+	}
+
+	bprev, _ := json.Marshal(respObj)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(bprev)
+}
+
+func (repo APIRepo) getFetchNextPage(pcid string) ([]api.NewsPreview, *ec.Error) {
+	b, err := repo.Cache.JSONGet(pcid, ".query")
+	if err != nil {
+		var ecErr *ec.Error
+		if err == redis.Nil {
+			ecErr = ec.MustGetEcErr(ec.ECGone).
+				WithDetails("cache expired")
+		} else {
+			ecErr = ec.MustGetEcErr(ec.ECServerError).
+				WithDetails("error getting query cache").
+				WithDetails(err.Error())
+		}
+		return nil, ecErr
+	}
+
+	// read cache.query
+	var cq api.CacheQuery
+	err = json.Unmarshal(b.([]byte), &cq)
+	if err != nil {
+		global.Logger.Debug().Err(err).Msg("error unmarshal cq")
+	}
+
+	handler, err := client.HandlerRepo.GetByCacheQuery(cq)
+	if err != nil {
+		return nil, ec.MustGetEcErr(ec.ECServerError).
+			WithDetails("error while get handler from client.HandlerRepo").
+			WithDetails(err.Error())
+	}
+
+	// rebuild query from cache
+	req, err := handler.RequestFromCacheQuery(cq)
+	if err != nil {
+		return nil, ec.MustGetEcErr(ec.ECServerError).
+			WithDetails("error while .RequestFromCacheQuery").
+			WithDetails(err.Error())
+	}
+
+	global.Logger.Info().
+		Str("uid", cq.UserId.String()).
+		Str("salt", cq.Salt).
+		Str("rawQuery", cq.RawQuery).
+		Str("nextPage", cq.NextPage.String()).
+		Msg("rebuild cache query ok")
+
+	// do request
+	resp, err := client.HandlerRepo.Do(req, handler)
+	if err != nil {
+		return nil, ec.MustGetEcErr(ec.ECServerError).
+			WithDetails("error while .Do").
+			WithDetails(err.Error())
+	}
+
+	// append prev to cache
+	next, prev := resp.ToNewsItemList()
+	if _, err := repo.Cache.JSONArrAppend(pcid, ".news_item", prev); err != nil {
+		return nil, ec.MustGetEcErr(ec.ECServerError).
+			WithDetails("error while appending preview items to cache").
+			WithDetails("error append prev to cache").
+			WithDetails(err.Error())
+	}
+
+	// set next page token to cache
+	if _, err := repo.Cache.JSONSet(pcid, ".query.next_page", next); err != nil {
+		global.Logger.Debug().Err(err).Msg("error ")
+		return nil, ec.MustGetEcErr(ec.ECServerError).
+			WithDetails("error while set next page token to cache").
+			WithDetails("error append prev to cache").
+			WithDetails(err.Error())
+	}
+	return prev, nil
 }

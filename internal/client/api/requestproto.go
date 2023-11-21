@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
 	"github.com/google/uuid"
 )
 
@@ -90,6 +91,11 @@ func (reqproto RequestProto) ToPreviewCache(uid uuid.UUID, next NextPageToken, o
 		NewsItem:  []NewsPreview{},
 		CreatedAt: time.Now().UTC(),
 	}
-	_ = c.AddRandomSalt(CACHE_KEY_SALE_LEN)
-	return c.Key(CACHE_KEY_PREFIX, CACHE_KEY_SUFFIX), c
+
+	_ = c.AddRandomSalt(global.PREVIEW_CACHE_KEY_SALT_LEN)
+
+	return c.Key(
+		global.PREVIEW_CACHE_KEY_PREFIX,
+		global.PREVIEW_CACHE_KEY_SUFFIX,
+	), c
 }

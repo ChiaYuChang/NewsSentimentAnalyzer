@@ -25,15 +25,14 @@ type APIKeyItem struct {
 func NewApiKeys(apis []APIItem, users []UserItem) APIKey {
 	apikeys := APIKey{}
 
-	kl := []int{16, 32, 52}
-	s := NewSampler([]rune{'0', 'x', '-'}, []float64{0.6, 0.35, 0.05})
+	s := NewSampler(API_KEY_CHAR_SET, API_KEY_CHAR_PROB)
 	for _, u := range users {
 		for _, a := range apis {
-			if rand.Float64() < a.Probability {
+			if (u.Id == TEST_ADMIN_USER_UID || u.Id == TEST_USER_UID) || rand.Float64() < a.Probability {
 				apikeys.Item = append(apikeys.Item, APIKeyItem{
 					Owner: u.Id,
 					APIId: a.Id,
-					Key:   string(s.GetN(kl[rand.Intn(len(kl))])),
+					Key:   string(s.GetN(API_KEY_LENGTH[rand.Intn(len(API_KEY_LENGTH))])),
 				})
 			}
 		}

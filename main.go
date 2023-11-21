@@ -79,7 +79,16 @@ func main() {
 	)
 	cookieMaker.SetDefaultCookieMaker(cm)
 
-	addr := fmt.Sprintf("%s:%d", viper.GetString("APP_HOST"), viper.GetInt("APP_PORT"))
+	addr := fmt.Sprintf(
+		"%s:%d",
+		viper.GetString("APP_HOST"),
+		viper.GetInt("APP_PORT"))
+
+	global.Logger.Info().
+		Str("addr", addr).
+		Time("time", time.Now()).
+		Msg("Server started")
+
 	server := &http.Server{
 		Addr:    addr,
 		Handler: router.NewRouter(srvc, rds, vw, tm, cm),
@@ -90,7 +99,9 @@ func main() {
 	signal.Notify(signalChan, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM)
 	go func(signalChan chan os.Signal) {
 		sig := <-signalChan
-		fmt.Printf("Get %v\n", sig)
+		global.Logger.Info().
+			Str("Signal", sig.String()).
+			Msgf("Get %v\n", sig)
 
 		shutdownCtx, shutdownCancel := context.WithTimeout(serverCtx, 30*time.Second)
 		defer shutdownCancel()
@@ -98,7 +109,9 @@ func main() {
 		go func() {
 			<-shutdownCtx.Done()
 			if shutdownCtx.Err() == context.DeadlineExceeded {
-				global.Logger.Error().Msg("graceful shutdown timed out.. forcing exit.")
+				global.Logger.Error().
+					Err(shutdownCtx.Err()).
+					Msg("graceful shutdown timed out.. forcing exit.")
 				os.Exit(0)
 			}
 		}()

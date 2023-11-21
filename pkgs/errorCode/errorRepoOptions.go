@@ -40,6 +40,7 @@ func WithClientErr() ErrorRepoOption {
 			{ECUnsupportedMediaType, http.StatusUnsupportedMediaType, "the media format of the requested data is not supported by the server"},
 			{ECUnprocessableContent, http.StatusUnprocessableEntity, "the request could not be process by server"},
 			{ECInvalidParams, http.StatusBadRequest, "invalid parameters"},
+			{ECGone, http.StatusGone, "the requested content has been permanently deleted from server"},
 		} {
 			err := repo.RegisterErr(e.code, e.status, e.msg)
 			if err != nil {

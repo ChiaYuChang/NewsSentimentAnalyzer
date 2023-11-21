@@ -1,6 +1,7 @@
 package googlecse
 
 import (
+	"crypto/rand"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/utils"
+	"github.com/oklog/ulid/v2"
 )
 
 type Response struct {
@@ -47,14 +49,11 @@ func (resp Response) Len() int {
 }
 
 func (resp Response) ToNewsItemList() (api.NextPageToken, []api.NewsPreview) {
-	if !resp.HasNext() {
-		return api.IntLastPageToken, nil
-	}
-
 	preview := make([]api.NewsPreview, resp.Len())
 	for i, item := range resp.Items {
+		id, _ := ulid.New(ulid.Timestamp(time.Now()), rand.Reader)
 		preview[i] = api.NewsPreview{
-			Id:          i,
+			Id:          id,
 			Title:       item.Title,
 			Link:        item.Link.String(),
 			Description: item.PageMap.Description(),
@@ -64,7 +63,10 @@ func (resp Response) ToNewsItemList() (api.NextPageToken, []api.NewsPreview) {
 		}
 	}
 
-	return api.IntNextPageToken(resp.Queries.NextPage[0].StartIndex), preview
+	if resp.HasNext() {
+		return api.IntNextPageToken(resp.Queries.NextPage[0].StartIndex), preview
+	}
+	return api.IntLastPageToken, preview
 }
 
 type SearchInformation struct {

@@ -85,13 +85,12 @@ func (repo AuthRepo) PostSignIn(w http.ResponseWriter, req *http.Request) {
 
 	var auth pageform.AuthInfo
 	repo.FormDecoder.Decode(&auth, req.PostForm)
-	repo.FormModifier.Struct(req.Context(), &auth)
 
-	global.Logger.Debug().Msg("check db")
 	err, uid, role := repo.Service.User().
 		Login(context.Background(), auth.Email, auth.Password)
 
 	if err != nil {
+		global.Logger.Info().Msg("login error")
 		data := object.LoginPage{
 			Page: object.Page{
 				HeadConent: view.NewHeadContent(),
@@ -164,15 +163,6 @@ func (repo AuthRepo) PostSignUp(w http.ResponseWriter, req *http.Request) {
 	if err := repo.FormDecoder.Decode(&signUpInfo, req.PostForm); err != nil {
 		ecErr := ec.MustGetEcErr(ec.ECBadRequest)
 		ecErr.WithDetails(fmt.Sprintf("error while get auth info: %s", err))
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(ecErr.HttpStatusCode)
-		w.Write(ecErr.MustToJson())
-		return
-	}
-
-	if err := repo.FormModifier.Struct(req.Context(), &signUpInfo); err != nil {
-		ecErr := ec.MustGetEcErr(ec.ECBadRequest)
-		ecErr.WithDetails(fmt.Sprintf("error while modifying auth info: %s", err))
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(ecErr.HttpStatusCode)
 		w.Write(ecErr.MustToJson())

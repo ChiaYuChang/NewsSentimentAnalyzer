@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	cli.RegisterPageForm(
+	cli.RegisterHandler(
 		srv.GoogleCSE{},
 		CSEHandler{},
 		EPform2client)

@@ -2,12 +2,14 @@ package view
 
 import (
 	"bytes"
+	"fmt"
 	"html/template"
 	"net/http"
 	"sync"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view/object"
+	"github.com/spf13/viper"
 )
 
 type headContentSingleton struct {
@@ -162,7 +164,7 @@ var ErrorPage401 = object.ErrorPage{
 	ErrorMessage:       "Unauthorized",
 	ErrorDetail:        "You are not authorized to access this page.",
 	ShouldAutoRedirect: true,
-	RedirectPageUrl:    "/login",
+	RedirectPageUrl:    global.AppVar.App.RoutePattern.Page["sign-in"],
 	RedirectPageName:   "log in page",
 	CountDownFrom:      5,
 }
@@ -181,6 +183,17 @@ var ErrorPage404 = object.ErrorPage{
 	ErrorMessage:       "Page not found",
 	ErrorDetail:        "The page you are looking for may have been moved, deleted, or possibly never existed.",
 	ShouldAutoRedirect: false,
+}
+
+var ErrorPage410 = object.ErrorPage{
+	Page:               object.Page{HeadConent: SharedHeadContent(), Title: "410 error"},
+	ErrorCode:          http.StatusGone,
+	ErrorMessage:       "Gone",
+	ErrorDetail:        "The requested resource is no longer available at the server and no forwarding address is known.",
+	ShouldAutoRedirect: true,
+	RedirectPageUrl:    fmt.Sprintf("/%s%s", viper.GetString("APP_API_VERSION"), global.AppVar.App.RoutePattern.Page["endpoints"]),
+	RedirectPageName:   "welcome page",
+	CountDownFrom:      5,
 }
 
 var ErrorPage429 = object.ErrorPage{

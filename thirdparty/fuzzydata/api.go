@@ -7,11 +7,6 @@ import (
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model"
 )
 
-const (
-	APITypeSource = model.ApiTypeSource
-	APITypeLLM    = model.ApiTypeLanguageModel
-)
-
 type APIList []APIItem
 
 func (a APIList) N() int {

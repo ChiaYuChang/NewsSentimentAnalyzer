@@ -127,9 +127,15 @@ func NewRouter(srvc service.Service, rds *cache.RedsiStore, vw view.View,
 
 	r.Get(rp.Page["sign-out"], auth.GetSignOut)
 
+	// client side error
 	r.Get(rp.ErrorPage["unauthorized"], errHandlerRepo.Unauthorized)
 	r.Get(rp.ErrorPage["bad-request"], errHandlerRepo.BadRequest)
 	r.Get(rp.ErrorPage["too-many-request"], errHandlerRepo.TooManyRequests)
+	r.Get(rp.ErrorPage["gone"], errHandlerRepo.Gone)
+
+	// server side error
+	r.Get(rp.ErrorPage["internal-server-error"], errHandlerRepo.InternalServerError)
+
 	r.Get("/*", errHandlerRepo.SeeOther("/sign-in"))
 
 	r.Route(fmt.Sprintf("/%s", apiRepo.Version), func(r chi.Router) {
@@ -178,7 +184,7 @@ func NewRouter(srvc service.Service, rds *cache.RedsiStore, vw view.View,
 					}
 
 					if epGetAPISelectOptionsHandlerFun, err := epRepo.GetAPISelectOptions(key); err == nil {
-						r.Get(fmt.Sprintf("/%s/opts.js", key.String()), epGetAPISelectOptionsHandlerFun)
+						r.Get(fmt.Sprintf("/%s/opts.js", key.APIName()), epGetAPISelectOptionsHandlerFun)
 					} else {
 						global.Logger.
 							Error().
@@ -189,7 +195,8 @@ func NewRouter(srvc service.Service, rds *cache.RedsiStore, vw view.View,
 				r.Get("/*", errHandlerRepo.NotFound)
 			})
 
-		r.Get("/result", apiRepo.GetResultSelector)
+		r.Get("/preview/{pcid}", apiRepo.GetPreview)
+		r.Get("/preview/fetch-next-page/{pcid}", apiRepo.GetFetchNextPage)
 
 		r.Get(rp.ErrorPage["forbidden"], errHandlerRepo.Forbidden)
 		r.Get("/*", errHandlerRepo.NotFound)

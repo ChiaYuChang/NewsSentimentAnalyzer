@@ -102,20 +102,6 @@ func (m *MockPayload) EXPECT() *MockPayloadMockRecorder {
 	return m.recorder
 }
 
-// GetKey mocks base method.
-func (m *MockPayload) GetKey() string {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetKey")
-	ret0, _ := ret[0].(string)
-	return ret0
-}
-
-// GetKey indicates an expected call of GetKey.
-func (mr *MockPayloadMockRecorder) GetKey() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetKey", reflect.TypeOf((*MockPayload)(nil).GetKey))
-}
-
 // GetRole mocks base method.
 func (m *MockPayload) GetRole() tokenmaker.Role {
 	m.ctrl.T.Helper()
@@ -128,6 +114,34 @@ func (m *MockPayload) GetRole() tokenmaker.Role {
 func (mr *MockPayloadMockRecorder) GetRole() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRole", reflect.TypeOf((*MockPayload)(nil).GetRole))
+}
+
+// GetSecretID mocks base method.
+func (m *MockPayload) GetSecretID() uuid.UUID {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetSecretID")
+	ret0, _ := ret[0].(uuid.UUID)
+	return ret0
+}
+
+// GetSecretID indicates an expected call of GetSecretID.
+func (mr *MockPayloadMockRecorder) GetSecretID() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSecretID", reflect.TypeOf((*MockPayload)(nil).GetSecretID))
+}
+
+// GetSessionID mocks base method.
+func (m *MockPayload) GetSessionID() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetSessionID")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GetSessionID indicates an expected call of GetSessionID.
+func (mr *MockPayloadMockRecorder) GetSessionID() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSessionID", reflect.TypeOf((*MockPayload)(nil).GetSessionID))
 }
 
 // GetUserID mocks base method.

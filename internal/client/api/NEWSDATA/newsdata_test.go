@@ -222,11 +222,12 @@ func TestParseResponse(t *testing.T) {
 func TestLatestNewsHandler(t *testing.T) {
 	type testCase struct {
 		Name         string
-		Handler      client.PageFormHandler
+		Handler      client.Handler
 		PageForm     pageform.PageForm
 		RawQueryTest func(t *testing.T, rawquery string)
 		Endpoint     string
 		Filename     map[string]string
+		NItem        int
 	}
 
 	tcs := []testCase{{
@@ -243,6 +244,7 @@ func TestLatestNewsHandler(t *testing.T) {
 			"16903560911db4c680d9b2461ebe967794a90f1b3f": "example_response/latest_news_2.json",
 		},
 		Endpoint: cli.EPLatestNews,
+		NItem:    13,
 	}}
 
 	mux := chi.NewRouter()
@@ -277,20 +279,22 @@ func TestLatestNewsHandler(t *testing.T) {
 		tc := tcs[i]
 		t.Run(tc.Name, func(t *testing.T) {
 			Cache := map[string]*api.PreviewCache{}
-			NItem := 0
 
 			// user's first request
-			req, err := tc.Handler.Handle(TEST_API_KEY, tc.PageForm)
+			ckey, cache, err := tc.Handler.Handle(TEST_API_KEY, TEST_USER_ID, tc.PageForm)
 			require.NoError(t, err)
-			require.NotNil(t, req)
+			require.NotNil(t, cache)
+			require.NotEmpty(t, ckey)
 
-			ckey, cache := req.ToPreviewCache(TEST_USER_ID)
 			Cache[ckey] = cache
 			require.NotZero(t, ckey)
 			require.NotNil(t, cache)
 
 			// should stop when i == len(tc.Filename)
 			for i := 1; i <= len(tc.Filename)+1; i++ {
+				req, err := tc.Handler.RequestFromCacheQuery(cache.Query)
+				require.NoError(t, err)
+
 				httpReq, err := req.ToHttpRequest()
 				require.NoError(t, err)
 				require.NotNil(t, httpReq)
@@ -324,27 +328,22 @@ func TestLatestNewsHandler(t *testing.T) {
 				cache, ok := Cache[ckey]
 				require.True(t, ok)
 				cache.SetNextPage(next)
-
-				if next.Equal(api.StrLastPageToken) {
-					require.Nil(t, prev)
-					require.Equal(t, 0, len(prev))
-					require.Equal(t, len(tc.Filename), i)
-					break
-				} else {
-					require.Less(t, 0, len(prev))
-					NItem += len(prev)
-
+				if len(prev) > 0 {
 					// append items to cache
 					cache.NewsItem = append(cache.NewsItem, prev...)
 					Cache[ckey] = cache
 				}
 
+				if next.Equal(api.StrLastPageToken) {
+					break
+				}
+
 				// next client request comes in
 				// build request from cache
-				req, err = cli.RequestFromPreviewCache(cache.Query)
+				req, err = cli.RequestFromCacheQuery(cache.Query)
 				require.NoError(t, err)
 			}
-			require.Equal(t, NItem, len(Cache[ckey].NewsItem))
+			require.Equal(t, tc.NItem, len(Cache[ckey].NewsItem))
 		})
 	}
 }
@@ -358,12 +357,12 @@ func TestNewsArchiveHandler(t *testing.T) {
 		Country:  []string{srv.Taiwan, srv.UnitedStates},
 	}
 
-	q, err := h.Handle(TEST_API_KEY, pf)
+	ckey, cache, err := h.Handle(TEST_API_KEY, TEST_USER_ID, pf)
 	require.NoError(t, err)
-	require.NotNil(t, q)
+	require.NotNil(t, cache)
+	require.NotEmpty(t, ckey)
 
-	qs := q.Encode()
-	t.Log(qs)
+	qs := cache.Query.RawQuery
 	require.Contains(t, qs, "country=")
 	require.Contains(t, qs, "language=")
 	require.NotContains(t, qs, "from=0001-01-01")
@@ -379,16 +378,19 @@ func TestNewsSourcesHandler(t *testing.T) {
 		Category: []string{srv.Business, srv.Environment},
 	}
 
-	q, err := h.Handle(TEST_API_KEY, pf)
+	ckey, cache, err := h.Handle(TEST_API_KEY, TEST_USER_ID, pf)
 	require.NoError(t, err)
-	require.NotNil(t, q)
+	require.NotNil(t, cache)
+	require.NotEmpty(t, ckey)
 
-	qs := q.Encode()
+	qs := cache.Query.RawQuery
 	require.Contains(t, qs, "country=")
 	require.Contains(t, qs, "language=")
 	require.Contains(t, qs, "category=")
 
-	r, err := q.ToHttpRequest()
+	req, err := h.RequestFromCacheQuery(cache.Query)
+	require.NoError(t, err)
+	r, err := req.ToHttpRequest()
 	require.NoError(t, err)
 	require.NotNil(t, r)
 
@@ -413,7 +415,10 @@ func TestWriteToRedis(t *testing.T) {
 	}
 
 	rh := rejson.NewReJSONHandler()
-	defer rdb.Close()
+	defer func() {
+		err := rdb.Close()
+		require.NoError(t, err)
+	}()
 
 	rh.SetGoRedisClientWithContext(context.Background(), rdb)
 	h := cli.LatestNewsHandler{}
@@ -470,13 +475,10 @@ func TestWriteToRedis(t *testing.T) {
 	NItem := 0
 
 	// user's first request
-	req, err := h.Handle(TEST_API_KEY, pf)
+	ckey, cache, err := h.Handle(TEST_API_KEY, TEST_USER_ID, pf)
 	require.NoError(t, err)
-	require.NotNil(t, req)
-
-	ckey, cache := req.ToPreviewCache(TEST_USER_ID)
-	require.NotZero(t, ckey)
 	require.NotNil(t, cache)
+	require.NotEmpty(t, ckey)
 
 	err = cache.AddRandomSalt(64)
 	require.NoError(t, err)
@@ -490,6 +492,9 @@ func TestWriteToRedis(t *testing.T) {
 
 	// should stop when i == len(tc.Filename)
 	for i := 1; i <= len(tc.Filename)+1; i++ {
+		req, err := h.RequestFromCacheQuery(cache.Query)
+		require.NoError(t, err)
+
 		httpReq, err := req.ToHttpRequest()
 		require.NoError(t, err)
 		require.NotNil(t, httpReq)
@@ -517,19 +522,21 @@ func TestWriteToRedis(t *testing.T) {
 		rh.JSONSet(ckey, ".query.next_page", next)
 		cache.SetNextPage(next)
 
-		if next.Equal(api.StrLastPageToken) {
-			require.Nil(t, prev)
-			require.Equal(t, 0, len(prev))
-			require.Equal(t, len(tc.Filename), i)
-			break
-		} else {
-			require.Less(t, 0, len(prev))
+		if len(prev) > 0 {
 			NItem += len(prev)
+			t.Logf("add %d items\n", len(prev))
 
 			// append items to cache
 			for j := range prev {
 				rh.JSONArrAppend(ckey, ".news_item", prev[j])
 			}
+			l, err := rh.JSONArrLen(ckey, ".news_item")
+			require.NoError(t, err)
+			t.Logf("n items: %d\n", l.(int64))
+		}
+
+		if next.Equal(api.StrLastPageToken) {
+			break
 		}
 
 		// next client request comes in
@@ -543,7 +550,7 @@ func TestWriteToRedis(t *testing.T) {
 		err = json.Unmarshal(b.([]byte), &cq)
 		require.NoError(t, err)
 
-		req, err = cli.RequestFromPreviewCache(cq)
+		req, err = cli.RequestFromCacheQuery(cq)
 		require.NoError(t, err)
 	}
 

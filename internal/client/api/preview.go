@@ -10,15 +10,16 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/oklog/ulid/v2"
 )
 
 type NewsPreview struct {
-	Id          int       `json:"id"                  redis:"id"`
+	Id          ulid.ULID `json:"id"                  redis:"id"`
 	Title       string    `json:"title"               redis:"title"`
 	Link        string    `json:"link"                redis:"link"`
 	Description string    `json:"description"         redis:"description"`
 	Category    string    `json:"category,omitempty"  redis:"category"`
-	Content     string    `json:"content"             redis:"content"`
+	Content     string    `json:"content,omitempty"   redis:"content"`
 	PubDate     time.Time `json:"publication_date"    redis:"publication_date"`
 }
 
@@ -26,16 +27,10 @@ type PreviewCache struct {
 	Query     CacheQuery    `json:"query"      redis:"query"`
 	CreatedAt time.Time     `json:"created_at" redis:"created_at"`
 	NewsItem  []NewsPreview `json:"news_item"  redis:"news_item"`
-	end       int           `json:"-"          redis:"-"`
 }
 
 func (cache *PreviewCache) AppendNewsItem(items ...NewsPreview) {
-	var i int
 	cache.NewsItem = append(cache.NewsItem, items...)
-	for i = cache.end; i < cache.Len(); i++ {
-		cache.NewsItem[i].Id = i + 1
-	}
-	cache.end = i
 }
 
 func (cache PreviewCache) Len() int {

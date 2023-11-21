@@ -6,7 +6,6 @@ import (
 	"context"
 	"crypto/sha1"
 	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -60,9 +59,9 @@ type EndpointRepo struct {
 	apiRepo          APIRepo
 	val              *val.Validate
 	PageView         map[EndpointRepoKey]string
-	PageSelectOption map[EndpointRepoKey]string
 	PageTemplateName map[EndpointRepoKey]string
 	ApiID            map[EndpointRepoKey]int16
+	PageSelectOption map[string]string
 }
 
 func NewEndpointRepo(apiRepo APIRepo, v *val.Validate) EndpointRepo {
@@ -70,9 +69,9 @@ func NewEndpointRepo(apiRepo APIRepo, v *val.Validate) EndpointRepo {
 		apiRepo:          apiRepo,
 		val:              v,
 		PageView:         make(map[EndpointRepoKey]string),
-		PageSelectOption: make(map[EndpointRepoKey]string),
 		PageTemplateName: make(map[EndpointRepoKey]string),
 		ApiID:            make(map[EndpointRepoKey]int16),
+		PageSelectOption: make(map[string]string),
 	}
 }
 
@@ -94,12 +93,23 @@ func (repo *EndpointRepo) RegisterEndpointsPageView(apiName string, apiId int16,
 	pageData.SelectOpts = f.SelectionOpts()
 
 	key := NewRepoMapKey(apiName, endpointName)
-
 	repo.PageTemplateName[key] = templateName
+	if err = repo.genPageView(key, templateName, pageData); err != nil {
+		return fmt.Errorf("error while generating page view: %w", err)
+	}
 
+	if err = repo.genSelectOptionsScript(key, pageData, true); err != nil {
+		return fmt.Errorf("error while generating select options: %w", err)
+	}
+
+	repo.ApiID[key] = apiId
+	return nil
+}
+
+func (repo EndpointRepo) genPageView(key EndpointRepoKey, templateName string, pageData object.APIEndpointPage) error {
 	buf := bytes.NewBuffer(nil)
 	gz, _ := gzip.NewWriterLevel(buf, gzip.BestCompression)
-	err = repo.apiRepo.View.ExecuteTemplate(gz, templateName, pageData)
+	err := repo.apiRepo.View.ExecuteTemplate(gz, templateName, pageData)
 	if err != nil {
 		return err
 	}
@@ -107,24 +117,43 @@ func (repo *EndpointRepo) RegisterEndpointsPageView(apiName string, apiId int16,
 	if err := gz.Close(); err != nil {
 		return fmt.Errorf("error while compressing page: %w", err)
 	}
+
 	ctext := buf.Bytes()
 	repo.PageView[key] = key.CacheKey(ctext)
-	repo.apiRepo.Cache.Set(
+	cmd := repo.apiRepo.Cache.Set(
 		context.Background(), repo.PageView[key],
 		ctext, global.CacheExpireDefault)
+	return cmd.Err()
+}
 
-	buf = bytes.NewBuffer(nil)
-	err = repo.apiRepo.View.ExecuteTemplate(buf, "options.gotmpl", pageData.SelectOpts)
+func (repo EndpointRepo) genSelectOptionsScript(key EndpointRepoKey, pageData object.APIEndpointPage, minify bool) error {
+	if _, ok := repo.PageSelectOption[key.APIName()]; ok {
+		return nil
+	}
+
+	originalScriptBuf := bytes.NewBuffer(nil)
+	err := repo.apiRepo.View.ExecuteTemplate(originalScriptBuf, "options.gotmpl", pageData.SelectOpts)
 	if err != nil {
 		return err
 	}
-	repo.PageSelectOption[key] = key.CacheKey(buf.Bytes())
-	repo.apiRepo.Cache.Set(
-		context.Background(), repo.PageSelectOption[key],
-		buf.Bytes(), global.CacheExpireDefault)
 
-	repo.ApiID[key] = apiId
-	return nil
+	if minify {
+		minifiedScrptbuf := bytes.NewBuffer(nil)
+		if err := global.Minifier().Minify("application/javascript", minifiedScrptbuf, originalScriptBuf); err != nil {
+			return fmt.Errorf("error while minifying options: %w", err)
+		}
+		repo.PageSelectOption[key.APIName()] = key.CacheKey(minifiedScrptbuf.Bytes())
+		cmd := repo.apiRepo.Cache.Set(
+			context.Background(), repo.PageSelectOption[key.APIName()],
+			minifiedScrptbuf.Bytes(), global.CacheExpireDefault)
+		return cmd.Err()
+	}
+
+	repo.PageSelectOption[key.APIName()] = key.CacheKey(originalScriptBuf.Bytes())
+	cmd := repo.apiRepo.Cache.Set(
+		context.Background(), repo.PageSelectOption[key.APIName()],
+		originalScriptBuf.Bytes(), global.CacheExpireDefault)
+	return cmd.Err()
 }
 
 func (repo EndpointRepo) getCache(ctx context.Context, key EndpointRepoKey, ckey string) ([]byte, error) {
@@ -168,7 +197,7 @@ func (repo EndpointRepo) GetAPIEndpoints(key EndpointRepoKey) (http.HandlerFunc,
 }
 
 func (repo EndpointRepo) GetAPISelectOptions(key EndpointRepoKey) (http.HandlerFunc, error) {
-	ckey, ok := repo.PageSelectOption[key]
+	ckey, ok := repo.PageSelectOption[key.APIName()]
 	if !ok {
 		return nil, ErrEndpointNotFount
 	}
@@ -236,59 +265,51 @@ func (repo EndpointRepo) PatchAPIEndpoints(key EndpointRepoKey) (http.HandlerFun
 	}, nil
 }
 
-func postEndpoints(repo EndpointRepo, pageform pf.PageForm, userInfo tokenmaker.Payload, w http.ResponseWriter, httpReq *http.Request) {
-	type JSONResponse struct {
-		CacheKey          string            `json:"cache_key"`
-		StatusCode        int               `json:"status_code"`
-		Message           string            `json:"message"`
-		Details           []string          `json:"details"`
-		NewsSourseRequest api.Request       `json:"news-src-request"`
-		LLMRequest        map[string]string `json:"llm-request"`
+func (repo EndpointRepo) Do(req api.Request, handler client.Handler) (api.Response, error) {
+	httpReq, err := req.ToHttpRequest()
+	if err != nil {
+		return nil, err
 	}
 
-	var jsonResp JSONResponse
-	w.Header().Add("Content-Type", "application/json")
+	httpResp, err := http.DefaultClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+
+	return handler.Parse(httpResp)
+}
+
+func postEndpoints(repo EndpointRepo, pageform pf.PageForm, userInfo tokenmaker.Payload,
+	w http.ResponseWriter, httpReq *http.Request) {
 
 	userInfo, ok := httpReq.Context().Value(global.CtxUserInfo).(tokenmaker.Payload)
 	if !ok {
-		ecErr := ec.MustGetEcErr(ec.ECServerError)
-		jsonResp.StatusCode = ecErr.HttpStatusCode
-		jsonResp.Message = ecErr.Message
-		jsonResp.Details = append(jsonResp.Details, "user information not found")
-		b, _ := json.MarshalIndent(jsonResp, "", "    ")
+		ecErr := ec.MustGetEcErr(ec.ECServerError).
+			WithDetails("user info missing")
 		w.WriteHeader(ecErr.HttpStatusCode)
-		w.Write(b)
+		w.Write(ecErr.MustToJson())
 		return
 	}
-
-	global.Logger.Info().
-		Str("user_id", userInfo.GetUserID().String()).
-		Str("user_role", userInfo.GetRole().String()).
-		Msg("Get User Info OK")
 
 	if err := httpReq.ParseForm(); err != nil {
-		global.Logger.Error().
-			Err(err).
-			Msg("error while calling .ParseForm method")
+		ecErr := ec.MustGetEcErr(ec.ECBadRequest).
+			WithDetails("error while .ParseForm").
+			WithDetails(err.Error())
+		w.WriteHeader(ecErr.HttpStatusCode)
+		w.Write(ecErr.MustToJson())
 		return
 	}
-	global.Logger.Info().
-		Msg("Parse form OK")
 
 	pageform, err := pageform.FormDecodeAndValidate(
 		repo.apiRepo.FormDecoder, repo.val, httpReq.PostForm)
 	if err != nil {
-		ecErr := ec.MustGetEcErr(ec.ECBadRequest)
-		jsonResp.StatusCode = ecErr.HttpStatusCode
-		jsonResp.Message = ecErr.Message
-		jsonResp.Details = append(jsonResp.Details, err.Error())
-		b, _ := json.MarshalIndent(jsonResp, "", "    ")
+		ecErr := ec.MustGetEcErr(ec.ECBadRequest).
+			WithDetails("error while .FormDecodeAndValidate").
+			WithDetails(err.Error())
 		w.WriteHeader(ecErr.HttpStatusCode)
-		w.Write(b)
+		w.Write(ecErr.MustToJson())
 		return
 	}
-	global.Logger.Info().
-		Msg("Decode and Validate OK")
 
 	apikey, _ := repo.apiRepo.Service.APIKey().Get(
 		httpReq.Context(), &service.APIKeyGetRequest{
@@ -297,69 +318,29 @@ func postEndpoints(repo EndpointRepo, pageform pf.PageForm, userInfo tokenmaker.
 		},
 	)
 
-	req, err := client.PageFormHandlerRepo.Handle(apikey.Key, pageform)
+	handler, err := client.HandlerRepo.Get(pageform.API(), pageform.Endpoint())
 	if err != nil {
-		global.Logger.Error().
-			Err(err).
-			Msg("error while calling .NewQueryFromPageFrom method")
-
-		ecErr := ec.MustGetEcErr(ec.ECServerError)
-		jsonResp.StatusCode = ecErr.HttpStatusCode
-		jsonResp.Message = ecErr.Message
-		jsonResp.Details = append(jsonResp.Details, err.Error())
-		b, _ := json.MarshalIndent(jsonResp, "", "    ")
+		ecErr := ec.MustGetEcErr(ec.ECServerError).
+			WithDetails("error while calling .PageFormHandlerRepo.Get method").
+			WithDetails(err.Error())
 		w.WriteHeader(ecErr.HttpStatusCode)
-		w.Write(b)
+		w.Write(ecErr.MustToJson())
 		return
 	}
 
-	ckey, cache := req.ToPreviewCache(userInfo.GetUserID())
-	if repo.apiRepo.Cache != nil {
-		_, _ = repo.apiRepo.Cache.JSONSet(ckey, ".", cache)
-		_ = repo.apiRepo.Cache.Expire(httpReq.Context(), ckey, 10*time.Minute)
-		jsonResp.CacheKey = ckey
-	} else {
-		global.Logger.Warn().
-			Str("uid", cache.Query.UserId.String()).
-			Time("created_at", cache.CreatedAt).
-			Msg("Cache is nil")
-	}
-
-	llmRequest := map[string]string{
-		"id":    "1",
-		"query": "{}",
-	}
-
-	jsonResp.StatusCode = http.StatusOK
-	jsonResp.Message = "OK"
-
-	jsonResp.LLMRequest = llmRequest
-	jsonResp.NewsSourseRequest = req
-
-	b, err := json.MarshalIndent(jsonResp, "", "    ")
+	ckey, cache, err := handler.Handle(apikey.Key, userInfo.GetUserID(), pageform)
 	if err != nil {
-		global.Logger.Error().
-			Err(err).
-			Msg("error while calling .NewQueryFromPageFrom method")
-
-		ecErr := ec.MustGetEcErr(ec.ECServerError)
-		jsonResp.StatusCode = ecErr.HttpStatusCode
-		jsonResp.Message = ecErr.Message
-		jsonResp.Details = append(jsonResp.Details, err.Error())
-		b, _ := json.MarshalIndent(jsonResp, "", "    ")
+		ecErr := ec.MustGetEcErr(ec.ECServerError).
+			WithDetails("error while calling .NewQueryFromPageFrom method").
+			WithDetails(err.Error())
 		w.WriteHeader(ecErr.HttpStatusCode)
-		w.Write(b)
+		w.Write(ecErr.MustToJson())
 		return
 	}
 
-	cookie := repo.apiRepo.CookieMaker.NewCookie(COOKIE_PREVIEW_CID, ckey)
-	http.SetCookie(w, cookie)
+	_, _ = repo.apiRepo.Cache.JSONSet(ckey, ".", cache)
+	_ = repo.apiRepo.Cache.Expire(httpReq.Context(), ckey, 10*time.Minute)
 
-	w.WriteHeader(jsonResp.StatusCode)
-	w.Write(b)
+	http.Redirect(w, httpReq, fmt.Sprintf("/v1/preview/%s", ckey), http.StatusSeeOther)
 	return
 }
-
-// func patchEndpoints() {
-// 	client.PageFormHandlerRepo.
-// }

@@ -1,11 +1,11 @@
 package api_test
 
 import (
+	"crypto/rand"
 	"crypto/tls"
 	"errors"
 	"fmt"
 	"io"
-	"math/rand"
 	"net/http"
 	"net/http/httptest"
 	"testing"

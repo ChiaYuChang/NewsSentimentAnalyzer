@@ -247,24 +247,24 @@ func (r Request) ToPreviewCache(uid uuid.UUID) (cKey string, c *api.PreviewCache
 	return r.RequestProto.ToPreviewCache(uid, api.IntNextPageToken(1), nil)
 }
 
-func RequestFromPreviewCache(c *api.PreviewCache) (api.Request, error) {
-	if c.Query.NextPage.Equal(api.IntLastPageToken) {
+func RequestFromCacheQuery(cq api.CacheQuery) (api.Request, error) {
+	if cq.NextPage.Equal(api.IntLastPageToken) {
 		return nil, api.ErrEndOfQuery
 	}
 
 	var err error
-	req := NewRequest(c.Query.API.Key)
-	_, err = req.SetEndpoint(c.Query.API.Endpoint)
+	req := NewRequest(cq.API.Key)
+	_, err = req.SetEndpoint(cq.API.Endpoint)
 	if err != nil {
 		return nil, fmt.Errorf("error while set endpoint: %w", err)
 	}
 
-	req.Values, err = url.ParseQuery(c.Query.RawQuery)
+	req.Values, err = url.ParseQuery(cq.RawQuery)
 	if err != nil {
 		return nil, err
 	}
 
-	i, ok := c.Query.NextPage.(api.IntNextPageToken)
+	i, ok := cq.NextPage.(api.IntNextPageToken)
 	if !ok {
 		return nil, api.ErrTypeAssertionFailure
 	}

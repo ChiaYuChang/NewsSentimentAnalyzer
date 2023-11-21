@@ -49,6 +49,7 @@ func NewErrorHandlerRepo(tmpl *template.Template, store *cache.RedsiStore) (Erro
 		http.StatusUnauthorized:        view.ErrorPage401,
 		http.StatusForbidden:           view.ErrorPage403,
 		http.StatusNotFound:            view.ErrorPage404,
+		http.StatusGone:                view.ErrorPage410,
 		http.StatusTooManyRequests:     view.ErrorPage429,
 		http.StatusInternalServerError: view.ErrorPage500,
 	}
@@ -152,6 +153,11 @@ func (repo ErrorHandlerRepo) Forbidden(w http.ResponseWriter, req *http.Request)
 // 404 error
 func (repo ErrorHandlerRepo) NotFound(w http.ResponseWriter, req *http.Request) {
 	repo.fetchErrorPage(http.StatusNotFound, w, req)
+}
+
+// 410 error
+func (repo ErrorHandlerRepo) Gone(w http.ResponseWriter, req *http.Request) {
+	repo.fetchErrorPage(http.StatusGone, w, req)
 }
 
 // 426 error

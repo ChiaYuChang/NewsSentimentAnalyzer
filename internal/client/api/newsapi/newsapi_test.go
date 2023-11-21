@@ -178,10 +178,11 @@ func TestParseResponse(t *testing.T) {
 func TestHandlers(t *testing.T) {
 	type testCase struct {
 		Name     string
-		Handler  client.PageFormHandler
+		Handler  client.Handler
 		PageForm pageform.PageForm
 		Endpoint string
 		Filename map[string]string
+		NItem    int
 	}
 
 	ft, err := time.Parse(time.DateOnly, "2023-06-30")
@@ -202,6 +203,7 @@ func TestHandlers(t *testing.T) {
 				"3": "example_response/top-headlines_3.json",
 			},
 			Endpoint: cli.EPTopHeadlines,
+			NItem:    12,
 		},
 		{
 			Name:    "everything",
@@ -224,6 +226,7 @@ func TestHandlers(t *testing.T) {
 				"4": "example_response/everything_4.json",
 			},
 			Endpoint: cli.EPEverything,
+			NItem:    24,
 		},
 	}
 
@@ -262,19 +265,21 @@ func TestHandlers(t *testing.T) {
 		t.Run(tc.Name, func(t *testing.T) {
 			// mock a redis db
 			Cache := map[string]*api.PreviewCache{}
-			NItem := 0
 
 			// user first request
-			req, err := tc.Handler.Handle(TEST_API_KEY, tc.PageForm)
+			ckey, cache, err := tc.Handler.Handle(TEST_API_KEY, TEST_USER_ID, tc.PageForm)
 			require.NoError(t, err)
-			require.NotNil(t, req)
+			require.NotNil(t, cache)
+			require.NotEmpty(t, ckey)
 
-			ckey, cache := req.ToPreviewCache(TEST_USER_ID)
 			Cache[ckey] = cache
 			require.NotZero(t, ckey)
 			require.NotNil(t, cache)
 
 			for i := 1; i <= 10; i++ {
+				req, err := tc.Handler.RequestFromCacheQuery(cache.Query)
+				require.NoError(t, err)
+
 				httpReq, err := req.ToHttpRequest()
 				require.NoError(t, err)
 				require.NotNil(t, httpReq)
@@ -307,26 +312,21 @@ func TestHandlers(t *testing.T) {
 				require.True(t, ok)
 				cache.SetNextPage(next)
 
-				if next.Equal(api.IntLastPageToken) {
-					// last page
-					require.Nil(t, prev)
-					require.Equal(t, 0, len(prev))
-					require.Equal(t, len(tc.Filename), i)
-					break
-				} else {
-					require.Less(t, 0, len(prev))
-					NItem += len(prev)
-
+				if len(prev) > 0 {
 					// append items to cache
 					cache.NewsItem = append(cache.NewsItem, prev...)
 					Cache[ckey] = cache
 				}
+
+				if next.Equal(api.IntLastPageToken) {
+					break
+				}
 				// next client request comes in
 				// build request from cache
-				req, err = newsapi.RequestFromPreviewCache(cache)
+				req, err = newsapi.RequestFromCacheQuery(cache.Query)
 				require.NoError(t, err)
 			}
-			require.Equal(t, NItem, len(Cache[ckey].NewsItem))
+			require.Equal(t, tc.NItem, len(Cache[ckey].NewsItem))
 		})
 	}
 }

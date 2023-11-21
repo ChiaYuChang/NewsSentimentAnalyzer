@@ -3,6 +3,7 @@ package newsdata
 import (
 	"bytes"
 	"context"
+	"crypto/rand"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -14,6 +15,7 @@ import (
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/parser"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
+	"github.com/oklog/ulid/v2"
 )
 
 type Response struct {
@@ -48,14 +50,11 @@ func (resp Response) String() string {
 }
 
 func (resp Response) ToNewsItemList() (next api.NextPageToken, preview []api.NewsPreview) {
-	if !resp.HasNext() {
-		return api.StrLastPageToken, nil
-	}
-
 	preview = make([]api.NewsPreview, len(resp.Articles))
 	for i, article := range resp.Articles {
+		id, _ := ulid.New(ulid.Timestamp(time.Now()), rand.Reader)
 		preview[i] = api.NewsPreview{
-			Id:          i,
+			Id:          id,
 			Title:       article.Title,
 			Link:        article.Link,
 			Description: article.Description,
@@ -64,7 +63,11 @@ func (resp Response) ToNewsItemList() (next api.NextPageToken, preview []api.New
 			PubDate:     time.Time(article.PublishedAt),
 		}
 	}
-	return api.StrNextPageToken(resp.NextPage), preview
+
+	if resp.HasNext() {
+		return api.StrNextPageToken(resp.NextPage), preview
+	}
+	return api.StrLastPageToken, preview
 }
 
 // convert response to model.CreateNewsParams and return by a channel

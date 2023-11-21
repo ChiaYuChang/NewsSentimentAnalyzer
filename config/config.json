@@ -72,7 +72,9 @@
         "unauthorized": "/unauthorized",
         "bad-request": "/bad-request",
         "forbidden": "/forbidden",
-        "too-many-request": "/too-many-request"
+        "too-many-request": "/too-many-request",
+        "gone": "/gone",
+        "internal-server-error": "/internal-server-error"
       },
       "staticPage": "/static/*",
       "healthCheck": "/health-check"

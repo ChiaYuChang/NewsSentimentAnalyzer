@@ -276,10 +276,10 @@ func (req Request) ToPreviewCache(uid uuid.UUID) (cKey string, c *api.PreviewCac
 	other[qpPageSize.String()] = strconv.Itoa(req.PageSize)
 
 	return req.RequestProto.ToPreviewCache(
-		uid, api.IntNextPageToken(req.Start+req.PageSize), other)
+		uid, api.IntNextPageToken(req.Start), other)
 }
 
-func RequestFromPreviewCache(cq api.CacheQuery) (api.Request, error) {
+func RequestFromCacheQuery(cq api.CacheQuery) (api.Request, error) {
 	if cq.NextPage.Equal(api.IntLastPageToken) {
 		// last page
 		return nil, api.ErrNotNextPage
