@@ -67,13 +67,13 @@ var Endpoints = EndpointList{
 		CreatedAt:    TIME_MIN,
 		UpdatedAt:    TIME_MIN,
 	},
-	{
-		Name:         "Sources",
-		APIId:        3,
-		TemplateName: "NewsAPI-sources.gotmpl",
-		CreatedAt:    TIME_MIN,
-		UpdatedAt:    TIME_MIN,
-	},
+	// {
+	// 	Name:         "Sources",
+	// 	APIId:        3,
+	// 	TemplateName: "NewsAPI-sources.gotmpl",
+	// 	CreatedAt:    TIME_MIN,
+	// 	UpdatedAt:    TIME_MIN,
+	// },
 	{
 		Name:         "Custom Search",
 		APIId:        4,

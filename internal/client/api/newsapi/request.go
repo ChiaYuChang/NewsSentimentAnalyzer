@@ -223,28 +223,28 @@ func (r *Request) SetEndpoint(ep string) (*Request, error) {
 	return r, nil
 }
 
-func (r *Request) ToHttpRequest() (*http.Request, error) {
-	httpReq, err := r.RequestProto.ToHTTPRequest(API_URL, API_METHOD, nil)
+func (req *Request) ToHttpRequest() (*http.Request, error) {
+	httpReq, err := req.RequestProto.ToHTTPRequest(API_URL, API_METHOD, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	p, err := r.Params.Clone()
+	p, err := req.Params.Clone()
 	if err != nil {
 		return nil, err
 	}
 
-	httpReq.Header.Set(AuthorizationHeader, r.APIKey())
-	if r.Page > 1 {
+	httpReq.Header.Set(AuthorizationHeader, req.APIKey())
+	if req.Page > 1 {
 		// default: page=1
-		p.Set(Page, strconv.Itoa(r.Page))
+		p.Set(Page, strconv.Itoa(req.Page))
 	}
 	httpReq.URL.RawQuery = p.Encode()
 	return httpReq, nil
 }
 
-func (r Request) ToPreviewCache(uid uuid.UUID) (cKey string, c *api.PreviewCache) {
-	return r.RequestProto.ToPreviewCache(uid, api.IntNextPageToken(1), nil)
+func (req Request) ToPreviewCache(uid uuid.UUID) (cKey string, c *api.PreviewCache) {
+	return req.RequestProto.ToPreviewCache(uid, api.IntNextPageToken(1), nil)
 }
 
 func RequestFromCacheQuery(cq api.CacheQuery) (api.Request, error) {

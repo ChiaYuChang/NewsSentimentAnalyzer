@@ -30,7 +30,7 @@ const (
 	API_SCHEME                   = "https"
 	API_HOST                     = "newsapi.org"
 	API_PATH                     = ""
-	API_VERSION                  = "v1"
+	API_VERSION                  = "v2"
 	API_METHOD                   = http.MethodGet
 	API_TIME_FORMAT              = "2006-01-02T15:04:05Z"
 	API_RESP_TIME_FMT            = "2006-01-02T15:04:05Z"

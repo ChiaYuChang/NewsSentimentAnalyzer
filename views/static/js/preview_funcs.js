@@ -6,7 +6,7 @@ var data = [];
 function init_list() {
     function item_func(values) {
         return `<tr>
-                    <td><input type='checkbox' class='pure-checkbox' name='item[${values["id"]}]' id='item-id'></td>
+                    <td><input type='checkbox' class='pure-checkbox' name='item[${values["id"]}]' value='${values["id"]}'></td>
                     <td>
                         <a href=${values["link"]}><h5>${values["title"]}</h5></a>
                         <p>${values["description"]}</p>
@@ -29,6 +29,10 @@ async function getPreviewItems(pcid) {
 
     response.json().then(data => {
         console.log(data);
+        if (data["has_next"] === false) {
+            let el = document.getElementById("more");
+            el.classList.add("pure-button-disabled")
+        }
 
         if ("error" in data) {
             console.log(data["error"]);

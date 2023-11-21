@@ -25,6 +25,7 @@ import (
 type Response struct {
 	TotalArticles int       `json:"totalArticles"`
 	Articles      []Article `json:"articles"`
+	Max           int       `json:"-"`
 	CurrPage      int       `json:"-"`
 }
 
@@ -42,7 +43,7 @@ func (resp Response) GetStatus() string {
 }
 
 func (resp Response) HasNext() bool {
-	return resp.Len() > 0
+	return (resp.Len() > 0 && resp.Len() == resp.Max)
 }
 
 // return the number of the articles in the response
@@ -57,9 +58,6 @@ func (resp Response) String() string {
 }
 
 func (resp Response) ToNewsItemList() (next api.NextPageToken, preview []api.NewsPreview) {
-	if !resp.HasNext() {
-		return api.IntLastPageToken, nil
-	}
 	preview = make([]api.NewsPreview, resp.Len())
 	for i, article := range resp.Articles {
 		content, err := resp.ContentProcessFunc(article.Content)
@@ -77,6 +75,10 @@ func (resp Response) ToNewsItemList() (next api.NextPageToken, preview []api.New
 			Content:     content,
 			PubDate:     time.Time(article.PublishedAt),
 		}
+	}
+
+	if !resp.HasNext() {
+		return api.IntLastPageToken, preview
 	}
 	return api.IntNextPageToken(resp.CurrPage + 1), preview
 }
@@ -165,6 +167,19 @@ func extractCurrPageFromResp(resp *http.Response) (int, error) {
 	return page, nil
 }
 
+func extractMaxFromResp(resp *http.Response) (int, error) {
+	maxStr := resp.Request.URL.Query().Get(string(Max))
+	if maxStr == "" {
+		maxStr = "10"
+	}
+
+	max, err := strconv.Atoi(maxStr)
+	if err != nil {
+		return 0, fmt.Errorf("error while converting max string to int: %w", err)
+	}
+	return max, nil
+}
+
 func ParseHTTPResponse(resp *http.Response) (*Response, error) {
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -190,6 +205,12 @@ func ParseHTTPResponse(resp *http.Response) (*Response, error) {
 		return nil, err
 	}
 	apiResponse.CurrPage = page
+
+	max, err := extractMaxFromResp(resp)
+	if err != nil {
+		return nil, err
+	}
+	apiResponse.Max = max
 	return apiResponse, err
 }
 

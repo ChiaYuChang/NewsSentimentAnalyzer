@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api"
@@ -41,7 +42,7 @@ func (resp Response) GetStatus() string {
 }
 
 func (resp Response) HasNext() bool {
-	return len(resp.Queries.NextPage) > 0
+	return len(resp.Queries.NextPage) > 0 && resp.Queries.NextPage[0].StartIndex <= 100
 }
 
 func (resp Response) Len() int {
@@ -49,10 +50,15 @@ func (resp Response) Len() int {
 }
 
 func (resp Response) ToNewsItemList() (api.NextPageToken, []api.NewsPreview) {
-	preview := make([]api.NewsPreview, resp.Len())
-	for i, item := range resp.Items {
+	preview := make([]api.NewsPreview, 0, resp.Len())
+	for _, item := range resp.Items {
+		if item.Title == "" ||
+			strings.ToLower(item.Title) == "untitled" ||
+			item.PageMap.Description() == "" {
+			continue
+		}
 		id, _ := ulid.New(ulid.Timestamp(time.Now()), rand.Reader)
-		preview[i] = api.NewsPreview{
+		preview = append(preview, api.NewsPreview{
 			Id:          id,
 			Title:       item.Title,
 			Link:        item.Link.String(),
@@ -60,7 +66,7 @@ func (resp Response) ToNewsItemList() (api.NextPageToken, []api.NewsPreview) {
 			Category:    item.PageMap.Category(),
 			Content:     "",
 			PubDate:     item.PageMap.PubDate(),
-		}
+		})
 	}
 
 	if resp.HasNext() {

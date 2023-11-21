@@ -6,7 +6,6 @@ INSERT INTO endpoints (
     (3, 'Top Headlines', '2', 'GNews-top_headlines.gotmpl', '2020-01-01 00:00:00', '2020-01-01 00:00:00'),
     (4, 'Everything', '3', 'NewsAPI-everything.gotmpl', '2020-01-01 00:00:00', '2020-01-01 00:00:00'),
     (5, 'Top Headlines', '3', 'NewsAPI-top_headlines.gotmpl', '2020-01-01 00:00:00', '2020-01-01 00:00:00'),
-    (6, 'Sources', '3', 'NewsAPI-sources.gotmpl', '2020-01-01 00:00:00', '2020-01-01 00:00:00'),
-    (7, 'Custom Search', '4', 'GoogleCSE.gotmpl', '2020-01-01 00:00:00', '2020-01-01 00:00:00');
+    (6, 'Custom Search', '4', 'GoogleCSE.gotmpl', '2020-01-01 00:00:00', '2020-01-01 00:00:00');
 
-ALTER SEQUENCE endpoints_id_seq RESTART WITH 8;
+ALTER SEQUENCE endpoints_id_seq RESTART WITH 7;
