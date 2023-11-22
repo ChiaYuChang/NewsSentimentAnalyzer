@@ -15,36 +15,38 @@
 <body>
     <section class="width-background">
         <div class="mid-card">
-            <form action="" method="post" class="data-form">
-                <div class="table-container" id="item-table">
-                    <div class="search-bar">
-                        <label for="search" class="hide"></label>
-                        <input type="search" name="search" id="search" class="fuzzy-search" placeholder="Search...">
-                    </div>
-                    <form action="" class="pure-form">
-                        <table class="pure-table pure-table-horizontal striped-table">
-                            <thead>
-                                <tr>
-                                    <th title="select all" style="width: 1rem; min-width: 1.5rem;">
-                                        <input type="checkbox" name="select-all" id="select-all">
-                                    </th>
-                                    <th title="title" class="sort sort-by-title" data-sort="title">Title and Description
-                                    </th>
-                                    <th title="publication date" class="sort sort-by-pubDate" data-sort="pubDate"
-                                        style="width: 7rem; min-width: 84px;">
-                                        <i class="fa-solid fa-calendar-days"></i>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody class="list">
-                            </tbody>
-                        </table>
-                    </form>
+            <div class="table-container" id="item-table">
+                <div class="search-bar">
+                    <label for="search" class="hide"></label>
+                    <input type="search" name="search" id="search" class="fuzzy-search" placeholder="Search...">
                 </div>
-                <button type="button" class="btn" id="more" onclick="getPreviewItems(pcid)">More</button>
-            </form>
+                <table class="pure-table pure-table-horizontal striped-table">
+                    <thead>
+                        <tr>
+                            <th title="select all" style="width: 1rem; min-width: 1.5rem;">
+                                <input type="checkbox" name="select-all" id="select-all">
+                            </th>
+                            <th title="title" class="sort sort-by-title" data-sort="title">Title and Description
+                            </th>
+                            <th title="publication date" class="sort sort-by-pubDate" data-sort="pubDate"
+                                style="width: 7rem; min-width: 84px;">
+                                <i class="fa-solid fa-calendar-days"></i>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="list">
+                    </tbody>
+                </table>
+            </div>
+            <button type="button" class="btn" id="more" onclick="getPreviewItems(pcid)">More</button>
+            <button type="button" class="btn" id="back" onclick="goToPreviousPage()">Back to Endpoint</button>
+            <button type="button" class="btn" onclick="submit(pcid)">Submit</button>
         </div>
     </section>
 </body>
+
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script type="text/javascript" src="/static/js/toast.js"></script>
 
 </html>

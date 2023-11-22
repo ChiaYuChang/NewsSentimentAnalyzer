@@ -216,7 +216,7 @@ header {
     display: flex;
     font-size: .75rem;
     align-items: center;
-    color: red;
+    color: #ca3c3c;
     gap: 2px;
     padding-top: 3px;
 }
@@ -231,7 +231,7 @@ header {
 }
 
 .highlight-alert {
-    outline: solid red 2px;
+    outline: solid #ca3c3c 2px;
     border-radius: 2px;
     background-color: rgb(255, 235, 235);
 }

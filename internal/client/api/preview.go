@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
 	"github.com/google/uuid"
 	"github.com/oklog/ulid/v2"
 )
@@ -21,6 +22,25 @@ type NewsPreview struct {
 	Category    string    `json:"category,omitempty"  redis:"category"`
 	Content     string    `json:"content,omitempty"   redis:"content"`
 	PubDate     time.Time `json:"publication_date"    redis:"publication_date"`
+}
+
+func (np NewsPreview) ToNewsCreateRequest(guid, language, source string, relatedGuid ...string) *service.NewsCreateRequest {
+	md5Hash, _ := MD5Hash(np.Title, np.PubDate, np.Content)
+	req := &service.NewsCreateRequest{
+		Md5Hash:     md5Hash,
+		Guid:        guid,
+		Author:      nil,
+		Title:       np.Title,
+		Link:        np.Link,
+		Description: np.Description,
+		Language:    language,
+		Content:     []string{np.Content},
+		Category:    np.Category,
+		Source:      source,
+		RelatedGuid: relatedGuid,
+		PublishedAt: np.PubDate,
+	}
+	return req
 }
 
 type PreviewCache struct {

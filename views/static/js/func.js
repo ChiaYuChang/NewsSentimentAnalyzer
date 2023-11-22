@@ -94,3 +94,4 @@ class Switch {
         this.off_func();
     }
 }
+

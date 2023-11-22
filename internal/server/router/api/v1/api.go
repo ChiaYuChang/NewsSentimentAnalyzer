@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"sort"
 	"strings"
 	"time"
 
@@ -599,32 +600,115 @@ func (repo APIRepo) GetPreview(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-type PreviewResponse struct {
-	Error   *PreviewError     `json:"error,omitempty"`
-	HasNext bool              `json:"has_next"`
-	Items   []api.NewsPreview `json:"items"`
-}
+func (repo APIRepo) PostPreview(w http.ResponseWriter, req *http.Request) {
+	resp := pageform.PreviewPostResp{}
+	err := req.ParseForm()
+	if err != nil {
+		ecErr := ec.MustGetEcErr(ec.ECBadRequest).
+			WithDetails("error while ParseForm").
+			WithDetails(err.Error())
+		resp.Error = &pageform.PreviewError{
+			Code:        ecErr.HttpStatusCode,
+			Message:     ecErr.Message,
+			Detail:      ecErr.Details,
+			RedirectURL: global.AppVar.App.RoutePattern.ErrorPage["bad-request"],
+		}
 
-type PreviewError struct {
-	Code        int      `json:"code,omitempty"`
-	Message     string   `json:"message,omitempty"`
-	Detail      []string `json:"details,omitempty"`
-	RedirectURL string   `json:"url,omitempty"`
+		b, _ := json.Marshal(resp)
+		w.WriteHeader(ecErr.HttpStatusCode)
+		w.Write(b)
+		return
+	}
+
+	pcid := chi.URLParam(req, "pcid")
+	var pf pageform.PreviewPostForm
+	repo.FormDecoder.Decode(&pf, req.Form)
+
+	res, err := repo.Cache.JSONGet(pcid, ".news_item")
+	if err != nil {
+		ecErr := ec.MustGetEcErr(ec.ECBadRequest).
+			WithDetails("error while get cache").
+			WithDetails(err.Error())
+		resp.Error = &pageform.PreviewError{
+			Code:        ecErr.HttpStatusCode,
+			Message:     ecErr.Message,
+			Detail:      ecErr.Details,
+			RedirectURL: global.AppVar.App.RoutePattern.ErrorPage["internal-server-error"],
+		}
+
+		b, _ := json.Marshal(resp)
+		w.WriteHeader(ecErr.HttpStatusCode)
+		w.Write(b)
+		return
+	}
+
+	sort.Sort(sort.StringSlice(pf.Item))
+	var prev []api.NewsPreview
+	err = json.Unmarshal(res.([]byte), &prev)
+	if err != nil {
+		ecErr := ec.MustGetEcErr(ec.ECBadRequest).
+			WithDetails("error while unmarshaling cache").
+			WithDetails(err.Error())
+		resp.Error = &pageform.PreviewError{
+			Code:        ecErr.HttpStatusCode,
+			Message:     ecErr.Message,
+			Detail:      ecErr.Details,
+			RedirectURL: global.AppVar.App.RoutePattern.ErrorPage["internal-server-error"],
+		}
+
+		b, _ := json.Marshal(resp)
+		w.WriteHeader(ecErr.HttpStatusCode)
+		w.Write(b)
+		return
+	}
+
+	var selectedPrev []api.NewsPreview
+	if pf.SelectAll {
+		selectedPrev = prev
+	} else {
+		selectedPrev := make([]api.NewsPreview, 0, len(prev))
+		for _, p := range prev {
+			_, ok := sort.Find(len(pf.Item), func(i int) int {
+				return strings.Compare(p.Id.String(), pf.Item[i])
+			})
+			if ok {
+				selectedPrev = append(selectedPrev, p)
+			}
+		}
+	}
+
+	global.Logger.Info().Int("n", len(selectedPrev)).Msg("OK")
+	resp.RedirectURL = fmt.Sprintf("/%s%s", repo.Version, global.AppVar.App.RoutePattern.Page["welcome"])
+	b, _ := json.Marshal(resp)
+	w.WriteHeader(http.StatusOK)
+	w.Write(b)
+	return
 }
 
 func (repo APIRepo) GetFetchNextPage(w http.ResponseWriter, req *http.Request) {
-	_ = req.ParseForm()
-	pcid := chi.URLParam(req, "pcid")
+	var prev []api.NewsPreview
+	var hasNext bool
+	var ecErr *ec.Error
+	var resp api.Response
+	var pcid string
+	var cq api.CacheQuery
 
-	prev, hasNext, ecErr := repo.getFetchNextPage(pcid)
+	_ = req.ParseForm()
+	pcid = chi.URLParam(req, "pcid")
+
+	if cq, ecErr = getCacheQuery(repo, pcid); ecErr == nil {
+		if resp, ecErr = fetchNextPage(cq); ecErr == nil {
+			prev, hasNext, ecErr = getPreviewsAndUpdateCache(repo, pcid, resp)
+		}
+	}
+
 	for i := range prev {
-		// remove content before marshaling
 		prev[i].Content = ""
 	}
 
-	respObj := PreviewResponse{Items: prev, HasNext: hasNext}
+	respObj := pageform.PreviewResponse{Items: prev, HasNext: hasNext}
 	if ecErr != nil {
-		respObj.Error = &PreviewError{
+		respObj.Error = &pageform.PreviewError{
 			Code:    ecErr.HttpStatusCode,
 			Message: ecErr.Message,
 			Detail:  ecErr.Details,
@@ -645,7 +729,9 @@ func (repo APIRepo) GetFetchNextPage(w http.ResponseWriter, req *http.Request) {
 	w.Write(bprev)
 }
 
-func (repo APIRepo) getFetchNextPage(pcid string) ([]api.NewsPreview, bool, *ec.Error) {
+func getCacheQuery(repo APIRepo, pcid string) (api.CacheQuery, *ec.Error) {
+	var cq api.CacheQuery
+
 	b, err := repo.Cache.JSONGet(pcid, ".query")
 	if err != nil {
 		var ecErr *ec.Error
@@ -657,19 +743,25 @@ func (repo APIRepo) getFetchNextPage(pcid string) ([]api.NewsPreview, bool, *ec.
 				WithDetails("error getting query cache").
 				WithDetails(err.Error())
 		}
-		return nil, false, ecErr
+		return cq, ecErr
 	}
 
 	// read cache.query
-	var cq api.CacheQuery
 	err = json.Unmarshal(b.([]byte), &cq)
 	if err != nil {
 		global.Logger.Debug().Err(err).Msg("error unmarshal cq")
+		ceErr := ec.MustGetEcErr(ec.ECServerError).
+			WithDetails("error unmarshal cq").
+			WithDetails(err.Error())
+		return cq, ceErr
 	}
+	return cq, nil
+}
 
+func fetchNextPage(cq api.CacheQuery) (api.Response, *ec.Error) {
 	handler, err := client.HandlerRepo.GetByCacheQuery(cq)
 	if err != nil {
-		return nil, false, ec.MustGetEcErr(ec.ECServerError).
+		return nil, ec.MustGetEcErr(ec.ECServerError).
 			WithDetails("error while get handler from client.HandlerRepo").
 			WithDetails(err.Error())
 	}
@@ -677,7 +769,7 @@ func (repo APIRepo) getFetchNextPage(pcid string) ([]api.NewsPreview, bool, *ec.
 	// rebuild query from cache
 	req, err := handler.RequestFromCacheQuery(cq)
 	if err != nil {
-		return nil, false, ec.MustGetEcErr(ec.ECServerError).
+		return nil, ec.MustGetEcErr(ec.ECServerError).
 			WithDetails("error while .RequestFromCacheQuery").
 			WithDetails(err.Error())
 	}
@@ -692,14 +784,22 @@ func (repo APIRepo) getFetchNextPage(pcid string) ([]api.NewsPreview, bool, *ec.
 	// do request
 	resp, err := client.HandlerRepo.Do(req, handler)
 	if err != nil {
-		return nil, false, ec.MustGetEcErr(ec.ECServerError).
+		return nil, ec.MustGetEcErr(ec.ECServerError).
 			WithDetails("error while .Do").
 			WithDetails(err.Error())
 	}
+	return resp, nil
+}
 
+func getPreviewsAndUpdateCache(repo APIRepo, pcid string, resp api.Response) ([]api.NewsPreview, bool, *ec.Error) {
 	// append prev to cache
 	next, prev := resp.ToNewsItemList()
-	if _, err := repo.Cache.JSONArrAppend(pcid, ".news_item", prev); err != nil {
+
+	values := make([]any, len(prev))
+	for i, p := range prev {
+		values[i] = p
+	}
+	if _, err := repo.Cache.JSONArrAppend(pcid, ".news_item", values...); err != nil {
 		return nil, false, ec.MustGetEcErr(ec.ECServerError).
 			WithDetails("error while appending preview items to cache").
 			WithDetails("error append prev to cache").
@@ -715,5 +815,5 @@ func (repo APIRepo) getFetchNextPage(pcid string) ([]api.NewsPreview, bool, *ec.
 			WithDetails(err.Error())
 	}
 
-	return prev, !(next.Equal(api.IntLastPageToken) || next.Equal(api.StrLastPageToken)), nil
+	return prev, !api.IsLastPageToken(next), nil
 }

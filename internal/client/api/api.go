@@ -30,6 +30,10 @@ const (
 	IntLastPageToken = IntNextPageToken(-1)
 )
 
+func IsLastPageToken(token NextPageToken) bool {
+	return token.Equal(StrLastPageToken) || token.Equal(IntLastPageToken)
+}
+
 const QueryOriPageKey = true
 
 func QueryOriginalPageContext(ctx context.Context) context.Context {
