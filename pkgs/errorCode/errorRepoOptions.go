@@ -79,3 +79,22 @@ func WithPgxError() ErrorRepoOption {
 		return nil
 	}
 }
+
+func WithgRPCError() ErrorRepoOption {
+	return func(repo ErrorRepo) error {
+		for _, e := range []struct {
+			code   ErrorCode
+			status int
+			msg    string
+		}{
+			{ECgRPCClientError, http.StatusInternalServerError, "gRPC client error"},
+			{ECgRPCServerError, http.StatusInternalServerError, "gRPC server error"},
+		} {
+			err := repo.RegisterErr(e.code, e.status, e.msg)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+}

@@ -13,6 +13,8 @@ const (
 const (
 	ECCodeHasBeenUsed ErrorCode = 2
 	ECUnknownError    ErrorCode = 3
+	ECgRPCServerError ErrorCode = 4
+	ECgRPCClientError ErrorCode = 5
 )
 
 // Client side general error

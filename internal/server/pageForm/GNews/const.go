@@ -1,5 +1,6 @@
 package gnews
 
+// category
 const (
 	General       = "general"
 	World         = "world"
@@ -12,6 +13,7 @@ const (
 	Health        = "health"
 )
 
+// country
 const (
 	Australia         = "au"
 	Brazil            = "br"
@@ -45,6 +47,7 @@ const (
 	UnitedStates      = "us"
 )
 
+// language
 const (
 	Arabic     = "ar"
 	Chinese    = "zh"

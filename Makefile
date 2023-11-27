@@ -111,12 +111,38 @@ gen-public-key: gen-private-key
 # 	-out ${KEY_PATH}/${PUBLIC_KEY_NAME} \
 # 	-config ssl.conf
 
-run: docker-up-db build build-wasm
-	${BIN_PATH}/${APP_NAME} -v v1 -c ./config/config.json -s development -h localhost -p 8001
+build-proto:
+	protoc --go_out=. --go_opt=paths=source_relative \
+	--go-grpc_out=. --go-grpc_opt=paths=source_relative \
+	${PROTO_SRC_DIR}/*.proto \
+
+clean-proto:
+	rm -rf ./proto/*pb.go
+
+build-lang-detector:
+	@go build -o bin/languageDetectorServer/languageDetectorServer ./cmd/languageDetectorServer/main.go && \
+		chmod +x bin/languageDetectorServer/languageDetectorServer
 
 build-milvus-health-check:
-	@go build -o bin/milvus-health-check ./thirdparty/milvus-health-check/main.go && \
-		chmod +x ./milvus-health-check
+	@go build -o bin/milvusHealthCheck/milvusHealthCheck ./cmd/milvusHealthCheck/main.go && \
+		chmod +x bin/milvusHealthCheck/milvusHealthCheck
+
+build-news-sentiment-analyzer:
+	@go build -o ./${APP_NAME} ./main.go && \
+		chmod +x ./${APP_NAME}
+
+run: docker-up-db build build-wasm build-news-sentiment-analyzer
+	./${APP_NAME} -v v1 -c ./config/config.json -s development -h localhost -p 8001
+
+build: build-lang-detector build-milvus-health-check build-news-sentiment-analyzer
+
+start-lang-detect-server:
+	@./bin/languageDetectorServer/languageDetectorServer -o ./bin/languageDetectorServer/log.json
+
+clean:
+	@rm ./${APP_NAME}
+	@rm bin/milvusHealthCheck/milvusHealthCheck
+	@rm bin/languageDetectorServer/languageDetectorServer
 
 about: ## Display info related to the build
 	@echo "- Protoc version  : $(shell protoc --version)"

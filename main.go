@@ -19,6 +19,7 @@ import (
 	errorcode "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/errorCode"
 	tokenmaker "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/tokenMaker"
 	"github.com/spf13/viper"
+	"github.com/tdewolff/minify/v2/js"
 )
 
 func main() {
@@ -41,6 +42,7 @@ func main() {
 			Msg("failed to connect to postgresSQL server")
 		os.Exit(1)
 	}
+
 	global.Logger.Info().
 		Str("db", "psql").
 		Str("status", "ok").
@@ -63,6 +65,11 @@ func main() {
 		os.Exit(1)
 	}
 	global.Logger.Info().Msg("Connected to redis")
+
+	_ = global.SetMinifier(global.MinifierOpt{
+		Mimetype: "application/javascript",
+		Minifier: js.Minify,
+	})
 
 	tm := tokenmaker.NewJWTMaker(
 		global.AppVar.Token.Secret(),

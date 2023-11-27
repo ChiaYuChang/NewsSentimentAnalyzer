@@ -24,12 +24,12 @@ type NewsPreview struct {
 	PubDate     time.Time `json:"publication_date"    redis:"publication_date"`
 }
 
-func (np NewsPreview) ToNewsCreateRequest(guid, language, source string, relatedGuid ...string) *service.NewsCreateRequest {
+func (np NewsPreview) ToNewsCreateRequest(guid, language, source string, author []string, relatedGuid ...string) *service.NewsCreateRequest {
 	md5Hash, _ := MD5Hash(np.Title, np.PubDate, np.Content)
 	req := &service.NewsCreateRequest{
 		Md5Hash:     md5Hash,
 		Guid:        guid,
-		Author:      nil,
+		Author:      author,
 		Title:       np.Title,
 		Link:        np.Link,
 		Description: np.Description,

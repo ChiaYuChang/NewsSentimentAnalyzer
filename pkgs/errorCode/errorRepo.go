@@ -14,7 +14,8 @@ func NewDefaultErrorRepo() (ErrorRepo, error) {
 	return NewErrorRepo(
 		WithSuccess(),
 		WithClientErr(),
-		WithServerErr())
+		WithServerErr(),
+		WithgRPCError())
 }
 
 func WithOptions(opts ...ErrorRepoOption) error {

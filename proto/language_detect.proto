@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package language_detect;
+
+option go_package = "github.com/ChiaYuChang/proto";
+
+service LanguageDetector {
+  rpc DetectLanguage(stream LanguageDetectRequest)
+      returns (stream LanguageDetectResponse);
+  rpc HealthCheck(PingPong) returns (PingPong);
+}
+
+message LanguageDetectRequest {
+  string Id = 1;
+  string Text = 2;
+  optional LanguageOption LanguageOption = 3;
+  optional double Threshold = 4;
+}
+
+message LanguageOption { repeated int64 LanguageOpt = 1; }
+
+message LanguageDetectResponse {
+  string Id = 1;
+  int64 Language = 2;
+  double Probability = 3;
+  repeated ConfidenceValue ConfidenceValue = 4;
+  optional Error error = 5;
+}
+
+message Error {
+  int64 Code = 1;
+  string Message = 2;
+  repeated string Details = 3;
+}
+
+message ConfidenceValue {
+  string Language = 1;
+  double Value = 2;
+}
+
+message PingPong { bool signal = 1; }

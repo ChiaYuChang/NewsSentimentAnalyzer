@@ -1,5 +1,6 @@
 package newsapi
 
+// category
 const (
 	Business      = "business"
 	Entertainment = "entertainment"
@@ -10,6 +11,7 @@ const (
 	Technology    = "technology"
 )
 
+// country
 const (
 	UnitedArabEmirates = "ae"
 	Argentina          = "ar"
@@ -67,6 +69,7 @@ const (
 	SouthAfrica        = "za"
 )
 
+// language
 const (
 	Arabic     = "ar"
 	German     = "de"

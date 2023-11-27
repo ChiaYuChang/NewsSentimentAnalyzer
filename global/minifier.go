@@ -21,3 +21,18 @@ func Minifier() *minify.M {
 	})
 	return minifier.M
 }
+
+type MinifierOpt struct {
+	Mimetype string
+	Minifier minify.MinifierFunc
+}
+
+func SetMinifier(opts ...MinifierOpt) *minify.M {
+	minifier.Do(func() {
+		minifier.M = minify.New()
+		for _, opt := range opts {
+			minifier.M.AddFunc(opt.Mimetype, opt.Minifier)
+		}
+	})
+	return minifier.M
+}
