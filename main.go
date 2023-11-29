@@ -61,7 +61,8 @@ func main() {
 	vw, err := view.NewViewWithDefaultTemplateFuncs(global.AppVar.App.Template...)
 	if err != nil {
 		global.Logger.
-			Err(err).Msg("error while view.NewViewWithDefaultTemplateFuncs")
+			Err(err).
+			Msg("error while view.NewViewWithDefaultTemplateFuncs")
 		os.Exit(1)
 	}
 	global.Logger.Info().Msg("Connected to redis")
@@ -85,6 +86,14 @@ func main() {
 		true, true, http.SameSiteLaxMode,
 	)
 	cookieMaker.SetDefaultCookieMaker(cm)
+
+	err = global.SetupMicroservice(global.AppVar.Microservice)
+	if err != nil {
+		global.Logger.
+			Err(err).
+			Msg("error while SetupMicroservice")
+		os.Exit(1)
+	}
 
 	addr := fmt.Sprintf(
 		"%s:%d",
@@ -158,7 +167,6 @@ func main() {
 	}(signalChan)
 
 	startAt := time.Now()
-
 	global.Logger.Info().
 		Str("addr", addr).
 		Str("api verion", viper.GetString("APP_API_VERSION")).

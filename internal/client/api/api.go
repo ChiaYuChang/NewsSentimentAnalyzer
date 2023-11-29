@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -65,19 +64,22 @@ type Response interface {
 	ContentProcessFunc(c string) (string, error)
 }
 
-func MD5Hash(title string, publishedAt time.Time, content ...string) (string, error) {
+func MD5Hash(prev NewsPreview) (string, error) {
 	hasher := md5.New()
 
-	if _, err := hasher.Write(re.ReplaceAll([]byte(title), []byte{})); err != nil {
+	if _, err := hasher.Write(re.ReplaceAll([]byte(prev.Title), []byte{})); err != nil {
 		return "", fmt.Errorf("error while writing to hasher: %w", err)
 	}
 
-	cs := strings.Join(content, "")
-	if _, err := hasher.Write(re.ReplaceAll([]byte(cs), []byte{})); err != nil {
+	if _, err := hasher.Write(re.ReplaceAll([]byte(prev.Link), []byte{})); err != nil {
 		return "", fmt.Errorf("error while writing to hasher: %w", err)
 	}
 
-	if _, err := hasher.Write(re.ReplaceAll([]byte(publishedAt.UTC().Format(time.DateTime)), []byte{})); err != nil {
+	if _, err := hasher.Write(re.ReplaceAll([]byte(prev.Content), []byte{})); err != nil {
+		return "", fmt.Errorf("error while writing to hasher: %w", err)
+	}
+
+	if _, err := hasher.Write(re.ReplaceAll([]byte(prev.PubDate.UTC().Format(time.DateOnly)), []byte{})); err != nil {
 		return "", fmt.Errorf("error while writing to hasher: %w", err)
 	}
 

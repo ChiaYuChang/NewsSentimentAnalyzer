@@ -9,10 +9,11 @@ import (
 )
 
 type Option struct {
-	Token       TokenMakerOption `mapstructure:"token"`
-	RateLimiter RateLimiter      `mapstructure:"ratelimiter"`
-	Password    PasswordOption   `mapstructure:"password"`
-	App         AppOption        `mapstructure:"app"`
+	Token        TokenMakerOption        `mapstructure:"token"`
+	RateLimiter  RateLimiter             `mapstructure:"ratelimiter"`
+	Password     PasswordOption          `mapstructure:"password"`
+	App          AppOption               `mapstructure:"app"`
+	Microservice map[string]Microservice `mapstructure:"microservice"`
 }
 
 func (opt Option) String() string {

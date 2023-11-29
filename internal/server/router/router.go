@@ -66,9 +66,11 @@ func NewRouter(srvc service.Service, rds *cache.RedsiStore, vw view.View,
 	wg.Add(1)
 	go func(epRepo api.EndpointRepo, epChan chan *model.ListAllEndpointRow, wg *sync.WaitGroup) {
 		for ep := range epChan {
-			apiName, apiID, endpointName, templateName := ep.ApiName, ep.ApiID, ep.EndpointName, ep.TemplateName
+			apiName, apiID := ep.ApiName, ep.ApiID
+			endpointName, endpointID := ep.EndpointName, ep.EndpointID
+			templateName := ep.TemplateName
 			if err := epRepo.RegisterEndpointsPageView(
-				apiName, apiID, endpointName, templateName); err != nil {
+				apiName, apiID, endpointName, endpointID, templateName); err != nil {
 				global.Logger.
 					Error().
 					Str("api", apiName).

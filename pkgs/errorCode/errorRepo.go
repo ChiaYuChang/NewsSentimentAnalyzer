@@ -15,6 +15,7 @@ func NewDefaultErrorRepo() (ErrorRepo, error) {
 		WithSuccess(),
 		WithClientErr(),
 		WithServerErr(),
+		WithPgxError(),
 		WithgRPCError())
 }
 

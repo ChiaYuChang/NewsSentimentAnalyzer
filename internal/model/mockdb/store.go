@@ -396,6 +396,21 @@ func (mr *MockStoreMockRecorder) DeleteUser(arg0, arg1 interface{}) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteUser", reflect.TypeOf((*MockStore)(nil).DeleteUser), arg0, arg1)
 }
 
+// DoCacheToStoreTx mocks base method.
+func (m *MockStore) DoCacheToStoreTx(arg0 context.Context, arg1 *model.CacheToStoreTXParams) (*model.CacheToStoreTXResult, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DoCacheToStoreTx", arg0, arg1)
+	ret0, _ := ret[0].(*model.CacheToStoreTXResult)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DoCacheToStoreTx indicates an expected call of DoCacheToStoreTx.
+func (mr *MockStoreMockRecorder) DoCacheToStoreTx(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DoCacheToStoreTx", reflect.TypeOf((*MockStore)(nil).DoCacheToStoreTx), arg0, arg1)
+}
+
 // DoCheckAndUpdateUserPasswordTx mocks base method.
 func (m *MockStore) DoCheckAndUpdateUserPasswordTx(arg0 context.Context, arg1 *model.CheckAndUpdateUserPasswordTxParams) error {
 	m.ctrl.T.Helper()
@@ -692,6 +707,21 @@ func (m *MockStore) GetNewsByMD5Hash(arg0 context.Context, arg1 string) (*model.
 func (mr *MockStoreMockRecorder) GetNewsByMD5Hash(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNewsByMD5Hash", reflect.TypeOf((*MockStore)(nil).GetNewsByMD5Hash), arg0, arg1)
+}
+
+// GetNewsByMD5Hashs mocks base method.
+func (m *MockStore) GetNewsByMD5Hashs(arg0 context.Context, arg1 []string) ([]int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetNewsByMD5Hashs", arg0, arg1)
+	ret0, _ := ret[0].([]int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetNewsByMD5Hashs indicates an expected call of GetNewsByMD5Hashs.
+func (mr *MockStoreMockRecorder) GetNewsByMD5Hashs(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNewsByMD5Hashs", reflect.TypeOf((*MockStore)(nil).GetNewsByMD5Hashs), arg0, arg1)
 }
 
 // GetNewsPublishBetween mocks base method.

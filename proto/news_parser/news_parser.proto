@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package newsParser;
+
+option go_package = "github.com/ChiaYuChang/proto/news_parser/newsParser";
+
+message HasRequest { string URL = 1; }
+
+message ParseRequest { string URL = 1; }
+
+message GetGUIDRequest { string URL = 1; }

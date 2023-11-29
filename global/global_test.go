@@ -2,6 +2,7 @@ package global_test
 
 import (
 	"bytes"
+	"encoding/json"
 	"os"
 	"strings"
 	"testing"
@@ -124,24 +125,38 @@ func TestReadEnvVar(t *testing.T) {
 	t.Log(t, "dev", viper.GetInt("APP_STATE"))
 }
 
-// func TestReadOption(t *testing.T) {
-// 	err := global.ReadAppVar(
-// 		"../secret.json",
-// 		"../config/option.json",
-// 		"../config/endpoint.json",
-// 	)
-// 	require.NoError(t, err)
+func TestReadMicroservice(t *testing.T) {
+	text := `{
+      "name": "language-detector",
+      "type": "gRPC",
+      "host": "localhost",
+      "port": 50051
+    }`
 
-// 	opt := global.AppVar
-// 	err = opt.TokenMaker.UpdateSecret()
-// 	require.NoError(t, err)
-// 	opt.TokenMaker.SignMethod = jwt.SigningMethodHS512
+	viper.SetConfigType("json")
+	err := viper.ReadConfig(strings.NewReader(text))
+	require.NoError(t, err)
 
-// 	oldSrc := opt.TokenMaker.GetHexSecretString()
-// 	err = opt.TokenMaker.UpdateSecret()
-// 	require.NoError(t, err)
-// 	newSrc := opt.TokenMaker.GetHexSecretString()
-// 	require.NotEqual(t, oldSrc, newSrc)
+	var ms1 global.Microservice
+	err = viper.Unmarshal(&ms1)
+	require.NoError(t, err)
 
-// 	t.Log(global.AppVar)
-// }
+	require.Equal(t, "language-detector", ms1.Name)
+	require.Equal(t, "localhost", ms1.Host)
+	require.Equal(t, 50051, ms1.Port)
+	require.Equal(t, global.APITypegRPC, ms1.Type)
+	require.Nil(t, ms1.Params)
+
+	b, err := json.Marshal(ms1)
+	require.NoError(t, err)
+	require.NotNil(t, b)
+
+	var ms2 global.Microservice
+	err = json.Unmarshal(b, &ms2)
+	require.NoError(t, err)
+
+	require.Equal(t, ms1.Host, ms2.Host)
+	require.Equal(t, ms1.Port, ms2.Port)
+	require.Equal(t, ms1.Name, ms2.Name)
+	require.Equal(t, ms1.Type, ms2.Type)
+}

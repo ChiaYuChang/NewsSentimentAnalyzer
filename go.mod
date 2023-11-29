@@ -28,7 +28,6 @@ require (
 	go.uber.org/ratelimit v0.3.0
 	golang.org/x/crypto v0.9.0
 	golang.org/x/net v0.10.0
-	google.golang.org/api v0.122.0
 	google.golang.org/grpc v1.55.0
 	google.golang.org/protobuf v1.31.0
 )

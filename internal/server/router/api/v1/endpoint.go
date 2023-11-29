@@ -61,6 +61,7 @@ type EndpointRepo struct {
 	PageView         map[EndpointRepoKey]string
 	PageTemplateName map[EndpointRepoKey]string
 	ApiID            map[EndpointRepoKey]int16
+	EndpointID       map[EndpointRepoKey]int32
 	PageSelectOption map[string]string
 }
 
@@ -71,11 +72,16 @@ func NewEndpointRepo(apiRepo APIRepo, v *val.Validate) EndpointRepo {
 		PageView:         make(map[EndpointRepoKey]string),
 		PageTemplateName: make(map[EndpointRepoKey]string),
 		ApiID:            make(map[EndpointRepoKey]int16),
+		EndpointID:       make(map[EndpointRepoKey]int32),
 		PageSelectOption: make(map[string]string),
 	}
 }
 
-func (repo *EndpointRepo) RegisterEndpointsPageView(apiName string, apiId int16, endpointName, templateName string) error {
+func (repo *EndpointRepo) RegisterEndpointsPageView(
+	apiName string, apiId int16,
+	endpointName string, endpointId int32,
+	templateName string) error {
+
 	pageData := object.APIEndpointPage{
 		Page: object.Page{
 			HeadConent: view.SharedHeadContent(),
@@ -103,6 +109,7 @@ func (repo *EndpointRepo) RegisterEndpointsPageView(apiName string, apiId int16,
 	}
 
 	repo.ApiID[key] = apiId
+	repo.EndpointID[key] = endpointId
 	return nil
 }
 
@@ -163,9 +170,8 @@ func (repo EndpointRepo) getCache(ctx context.Context, key EndpointRepoKey, ckey
 		return nil, fmt.Errorf("error while read cache: %w", err)
 	case redis.Nil:
 		if err := repo.RegisterEndpointsPageView(
-			key.APIName(),
-			repo.ApiID[key],
-			key.EndpointName(),
+			key.APIName(), repo.ApiID[key],
+			key.EndpointName(), repo.EndpointID[key],
 			repo.PageTemplateName[key]); err != nil {
 			return nil, fmt.Errorf("error excute template: %w", err)
 		} else {
@@ -237,31 +243,6 @@ func (repo EndpointRepo) PostAPIEndpoints(key EndpointRepoKey) (http.HandlerFunc
 			return
 		}
 		postEndpoints(repo, pf, userInfo, w, req)
-	}, nil
-}
-
-func (repo EndpointRepo) PatchAPIEndpoints(key EndpointRepoKey) (http.HandlerFunc, error) {
-	pf, err := pf.Get(key.APIName(), key.EndpointName())
-	if err != nil || pf == nil {
-		ecErr := ec.MustGetEcErr(ec.ECServerError)
-		if err != nil {
-			ecErr.WithDetails(err.Error())
-			ecErr.WithDetails(key.String() + " not found")
-		}
-		if pf == nil {
-			ecErr.WithDetails("pageform object is nil")
-		}
-		return nil, ecErr
-	}
-
-	return func(w http.ResponseWriter, req *http.Request) {
-		// userInfo, ok := req.Context().Value(global.CtxUserInfo).(tokenmaker.Payload)
-		// if !ok {
-		// 	ecErr := ec.MustGetEcErr(ec.ECServerError)
-		// 	ecErr.WithDetails("user information not found")
-		// 	w.WriteHeader(ecErr.HttpStatusCode)
-		// 	w.Write(ecErr.MustToJson())
-		return
 	}, nil
 }
 
@@ -341,6 +322,10 @@ func postEndpoints(repo EndpointRepo, pageform pf.PageForm, userInfo tokenmaker.
 	_, _ = repo.apiRepo.Cache.JSONSet(ckey, ".", cache)
 	_ = repo.apiRepo.Cache.Expire(httpReq.Context(), ckey, 10*time.Minute)
 
-	http.Redirect(w, httpReq, fmt.Sprintf("/v1/preview/%s", ckey), http.StatusSeeOther)
+	aid := repo.ApiID[NewRepoMapKey(pageform.API(), pageform.Endpoint())]
+	eid := repo.EndpointID[NewRepoMapKey(pageform.API(), pageform.Endpoint())]
+	http.Redirect(w, httpReq,
+		fmt.Sprintf("/v1/preview/%s?aid=%d&eid=%d", ckey, aid, eid),
+		http.StatusSeeOther)
 	return
 }

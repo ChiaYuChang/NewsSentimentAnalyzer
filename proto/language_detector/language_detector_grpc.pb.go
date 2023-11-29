@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             v4.25.0
-// source: proto/language_detect.proto
+// source: proto/language_detector/language_detector.proto
 
-package proto
+package languageDetector
 
 import (
 	context "context"
@@ -19,8 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	LanguageDetector_DetectLanguage_FullMethodName = "/language_detect.LanguageDetector/DetectLanguage"
-	LanguageDetector_HealthCheck_FullMethodName    = "/language_detect.LanguageDetector/HealthCheck"
+	LanguageDetector_DetectLanguage_FullMethodName = "/languageDetector.LanguageDetector/DetectLanguage"
+	LanguageDetector_HealthCheck_FullMethodName    = "/languageDetector.LanguageDetector/HealthCheck"
 )
 
 // LanguageDetectorClient is the client API for LanguageDetector service.
@@ -159,7 +159,7 @@ func _LanguageDetector_HealthCheck_Handler(srv interface{}, ctx context.Context,
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var LanguageDetector_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "language_detect.LanguageDetector",
+	ServiceName: "languageDetector.LanguageDetector",
 	HandlerType: (*LanguageDetectorServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -175,5 +175,5 @@ var LanguageDetector_ServiceDesc = grpc.ServiceDesc{
 			ClientStreams: true,
 		},
 	},
-	Metadata: "proto/language_detect.proto",
+	Metadata: "proto/language_detector/language_detector.proto",
 }

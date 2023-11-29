@@ -6,6 +6,7 @@ import (
 	"sort"
 	"sync"
 
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
 	"github.com/PuerkitoBio/goquery"
 )
 
@@ -161,7 +162,9 @@ func NewParserRepo(opts ...Parser) ParserRepo {
 func (repo ParserRepo) RegisterDomainParser(parser ...Parser) ParserRepo {
 	for _, p := range parser {
 		for _, domain := range p.Domain() {
-			fmt.Println("register parser for domain: ", domain)
+			global.Logger.Info().
+				Str("domain", domain).
+				Msg("register parser")
 			repo[domain] = p
 		}
 	}

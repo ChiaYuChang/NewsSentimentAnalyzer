@@ -88,6 +88,12 @@ func (srvc Service) Endpoint() endpointService {
 	return endpointService(srvc)
 }
 
+type txService Service
+
+func (srvc Service) TX() txService {
+	return txService(srvc)
+}
+
 type otherService Service
 
 func (srvc Service) NewsJob() otherService {

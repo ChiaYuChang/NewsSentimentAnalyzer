@@ -224,6 +224,7 @@ func (querier Querier) DoQuery(q *Query) *Query {
 func (querier Querier) DoQueryPipeline(ctx context.Context, inputChan <-chan *Query) (<-chan *Query, <-chan error) {
 	errChan := make(chan error)
 	type Step struct {
+		Name    string
 		Step    func(*Query) *Query
 		ChanIn  <-chan *Query
 		ChanOut chan<- *Query

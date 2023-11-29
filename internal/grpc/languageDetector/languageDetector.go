@@ -7,7 +7,7 @@ import (
 	"io"
 
 	ec "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/errorCode"
-	pb "github.com/ChiaYuChang/NewsSentimentAnalyzer/proto"
+	pb "github.com/ChiaYuChang/NewsSentimentAnalyzer/proto/language_detector"
 	"google.golang.org/grpc"
 )
 

@@ -3,6 +3,7 @@ package parser_test
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -36,7 +37,7 @@ func TestNewsQuerier(t *testing.T) {
 		require.True(t, querier.HasContentEncodingHandler("gzip"))
 
 		rawURLs := []string{
-			"https://news.pts.org.tw/article/652813",
+			"https://news.pts.org.tw/article/668813",
 			"https://www.cna.com.tw/news/aspt/202309050416.aspx",
 		}
 
@@ -59,50 +60,50 @@ func TestNewsQuerier(t *testing.T) {
 			})
 		}
 	} else {
-		t.Log("Newwork is unreachable, skip this test")
+		t.Log("Network is unreachable, skip this test")
 	}
 }
 
 func TestQueryPipeline(t *testing.T) {
 	htmlBody := `<!DOCTYPE html>
-       <html lang="en">
-       <head>
-               <meta charset="UTF-8">
-               <meta name="viewport" content="width=device-width, initial-scale=1.0">
-               <title>Document</title>
-       </head>
-       <body>
-               <h1>For testing</h1>
-       </body>
-	    </html>`
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			<title>Document</title>
+		</head>
+		<body>
+			<h1>For testing</h1>
+		</body>
+	</html>`
 
 	type testCase struct {
-		Id         int
-		Path       string
-		StatusCode int
-		TimeDelay  time.Duration
+		Id                int
+		RouterPath        string
+		HTTPStatusCode    int
+		ResponseTimeDelay time.Duration
 	}
 
 	tcs := []testCase{
 		{
-			Path:       "/ok",
-			StatusCode: http.StatusOK,
-			TimeDelay:  0,
+			RouterPath:        "/ok",
+			HTTPStatusCode:    http.StatusOK,
+			ResponseTimeDelay: 0,
 		},
 		{
-			Path:       "/notfound",
-			StatusCode: http.StatusNotFound,
-			TimeDelay:  0,
+			RouterPath:        "/notfound",
+			HTTPStatusCode:    http.StatusNotFound,
+			ResponseTimeDelay: 0,
 		},
 		{
-			Path:       "/timeout",
-			StatusCode: http.StatusOK,
-			TimeDelay:  2 * time.Second,
+			RouterPath:        "/timeout",
+			HTTPStatusCode:    http.StatusOK,
+			ResponseTimeDelay: 2 * time.Second,
 		},
 		{
-			Path:       "/unauthorized",
-			StatusCode: http.StatusUnauthorized,
-			TimeDelay:  0,
+			RouterPath:        "/unauthorized",
+			HTTPStatusCode:    http.StatusUnauthorized,
+			ResponseTimeDelay: 0,
 		},
 	}
 
@@ -111,12 +112,11 @@ func TestQueryPipeline(t *testing.T) {
 	mux := chi.NewRouter()
 	mux.Use(middleware.Compress(5, "gzip"))
 
-	HandlerFromTC := func(tc testCase) func(w http.ResponseWriter, r *http.Request) {
+	HandlerFromTC := func(tc testCase) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
-			t.Logf("hit: %s Handler wait for %s sec\n", tc.Path, tc.TimeDelay)
-			time.Sleep(tc.TimeDelay)
-			w.WriteHeader(tc.StatusCode)
-			if tc.StatusCode == http.StatusOK {
+			time.Sleep(tc.ResponseTimeDelay)
+			w.WriteHeader(tc.HTTPStatusCode)
+			if tc.HTTPStatusCode == http.StatusOK {
 				w.Write([]byte(htmlBody))
 			}
 			return
@@ -125,10 +125,13 @@ func TestQueryPipeline(t *testing.T) {
 
 	for i := range tcs {
 		tcs[i].Id = i
-		path2id[tcs[i].Path] = tcs[i].Id
-		mux.Get(tcs[i].Path, HandlerFromTC(tcs[i]))
+		path2id[tcs[i].RouterPath] = tcs[i].Id
+
+		handler := HandlerFromTC(tcs[i])
+		mux.Get(tcs[i].RouterPath, handler)
 	}
-	srvc := httptest.NewServer(mux)
+	srvr := httptest.NewServer(mux)
+	defer srvr.Close()
 
 	inChan := make(chan *parser.Query)
 	querier, err := parser.NewQuerier(
@@ -145,41 +148,45 @@ func TestQueryPipeline(t *testing.T) {
 	go func() {
 		defer close(inChan)
 		for i := range tcs {
-			inChan <- parser.NewQueryWithId(tcs[i].Id, srvc.URL+tcs[i].Path)
+			inChan <- parser.NewQueryWithId(tcs[i].Id, srvr.URL+tcs[i].RouterPath)
 		}
 	}()
 
 	v := validator.New()
 	for i := 0; i < len(tcs); i++ {
 		select {
-		case q := <-outChan:
-			require.NoError(t, q.Error)
-			require.Equal(t, path2id["/ok"], q.Id())
-			require.Equal(t, 200, q.RespHttpStatusCode())
+		case q, ok := <-outChan:
+			if ok {
+				require.NoError(t, q.Error)
+				require.Equal(t, path2id["/ok"], q.Id())
+				require.Equal(t, 200, q.RespHttpStatusCode())
 
-			rc, err := q.Content()
-			require.NoError(t, err)
-			require.NotNil(t, rc)
+				rc, err := q.Content()
+				require.NoError(t, err)
+				require.NotNil(t, rc)
 
-			doc, err := io.ReadAll(rc)
-			require.NoError(t, err)
-			require.NotNil(t, doc)
+				doc, err := io.ReadAll(rc)
+				require.NoError(t, err)
+				require.NotNil(t, doc)
 
-			require.NoError(t, v.Var(string(doc), "html"))
-		case err := <-errChan:
-			require.Error(t, err)
-			es := err.Error()
-
-			if strings.HasPrefix(es, fmt.Sprintf("%d-th", path2id["/timeout"])) {
-				require.True(t, strings.Contains(es, "context deadline exceeded"))
+				require.NoError(t, v.Var(string(doc), "html"))
 			}
+		case err, ok := <-errChan:
+			if ok {
+				require.Error(t, err)
+				es := err.Error()
 
-			if strings.HasPrefix(es, fmt.Sprintf("%d-th", path2id["/notfound"])) {
-				require.True(t, strings.Contains(es, "request error with error code 404"))
-			}
+				if strings.HasPrefix(es, fmt.Sprintf("%d-th", path2id["/timeout"])) {
+					require.True(t, strings.Contains(es, "context deadline exceeded"))
+				}
 
-			if strings.HasPrefix(es, fmt.Sprintf("%d-th", path2id["/unauthorized"])) {
-				require.True(t, strings.Contains(es, "request error with error code 401"))
+				if strings.HasPrefix(es, fmt.Sprintf("%d-th", path2id["/notfound"])) {
+					require.True(t, strings.Contains(es, "request error with error code 404"))
+				}
+
+				if strings.HasPrefix(es, fmt.Sprintf("%d-th", path2id["/unauthorized"])) {
+					require.True(t, strings.Contains(es, "request error with error code 401"))
+				}
 			}
 		}
 	}
@@ -1584,14 +1591,16 @@ func TestPraserRepo(t *testing.T) {
 	q = repo.Parse(q)
 	require.NotNil(t, q)
 	require.Empty(t, q.News)
-	require.Equal(t, parser.ErrParserNotFound, q.Error)
+
+	require.True(t, errors.Is(q.Error, parser.ErrParserNotFound))
 	require.Equal(t, u.Path, repo.ToGUID(u))
 
 	q = &parser.Query{RawURL: u.String()}
 	q = repo.Parse(q)
 	require.NotNil(t, q)
 	require.Empty(t, q.News)
-	require.Equal(t, parser.ErrParserNotFound, q.Error)
+	require.True(t, errors.Is(q.Error, parser.ErrParserNotFound))
+
 	require.Equal(t, u.Path, repo.ToGUID(u))
 
 	q = &parser.Query{RawURL: ":not-url"}

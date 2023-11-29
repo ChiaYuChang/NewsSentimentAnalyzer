@@ -109,6 +109,14 @@ func (r NewsGetByMD5HashRequest) RequestName() string {
 	return "news-get-by-md5-req"
 }
 
+type NewsGetByMD5HashsRequest struct {
+	MD5Hash []string `validate:"required"`
+}
+
+func (r NewsGetByMD5HashsRequest) RequestName() string {
+	return "news-get-by-md5s-req"
+}
+
 type NewsListRequest struct {
 	N int32 `validate:"required,min=1"`
 }
@@ -158,6 +166,13 @@ func (srvc newsService) GetByMD5Hash(ctx context.Context, r *NewsGetByMD5HashReq
 		return nil, err
 	}
 	return srvc.store.GetNewsByMD5Hash(ctx, r.MD5Hash)
+}
+
+func (srvc newsService) GetByMD5Hashs(ctx context.Context, r *NewsGetByMD5HashsRequest) ([]int64, error) {
+	if err := srvc.validate.Struct(r); err != nil {
+		return nil, err
+	}
+	return srvc.store.GetNewsByMD5Hashs(ctx, r.MD5Hash)
 }
 
 func (srvc newsService) ListRecentN(ctx context.Context, r *NewsListRequest) ([]*model.ListRecentNNewsRow, error) {

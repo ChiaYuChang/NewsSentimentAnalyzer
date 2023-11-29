@@ -25,7 +25,7 @@ type NewsPreview struct {
 }
 
 func (np NewsPreview) ToNewsCreateRequest(guid, language, source string, author []string, relatedGuid ...string) *service.NewsCreateRequest {
-	md5Hash, _ := MD5Hash(np.Title, np.PubDate, np.Content)
+	md5Hash, _ := MD5Hash(np)
 	req := &service.NewsCreateRequest{
 		Md5Hash:     md5Hash,
 		Guid:        guid,
@@ -42,6 +42,12 @@ func (np NewsPreview) ToNewsCreateRequest(guid, language, source string, author 
 	}
 	return req
 }
+
+type SortById []NewsPreview
+
+func (a SortById) Len() int           { return len(a) }
+func (a SortById) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a SortById) Less(i, j int) bool { return a[i].Id.String() < a[j].Id.String() }
 
 type PreviewCache struct {
 	Query     CacheQuery    `json:"query"      redis:"query"`
@@ -143,9 +149,9 @@ func (cq *CacheQuery) UnmarshalJSON(data []byte) error {
 }
 
 type API struct {
-	Key      string `json:"key"       redis:"key"`
-	Name     string `json:"name"      redis:"name"`
-	Endpoint string `json:"endpoint"  redis:"endpoint"`
+	Key      string `json:"key"         redis:"key"`
+	Name     string `json:"name"        redis:"name"`
+	Endpoint string `json:"endpoint"    redis:"endpoint"`
 }
 
 type Preview struct {

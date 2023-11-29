@@ -21,6 +21,7 @@ type Store interface {
 	DoCheckAndUpdateUserPasswordTx(ctx context.Context, params *CheckAndUpdateUserPasswordTxParams) error
 	DoCreateOrUpdateAPIKeyTx(ctx context.Context, params *CreateOrUpdateAPIKeyTxParams) (*CreateOrUpdateAPIKeyTxResults, error)
 	DoCountUserJobTx(ctx context.Context, owner uuid.UUID) (*CountUserJobTxResult, error)
+	DoCacheToStoreTx(ctx context.Context, params *CacheToStoreTXParams) (*CacheToStoreTXResult, error)
 	Close(ctx context.Context) error
 }
 
@@ -99,6 +100,10 @@ func (s PGXStore) DoCountUserJobTx(ctx context.Context, owner uuid.UUID) (*Count
 	return countUserJobTx(s, ctx, owner)
 }
 
+func (s PGXStore) DoCacheToStoreTx(ctx context.Context, params *CacheToStoreTXParams) (*CacheToStoreTXResult, error) {
+	return doCacheToStoreTx(s, ctx, params)
+}
+
 type PGXPoolStore struct {
 	Querier
 	Conn *pgxpool.Pool
@@ -151,6 +156,10 @@ func (s PGXPoolStore) DoCreateOrUpdateAPIKeyTx(ctx context.Context, params *Crea
 
 func (s PGXPoolStore) DoCountUserJobTx(ctx context.Context, owner uuid.UUID) (*CountUserJobTxResult, error) {
 	return countUserJobTx(s, ctx, owner)
+}
+
+func (s PGXPoolStore) DoCacheToStoreTx(ctx context.Context, params *CacheToStoreTXParams) (*CacheToStoreTXResult, error) {
+	return doCacheToStoreTx(s, ctx, params)
 }
 
 func checkAndUpdateUserPasswordTx(s Store, ctx context.Context, params *CheckAndUpdateUserPasswordTxParams) error {
@@ -235,6 +244,94 @@ func createNewsTx(s Store, ctx context.Context, params *CreateNewsParams) (int64
 		return err
 	})
 	return newsId, err
+}
+
+type CacheToStoreTXParams struct {
+	CreateJobParams  *CreateJobParams
+	CreateNewsParams <-chan *CreateNewsParams
+}
+
+type CacheToStoreTXResult struct {
+	JobId                int32
+	JobCreateError       error
+	NewsJobCreateResults []NewsJobCreateResult
+}
+
+func (r *CacheToStoreTXResult) Error() error {
+	if r.JobCreateError != nil {
+		fmt.Printf("error while create job: %s\n", r.JobCreateError.Error())
+		err := ec.MustGetEcErr(ec.ECPgxError).
+			WithDetails("error while create job").
+			WithDetails(r.JobCreateError.Error())
+		return err
+	}
+
+	err := ec.MustGetEcErr(ec.ECPgxError)
+	for _, r := range r.NewsJobCreateResults {
+		if r.Error != nil {
+			err.WithDetails(r.Error.Error())
+		}
+	}
+
+	if len(err.Details) > 0 {
+		return err
+	}
+	return nil
+}
+
+type NewsJobCreateResult struct {
+	Md5Hash   string `json:"md5_hash"`
+	NewsID    int64  `json:"news_id"`
+	NewsJobId int64  `json:"news_job_id"`
+	Error     error  `json:"error"`
+}
+
+func cacheToStoreTx(s Store, ctx context.Context, params *CacheToStoreTXParams) *CacheToStoreTXResult {
+	result := &CacheToStoreTXResult{}
+	result.JobId, result.JobCreateError = s.CreateJob(ctx, params.CreateJobParams)
+	if result.JobCreateError != nil {
+		return result
+	}
+
+	result.NewsJobCreateResults = []NewsJobCreateResult{}
+	for param := range params.CreateNewsParams {
+		row, err := s.GetNewsByMD5Hash(ctx, param.Md5Hash)
+
+		r := NewsJobCreateResult{}
+		r.Md5Hash = param.Md5Hash
+		if err == nil {
+			r.NewsID = row.ID
+		} else {
+			nid, err := s.CreateNews(ctx, param)
+			if err != nil {
+				r.Error = fmt.Errorf("error while CreateNews %w", err)
+			}
+			r.NewsID = nid
+		}
+		result.NewsJobCreateResults = append(result.NewsJobCreateResults, r)
+	}
+
+	for i, r := range result.NewsJobCreateResults {
+		if r.Error == nil {
+			if njId, err := s.CreateNewsJob(ctx, &CreateNewsJobParams{
+				NewsID: r.NewsID, JobID: int64(result.JobId),
+			}); err != nil {
+				result.NewsJobCreateResults[i].Error = fmt.Errorf("error while CreateNewsJob %w", err)
+			} else {
+				result.NewsJobCreateResults[i].NewsJobId = njId
+			}
+		}
+	}
+	return result
+}
+
+func doCacheToStoreTx(s Store, ctx context.Context, params *CacheToStoreTXParams) (*CacheToStoreTXResult, error) {
+	var result *CacheToStoreTXResult
+	err := s.ExecTx(ctx, func(q *Queries) error {
+		result = cacheToStoreTx(s, ctx, params)
+		return result.Error()
+	})
+	return result, err
 }
 
 type CountUserJobTxResult struct {

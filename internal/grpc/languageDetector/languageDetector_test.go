@@ -2,11 +2,12 @@ package languagedetector_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
 	ld "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/grpc/languageDetector"
-	pb "github.com/ChiaYuChang/NewsSentimentAnalyzer/proto"
+	pb "github.com/ChiaYuChang/NewsSentimentAnalyzer/proto/language_detector"
 	"github.com/google/uuid"
 	"github.com/pemistahl/lingua-go"
 	"github.com/stretchr/testify/require"
@@ -21,19 +22,22 @@ func TestPingPong(t *testing.T) {
 	)
 	require.NoError(t, err)
 	require.NotNil(t, conn)
-
 	cli := ld.LanguageDetectorClient{
 		pb.NewLanguageDetectorClient(conn), nil, nil,
 	}
 
-	ctx, _ := context.WithTimeout(context.Background(), 2*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
 	err = cli.HealthCheck(ctx)
 	require.NoError(t, err)
 }
 
 func TestLanguageDetect(t *testing.T) {
+	host := "localhost"
+	port := 50051
 	conn, err := grpc.Dial(
-		"localhost:50051",
+		fmt.Sprintf("%s:%d", host, port),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	require.NoError(t, err)

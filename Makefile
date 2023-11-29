@@ -111,10 +111,10 @@ gen-public-key: gen-private-key
 # 	-out ${KEY_PATH}/${PUBLIC_KEY_NAME} \
 # 	-config ssl.conf
 
-build-proto:
+build-lang-detector-proto:
 	protoc --go_out=. --go_opt=paths=source_relative \
 	--go-grpc_out=. --go-grpc_opt=paths=source_relative \
-	${PROTO_SRC_DIR}/*.proto \
+	${PROTO_SRC_DIR}/language_detector/*.proto \
 
 clean-proto:
 	rm -rf ./proto/*pb.go

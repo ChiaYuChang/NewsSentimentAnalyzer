@@ -2,24 +2,19 @@ package gnews
 
 import (
 	"bytes"
-	"context"
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/parser"
 	"github.com/oklog/ulid/v2"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api"
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
 )
 
 type Response struct {
@@ -81,48 +76,6 @@ func (resp Response) ToNewsItemList() (next api.NextPageToken, preview []api.New
 		return api.IntLastPageToken, preview
 	}
 	return api.IntNextPageToken(resp.CurrPage + 1), preview
-}
-
-// convert response to model.CreateNewsParams and return by a channel
-func (resp Response) ToNews(ctx context.Context, wg *sync.WaitGroup, c chan<- *service.NewsCreateRequest) {
-	defer wg.Done()
-	for i := 0; i < resp.Len(); i++ {
-		select {
-		case <-ctx.Done():
-			break
-		default:
-			link := resp.Articles[i].Link
-			u, _ := url.Parse(link)
-
-			md5hash, _ := api.MD5Hash(
-				resp.Articles[i].Title,
-				resp.Articles[i].PublishedAt.ToTime(),
-				resp.Articles[i].Content,
-			)
-
-			var req *service.NewsCreateRequest
-			if val, ok := ctx.Value(api.QueryOriPageKey).(bool); ok && val {
-				q := parser.ParseURL(u)
-				req = q.ToNewsCreateParam(md5hash)
-			} else {
-				c <- &service.NewsCreateRequest{
-					Md5Hash:     md5hash,
-					Guid:        parser.ToGUID(u),
-					Author:      []string{},
-					Title:       resp.Articles[i].Title,
-					Link:        link,
-					Description: resp.Articles[i].Description,
-					Language:    "",
-					Content:     []string{resp.Articles[i].Content},
-					Source:      u.Host,
-					RelatedGuid: []string{},
-					PublishedAt: resp.Articles[i].PublishedAt.ToTime(),
-				}
-			}
-			c <- req
-		}
-	}
-	return
 }
 
 type Article struct {

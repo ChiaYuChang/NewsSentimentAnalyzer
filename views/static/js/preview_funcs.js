@@ -1,4 +1,8 @@
-var pcid = location.pathname.split('/')[3];
+const pcid = location.pathname.split('/')[3];
+
+const urlParams = new URLSearchParams(window.location.search);
+const aid = urlParams.get('aid')
+const eid = urlParams.get('eid')
 
 var list;
 var masterCheckbox;
@@ -16,7 +20,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
         });
     });
 
-    getPreviewItems(pcid);
+    getPreviewItems(pcid, true);
 })
 
 function initList() {
@@ -38,8 +42,8 @@ function initList() {
     list = new List("item-table", options);
 }
 
-async function getPreviewItems(pcid) {
-    const response = await fetch(`/v1/preview/fetch-next-page/${pcid}`, {
+async function getPreviewItems(pcid, isFirstCall) {
+    const response = await fetch(`/v1/preview/fetch-next-page/${pcid}?first=${isFirstCall}`, {
         method: 'GET',
     });
 
@@ -52,9 +56,9 @@ async function getPreviewItems(pcid) {
 
         if ("error" in data) {
             console.log(data["error"]);
-            if (data["error"]["url"] !== "") {
-                location.href = data["error"]["url"];
-            }
+            // if (data["error"]["url"] !== "") {
+            //     location.href = data["error"]["url"];
+            // }
             return
         }
 
@@ -112,7 +116,7 @@ async function submit(pcid) {
             fdata.append(`item[${i}]`, dataId);
         });
     }
-    const response = await fetch(`/v1/preview/${pcid}`, {
+    const response = await fetch(`/v1/preview/${pcid}?aid=${aid}&eid=${eid}`, {
         method: 'POST',
         body: fdata
     });

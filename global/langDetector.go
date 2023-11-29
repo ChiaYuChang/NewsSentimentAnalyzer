@@ -1,32 +1,49 @@
 package global
 
 import (
+	"fmt"
+	"os"
 	"sync"
 
-	"github.com/pemistahl/lingua-go"
+	ld "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/grpc/languageDetector"
+	pb "github.com/ChiaYuChang/NewsSentimentAnalyzer/proto/language_detector"
+	"google.golang.org/grpc"
 )
 
-var languageDetector detectorSingleton
+var lds languageDetectorClientSingleton
 
-type detectorSingleton struct {
-	lingua.LanguageDetector
+type languageDetectorClientSingleton struct {
+	cli ld.LanguageDetectorClient
 	sync.Once
 }
 
-func LanguageDetector() lingua.LanguageDetector {
-	languageDetector.Do(func() {
-		languageDetector.LanguageDetector = lingua.NewLanguageDetectorBuilder().
-			FromLanguages(lingua.AllLanguages()...).
-			Build()
+func NewLanguageDetectorClient(host string, port int,
+	dailOpts []grpc.DialOption, detectLanguageCallOpt []grpc.CallOption,
+	healthCheckCallOpt []grpc.CallOption) (ld.LanguageDetectorClient, error) {
+
+	lds.Do(func() {
+		conn, err := grpc.Dial(
+			fmt.Sprintf("%s:%d", host, port),
+			dailOpts...,
+		)
+		if err != nil {
+			Logger.Fatal().
+				Str("address", host).
+				Int("port", port).
+				Err(err).
+				Msg("failed to create language detector client")
+			os.Exit(1)
+		}
+
+		lds.cli = ld.LanguageDetectorClient{
+			LanguageDetectorClient: pb.NewLanguageDetectorClient(conn),
+			DetectLanguageCallOpt:  detectLanguageCallOpt,
+			HealthCheckCallOpt:     healthCheckCallOpt,
+		}
 	})
-	return languageDetector.LanguageDetector
+	return lds.cli, nil
 }
 
-func SetLanguageDetector(lang ...lingua.Language) lingua.LanguageDetector {
-	languageDetector.Do(func() {
-		languageDetector.LanguageDetector = lingua.NewLanguageDetectorBuilder().
-			FromLanguages(lang...).
-			Build()
-	})
-	return languageDetector.LanguageDetector
+func LanguageDetectorClient() ld.LanguageDetectorClient {
+	return lds.cli
 }

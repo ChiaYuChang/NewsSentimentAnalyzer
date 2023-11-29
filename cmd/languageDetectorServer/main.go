@@ -14,7 +14,7 @@ import (
 	"time"
 
 	ec "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/errorCode"
-	pb "github.com/ChiaYuChang/NewsSentimentAnalyzer/proto"
+	pb "github.com/ChiaYuChang/NewsSentimentAnalyzer/proto/language_detector"
 	"github.com/pemistahl/lingua-go"
 	"github.com/rs/zerolog"
 	"github.com/spf13/pflag"
@@ -133,7 +133,7 @@ func (srvr LanguageDetectServer) DetectLanguage(stream pb.LanguageDetector_Detec
 }
 
 func (srvr LanguageDetectServer) HealthCheck(ctx context.Context, sig *pb.PingPong) (*pb.PingPong, error) {
-	Logger.Info().Msg("ping")
+	Logger.Info().Time("time", time.Now()).Msg("ping")
 	select {
 	case <-ctx.Done():
 		return nil, ctx.Err()

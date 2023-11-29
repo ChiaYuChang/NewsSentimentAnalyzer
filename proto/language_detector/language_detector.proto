@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package language_detect;
+package languageDetector;
 
-option go_package = "github.com/ChiaYuChang/proto";
+option go_package = "github.com/ChiaYuChang/proto/language_detector/languageDetector";
 
 service LanguageDetector {
   rpc DetectLanguage(stream LanguageDetectRequest)

@@ -79,5 +79,13 @@
       "staticPage": "/static/*",
       "healthCheck": "/health-check"
     }
+  },
+  "microservice": {
+    "language-detector": {
+      "name": "language-detector",
+      "type": "gRPC",
+      "host": "localhost",
+      "port": 50051
+    }
   }
 }

@@ -51,6 +51,7 @@ type Querier interface {
 	GetNewsByJob(ctx context.Context) ([]*GetNewsByJobRow, error)
 	GetNewsByKeywords(ctx context.Context, keywords []string) ([]*GetNewsByKeywordsRow, error)
 	GetNewsByMD5Hash(ctx context.Context, md5Hash string) (*GetNewsByMD5HashRow, error)
+	GetNewsByMD5Hashs(ctx context.Context, md5Hash []string) ([]int64, error)
 	GetNewsPublishBetween(ctx context.Context, arg *GetNewsPublishBetweenParams) ([]*GetNewsPublishBetweenRow, error)
 	GetUserAuth(ctx context.Context, email string) (*GetUserAuthRow, error)
 	HardDeleteUser(ctx context.Context, id uuid.UUID) (int64, error)

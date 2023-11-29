@@ -12,13 +12,36 @@ import (
 )
 
 const createNews = `-- name: CreateNews :one
-INSERT INTO news (
-    md5_hash, guid, author, title, link, description, language,
-    content, category, source, related_guid, publish_at
-) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
-)
-RETURNING id
+
+INSERT INTO
+    news (
+        md5_hash,
+        guid,
+        author,
+        title,
+        link,
+        description,
+        language,
+        content,
+        category,
+        source,
+        related_guid,
+        publish_at
+    )
+VALUES (
+        $1,
+        $2,
+        $3,
+        $4,
+        $5,
+        $6,
+        $7,
+        $8,
+        $9,
+        $10,
+        $11,
+        $12
+    ) RETURNING id
 `
 
 type CreateNewsParams struct {
@@ -57,8 +80,8 @@ func (q *Queries) CreateNews(ctx context.Context, arg *CreateNewsParams) (int64,
 }
 
 const deleteNews = `-- name: DeleteNews :execrows
-DELETE FROM news
- WHERE id = $1
+
+DELETE FROM news WHERE id = $1
 `
 
 func (q *Queries) DeleteNews(ctx context.Context, id int64) (int64, error) {
@@ -70,8 +93,8 @@ func (q *Queries) DeleteNews(ctx context.Context, id int64) (int64, error) {
 }
 
 const deleteNewsPublishBefore = `-- name: DeleteNewsPublishBefore :execrows
-DELETE FROM news
- WHERE publish_at < $1
+
+DELETE FROM news WHERE publish_at < $1
 `
 
 func (q *Queries) DeleteNewsPublishBefore(ctx context.Context, beforeTime pgtype.Timestamptz) (int64, error) {
@@ -83,10 +106,11 @@ func (q *Queries) DeleteNewsPublishBefore(ctx context.Context, beforeTime pgtype
 }
 
 const getContentById = `-- name: GetContentById :many
+
 SELECT id, content
-  FROM news
- WHERE id = ANY($1::int[]) 
- ORDER BY id
+FROM news
+WHERE id = ANY($1:: int [])
+ORDER BY id
 `
 
 type GetContentByIdRow struct {
@@ -115,15 +139,22 @@ func (q *Queries) GetContentById(ctx context.Context, ids []int32) ([]*GetConten
 }
 
 const getNewsByJob = `-- name: GetNewsByJob :many
-SELECT id, title, description, source, related_guid, publish_at
-  FROM news
- WHERE news.id = ANY(
-    SELECT newsjobs.news_id
-      FROM jobs
-      LEFT JOIN newsjobs
-        ON jobs.id = newsjobs.jobs_id
- )
- ORDER BY publish_at
+
+SELECT
+    id,
+    title,
+    description,
+    source,
+    related_guid,
+    publish_at
+FROM news
+WHERE news.id = ANY(
+        SELECT
+            newsjobs.news_id
+        FROM jobs
+            LEFT JOIN newsjobs ON jobs.id = newsjobs.jobs_id
+    )
+ORDER BY publish_at
 `
 
 type GetNewsByJobRow struct {
@@ -163,14 +194,22 @@ func (q *Queries) GetNewsByJob(ctx context.Context) ([]*GetNewsByJobRow, error) 
 }
 
 const getNewsByKeywords = `-- name: GetNewsByKeywords :many
-SELECT id, title, description, source, related_guid, publish_at
-  FROM news
- WHERE id = ANY(
-    SELECT news_id
-      FROM keywords
-    WHERE keyword = ANY($1::string[])
- )
- ORDER BY publish_at
+
+SELECT
+    id,
+    title,
+    description,
+    source,
+    related_guid,
+    publish_at
+FROM news
+WHERE id = ANY(
+        SELECT news_id
+        FROM keywords
+        WHERE
+            keyword = ANY($1:: string [])
+    )
+ORDER BY publish_at
 `
 
 type GetNewsByKeywordsRow struct {
@@ -210,9 +249,16 @@ func (q *Queries) GetNewsByKeywords(ctx context.Context, keywords []string) ([]*
 }
 
 const getNewsByMD5Hash = `-- name: GetNewsByMD5Hash :one
-SELECT id, title, description, source, related_guid, publish_at
-  FROM news
- WHERE md5_hash = $1
+
+SELECT
+    id,
+    title,
+    description,
+    source,
+    related_guid,
+    publish_at
+FROM news
+WHERE md5_hash = $1
 `
 
 type GetNewsByMD5HashRow struct {
@@ -238,11 +284,45 @@ func (q *Queries) GetNewsByMD5Hash(ctx context.Context, md5Hash string) (*GetNew
 	return &i, err
 }
 
+const getNewsByMD5Hashs = `-- name: GetNewsByMD5Hashs :many
+
+SELECT id FROM news WHERE md5_hash = ANY($1:: string [])
+`
+
+func (q *Queries) GetNewsByMD5Hashs(ctx context.Context, md5Hash []string) ([]int64, error) {
+	rows, err := q.db.Query(ctx, getNewsByMD5Hashs, md5Hash)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []int64
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		items = append(items, id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getNewsPublishBetween = `-- name: GetNewsPublishBetween :many
-SELECT id, title, description, source, related_guid, publish_at
-  FROM news
- WHERE publish_at BETWEEN timestamp $1 AND $2
- ORDER BY publish_at
+
+SELECT
+    id,
+    title,
+    description,
+    source,
+    related_guid,
+    publish_at
+FROM news
+WHERE
+    publish_at BETWEEN timestamp $1
+    AND $2
+ORDER BY publish_at
 `
 
 type GetNewsPublishBetweenParams struct {
@@ -287,10 +367,17 @@ func (q *Queries) GetNewsPublishBetween(ctx context.Context, arg *GetNewsPublish
 }
 
 const listRecentNNews = `-- name: ListRecentNNews :many
-SELECT id, title, description, source, related_guid, publish_at
-  FROM news
- ORDER BY publish_at
- LIMIT $1
+
+SELECT
+    id,
+    title,
+    description,
+    source,
+    related_guid,
+    publish_at
+FROM news
+ORDER BY publish_at
+LIMIT $1
 `
 
 type ListRecentNNewsRow struct {
