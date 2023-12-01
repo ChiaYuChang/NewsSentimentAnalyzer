@@ -116,12 +116,23 @@ build-lang-detector-proto:
 	--go-grpc_out=. --go-grpc_opt=paths=source_relative \
 	${PROTO_SRC_DIR}/language_detector/*.proto \
 
+build-url-parser-proto:
+	protoc --go_out=. --go_opt=paths=source_relative \
+	--go-grpc_out=. --go-grpc_opt=paths=source_relative \
+	${PROTO_SRC_DIR}/news_parser/*.proto \
+
+build-proto: build-lang-detector-proto build-url-parser-proto
+
 clean-proto:
 	rm -rf ./proto/*pb.go
 
 build-lang-detector:
 	@go build -o bin/languageDetectorServer/languageDetectorServer ./cmd/languageDetectorServer/main.go && \
 		chmod +x bin/languageDetectorServer/languageDetectorServer
+
+build-url-parser:
+	@go build -o bin/newsParserServer/newsParserServer ./cmd/newsParserServer/main.go && \
+		chmod +x bin/newsParserServer/newsParserServer
 
 build-milvus-health-check:
 	@go build -o bin/milvusHealthCheck/milvusHealthCheck ./cmd/milvusHealthCheck/main.go && \
@@ -136,8 +147,27 @@ run: docker-up-db build build-wasm build-news-sentiment-analyzer
 
 build: build-lang-detector build-milvus-health-check build-news-sentiment-analyzer
 
-start-lang-detect-server:
-	@./bin/languageDetectorServer/languageDetectorServer -o ./bin/languageDetectorServer/log.json
+start-lang-detect-server: build-lang-detector
+	@ ./bin/languageDetectorServer/languageDetectorServer \
+	-o ./bin/languageDetectorServer/log.json & \
+	echo "$$!" > "${TMP_DIR}/lang-detect-server.pid"
+
+stop-lang-detect-server:
+	@kill `cat ${TMP_DIR}/lang-detect-server.pid`
+	@rm ${TMP_DIR}/lang-detect-server.pid
+
+start-url-parser-server: build-url-parser
+	@./bin/newsParserServer/newsParserServer \
+	-o ./bin/newsParserServer/log.json & \
+	echo "$$!" > "${TMP_DIR}/news-parser-server.pid"
+
+stop-url-parser-server:
+	@kill `cat ${TMP_DIR}/news-parser-server.pid`
+	@rm ${TMP_DIR}/news-parser-server.pid
+
+start-all-microservice: start-lang-detect-server start-url-parser-server
+
+stop-all-microservice: stop-lang-detect-server stop-url-parser-server
 
 clean:
 	@rm ./${APP_NAME}

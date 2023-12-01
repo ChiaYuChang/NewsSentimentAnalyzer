@@ -13,8 +13,9 @@ import (
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api"
+	languagedetector "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/grpc/languageDetector"
+	newsparser "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/grpc/newsParser"
 	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm"
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/parser"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view/object"
@@ -143,7 +144,7 @@ func (repo APIRepo) PostPreview(w http.ResponseWriter, req *http.Request) {
 	global.Logger.Info().Int("n", len(selectedPrev)).Msg("OK")
 
 	reqChan := make(chan *languageDetector.LanguageDetectRequest)
-	respChan, err, errChan := global.LanguageDetectorClient().DetectLanguage(context.TODO(), reqChan)
+	respChan, err, errChan := languagedetector.MustGetLanguageDetectorClient().DetectLanguage(context.TODO(), reqChan)
 	if err != nil {
 		ecErr := ec.MustGetEcErr(ec.ECBadRequest).
 			WithDetails("error while detect language").
@@ -177,12 +178,23 @@ func (repo APIRepo) PostPreview(w http.ResponseWriter, req *http.Request) {
 	go func(respChan <-chan *languageDetector.LanguageDetectResponse,
 		cnChan chan<- *service.NewsCreateRequest) {
 		defer close(cnChan)
+		cli, _ := newsparser.GetNewsParserClient()
+		i := int64(0)
 		for resp := range respChan {
 			prev := selectedPrev[resp.GetId()]
 			u, _ := url.Parse(prev.Link)
-			guid := parser.GetDefaultParser().ToGUID(u)
+			// guid := parser.GetDefaultParser().ToGUID(u)
+			_, guid, err := cli.GetGUID(context.TODO(), i, u.String())
+			if err != nil {
+				global.Logger.Error().
+					Err(err).
+					Str("url", u.String()))
+					Msg("error while GetGUID")
+				continue
+			}
 			lang := lingua.Language(int(resp.GetLanguage())).IsoCode639_1()
 			cnChan <- prev.ToNewsCreateRequest(guid, lang.String(), u.Host, nil)
+			i++
 		}
 		global.Logger.Info().Msg("to create news req go run time done")
 	}(respChan, cnChan)

@@ -4,8 +4,53 @@ package newsParser;
 
 option go_package = "github.com/ChiaYuChang/proto/news_parser/newsParser";
 
-message HasRequest { string URL = 1; }
+import "google/protobuf/timestamp.proto";
 
-message ParseRequest { string URL = 1; }
+service URLParser {
+  rpc HealthCheck(PingPong) returns (PingPong);
+  rpc ParseUrl(ParseURLRequest) returns (ParseURLResponse);
+  rpc GetGUID(GetGUIDRequest) returns (GetGUIDResponse);
+}
 
-message GetGUIDRequest { string URL = 1; }
+message ParseURLRequest {
+  int64 Id = 1;
+  string URL = 2;
+}
+
+message ParseURLResponse {
+  int64 Id = 1;
+  optional NewsItem NewsItem = 2;
+  optional Error Error = 3;
+}
+
+message NewsItem {
+  string Title = 1;
+  string Link = 2;
+  string Description = 3;
+  string Language = 4;
+  repeated string Author = 5;
+  string Category = 6;
+  string GUID = 7;
+  google.protobuf.Timestamp PubDate = 8;
+  repeated string Content = 9;
+  repeated string Tag = 10;
+  repeated string RelatedGUID = 11;
+}
+
+message Error {
+  int64 Code = 1;
+  string Message = 2;
+  repeated string Details = 3;
+}
+
+message GetGUIDRequest {
+  int64 Id = 1;
+  string URL = 2;
+}
+
+message GetGUIDResponse {
+  int64 Id = 1;
+  string GUID = 2;
+}
+
+message PingPong { bool signal = 1; }

@@ -60,7 +60,7 @@ func GetDefaultParser() Parser {
 			NewUDNParser(),     // 聯合新聞網
 			// 外媒
 			NewBBCParser(),     // BBC News 中文
-			NewNYTimesParser(), //	紐約時報中文網
+			NewNYTimesParser(), // 紐約時報中文網
 			NewRFIParser(),     // 法廣台灣
 		)
 		fmt.Println("set up parser repo singleton")
