@@ -12,11 +12,11 @@ type ErrorResponse struct {
 	Error []string `json:"errors"`
 }
 
-func (er ErrorResponse) ToError(code int) error {
+func (errResp ErrorResponse) ToEcError(code int) *ec.Error {
 	var ecCode ec.ErrorCode
 	switch code {
 	case http.StatusOK:
-		return ec.MustGetErr(ec.Success)
+		return ec.MustGetEcErr(ec.Success)
 	case http.StatusBadRequest:
 		ecCode = ec.ECBadRequest
 	case http.StatusUnauthorized:
@@ -33,11 +33,11 @@ func (er ErrorResponse) ToError(code int) error {
 		ecCode = ec.ECBadRequest
 	}
 
-	if len(er.Error) != 0 {
-		return ec.MustGetErr(ecCode).(*ec.Error).
-			WithDetails(er.Error...)
+	if len(errResp.Error) != 0 {
+		return ec.MustGetEcErr(ecCode).
+			WithDetails(errResp.Error...)
 	}
-	return ec.MustGetErr(ecCode)
+	return ec.MustGetEcErr(ecCode)
 }
 
 func (er ErrorResponse) String() string {

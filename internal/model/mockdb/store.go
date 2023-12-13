@@ -187,10 +187,10 @@ func (mr *MockStoreMockRecorder) CreateEndpoint(arg0, arg1 interface{}) *gomock.
 }
 
 // CreateJob mocks base method.
-func (m *MockStore) CreateJob(arg0 context.Context, arg1 *model.CreateJobParams) (int32, error) {
+func (m *MockStore) CreateJob(arg0 context.Context, arg1 *model.CreateJobParams) (int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateJob", arg0, arg1)
-	ret0, _ := ret[0].(int32)
+	ret0, _ := ret[0].(int64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -887,6 +887,21 @@ func (m *MockStore) UpdateAPIKey(arg0 context.Context, arg1 *model.UpdateAPIKeyP
 func (mr *MockStoreMockRecorder) UpdateAPIKey(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAPIKey", reflect.TypeOf((*MockStore)(nil).UpdateAPIKey), arg0, arg1)
+}
+
+// UpdateJobByULID mocks base method.
+func (m *MockStore) UpdateJobByULID(arg0 context.Context, arg1 *model.UpdateJobByULIDParams) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateJobByULID", arg0, arg1)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateJobByULID indicates an expected call of UpdateJobByULID.
+func (mr *MockStoreMockRecorder) UpdateJobByULID(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateJobByULID", reflect.TypeOf((*MockStore)(nil).UpdateJobByULID), arg0, arg1)
 }
 
 // UpdateJobStatus mocks base method.

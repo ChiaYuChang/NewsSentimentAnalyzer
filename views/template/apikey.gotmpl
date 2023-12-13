@@ -4,6 +4,9 @@
 <head>
     {{template "head" .Page.HeadConent}}
     <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const aid = urlParams.get('aid')
+
     function deleteAPIKey(id) {
         fetch(`apikey/${id}`, {
             method: "DELETE",
@@ -55,7 +58,7 @@
                 </thead>
                 <tbody>
                     {{range $api := .NewsAPIs}}
-                    <tr>
+                    <tr id="api-{{$api.ID}}">
                         <td>
                             <div class="row">
                                 <img src="/static/image/{{$api.Icon}}" alt="{{$api.Name}}" class="api-logo-icon">
@@ -70,7 +73,7 @@
                     </tr>
                     {{end}}
                     {{range $api := .AnalyzerAPIs}}
-                    <tr>
+                    <tr id="api-{{$api.ID}}">
                         <td>
                             <div class="row">
                                 <img src="/static/image/{{$api.Icon}}" alt="{{$api.Name}}" class="api-logo-icon">
@@ -93,4 +96,10 @@
     </section>
 </body>
 
+<script>
+    if (aid !== "") {
+        let row = document.getElementById(`api-${aid}`)
+        row.classList.add("highlight-alert")
+    }
+</script>
 </html>

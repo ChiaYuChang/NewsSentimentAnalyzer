@@ -1,7 +1,6 @@
 package object
 
 import (
-	"encoding/json"
 	"fmt"
 	"html/template"
 	"path"
@@ -103,21 +102,18 @@ func StatusToClass(jobStatus model.JobStatus) string {
 }
 
 type JobDetails struct {
-	JID           int32             `json:"job-id"`
-	Owner         string            `json:"job-owner"`
-	Status        string            `json:"job-status"`
-	NewsAPI       string            `json:"job-news_api"`
-	NewsAPIQuery  string            `json:"job-news_api_query"`
-	Analyzer      string            `json:"job-analyzer"`
-	AnalyzerQuery map[string]string `json:"job-analyzer_query"`
-	CreatedAt     string            `json:"job-created_at"`
-	UpdatedAt     string            `json:"job-updated_at"`
+	JID           int64  `json:"job-id"`
+	Owner         string `json:"job-owner"`
+	Status        string `json:"job-status"`
+	NewsAPI       string `json:"job-news_api"`
+	NewsAPIQuery  string `json:"job-news_api_query"`
+	Analyzer      string `json:"job-analyzer"`
+	AnalyzerQuery string `json:"job-analyzer_query"`
+	CreatedAt     string `json:"job-created_at"`
+	UpdatedAt     string `json:"job-updated_at"`
 }
 
 func NewJobDetails(owner string, j *model.GetJobsByJobIdRow) JobDetails {
-	analyzerQuery := map[string]string{}
-	json.Unmarshal(j.LlmQuery, &analyzerQuery)
-
 	return JobDetails{
 		JID:           j.ID,
 		Owner:         owner,
@@ -125,7 +121,7 @@ func NewJobDetails(owner string, j *model.GetJobsByJobIdRow) JobDetails {
 		NewsAPI:       j.NewsSrc,
 		NewsAPIQuery:  j.SrcQuery,
 		Analyzer:      j.Analyzer,
-		AnalyzerQuery: analyzerQuery,
+		AnalyzerQuery: string(j.LlmQuery),
 		CreatedAt:     j.CreatedAt.Time.UTC().Format(time.DateTime),
 		UpdatedAt:     j.UpdatedAt.Time.UTC().Format(time.DateTime),
 	}
@@ -355,4 +351,11 @@ func (apiEP APIEndpointPage) HasSelectOpts() bool {
 
 type ResultSecectorPage struct {
 	Page
+	Version string
+}
+
+type AnalyzerPage struct {
+	Page
+	Prompt  map[string]string
+	Version string
 }

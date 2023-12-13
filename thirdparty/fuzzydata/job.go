@@ -1,12 +1,14 @@
 package main
 
 import (
-	"math/rand"
+	crand "crypto/rand"
+	mrand "math/rand"
 	"time"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model"
 	rg "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/randanGenerator"
 	"github.com/google/uuid"
+	"github.com/oklog/ulid"
 )
 
 var JobStatus = []model.JobStatus{
@@ -24,6 +26,7 @@ type Job struct {
 
 type JobItem struct {
 	Id         int             `json:"id"`
+	ULID       string          `json:"ulid"`
 	Owner      uuid.UUID       `json:"owner"`
 	Status     model.JobStatus `json:"status"               mod:"trim"`
 	SrcAPIName string          `json:"src_api_name"         mod:"trim"`
@@ -69,26 +72,28 @@ func NewJobs(maxJobN int, apis []APIItem, users []UserItem) Job {
 	jss := NewSampler(JobStatus, []float64{0.3, 0.3, 0.3, 0.07, 0.03})
 	for i := 0; i < len(users); i++ {
 		owner := users[i]
-		n := rand.Intn(maxJobN-minJobN) + minJobN
+		n := mrand.Intn(maxJobN-minJobN) + minJobN
 		if owner.Id == TEST_ADMIN_USER_UID || owner.Id == TEST_USER_UID {
 			n = maxJobN
 		}
 
 		for j := 0; j < n; j++ {
-			srcApi := apis[srcApis[rand.Intn(len(srcApis))]-1]
-			llmApi := apis[llmApis[rand.Intn(len(llmApis))]-1]
+			srcApi := apis[srcApis[mrand.Intn(len(srcApis))]-1]
+			llmApi := apis[llmApis[mrand.Intn(len(llmApis))]-1]
+
 			jobs.Item = append(jobs.Item, JobItem{
 				Owner:    owner.Id,
+				ULID:     ulid.MustNew(ulid.Timestamp(time.Now()), crand.Reader).String(),
 				Status:   jss.Get(),
 				SrcApiId: srcApi.Id,
-				SrcQuery: rg.Must(rg.AlphaNum.GenRdmString(rand.Intn(10) + 20)),
+				SrcQuery: rg.Must(rg.AlphaNum.GenRdmString(mrand.Intn(10) + 20)),
 				LlmApiId: llmApi.Id,
-				LlmQuery: "{}",
+				LlmQuery: `{"is_test_data": true}`,
 			})
 		}
 	}
 
-	rand.Shuffle(len(jobs.Item), func(i, j int) {
+	mrand.Shuffle(len(jobs.Item), func(i, j int) {
 		jobs.Item[i], jobs.Item[j] = jobs.Item[j], jobs.Item[i]
 	})
 	cts := rg.GenRdnTimes(len(jobs.Item), TIME_MIN, TIME_MAX)

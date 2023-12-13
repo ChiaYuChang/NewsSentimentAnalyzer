@@ -1,6 +1,9 @@
 package pageform
 
-import "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api"
+import (
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api"
+	ec "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/errorCode"
+)
 
 type PreviewResponse struct {
 	Error   *PreviewError     `form:"error"    json:"error,omitempty"`
@@ -9,10 +12,11 @@ type PreviewResponse struct {
 }
 
 type PreviewError struct {
-	Code        int      `form:"code"    json:"code,omitempty"`
-	Message     string   `form:"message" json:"message,omitempty"`
-	Detail      []string `form:"details" json:"details,omitempty"`
-	RedirectURL string   `form:"url"     json:"url,omitempty"`
+	Code        int      `form:"code"     json:"code,omitempty"`
+	PgxCode     string   `form:"pgx_code" json:"pgx_code,omitempty"`
+	Message     string   `form:"message"  json:"message,omitempty"`
+	Detail      []string `form:"details"  json:"details,omitempty"`
+	RedirectURL string   `form:"url"      json:"url,omitempty"`
 }
 
 type PreviewPostForm struct {
@@ -23,4 +27,13 @@ type PreviewPostForm struct {
 type PreviewPostResp struct {
 	Error       *PreviewError `form:"error" json:"error,omitempty"`
 	RedirectURL string        `form:"url"   json:"url,omitempty"`
+}
+
+func (resp *PreviewPostResp) WithEcError(ecErr *ec.Error) {
+	resp.Error = &PreviewError{
+		Code:    ecErr.HttpStatusCode,
+		PgxCode: ecErr.PgxCode,
+		Message: ecErr.Message,
+		Detail:  ecErr.Details,
+	}
 }

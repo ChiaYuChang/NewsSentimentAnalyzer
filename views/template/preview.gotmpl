@@ -14,6 +14,10 @@
 
 <body>
     <section class="width-background">
+        <div class="control-panal">
+            <button type="button" class="btn" id="home" onclick="toTop()"><i class="fa-solid fa-up-long"></i></button>
+            <button type="button" class="btn" id="end"  onclick="toEnd()"><i class="fa-solid fa-down-long"></i></button>
+        </div>
         <div class="mid-card">
             <div class="table-container" id="item-table">
                 <div class="search-bar">
@@ -40,7 +44,8 @@
             </div>
             <button type="button" class="btn" id="more" onclick="getPreviewItems(pcid)">More</button>
             <button type="button" class="btn" id="back" onclick="goToPreviousPage()">Back to Endpoint</button>
-            <button type="button" class="btn" onclick="submit(pcid,false)">Submit</button>
+            <button type="button" class="btn" id="submit" onclick="submit(pcid,false)">Submit</button>
+            <button id="to-api-key" type="button" class="btn hide" onclick="goToAPIKeyPage('{{.Version}}')">Check API Key page</button>
         </div>
     </section>
 </body>

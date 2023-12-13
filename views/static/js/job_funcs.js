@@ -1,6 +1,9 @@
 var pagerCache = new Map();
 var detailCache = new Map();
 
+const urlParams = new URLSearchParams(window.location.search);
+var selectedJobId = parseInt(urlParams.get('jid'));
+
 addEventListener("DOMContentLoaded", (event) => {
     showLoadingAnimation();
     updatePageButton();
@@ -128,8 +131,18 @@ function getKey(jstatus, page) {
 
 var jobList
 var item_func = function (values) {
+    if (values["job-id"] == selectedJobId) {
+        return `
+        <tr class='job-data highlight-alert' id='job-${values["job-id"]}' onclick=${values["onclick"]}>",
+        <th class='job-id mono'>${values["job-id"]}</th>",
+        <td><div class='job-status' status=${values["job-status"]}>${values["job-status"]}</div></td>",
+        <td class='job-news_src'>${values["job-news_src"]}</td>",
+        <td class='job-analyzer'>${values["job-analyzer"]}</td>",
+        <td class='job-updated_at mono'>${values["job-updated_at"]}</td>",
+        </tr>`
+    }
     return `
-        <tr class='job-data' onclick=${values["onclick"]}>",
+        <tr class='job-data' id='job-${values["job-id"]}' onclick=${values["onclick"]}>",
         <th class='job-id mono'>${values["job-id"]}</th>",
         <td><div class='job-status' status=${values["job-status"]}>${values["job-status"]}</div></td>",
         <td class='job-news_src'>${values["job-news_src"]}</td>",
@@ -193,12 +206,74 @@ async function getJobs() {
                 });
                 newList(data)
             })
-            .catch(err => { console.error("Error:", err) });
+            .catch(err => { 
+                console.error("Error:", err)
+            });
     }
 }
 
+var detailsFields = [
+    {
+        "row_header": "Job ID",
+        "field_name": "job-id",
+        "is_mono": false,
+    },
+    {
+        "row_header": "Owner",
+        "field_name": "job-owner",
+        "is_mono": false,
+    },
+    {
+        "row_header": "Status",
+        "field_name": "job-status",
+        "is_mono": false,
+    },
+    {
+        "row_header": "News API",
+        "field_name": "job-news_api",
+        "is_mono": false,
+    },
+    {
+        "row_header": "News API Query",
+        "field_name": "job-news_api_query",
+        "is_mono": true,
+    },
+    {
+        "row_header": "Analyzer",
+        "field_name": "job-analyzer",
+        "is_mono": false,
+    },
+    {
+        "row_header": "Analyzer Query",
+        "field_name": "job-analyzer_query",
+        "is_mono": true,
+    },
+    {
+        "row_header": "Created At",
+        "field_name": "job-created_at",
+        "is_mono": true,
+    },
+    {
+        "row_header": "Updated At",
+        "field_name": "job-updated_at",
+        "is_mono": true,
+    },
+]
+
 async function getJobDetails(id) {
-    let detailEl = document.getElementById("detail");
+    if (selectedJobId !== null) {
+        let el = document.getElementById(`job-${selectedJobId}`);
+        if (el !== null ) {
+            el.classList.remove("highlight-alert");
+        }        
+    }
+    selectedJobId= id;
+    let el = document.getElementById(`job-${selectedJobId}`);
+    if (el !== null ) {
+        el.classList.add("highlight-alert");
+    }     
+
+    const detailEl = document.getElementById("detail");
     if (detailEl.getAttribute("job-id") === ('' + id)) { return }
 
     var data
@@ -220,54 +295,6 @@ async function getJobDetails(id) {
     detailEl.setAttribute("job-id", data["job-id"]);
 
     tr = document.createElement("tr")
-    var detailsFields = [
-        {
-            "row_header": "Job ID",
-            "field_name": "job-id",
-            "is_mono": false,
-        },
-        {
-            "row_header": "Owner",
-            "field_name": "job-owner",
-            "is_mono": false,
-        },
-        {
-            "row_header": "Status",
-            "field_name": "job-status",
-            "is_mono": false,
-        },
-        {
-            "row_header": "News API",
-            "field_name": "job-news_api",
-            "is_mono": false,
-        },
-        {
-            "row_header": "News API Query",
-            "field_name": "job-news_api_query",
-            "is_mono": true,
-        },
-        {
-            "row_header": "Analyzer",
-            "field_name": "job-analyzer",
-            "is_mono": false,
-        },
-        {
-            "row_header": "Analyzer Query",
-            "field_name": "job-analyzer_query",
-            "is_mono": true,
-        },
-        {
-            "row_header": "Created At",
-            "field_name": "job-created_at",
-            "is_mono": true,
-        },
-        {
-            "row_header": "Updated At",
-            "field_name": "job-updated_at",
-            "is_mono": true,
-        },
-    ]
-
     detailsFields.forEach((f) => {
         let tr = document.createElement("tr")
         let th = document.createElement("th")
@@ -275,23 +302,30 @@ async function getJobDetails(id) {
         th.setAttribute("scope", "row")
 
         let td = document.createElement("td")
-        if (f.field_name === "job-analyzer_query") {
-            let pre = document.createElement("pre")
-            let jsn = JSON.stringify(data[f.field_name], null, "\t");
-            pre.textContent = jsn
-            td.classList.add("mono")
-            td.appendChild(pre)
-        } else if (f.field_name === "job-status") {
-            let div = document.createElement("div")
-            div.setAttribute("class", "job-status")
-            div.setAttribute("status", data[f.field_name])
-            div.textContent = data[f.field_name];
-            td.appendChild(div)
-        } else {
-            td.textContent = data[f.field_name]
-            if (f.is_mono) {
+        switch (f.field_name) {
+            case "job-analyzer_query":
+                let pre = document.createElement("pre");
+                let jsn = JSON.parse(data["job-analyzer_query"]);
+                pre.textContent = JSON.stringify(jsn, null, 2);
+                td.classList.add("mono");
+                td.appendChild(pre);
+                break;
+            case "job-status":
+                let div = document.createElement("div")
+                div.setAttribute("class", "job-status")
+                div.setAttribute("status", data["job-status"])
+                div.textContent = data["job-status"];
+                td.appendChild(div)
+                break;
+            case "job-news_api_query":
+                td.textContent = decodeURIComponent(data["job-news_api_query"]);
                 td.classList.add("mono")
-            }
+                break;
+            default:
+                td.textContent = data[f.field_name]
+                if (f.is_mono) {
+                    td.classList.add("mono")
+                }
         }
 
         tr.appendChild(th)

@@ -92,7 +92,7 @@ func (reqproto RequestProto) ToPreviewCache(uid uuid.UUID, next NextPageToken, o
 		CreatedAt: time.Now().UTC(),
 	}
 
-	_ = c.AddRandomSalt(global.PREVIEW_CACHE_KEY_SALT_LEN)
+	// _ = c.AddRandomSalt(global.PREVIEW_CACHE_KEY_SALT_LEN)
 
 	return c.Key(
 		global.PREVIEW_CACHE_KEY_PREFIX,

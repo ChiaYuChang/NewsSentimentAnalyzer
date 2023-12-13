@@ -2,15 +2,13 @@ package openai
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 )
 
 type RequestBody interface {
-	String() string
-	json.Marshaler
-	json.Unmarshaler
 	Endpoint() string
 }
 
@@ -20,11 +18,20 @@ type Request[T RequestBody] struct {
 }
 
 func (r Request[T]) String() string {
-	return ""
+	data, _ := json.MarshalIndent(r.Body, "", "    ")
+	return string(data)
 }
 
 func (r Request[T]) EndPoint() string {
 	return r.Body.Endpoint()
+}
+
+func (r *Request[T]) Modify(ctx context.Context) error {
+	return GetModifier().Struct(ctx, &r.Body)
+}
+
+func (r Request[T]) Validate(ctx context.Context) error {
+	return GetValidator().StructCtx(ctx, r.Body)
 }
 
 func (r Request[T]) ToHTTPRequest() (*http.Request, error) {

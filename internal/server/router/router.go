@@ -200,6 +200,8 @@ func NewRouter(srvc service.Service, rds *cache.RedsiStore, vw view.View,
 		r.Get("/preview/{pcid}", apiRepo.GetPreview)
 		r.Post("/preview/{pcid}", apiRepo.PostPreview)
 		r.Get("/preview/fetch-next-page/{pcid}", apiRepo.GetFetchNextPage)
+		r.Get("/analyzer/{pcid}", apiRepo.GetAnalyzer)
+		r.Post("/analyzer/{pcid}", apiRepo.PostAnalyzer)
 
 		r.Get(rp.ErrorPage["forbidden"], errHandlerRepo.Forbidden)
 		r.Get("/*", errHandlerRepo.NotFound)

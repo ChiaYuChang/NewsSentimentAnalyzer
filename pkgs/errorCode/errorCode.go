@@ -11,10 +11,12 @@ const (
 )
 
 const (
-	ECCodeHasBeenUsed ErrorCode = 2
-	ECUnknownError    ErrorCode = 3
-	ECgRPCServerError ErrorCode = 4
-	ECgRPCClientError ErrorCode = 5
+	ECCodeHasBeenUsed   ErrorCode = 2
+	ECUnknownError      ErrorCode = 3
+	ECgRPCServerError   ErrorCode = 4
+	ECgRPCClientError   ErrorCode = 5
+	ECModificationError ErrorCode = 6
+	ECValidationError   ErrorCode = 7
 )
 
 // Client side general error

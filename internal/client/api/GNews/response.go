@@ -145,7 +145,7 @@ func ParseHTTPResponse(resp *http.Response) (*Response, error) {
 		if err != nil {
 			return nil, err
 		}
-		return nil, apiErrResponse.ToError(resp.StatusCode)
+		return nil, apiErrResponse.ToEcError(resp.StatusCode)
 	}
 
 	apiResponse, err := ParseResponse(body)

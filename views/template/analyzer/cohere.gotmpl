@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {{template "head" .Page.HeadConent}}
+    <script src="/static/js/analyzer_funcs.js"></script>
+    <title>{{.Page.Title}}</title>
+</head>
+
+<body>
+    <section class="background">
+        <div class="mid-card">
+            <h1>Analyzer API: <strong>Cohere</strong></h1>
+            <form action="" method="post" class="data-form">
+                <ul class="data-list">
+                    <li class="data-field">
+                        <label for="analysis" class="data-field-label">Analysis</label>
+                        <div class="data-field-input row">
+                            <div>
+                                <label class="pure-checkbox">
+                                    <input type="checkbox" name="embedding" id="embedding" checked>
+                                    Article Embedding
+                                </label>
+                            </div>
+                            <div>
+                                <label class="pure-checkbox">
+                                    <input type="checkbox" name="sentiment" id="sentiment" checked>
+                                    Sentiment Analysis
+                                </label>
+                            </div>
+                        </div>
+                    </li>
+                    <div class="option" type="embedding">
+                        <h5>Embedding Options</h5>
+                        <hr class="rounded">
+                        <li class="data-field">
+                            <label for="embedding-model" class="data-field-label">Model</label>
+                            <select name="embedding-model" id="embedding-model" class="form-input data-field-input" >
+                                <option value="embed-english-v3.0"> embed-english-v3.0 (1024) </option>
+                                <option value="embed-multilingual-v3.0"> embed-multilingual-v3.0 (1024) </option>
+                                <option value="embed-english-light-v3.0"> embed-english-light-v3.0 (384) </option>
+                                <option value="embed-multilingual-light-v3.0"> embed-multilingual-light-v3.0 (384) </option>
+                            </select>
+                        </li>
+                        <li class="data-field">
+                            <label for="input-type" class="data-field-label">Input type</label>
+                            <select name="input-type" id="input-type" class="form-input data-field-input" >
+                                <option value="search_document">Search document</option>
+                                <option value="search_query">Search Query</option>
+                                <option value="classification">Classification</option>
+                                <option value="clustering">Clustering</option>
+                            </select>
+                        </li>
+                    </div>
+                    <div class="option" type="sentiment">
+                        <h5>Sentiment Analysis Options</h5>
+                        <hr class="rounded">
+                        <li class="data-field" style="height:10rem;">
+                            <label for="prompt" class="data-field-label">Prompt</label>
+                            <div class="text-area">{{index .Prompt "cohere-sentiment"}}</div>
+                        </li>
+                        <li class="data-field">
+                            <label for="max-token" class="data-field-label">Max Token</label>
+                            <input name="max-token" id="max-token" type="number" min="10" value="100" class="form-input data-field-input" required>
+                        </li>
+                        <li class="data-field">
+                            <label for="truncate" class="data-field-label">Truncate</label>
+                            <select name="truncate" id="truncate" class="form-input data-field-input" >
+                                <option value="END">END</option>
+                                <option value="START">START</option>
+                            </select>
+                        </li>
+                    </div>
+                </ul>
+                <input type="submit" value="Submit" class="btn">
+                <p class="footer">
+                    back to <a href="/{{.Version}}/welcome" class=" url">welcome</a> page
+                </p>
+            </form>
+        </div>
+    </section>
+</body>
+</html>

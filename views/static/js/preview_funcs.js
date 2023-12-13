@@ -49,16 +49,39 @@ async function getPreviewItems(pcid, isFirstCall) {
 
     response.json().then(data => {
         console.log(data);
+
         if (data["has_next"] === false) {
             let el = document.getElementById("more");
             el.classList.add("pure-button-disabled")
         }
 
         if ("error" in data) {
-            console.log(data["error"]);
-            // if (data["error"]["url"] !== "") {
-            //     location.href = data["error"]["url"];
-            // }
+            let error = data["error"];
+            switch (error.code) {
+                case 401:
+                    console.log("is 401 error");
+                    ShowAlertToast(
+                        message = "Authorization error, please check your API key",
+                        x = 50, y = 10,
+                        duration = 5000
+                    );
+                    let toApiKeyBtn = document.getElementById("to-api-key");
+                    toApiKeyBtn.classList.remove("hide");
+                    toApiKeyBtn.classList.add("highlight-alert");
+                    break;
+                case 410:
+                    console.log("is 410 error")
+                    ShowAlertToast(
+                        message = "Preview has been expired, please create a new one",
+                        x = 50, y = 10,
+                        duration = 5000
+                    )
+                    let submitBtn = document.getElementById("submit");
+                    submitBtn.classList.add("pure-button-disabled");
+                    break;
+                default:
+                    console.log(error);
+            }
             return
         }
 
@@ -91,6 +114,16 @@ async function getPreviewItems(pcid, isFirstCall) {
     })
 
 }
+
+
+function toTop() {
+    window.scrollTo(0, 0);
+}
+
+function toEnd() {
+    document.getElementById("more").scrollIntoView();
+}
+
 
 async function submit(pcid) {
     const fdata = new URLSearchParams();
@@ -125,7 +158,7 @@ async function submit(pcid) {
         ShowInfoToast(message = "Done", destination = data["url"])
         setTimeout(() => {
             window.location.href = data["url"];
-        }, 3000);
+        }, 1000);
     }).catch(err => {
         ShowAlertToast(
             message = `Code ${err.code}: ${err.message}`
@@ -136,4 +169,8 @@ async function submit(pcid) {
 
 function goToPreviousPage() {
     window.history.go(-1);
+}
+
+function goToAPIKeyPage(version) {
+    location.href = `/${version}/apikey?aid=${aid}`
 }

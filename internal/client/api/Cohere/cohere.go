@@ -1,14 +1,11 @@
 package cohere
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
+	"os"
 
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api"
-	srv "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm/Cohere"
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/validator"
 )
 
 const (
@@ -21,119 +18,90 @@ const (
 var API_URL = fmt.Sprintf("%s://%s/%s", API_SCHEME, API_HOST, API_VERSION)
 
 const (
-	EPWordEmbedding string = "embed"
-)
-
-type TruncateType string
-
-const (
-	TruncateNone  TruncateType = "NONE"
-	TruncateStart TruncateType = "START"
-	TruncateEnd   TruncateType = "END"
+	EPCoEmbed  = "embed"
+	EPChat     = "chat"
+	EPGenerate = "generate"
 )
 
 const (
-	Texts    api.Key = "texts"
-	Truncate api.Key = "truncate"
-	Model    api.Key = "model"
+	InputTypeSearchDocument = "search_document"
+	InputTypeSearchQuery    = "search_query"
+	InputTypeClassification = "classification"
+	InputTypeClustering     = "clustering"
 )
 
-type WordEmbeddingRequest struct {
-	*api.RequestProto
-}
+const (
+	TruncateNone  = "NONE"
+	TruncateStart = "START"
+	TruncateEnd   = "END"
+)
 
-func NewWordEmbeddingRequest(apikey string) WordEmbeddingRequest {
-	req := WordEmbeddingRequest{api.NewRequestProtoType(srv.API_NAME, "")}
-	req.SetEndpoint(EPWordEmbedding)
-	req.SetApiKey(apikey)
-	return req
-}
+const (
+	EmbedModelEnglishv3           = "embed-english-v3.0"
+	EmbedModelMultilingualv3      = "embed-multilingual-v3.0"
+	EmbedModelEnglishLightv3      = "embed-english-light-v3.0"
+	EmbedModelMultilingualLightv3 = "embed-multilingual-light-v3.0"
+	EmbedModelEnglishv2           = "embed-english-v2.0"
+	EmbedModelEnglishLightv2      = "embed-english-light-v2.0"
+	EmbedModelMultilingualv2      = "embed-multilingual-v2.0"
+)
 
-func (req WordEmbeddingRequest) String() string {
-	b, _ := json.MarshalIndent(req, "", "    ")
-	return string(b)
-}
+const (
+	GenerateModelCommand             = "command"
+	GenerateModelCommandNightly      = "command-nightly"
+	GenerateModelCommandLight        = "command-light"
+	GenerateModelCommandLightNightly = "command-light-nightly"
+)
 
-func (req *WordEmbeddingRequest) WithTexts(texts ...string) *WordEmbeddingRequest {
-	for _, text := range texts {
-		req.Add(Texts, text)
-	}
-	return req
-}
+func init() {
+	EnmusEmbdedModel := validator.NewEnmus[string](
+		"cohere_embed_model",
+		EmbedModelEnglishv3,
+		EmbedModelMultilingualv3,
+		EmbedModelEnglishLightv3,
+		EmbedModelMultilingualLightv3,
+		EmbedModelEnglishv2,
+		EmbedModelEnglishLightv2,
+		EmbedModelMultilingualv2,
+	)
 
-func (req *WordEmbeddingRequest) WithModel(model string) *WordEmbeddingRequest {
-	req.Add(Model, model)
-	return req
-}
+	EnmusGenerateModel := validator.NewEnmus[string](
+		"cohere_generate_model",
+		GenerateModelCommand,
+		GenerateModelCommandNightly,
+		GenerateModelCommandLight,
+		GenerateModelCommandLightNightly,
+	)
 
-func (req *WordEmbeddingRequest) WithTruncate(truncate TruncateType) *WordEmbeddingRequest {
-	req.Add(Model, string(truncate))
-	return req
-}
+	EnmusInputType := validator.NewEnmus[string](
+		"cohere_embed_input_type",
+		InputTypeSearchDocument,
+		InputTypeSearchQuery,
+		InputTypeClassification,
+		InputTypeClustering,
+	)
 
-func (req *WordEmbeddingRequest) ToHttpRequest() (*http.Request, error) {
-	url := fmt.Sprintf("%s/%s", API_URL, req.Endpoint())
-
-	b, err := json.Marshal(req.Values)
+	EnmuTruncate := validator.NewEnmus[string](
+		"cohere_truncate",
+		TruncateNone,
+		TruncateStart,
+		TruncateEnd,
+	)
+	val, err := validator.GetDefaultValidate()
 	if err != nil {
-		log.Fatal(err)
+		fmt.Printf("error while GetDefaultValidate: %v", err)
+		os.Exit(1)
 	}
 
-	r, err := http.NewRequest("POST", url, bytes.NewBuffer(b))
+	err = validator.RegisterValidator(
+		val,
+		EnmusEmbdedModel,
+		EnmusInputType,
+		EnmuTruncate,
+		EnmusGenerateModel,
+	)
 	if err != nil {
-		return nil, fmt.Errorf("error while creating request: %w", err)
+		fmt.Printf("error while RegisterValidator: %v", err)
+		os.Exit(1)
 	}
-
-	r.Header.Add("Accept", "application/json")
-	r.Header.Add("Content-Type", "application/json")
-	r.Header.Add("Authorization", fmt.Sprintf("Bearer %s", req.APIKey()))
-	return r, nil
 }
-
-// type WordEmbeddingPayload struct {
-// 	Texts    []string     `json:"texts"`
-// 	Model    string       `json:"model"`
-// 	Truncate TruncateType `json:"truncate"`
-// }
-
-// func (r WordEmbeddingPayload) String() string {
-// 	b, _ := json.MarshalIndent(r, "", "    ")
-// 	return string(b)
-// }
-
-// func (r WordEmbeddingPayload) Endpoint() string {
-// 	return EPWordEmbedding
-// }
-
-// func Embedding(payload WordEmbeddingPayload) {
-// 	url := "https://api.cohere.ai/v1/embed"
-
-// 	b, err := json.Marshal(payload)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-
-// 	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(b))
-
-// 	req.Header.Add("accept", "application/json")
-// 	req.Header.Add("content-type", "application/json")
-// 	req.Header.Add("authorization", "Bearer ZQOEHgimFaZSDdWTwaob1ULC8SxHRa3tuLAlzzVn")
-
-// 	res, err := http.DefaultClient.Do(req)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	defer res.Body.Close()
-
-// 	body, err := io.ReadAll(res.Body)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-
-// 	embd := EmbedResponse{}
-// 	err = json.Unmarshal(body, &embd)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	log.Println(embd)
-// }

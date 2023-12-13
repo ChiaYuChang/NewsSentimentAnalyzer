@@ -14,11 +14,11 @@ type ErrorResponse struct {
 }
 
 // see https://newsdata.io/documentation/#http-response-codes
-func (er ErrorResponse) ToError(code int) error {
+func (er ErrorResponse) ToEcError(code int) *ec.Error {
 	var ecCode ec.ErrorCode
 	switch code {
 	case http.StatusOK:
-		return ec.MustGetErr(ec.Success)
+		return ec.MustGetEcErr(ec.Success)
 	case http.StatusUnauthorized:
 		ecCode = ec.ECUnauthorized
 	case http.StatusForbidden:
@@ -36,10 +36,10 @@ func (er ErrorResponse) ToError(code int) error {
 	}
 
 	if er.Result["message"] != "" {
-		return ec.MustGetErr(ecCode).(*ec.Error).
+		return ec.MustGetEcErr(ecCode).
 			WithDetails(er.Result["message"])
 	}
-	return ec.MustGetErr(ecCode)
+	return ec.MustGetEcErr(ecCode)
 }
 
 func (er ErrorResponse) String() string {

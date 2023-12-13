@@ -150,7 +150,7 @@ func TestParsErroreResponseBody(t *testing.T) {
 
 		apiErrResponse, err := cli.ParseErrorResponse(respJson)
 		require.NoError(t, err)
-		require.Error(t, apiErrResponse.ToError(tc.HttpCode))
+		require.Error(t, apiErrResponse.ToEcError(tc.HttpCode))
 		require.Equal(t, tc.Status, apiErrResponse.Status)
 		require.Equal(t, tc.Message, apiErrResponse.Result["message"])
 		require.Equal(t, tc.MessageCode, apiErrResponse.Result["code"])
@@ -480,8 +480,8 @@ func TestWriteToRedis(t *testing.T) {
 	require.NotNil(t, cache)
 	require.NotEmpty(t, ckey)
 
-	err = cache.AddRandomSalt(64)
-	require.NoError(t, err)
+	// err = cache.AddRandomSalt(64)
+	// require.NoError(t, err)
 
 	ctx := context.Background()
 	rhResp, err := rh.JSONSet(ckey, ".", cache)

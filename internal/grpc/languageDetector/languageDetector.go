@@ -9,44 +9,43 @@ import (
 
 	ec "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/errorCode"
 	pb "github.com/ChiaYuChang/NewsSentimentAnalyzer/proto/language_detector"
+	"github.com/pemistahl/lingua-go"
 	"google.golang.org/grpc"
 )
 
-var cliS cliSingleton
-
-type cliSingleton struct {
+var cliSingleton = struct {
 	cli   LanguageDetectorClient
 	Error error
 	sync.Once
-}
+}{}
 
 func SetupServiceLanguageDetectorClient(host string, port int,
 	dailOpts []grpc.DialOption, detectLanguageCallOpt []grpc.CallOption,
 	healthCheckCallOpt []grpc.CallOption) (LanguageDetectorClient, error) {
-	cliS.Do(func() {
+	cliSingleton.Do(func() {
 		conn, err := grpc.Dial(
 			fmt.Sprintf("%s:%d", host, port),
 			dailOpts...,
 		)
 		if err != nil {
-			cliS.Error = fmt.Errorf("grpc.Dial error: %w", err)
+			cliSingleton.Error = fmt.Errorf("grpc.Dial error: %w", err)
 			return
 		}
 
-		cliS.cli = LanguageDetectorClient{
+		cliSingleton.cli = LanguageDetectorClient{
 			LanguageDetectorClient: pb.NewLanguageDetectorClient(conn),
 			DetectLanguageCallOpt:  detectLanguageCallOpt,
 			HealthCheckCallOpt:     healthCheckCallOpt,
 		}
 	})
-	return cliS.cli, nil
+	return cliSingleton.cli, nil
 }
 
 func GetLanguageDetectorClient() (LanguageDetectorClient, error) {
-	if cliS.Error != nil {
-		return LanguageDetectorClient{}, cliS.Error
+	if cliSingleton.Error != nil {
+		return LanguageDetectorClient{}, cliSingleton.Error
 	}
-	return cliS.cli, nil
+	return cliSingleton.cli, nil
 }
 
 func MustGetLanguageDetectorClient() LanguageDetectorClient {
@@ -134,6 +133,12 @@ func (cli LanguageDetectorClient) recvResponse(ctx context.Context, stream pb.La
 						WithDetails("stream.Recv error")
 					if resp != nil {
 						ecErr.WithDetails(fmt.Sprintf("object id: %s", resp.Id))
+						c <- &pb.LanguageDetectResponse{
+							Id:          resp.Id,
+							Language:    int64(lingua.Unknown),
+							Probability: 0,
+							Error:       resp.Error,
+						}
 					}
 					ecErr.WithDetails(err.Error())
 					e <- ecErr

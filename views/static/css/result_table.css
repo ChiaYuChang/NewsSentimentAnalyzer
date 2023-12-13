@@ -1,6 +1,17 @@
 .search-bar {
-    margin-bottom: 1.0rem;
-    position: relative;
+    position: fixed;
+    border:  2px #646464 solid;
+    border-radius: 5px;
+}
+
+.control-panal {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+    width: 2rem;
+    top:  85vh;
+    right: 5vh;
 }
 
 .search-bar::before {
@@ -9,9 +20,14 @@
     display: inline-block;
     vertical-align: middle;
     position: absolute;
+    color: #146C94;
     top: 50%;
     left: .75rem;
     transform: translateY(-50%)
+}
+
+.search-bar ~ table {
+    margin-top: 3.0rem;
 }
 
 .fuzzy-search {

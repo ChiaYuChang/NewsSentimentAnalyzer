@@ -8,6 +8,7 @@ import (
 	ec "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/errorCode"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -252,30 +253,36 @@ type CacheToStoreTXParams struct {
 }
 
 type CacheToStoreTXResult struct {
-	JobId                int32
+	JobId                int64
 	JobCreateError       error
 	NewsJobCreateResults []NewsJobCreateResult
 }
 
 func (r *CacheToStoreTXResult) Error() error {
-	if r.JobCreateError != nil {
-		fmt.Printf("error while create job: %s\n", r.JobCreateError.Error())
-		err := ec.MustGetEcErr(ec.ECPgxError).
-			WithDetails("error while create job").
-			WithDetails(r.JobCreateError.Error())
-		return err
+	if err := r.JobCreateError; err != nil {
+		var pgErr *pgconn.PgError
+		var ecErr *ec.Error
+		if ok := errors.As(err, &pgErr); ok {
+			ecErr = ec.NewErrorFromPgErr(pgErr)
+		} else {
+			ecErr = ec.MustGetEcErr(ec.ECServerError).
+				WithDetails(err.Error())
+		}
+		ecErr.WithDetails("error while create job")
+		return ecErr
 	}
 
-	err := ec.MustGetEcErr(ec.ECPgxError)
 	for _, r := range r.NewsJobCreateResults {
-		if r.Error != nil {
-			err.WithDetails(r.Error.Error())
+		if err := r.Error; err != nil {
+			var pgErr *pgconn.PgError
+			if ok := errors.As(err, &pgErr); ok {
+				return ec.NewErrorFromPgErr(pgErr)
+			} else {
+				return ec.MustGetEcErr(ec.ECServerError).WithDetails(err.Error())
+			}
 		}
 	}
 
-	if len(err.Details) > 0 {
-		return err
-	}
 	return nil
 }
 

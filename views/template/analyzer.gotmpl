@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {{template "head" .Page.HeadConent}}
+    <title>{{.Page.Title}}</title>
+</head>
+
+<body>
+    <section class="background">
+        <div class="mid-card">
+            <h1>Analyzer</h1>
+            <div class="row">
+                <button type="button" id="openai" class="btn">OpenAI</button>
+                <button type="button" id="cohere" class="btn">Cohere</button>
+            </div>
+            <hr class="rounded">
+            <div class="data-field" style="width=100%;">
+                <label class="data-field-label">Analysis</label>
+                <div class="data-field-input row">
+                    <div>
+                        <label class="pure-checkbox">
+                            <input type="checkbox" id="do-embedding" name="do-embedding" checked>
+                            Article Embedding
+                        </label>
+                    </div>
+                    <div>
+                        <label class="pure-checkbox">
+                            <input type="checkbox" id="do-sentiment" name="do-sentiment" checked>
+                            Sentiment Analysis
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <form action="" id="openai-option" method="post" class="data-form">
+                <ul class="data-list">
+                    <div class="option" type="embedding">
+                        <h5>Embedding Options</h5>
+                        <hr class="rounded">
+                        <li class="data-field">
+                            <label for="embedding-model" class="data-field-label">Model</label>
+                            <select name="embedding-model" class="form-input data-field-input">
+                                <option value="text-embedding-ada-002">text-embedding-ada-002 (1536)</option>
+                            </select>
+                        </li>
+                    </div>
+                    <div class="option" type="sentiment">
+                        <h5>Sentiment Analysis Options</h5>
+                        <hr class="rounded">
+                        <li class="data-field" style="height:10rem;">
+                            <label for="prompt" class="data-field-label">Prompt</label>
+                            <div class="text-area">{{index .Prompt "openai-sentiment"}}</div>
+                        </li>
+                        <li class="data-field">
+                            <label for="max-tokens" class="data-field-label">Max Token</label>
+                            <input name="max-tokens" type="number" min="10" value="100" class="form-input data-field-input" required>
+                        </li>
+                    </div>
+
+                </ul>
+                <input type="hidden" name="api" value="openai">
+                <button type="button" class="btn" onclick="submitForm()">Submit</button>
+            </form>
+            <form action="" id="cohere-option" method="post" class="data-form">
+                <ul class="data-list">
+                    <div class="option" type="embedding">
+                        <h5>Embedding Options</h5>
+                        <hr class="rounded">
+                        <li class="data-field">
+                            <label for="embedding-model" class="data-field-label">Model</label>
+                            <select name="embedding-model" class="form-input data-field-input" >
+                                <option value="embed-english-v3.0"> embed-english-v3.0 (1024) </option>
+                                <option value="embed-multilingual-v3.0"> embed-multilingual-v3.0 (1024) </option>
+                                <option value="embed-english-light-v3.0"> embed-english-light-v3.0 (384) </option>
+                                <option value="embed-multilingual-light-v3.0"> embed-multilingual-light-v3.0 (384) </option>
+                            </select>
+                        </li>
+                        <li class="data-field">
+                            <label for="input-type" class="data-field-label">Input type</label>
+                            <select name="input-type" class="form-input data-field-input" >
+                                <option value="search_document">Search document</option>
+                                <option value="search_query">Search Query</option>
+                                <option value="classification">Classification</option>
+                                <option value="clustering">Clustering</option>
+                            </select>
+                        </li>
+                    </div>
+                    <div class="option" type="sentiment">
+                        <h5>Sentiment Analysis Options</h5>
+                        <hr class="rounded">
+                        <li class="data-field" style="height:10rem;">
+                            <label for="prompt" class="data-field-label">Prompt</label>
+                            <div class="text-area">{{index .Prompt "cohere-sentiment"}}</div>
+                        </li>
+                        <li class="data-field">
+                            <label for="max-token" class="data-field-label">Max Token</label>
+                            <input name="max-token" type="number" min="10" max="2048" value="100" class="form-input data-field-input" required>
+                        </li>
+                        <li class="data-field">
+                            <label for="truncate" class="data-field-label">Truncate</label>
+                            <select name="truncate" class="form-input data-field-input" >
+                                <option value="END">END</option>
+                                <option value="START">START</option>
+                            </select>
+                        </li>
+                    </div>
+                    <input type="hidden" name="api" value="cohere">
+                    <button type="button" class="btn" onclick="submitForm()">Submit</button>
+                </ul>
+            </form>
+            <p class="footer">
+                back to <a href="/{{.Version}}/welcome" class=" url">welcome</a> page
+            </p>
+        </div>
+    </section>
+</body>
+
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script type="text/javascript" src="/static/js/toast.js"></script>
+<script src="/static/js/analyzer_funcs.js"></script>
+
+</html>

@@ -1,6 +1,6 @@
 INSERT INTO jobs (
-    id, owner, status, src_api_id, src_query, llm_api_id, llm_query, created_at, updated_at, deleted_at
+    id, ulid, owner, status, src_api_id, src_query, llm_api_id, llm_query, created_at, updated_at, deleted_at
 ) VALUES{{ range $i, $j := .Item}}{{if $i}},{{end}}
-    ({{$j.Id}}, '{{$j.Owner}}', '{{$j.Status}}', {{$j.SrcApiId}}, '{{.SrcQuery}}', {{.LlmApiId}}, '{{$j.LlmQuery}}', '{{$j.CreatedAt.Format "2006-01-02 15:04:05"}}', '{{$j.UpdatedAt.Format "2006-01-02 15:04:05"}}', {{$j.DeletedAt.Format "2006-01-02 15:04:05"}}){{ end }};
+    ({{$j.Id}}, '{{$j.ULID}}', '{{$j.Owner}}', '{{$j.Status}}', {{$j.SrcApiId}}, '{{.SrcQuery}}', {{.LlmApiId}}, '{{$j.LlmQuery}}', '{{$j.CreatedAt.Format "2006-01-02 15:04:05"}}', '{{$j.UpdatedAt.Format "2006-01-02 15:04:05"}}', {{$j.DeletedAt.Format "2006-01-02 15:04:05"}}){{ end }};
 
 ALTER SEQUENCE jobs_id_seq RESTART WITH {{.N}};

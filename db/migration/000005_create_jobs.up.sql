@@ -1,6 +1,7 @@
 CREATE TABLE
     "jobs" (
         "id" BIGSERIAL PRIMARY KEY,
+        "ulid" CHAR(26) UNIQUE NOT NULL,
         "owner" uuid NOT NULL,
         "status" job_status NOT NULL,
         "src_api_id" smallint NOT NULL,
@@ -13,6 +14,8 @@ CREATE TABLE
     );
 
 CREATE INDEX ON "jobs" ("owner", "status");
+
+CREATE INDEX ON "jobs" ("ulid");
 
 ALTER TABLE "jobs"
 ADD

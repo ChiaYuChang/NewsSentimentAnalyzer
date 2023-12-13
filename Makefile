@@ -142,31 +142,53 @@ build-news-sentiment-analyzer:
 	@go build -o ./${APP_NAME} ./main.go && \
 		chmod +x ./${APP_NAME}
 
-run: docker-up-db build build-wasm build-news-sentiment-analyzer
-	./${APP_NAME} -v v1 -c ./config/config.json -s development -h localhost -p 8001
+start: docker-up-db build build-news-sentiment-analyzer start-all-microservice
+	./${APP_NAME} -v v1 -c ./config/config.json -s development -h localhost -p 8001 & \
+	echo "$$!" > "${TMP_DIR}/nsa.pid";
+
+stop: 
+	@if [ -f "${TMP_DIR}/nsa.pid" ]; then \
+		kill `cat ${TMP_DIR}/nsa.pid`; \
+		rm ${TMP_DIR}/nsa.pid; \
+	else \
+		echo "nsa not exist"; \
+	fi
+	@$(MAKE) stop-all-microservice
+	@$(MAKE) docker-down-db
 
 build: build-lang-detector build-milvus-health-check build-news-sentiment-analyzer
 
 start-lang-detect-server: build-lang-detector
-	@ ./bin/languageDetectorServer/languageDetectorServer \
-	-o ./bin/languageDetectorServer/log.json & \
-	echo "$$!" > "${TMP_DIR}/lang-detect-server.pid"
+	@if [ ! -f "${TMP_DIR}/lang-detect-server.pid" ]; then \
+		./bin/languageDetectorServer/languageDetectorServer \
+		-o ./bin/languageDetectorServer/log.json & \
+		echo "$$!" > "${TMP_DIR}/lang-detect-server.pid"; \
+	fi
 
 stop-lang-detect-server:
-	@kill `cat ${TMP_DIR}/lang-detect-server.pid`
-	@rm ${TMP_DIR}/lang-detect-server.pid
+	@if [ -f "${TMP_DIR}/lang-detect-server.pid" ]; then \
+		kill `cat ${TMP_DIR}/lang-detect-server.pid`; \
+		rm ${TMP_DIR}/lang-detect-server.pid; \
+	else \
+		echo "lang-detect-server not exist"; \
+	fi
 
 start-url-parser-server: build-url-parser
-	@./bin/newsParserServer/newsParserServer \
-	-o ./bin/newsParserServer/log.json & \
-	echo "$$!" > "${TMP_DIR}/news-parser-server.pid"
-
+	@if [ ! -f "${TMP_DIR}/news-parser-server.pid" ]; then \
+		./bin/newsParserServer/newsParserServer \
+		-o ./bin/newsParserServer/log.json & \
+		echo "$$!" > "${TMP_DIR}/news-parser-server.pid"; \
+	fi
+	
 stop-url-parser-server:
-	@kill `cat ${TMP_DIR}/news-parser-server.pid`
-	@rm ${TMP_DIR}/news-parser-server.pid
+	@if [ -f "${TMP_DIR}/news-parser-server.pid" ]; then \
+		kill `cat ${TMP_DIR}/news-parser-server.pid`; \
+		rm ${TMP_DIR}/news-parser-server.pid; \
+	else \
+		echo "url-parser-server not exist"; \
+	fi
 
 start-all-microservice: start-lang-detect-server start-url-parser-server
-
 stop-all-microservice: stop-lang-detect-server stop-url-parser-server
 
 clean:

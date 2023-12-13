@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {{template "head" .Page.HeadConent}}
+    <script src="/static/js/analyzer_funcs.js"></script>
+    <title>{{.Page.Title}}</title>
+</head>
+
+<body>
+    <section class="background">
+        <div class="mid-card">
+            <h1>Analyzer</h1>
+            <form action="" method="post" class="data-form">
+                <ul class="data-list">
+                    <li class="data-field">
+                        <label for="analyzer-api" class="data-field-label">Analyzer API</label>
+                        <select name="analyzer-api" id="analyzer-api" class="form-input data-field-input" >
+                            <option value="openai">OpenAI</option>
+                            <option value="cohere">Cohere</option>
+                        </select>
+                    </li>
+                    <li class="data-field">
+                        <label for="analysis" class="data-field-label">Analysis</label>
+                        <div class="data-field-input row">
+                            <div>
+                                <label class="pure-checkbox">
+                                    <input type="checkbox" name="embedding" id="embedding" checked>
+                                    Article Embedding
+                                </label>
+                            </div>
+                            <div>
+                                <label class="pure-checkbox">
+                                    <input type="checkbox" name="sentiment" id="sentiment" checked>
+                                    Sentiment Analysis
+                                </label>
+                            </div>
+                        </div>
+                    </li>
+                    <div class="option" type="embedding">
+                        <h5>Embedding Options</h5>
+                        <hr class="rounded">
+                        <li class="data-field">
+                            <label for="embedding-model" class="data-field-label">Model</label>
+                            <select name="embedding-model" id="embedding-model" class="form-input data-field-input">
+                                <option value="text-embedding-ada-002">text-embedding-ada-002 (1536)</option>
+                            </select>
+                        </li>
+                    </div>
+                    <div class="option" type="sentiment">
+                        <h5>Sentiment Analysis Options</h5>
+                        <hr class="rounded">
+                        <li class="data-field" style="height:10rem;">
+                            <label for="prompt" class="data-field-label">Prompt</label>
+                            <div class="text-area">{{index .Prompt "openai-sentiment"}}</div>
+                        </li>
+                        <li class="data-field">
+                            <label for="max-token" class="data-field-label">Max Token</label>
+                            <input name="max-token" id="max-token" type="number" min="10" value="100" class="form-input data-field-input" required>
+                        </li>
+                    </div>
+                </ul>
+                <input type="submit" value="Submit" class="btn">
+                <p class="footer">
+                    back to <a href="/{{.Version}}/welcome" class=" url">welcome</a> page
+                </p>
+            </form>
+        </div>
+    </section>
+</body>
+</html>

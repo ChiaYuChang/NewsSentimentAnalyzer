@@ -86,4 +86,15 @@ var APIs = APIList{
 		DocumentURL: "https://openai.com/blog/introducing-chatgpt-and-whisper-apis",
 		Probability: 1.0,
 	},
+	{
+		Id:          6,
+		Name:        "Cohere",
+		Type:        APITypeLLM,
+		Image:       "logo_Cohere.png",
+		Icon:        "favicon_Cohere.png",
+		DocumentURL: "https://cohere.com/",
+		CreatedAt:   TIME_MIN,
+		UpdatedAt:   TIME_MIN,
+		Probability: 0.5,
+	},
 }

@@ -21,7 +21,7 @@ type Querier interface {
 	CreateAPI(ctx context.Context, arg *CreateAPIParams) (int16, error)
 	CreateAPIKey(ctx context.Context, arg *CreateAPIKeyParams) (int32, error)
 	CreateEndpoint(ctx context.Context, arg *CreateEndpointParams) (int32, error)
-	CreateJob(ctx context.Context, arg *CreateJobParams) (int32, error)
+	CreateJob(ctx context.Context, arg *CreateJobParams) (int64, error)
 	CreateKeyword(ctx context.Context, arg *CreateKeywordParams) (int64, error)
 	CreateLog(ctx context.Context, arg *CreateLogParams) (int64, error)
 	CreateNews(ctx context.Context, arg *CreateNewsParams) (int64, error)
@@ -63,6 +63,7 @@ type Querier interface {
 	ListRecentNNews(ctx context.Context, n int32) ([]*ListRecentNNewsRow, error)
 	UpdateAPI(ctx context.Context, arg *UpdateAPIParams) (int64, error)
 	UpdateAPIKey(ctx context.Context, arg *UpdateAPIKeyParams) (int64, error)
+	UpdateJobByULID(ctx context.Context, arg *UpdateJobByULIDParams) (int64, error)
 	UpdateJobStatus(ctx context.Context, arg *UpdateJobStatusParams) (int64, error)
 	UpdatePassword(ctx context.Context, arg *UpdatePasswordParams) (int64, error)
 }

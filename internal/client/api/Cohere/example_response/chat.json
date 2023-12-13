@@ -1,0 +1,20 @@
+{
+    "response_id": "d43e69ae-9710-455f-9b7a-ca4128126819",
+    "text": "0",
+    "generation_id": "e4d0bfa2-e9e2-4080-a37e-1f62ab92f2e4",
+    "token_count": {
+        "prompt_tokens": 349,
+        "response_tokens": 1,
+        "total_tokens": 350,
+        "billed_tokens": 334
+    },
+    "meta": {
+        "api_version": {
+            "version": "1"
+        },
+        "billed_units": {
+            "input_tokens": 333,
+            "output_tokens": 1
+        }
+    }
+}

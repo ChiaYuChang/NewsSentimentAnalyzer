@@ -4,11 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 type Error struct {
 	ErrorCode      ErrorCode `json:"error_code"`
 	HttpStatusCode int       `json:"status_code"`
+	PgxCode        string    `json:"pgx_code,omitempty"`
 	Message        string    `json:"message"`
 	MessageF       string    `json:"-"`
 	Details        []string  `json:"details,omitempty"`
@@ -25,6 +28,28 @@ func NewError(ec ErrorCode, status int, msg string) *Error {
 
 func NewErrorFromErr(ec ErrorCode, status int, err error) *Error {
 	return NewError(ec, status, err.Error())
+}
+
+func NewErrorFromPgErr(pgErr *pgconn.PgError) *Error {
+	return NewError(ECPgxError, 500, fmt.Sprintf("%s (%s)", pgErr.Message)).
+		WithPgxCode(pgErr.Code).
+		WithDetails(
+			fmt.Sprintf("servity: %s", pgErr.Severity),
+			fmt.Sprintf("detail: %s", pgErr.Detail),
+			fmt.Sprintf("hint: %s", pgErr.Hint),
+			fmt.Sprintf("position: %d", pgErr.Position),
+			fmt.Sprintf("internal position: %d", pgErr.InternalPosition),
+			fmt.Sprintf("internal query: %s", pgErr.InternalQuery),
+			fmt.Sprintf("where: %s", pgErr.Where),
+			fmt.Sprintf("schema name: %s", pgErr.SchemaName),
+			fmt.Sprintf("table name: %s", pgErr.TableName),
+			fmt.Sprintf("column name: %s", pgErr.ColumnName),
+			fmt.Sprintf("data type name: %s", pgErr.DataTypeName),
+			fmt.Sprintf("constraint name: %s", pgErr.ConstraintName),
+			fmt.Sprintf("file: %s", pgErr.File),
+			fmt.Sprintf("line: %d", pgErr.Line),
+			fmt.Sprintf("routine: %s", pgErr.Routine),
+		)
 }
 
 func (e *Error) Clone() *Error {
@@ -61,6 +86,11 @@ func (e *Error) WithMessagef(msgf string) *Error {
 
 func (e *Error) WithDetails(details ...string) *Error {
 	e.Details = append(e.Details, details...)
+	return e
+}
+
+func (e *Error) WithPgxCode(pgxCode string) *Error {
+	e.PgxCode = pgxCode
 	return e
 }
 

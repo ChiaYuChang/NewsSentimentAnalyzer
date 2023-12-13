@@ -17,6 +17,7 @@ func (srvc jobService) Service() Service {
 
 type JobCreateRequest struct {
 	Owner    uuid.UUID `validate:"not_uuid_nil,uuid4"`
+	Ulid     string    `validate:"required,len=26"`
 	Status   string    `validate:"required,job_status"`
 	SrcApiID int16     `validate:"required,min=1"`
 	SrcQuery string    `validate:"required,min=1"`
@@ -29,7 +30,7 @@ func (r JobCreateRequest) RequestName() string {
 }
 
 type JobDeleteRequest struct {
-	ID    int32     `validate:"required,min=1"`
+	ID    int64     `validate:"required,min=1"`
 	Owner uuid.UUID `validate:"not_uuid_nil,uuid4"`
 }
 
@@ -78,7 +79,7 @@ func (r JobGetWithStatusFilterRequest) ToParams() (*model.GetJobsByOwnerFilterBy
 
 type JobGetByJobIdRequest struct {
 	Owner uuid.UUID `validate:"not_uuid_nil,uuid4"`
-	Id    int32     `validate:"required,min=1"`
+	Id    int64     `validate:"required,min=1"`
 }
 
 func (r JobGetByJobIdRequest) RequestName() string {
@@ -94,7 +95,7 @@ func (r JobGetByJobIdRequest) ToParams() (*model.GetJobsByJobIdParams, error) {
 
 type JobUpdateStatusRequest struct {
 	Status string    `validate:"required,min=1,job_status"`
-	ID     int32     `validate:"required,min=1"`
+	ID     int64     `validate:"required,min=1"`
 	Owner  uuid.UUID `validate:"not_uuid_nil,uuid4"`
 }
 
@@ -171,14 +172,14 @@ func (r JobGetByJIdsRequest) ToParams() (*model.GetJobByOwnerFilterByJIdsParams,
 }
 
 // create job
-func (srvc jobService) Create(ctx context.Context, r *JobCreateRequest) (id int32, err error) {
+func (srvc jobService) Create(ctx context.Context, r *JobCreateRequest) (id int64, err error) {
 	if err := srvc.validate.Struct(r); err != nil {
 		return 0, err
 	}
 
 	return srvc.store.CreateJob(ctx, &model.CreateJobParams{
 		Owner:    r.Owner,
-		Status:   model.JobStatus(r.Status),
+		Ulid:     r.Ulid,
 		SrcApiID: r.SrcApiID,
 		SrcQuery: r.SrcQuery,
 		LlmApiID: r.LlmApiID,

@@ -537,7 +537,7 @@ func (repo APIRepo) GetJobDetail(w http.ResponseWriter, req *http.Request) {
 
 	job, err := repo.Service.Job().GetDetails(req.Context(), &service.JobGetByJobIdRequest{
 		Owner: userInfo.GetUserID(),
-		Id:    int32(jId),
+		Id:    int64(jId),
 	})
 
 	if err != nil {

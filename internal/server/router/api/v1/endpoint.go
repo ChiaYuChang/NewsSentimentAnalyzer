@@ -9,7 +9,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client"
@@ -242,7 +241,7 @@ func (repo EndpointRepo) PostAPIEndpoints(key EndpointRepoKey) (http.HandlerFunc
 			w.Write(ecErr.MustToJson())
 			return
 		}
-		postEndpoints(repo, pf, userInfo, w, req)
+		repo.postEndpoints(pf, userInfo, w, req)
 	}, nil
 }
 
@@ -260,7 +259,7 @@ func (repo EndpointRepo) Do(req api.Request, handler client.Handler) (api.Respon
 	return handler.Parse(httpResp)
 }
 
-func postEndpoints(repo EndpointRepo, pageform pf.PageForm, userInfo tokenmaker.Payload,
+func (repo EndpointRepo) postEndpoints(pageform pf.PageForm, userInfo tokenmaker.Payload,
 	w http.ResponseWriter, httpReq *http.Request) {
 
 	userInfo, ok := httpReq.Context().Value(global.CtxUserInfo).(tokenmaker.Payload)
@@ -320,7 +319,7 @@ func postEndpoints(repo EndpointRepo, pageform pf.PageForm, userInfo tokenmaker.
 	}
 
 	_, _ = repo.apiRepo.Cache.JSONSet(ckey, ".", cache)
-	_ = repo.apiRepo.Cache.Expire(httpReq.Context(), ckey, 10*time.Minute)
+	_ = repo.apiRepo.Cache.Expire(httpReq.Context(), ckey, global.CacheExpireDefault)
 
 	aid := repo.ApiID[NewRepoMapKey(pageform.API(), pageform.Endpoint())]
 	eid := repo.EndpointID[NewRepoMapKey(pageform.API(), pageform.Endpoint())]

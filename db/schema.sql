@@ -198,7 +198,8 @@ ALTER SEQUENCE public.endpoints_id_seq OWNED BY public.endpoints.id;
 --
 
 CREATE TABLE public.jobs (
-    id integer NOT NULL,
+    id bigint NOT NULL,
+    ulid character(26) NOT NULL,
     owner uuid NOT NULL,
     status public.job_status NOT NULL,
     src_api_id smallint NOT NULL,
@@ -218,7 +219,6 @@ ALTER TABLE public.jobs OWNER TO admin;
 --
 
 CREATE SEQUENCE public.jobs_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -581,6 +581,13 @@ CREATE INDEX apikeys_owner_api_id_idx ON public.apikeys USING btree (owner, api_
 --
 
 CREATE INDEX jobs_owner_status_idx ON public.jobs USING btree (owner, status);
+
+
+--
+-- Name: jobs_ulid_idx; Type: INDEX; Schema: public; Owner: admin
+--
+
+CREATE INDEX jobs_ulid_idx ON public.jobs USING btree (ulid);
 
 
 --

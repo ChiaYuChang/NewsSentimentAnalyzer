@@ -142,7 +142,7 @@ func ParseHTTPResponse(resp *http.Response) (api.Response, error) {
 		global.Logger.Info().
 			Int("status code", resp.StatusCode).
 			Msg("error")
-		return nil, apiErrResponse.ToError(resp.StatusCode)
+		return nil, apiErrResponse.ToEcError(resp.StatusCode)
 	}
 
 	apiResponse, err := ParseResponse(body)

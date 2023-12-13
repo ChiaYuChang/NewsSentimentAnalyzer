@@ -22,6 +22,10 @@ type ErrorResponse struct {
 }
 
 func (er ErrorResponse) ToError() error {
+	if er.Error.Message == "API key not valid. Please pass a valid API key." {
+		er.Error.Code = http.StatusUnauthorized
+	}
+
 	var ecCode ec.ErrorCode
 	switch er.Error.Code {
 	case http.StatusOK:

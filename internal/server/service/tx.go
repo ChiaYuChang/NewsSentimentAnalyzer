@@ -8,7 +8,7 @@ import (
 )
 
 func (srvc txService) DoCacheToStoreTx(ctx context.Context, user uuid.UUID,
-	srcId int16, srcQuery string, llmId int16, llmQuery string,
+	ulid string, srcId int16, srcQuery string, llmId int16, llmQuery string,
 	cnReqChan <-chan *NewsCreateRequest) (*model.CacheToStoreTXResult, error) {
 
 	cnpChan := make(chan *model.CreateNewsParams, 10)
@@ -23,7 +23,7 @@ func (srvc txService) DoCacheToStoreTx(ctx context.Context, user uuid.UUID,
 	return srvc.store.DoCacheToStoreTx(ctx, &model.CacheToStoreTXParams{
 		CreateJobParams: &model.CreateJobParams{
 			Owner:    user,
-			Status:   model.JobStatusCreated,
+			Ulid:     ulid,
 			SrcApiID: srcId,
 			SrcQuery: srcQuery,
 			LlmApiID: llmId,

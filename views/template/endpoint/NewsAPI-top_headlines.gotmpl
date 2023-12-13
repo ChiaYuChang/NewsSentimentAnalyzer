@@ -16,41 +16,45 @@
             <form action="" method="post" class="data-form">
                 <ul class="data-list">
                     <li class="data-field">
-                        <label for="keyword">Keywords</label>:
-                        <input type="text" name="keyword" id="keyword" class="form-input" required>
+                        <label for="keyword" class="data-field-label data-field-required">Keywords</label>
+                        <input type="text" name="keyword" id="keyword" class="form-input data-field-input" required>
                     </li>
                     <li class="data-field">
-                        <label for="sources">Sources</label>:
-                        <input type="text" name="sources" id="sources" class="form-input">
+                        <label for="sources" class="data-field-label">Sources</label>
+                        <input type="text" name="sources" id="sources" class="form-input data-field-input">
                     </li>
                     <li class="data-field">
-                        <label for="country">Country</label>:
-                        <div name="country" id="country" class="row">
+                        <label for="country" class="data-field-label">Country</label>
+                        <div class="data-field-input row">
+                            <div name="country" id="country" class="row">
+                            </div>
+                            <button type="button" title="insert-country" id="insert-country-btn" class="pure-button-disabled btn btn-small">
+                                <i class="fa-regular fa-plus"></i>
+                            </button>
+                            <button type="button" title="delete-country" id="delete-country-btn" class="pure-button-disabled btn btn-small">
+                                <i class="fa-regular fa-minus"></i>
+                            </button>
                         </div>
-                        <button type="button" title="insert-country" id="insert-country-btn" class="pure-button-disabled btn btn-small">
-                            <i class="fa-regular fa-plus"></i>
-                        </button>
-                        <button type="button" title="delete-country" id="delete-country-btn" class="pure-button-disabled btn btn-small">
-                            <i class="fa-regular fa-minus"></i>
-                        </button>
                     </li>
                     <li class="data-field">
-                        <label for="category">Category</label>:
-                        <div name="category" id="category" class="row">
+                        <label for="category" class="data-field-label">Category</label>
+                        <div class="data-field-input row">
+                            <div name="category" id="category" class="row">
+                            </div>
+                            <button type="button" title="insert-category" id="insert-category-btn" class="pure-button-disabled btn btn-small">
+                                <i class="fa-regular fa-plus"></i>
+                            </button>
+                            <button type="button" title="delete-category" id="delete-category-btn" class="pure-button-disabled btn btn-small">
+                                <i class="fa-regular fa-minus"></i>
+                            </button>
                         </div>
-                        <button type="button" title="insert-category" id="insert-category-btn" class="pure-button-disabled btn btn-small">
-                            <i class="fa-regular fa-plus"></i>
-                        </button>
-                        <button type="button" title="delete-category" id="delete-category-btn" class="pure-button-disabled btn btn-small">
-                            <i class="fa-regular fa-minus"></i>
-                        </button>
                     </li>
                 </ul>
                 <input type="submit" value="Submit" class="btn">
-                <p class="footer">
-                    back to <a href="/{{.Version}}/endpoints" class=" url">endpoints</a> page
-                </p>
             </form>
+            <p class="footer">
+                back to <a href="/{{.Version}}/endpoints" class=" url">endpoints</a> page
+            </p>
         </div>
     </section>
 </body>

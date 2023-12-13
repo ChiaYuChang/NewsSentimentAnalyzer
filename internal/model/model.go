@@ -219,7 +219,8 @@ type Endpoint struct {
 }
 
 type Job struct {
-	ID        int32              `json:"id"`
+	ID        int64              `json:"id"`
+	Ulid      string             `json:"ulid"`
 	Owner     uuid.UUID          `json:"owner"`
 	Status    JobStatus          `json:"status"`
 	SrcApiID  int16              `json:"src_api_id"`

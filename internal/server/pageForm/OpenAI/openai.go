@@ -6,7 +6,6 @@ import (
 	"net/url"
 	"strings"
 
-	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm"
 	pf "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view/object"
 	"github.com/go-playground/form"
@@ -58,8 +57,8 @@ func (f OpenAICompletions) String() string {
 	return sb.String()
 }
 
-func (f OpenAICompletions) Key() pageform.PageFormRepoKey {
-	return pageform.NewPageFormRepoKey(f.API(), f.Endpoint())
+func (f OpenAICompletions) Key() pf.PageFormRepoKey {
+	return pf.NewPageFormRepoKey(f.API(), f.Endpoint())
 }
 
 type OpenAIChatCompletions struct {
@@ -84,4 +83,13 @@ type Function struct {
 	Name        string                      `form:"name"       validate:"required"`
 	Description string                      `form:"description,omitempty"`
 	Parameters  map[string]json.Unmarshaler `form:"parameters" validate:"required,json"`
+}
+
+type EmbeddingsOptions struct {
+	Model string `form:"embedding-model"`
+}
+
+type SentimentAnalysisOptions struct {
+	Prompt   string `form:"prompt"`
+	MaxToken int    `form:"max-token"`
 }

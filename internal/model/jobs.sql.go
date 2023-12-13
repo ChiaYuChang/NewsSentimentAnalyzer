@@ -13,8 +13,8 @@ import (
 )
 
 const cleanUpJobs = `-- name: CleanUpJobs :execrows
-DELETE FROM jobs
- WHERE deleted_at IS NOT NULL
+
+DELETE FROM jobs WHERE deleted_at IS NOT NULL
 `
 
 func (q *Queries) CleanUpJobs(ctx context.Context) (int64, error) {
@@ -26,12 +26,12 @@ func (q *Queries) CleanUpJobs(ctx context.Context) (int64, error) {
 }
 
 const countJob = `-- name: CountJob :many
+
 SELECT status, COUNT(*) AS n_job
-  FROM jobs
- WHERE owner = $1
- GROUP BY status
- ORDER BY 
-        status ASC
+FROM jobs
+WHERE owner = $1
+GROUP BY status
+ORDER BY status ASC
 `
 
 type CountJobRow struct {
@@ -60,46 +60,53 @@ func (q *Queries) CountJob(ctx context.Context, owner uuid.UUID) ([]*CountJobRow
 }
 
 const createJob = `-- name: CreateJob :one
-INSERT INTO jobs (
-  owner, status, src_api_id, src_query, llm_api_id, llm_query
-) VALUES (
-    $1, $2, $3, $4, $5, $6
-) 
-RETURNING id
+
+INSERT INTO
+    jobs (
+        ulid,
+        owner,
+        status,
+        src_api_id,
+        src_query,
+        llm_api_id,
+        llm_query
+    )
+VALUES ($1, $2, 'created', $3, $4, $5, $6) RETURNING id
 `
 
 type CreateJobParams struct {
+	Ulid     string    `json:"ulid"`
 	Owner    uuid.UUID `json:"owner"`
-	Status   JobStatus `json:"status"`
 	SrcApiID int16     `json:"src_api_id"`
 	SrcQuery string    `json:"src_query"`
 	LlmApiID int16     `json:"llm_api_id"`
 	LlmQuery []byte    `json:"llm_query"`
 }
 
-func (q *Queries) CreateJob(ctx context.Context, arg *CreateJobParams) (int32, error) {
+func (q *Queries) CreateJob(ctx context.Context, arg *CreateJobParams) (int64, error) {
 	row := q.db.QueryRow(ctx, createJob,
+		arg.Ulid,
 		arg.Owner,
-		arg.Status,
 		arg.SrcApiID,
 		arg.SrcQuery,
 		arg.LlmApiID,
 		arg.LlmQuery,
 	)
-	var id int32
+	var id int64
 	err := row.Scan(&id)
 	return id, err
 }
 
 const deleteJob = `-- name: DeleteJob :execrows
+
 UPDATE jobs
-   SET deleted_at = CURRENT_TIMESTAMP
- WHERE id = $1
-   AND owner = $2
+SET
+    deleted_at = CURRENT_TIMESTAMP
+WHERE id = $1 AND owner = $2
 `
 
 type DeleteJobParams struct {
-	ID    int32     `json:"id"`
+	ID    int64     `json:"id"`
 	Owner uuid.UUID `json:"owner"`
 }
 
@@ -112,17 +119,26 @@ func (q *Queries) DeleteJob(ctx context.Context, arg *DeleteJobParams) (int64, e
 }
 
 const getJobByOwnerFilterByJIdAndStatus = `-- name: GetJobByOwnerFilterByJIdAndStatus :many
-SELECT j.id, j.owner, j.status, asrc.name AS news_src, allm.name AS analyzer, j.created_at, j.updated_at
-  FROM jobs AS j
- INNER JOIN apis AS asrc ON j.src_api_id = asrc.id
- INNER JOIN apis AS allm ON j.llm_api_id = allm.id 
- WHERE j.owner = $1
-   AND j.id BETWEEN $2::int AND $3::int
-   AND j.status = $4
-   AND j.deleted_at IS NULL
- ORDER BY 
-       j.id DESC
- LIMIT $5::int
+
+SELECT
+    j.id,
+    j.owner,
+    j.status,
+    asrc.name AS news_src,
+    allm.name AS analyzer,
+    j.created_at,
+    j.updated_at
+FROM jobs AS j
+    INNER JOIN apis AS asrc ON j.src_api_id = asrc.id
+    INNER JOIN apis AS allm ON j.llm_api_id = allm.id
+WHERE
+    j.owner = $1
+    AND j.id BETWEEN $2:: int
+    AND $3:: int
+    AND j.status = $4
+    AND j.deleted_at IS NULL
+ORDER BY j.id DESC
+LIMIT $5:: int
 `
 
 type GetJobByOwnerFilterByJIdAndStatusParams struct {
@@ -134,7 +150,7 @@ type GetJobByOwnerFilterByJIdAndStatusParams struct {
 }
 
 type GetJobByOwnerFilterByJIdAndStatusRow struct {
-	ID        int32              `json:"id"`
+	ID        int64              `json:"id"`
 	Owner     uuid.UUID          `json:"owner"`
 	Status    JobStatus          `json:"status"`
 	NewsSrc   string             `json:"news_src"`
@@ -178,16 +194,25 @@ func (q *Queries) GetJobByOwnerFilterByJIdAndStatus(ctx context.Context, arg *Ge
 }
 
 const getJobByOwnerFilterByJIdRange = `-- name: GetJobByOwnerFilterByJIdRange :many
-SELECT j.id, j.owner, j.status, asrc.name AS news_src, allm.name AS analyzer, j.created_at, j.updated_at
-  FROM jobs AS j
- INNER JOIN apis AS asrc ON j.src_api_id = asrc.id
- INNER JOIN apis AS allm ON j.llm_api_id = allm.id 
- WHERE j.owner = $1
-   AND j.id BETWEEN $2::int AND $3::int
-   AND j.deleted_at IS NULL
- ORDER BY 
-       j.id DESC
- LIMIT $4::int
+
+SELECT
+    j.id,
+    j.owner,
+    j.status,
+    asrc.name AS news_src,
+    allm.name AS analyzer,
+    j.created_at,
+    j.updated_at
+FROM jobs AS j
+    INNER JOIN apis AS asrc ON j.src_api_id = asrc.id
+    INNER JOIN apis AS allm ON j.llm_api_id = allm.id
+WHERE
+    j.owner = $1
+    AND j.id BETWEEN $2:: int
+    AND $3:: int
+    AND j.deleted_at IS NULL
+ORDER BY j.id DESC
+LIMIT $4:: int
 `
 
 type GetJobByOwnerFilterByJIdRangeParams struct {
@@ -198,7 +223,7 @@ type GetJobByOwnerFilterByJIdRangeParams struct {
 }
 
 type GetJobByOwnerFilterByJIdRangeRow struct {
-	ID        int32              `json:"id"`
+	ID        int64              `json:"id"`
 	Owner     uuid.UUID          `json:"owner"`
 	Status    JobStatus          `json:"status"`
 	NewsSrc   string             `json:"news_src"`
@@ -241,16 +266,24 @@ func (q *Queries) GetJobByOwnerFilterByJIdRange(ctx context.Context, arg *GetJob
 }
 
 const getJobByOwnerFilterByJIds = `-- name: GetJobByOwnerFilterByJIds :many
-SELECT j.id, j.owner, j.status, asrc.name AS news_src, allm.name AS analyzer, j.created_at, j.updated_at
-  FROM jobs AS j
- INNER JOIN apis AS asrc ON j.src_api_id = asrc.id
- INNER JOIN apis AS allm ON j.llm_api_id = allm.id 
- WHERE j.owner = $1
-   AND j.id = ANY($2::int[])
-   AND j.deleted_at IS NULL
- ORDER BY 
-       j.id DESC
- LIMIT $3::int
+
+SELECT
+    j.id,
+    j.owner,
+    j.status,
+    asrc.name AS news_src,
+    allm.name AS analyzer,
+    j.created_at,
+    j.updated_at
+FROM jobs AS j
+    INNER JOIN apis AS asrc ON j.src_api_id = asrc.id
+    INNER JOIN apis AS allm ON j.llm_api_id = allm.id
+WHERE
+    j.owner = $1
+    AND j.id = ANY($2:: int [])
+    AND j.deleted_at IS NULL
+ORDER BY j.id DESC
+LIMIT $3:: int
 `
 
 type GetJobByOwnerFilterByJIdsParams struct {
@@ -260,7 +293,7 @@ type GetJobByOwnerFilterByJIdsParams struct {
 }
 
 type GetJobByOwnerFilterByJIdsRow struct {
-	ID        int32              `json:"id"`
+	ID        int64              `json:"id"`
 	Owner     uuid.UUID          `json:"owner"`
 	Status    JobStatus          `json:"status"`
 	NewsSrc   string             `json:"news_src"`
@@ -298,23 +331,33 @@ func (q *Queries) GetJobByOwnerFilterByJIds(ctx context.Context, arg *GetJobByOw
 }
 
 const getJobsByJobId = `-- name: GetJobsByJobId :one
-SELECT j.id, j.owner, j.status, asrc.name AS news_src, j.src_query, 
-       allm.name AS analyzer, j.llm_query, j.created_at, j.updated_at
-  FROM jobs AS j
- INNER JOIN apis AS asrc ON j.src_api_id = asrc.id
- INNER JOIN apis AS allm ON j.llm_api_id = allm.id 
- WHERE j.owner = $1
-   AND j.id = $2
-   AND j.deleted_at IS NULL
+
+SELECT
+    j.id,
+    j.owner,
+    j.status,
+    asrc.name AS news_src,
+    j.src_query,
+    allm.name AS analyzer,
+    j.llm_query,
+    j.created_at,
+    j.updated_at
+FROM jobs AS j
+    INNER JOIN apis AS asrc ON j.src_api_id = asrc.id
+    INNER JOIN apis AS allm ON j.llm_api_id = allm.id
+WHERE
+    j.owner = $1
+    AND j.id = $2
+    AND j.deleted_at IS NULL
 `
 
 type GetJobsByJobIdParams struct {
 	Owner uuid.UUID `json:"owner"`
-	ID    int32     `json:"id"`
+	ID    int64     `json:"id"`
 }
 
 type GetJobsByJobIdRow struct {
-	ID        int32              `json:"id"`
+	ID        int64              `json:"id"`
 	Owner     uuid.UUID          `json:"owner"`
 	Status    JobStatus          `json:"status"`
 	NewsSrc   string             `json:"news_src"`
@@ -343,16 +386,24 @@ func (q *Queries) GetJobsByJobId(ctx context.Context, arg *GetJobsByJobIdParams)
 }
 
 const getJobsByOwner = `-- name: GetJobsByOwner :many
-SELECT j.id, j.owner, j.status, asrc.name AS news_src, allm.name AS analyzer, j.created_at, j.updated_at
-  FROM jobs AS j
- INNER JOIN apis AS asrc ON j.src_api_id = asrc.id
- INNER JOIN apis AS allm ON j.llm_api_id = allm.id 
- WHERE j.owner = $1
-   AND j.id < $2::int
-   AND j.deleted_at IS NULL
- ORDER BY 
-       j.id DESC
- LIMIT $3::int
+
+SELECT
+    j.id,
+    j.owner,
+    j.status,
+    asrc.name AS news_src,
+    allm.name AS analyzer,
+    j.created_at,
+    j.updated_at
+FROM jobs AS j
+    INNER JOIN apis AS asrc ON j.src_api_id = asrc.id
+    INNER JOIN apis AS allm ON j.llm_api_id = allm.id
+WHERE
+    j.owner = $1
+    AND j.id < $2:: int
+    AND j.deleted_at IS NULL
+ORDER BY j.id DESC
+LIMIT $3:: int
 `
 
 type GetJobsByOwnerParams struct {
@@ -362,7 +413,7 @@ type GetJobsByOwnerParams struct {
 }
 
 type GetJobsByOwnerRow struct {
-	ID        int32              `json:"id"`
+	ID        int64              `json:"id"`
 	Owner     uuid.UUID          `json:"owner"`
 	Status    JobStatus          `json:"status"`
 	NewsSrc   string             `json:"news_src"`
@@ -400,17 +451,25 @@ func (q *Queries) GetJobsByOwner(ctx context.Context, arg *GetJobsByOwnerParams)
 }
 
 const getJobsByOwnerFilterByStatus = `-- name: GetJobsByOwnerFilterByStatus :many
-SELECT j.id, j.owner, j.status, asrc.name AS news_src, allm.name AS analyzer, j.created_at, j.updated_at
-  FROM jobs AS j
- INNER JOIN apis AS asrc ON j.src_api_id = asrc.id
- INNER JOIN apis AS allm ON j.llm_api_id = allm.id 
- WHERE j.owner = $1
-   AND j.id < $2::int
-   AND j.status = $3
-   AND j.deleted_at IS NULL
- ORDER BY 
-       j.id DESC
- LIMIT $4::int
+
+SELECT
+    j.id,
+    j.owner,
+    j.status,
+    asrc.name AS news_src,
+    allm.name AS analyzer,
+    j.created_at,
+    j.updated_at
+FROM jobs AS j
+    INNER JOIN apis AS asrc ON j.src_api_id = asrc.id
+    INNER JOIN apis AS allm ON j.llm_api_id = allm.id
+WHERE
+    j.owner = $1
+    AND j.id < $2:: int
+    AND j.status = $3
+    AND j.deleted_at IS NULL
+ORDER BY j.id DESC
+LIMIT $4:: int
 `
 
 type GetJobsByOwnerFilterByStatusParams struct {
@@ -421,7 +480,7 @@ type GetJobsByOwnerFilterByStatusParams struct {
 }
 
 type GetJobsByOwnerFilterByStatusRow struct {
-	ID        int32              `json:"id"`
+	ID        int64              `json:"id"`
 	Owner     uuid.UUID          `json:"owner"`
 	Status    JobStatus          `json:"status"`
 	NewsSrc   string             `json:"news_src"`
@@ -464,17 +523,17 @@ func (q *Queries) GetJobsByOwnerFilterByStatus(ctx context.Context, arg *GetJobs
 }
 
 const getLastJobId = `-- name: GetLastJobId :many
-SELECT DISTINCT ON (status)
-       id, status
-  FROM jobs
- WHERE owner = $1
- ORDER BY 
-        status ASC,
-        id DESC
+
+SELECT
+    DISTINCT ON (status) id,
+    status
+FROM jobs
+WHERE owner = $1
+ORDER BY status ASC, id DESC
 `
 
 type GetLastJobIdRow struct {
-	ID     int32     `json:"id"`
+	ID     int64     `json:"id"`
 	Status JobStatus `json:"status"`
 }
 
@@ -498,18 +557,55 @@ func (q *Queries) GetLastJobId(ctx context.Context, owner uuid.UUID) ([]*GetLast
 	return items, nil
 }
 
-const updateJobStatus = `-- name: UpdateJobStatus :execrows
+const updateJobByULID = `-- name: UpdateJobByULID :execrows
+
 UPDATE jobs
-   SET status = $1,
-       updated_at = CURRENT_TIMESTAMP
- WHERE id = $2
-   AND owner = $3
-   AND deleted_at IS NULL
+SET
+    status = 'running',
+    llm_api_id = $1,
+    llm_query = $2,
+    updated_at = CURRENT_TIMESTAMP
+WHERE
+    ulid = $3
+    AND owner = $4
+    AND deleted_at IS NULL
+`
+
+type UpdateJobByULIDParams struct {
+	LlmApiID int16     `json:"llm_api_id"`
+	LlmQuery []byte    `json:"llm_query"`
+	Ulid     string    `json:"ulid"`
+	Owner    uuid.UUID `json:"owner"`
+}
+
+func (q *Queries) UpdateJobByULID(ctx context.Context, arg *UpdateJobByULIDParams) (int64, error) {
+	result, err := q.db.Exec(ctx, updateJobByULID,
+		arg.LlmApiID,
+		arg.LlmQuery,
+		arg.Ulid,
+		arg.Owner,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const updateJobStatus = `-- name: UpdateJobStatus :execrows
+
+UPDATE jobs
+SET
+    status = $1,
+    updated_at = CURRENT_TIMESTAMP
+WHERE
+    id = $2
+    AND owner = $3
+    AND deleted_at IS NULL
 `
 
 type UpdateJobStatusParams struct {
 	Status JobStatus `json:"status"`
-	ID     int32     `json:"id"`
+	ID     int64     `json:"id"`
 	Owner  uuid.UUID `json:"owner"`
 }
 
