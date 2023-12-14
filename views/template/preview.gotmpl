@@ -8,15 +8,18 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/list.js/2.3.1/list.min.js"></script>
     <script src="/static/js/preview_funcs.js"></script>
-    <link rel="stylesheet" href="/static/css/result_table.css">
+    <link rel="stylesheet" href="/static/css/preview.css">
     <title>{{.Page.Title}}</title>
 </head>
 
 <body>
     <section class="width-background">
         <div class="control-panal">
-            <button type="button" class="btn" id="home" onclick="toTop()"><i class="fa-solid fa-up-long"></i></button>
-            <button type="button" class="btn" id="end"  onclick="toEnd()"><i class="fa-solid fa-down-long"></i></button>
+            <button title="top" type="button" class="btn" id="panal-home" onclick="toTop()"><i class="fa-solid fa-up-long"></i></button>
+            <button title="select all" type="button" class="btn" id="panal-select-all"><i class="fa-solid fa-a"></i></button>
+            <button title="more" type="button" class="btn" id="panal-more" onclick="getPreviewItems(pcid)"><i class="fa-solid fa-m"></i></button>
+            <button title="submit" type="button" class="btn" id="panal-submit" onclick="submit(pcid,false)"><i class="fa-solid fa-s"></i></button>
+            <button title="button" type="button" class="btn" id="panal-end" onclick="toEnd()"><i class="fa-solid fa-down-long"></i></button>
         </div>
         <div class="mid-card">
             <div class="table-container" id="item-table">

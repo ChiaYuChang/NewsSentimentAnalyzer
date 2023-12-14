@@ -1,9 +1,9 @@
 package api
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -22,6 +22,7 @@ import (
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view/object"
 	ec "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/errorCode"
 	"github.com/go-chi/chi/v5"
+	"github.com/jackc/pgerrcode"
 	"github.com/pemistahl/lingua-go"
 	"github.com/redis/go-redis/v9"
 
@@ -30,7 +31,7 @@ import (
 )
 
 func (repo APIRepo) GetAnalyzer(w http.ResponseWriter, req *http.Request) {
-	// pcid := chi.URLParam(req, "pcid")
+	pcid := chi.URLParam(req, "pcid")
 	pageData := object.AnalyzerPage{
 		Page: object.Page{
 			HeadConent: view.SharedHeadContent(),
@@ -41,6 +42,8 @@ func (repo APIRepo) GetAnalyzer(w http.ResponseWriter, req *http.Request) {
 	}
 	pageData.Prompt["openai-sentiment"] = openai.SentimentAnalysisPrompt
 	pageData.Prompt["cohere-sentiment"] = cohere.SentimentAnalysisPrompt
+
+	repo.Cache.ExpireGT(context.Background(), pcid, global.CacheExpireDefault)
 
 	err := repo.View.ExecuteTemplate(w, "analyzer.gotmpl", pageData)
 	if err != nil {
@@ -54,24 +57,39 @@ func (repo APIRepo) PostAnalyzer(w http.ResponseWriter, req *http.Request) {
 	pcid := chi.URLParam(req, "pcid")
 	aid, _ := strconv.Atoi(req.URL.Query().Get("aid"))
 
-	if _, err := repo.Cache.Get(context.Background(), pcid).Result(); err == redis.Nil {
+	if res, err := repo.Cache.JSONGet(pcid, ".is_done"); err == redis.Nil {
 		resp.WithEcError(ec.MustGetEcErr(ec.ECGone).
 			WithDetails("cache already expire").
-			WithDetails(pcid))
-		w.WriteHeader(resp.Error.Code)
-		resp.Error.RedirectURL = global.AppVar.App.RoutePattern.ErrorPage["gone"]
+			WithDetails(pcid)).
+			WithRedirectURL(global.AppVar.App.RoutePattern.ErrorPage["gone"])
+		w.WriteHeader(resp.HttpStatusCode())
 		b, _ := json.Marshal(resp)
 		w.Write(b)
 		return
+	} else {
+		if bytes.Compare([]byte("true"), res.([]byte)) == 0 {
+			resp.Error = &pageform.PreviewError{
+				Code:        http.StatusInternalServerError,
+				PgxCode:     pgerrcode.UniqueViolation,
+				Message:     "You have already submitted this request",
+				RedirectURL: fmt.Sprintf("/v1%s", global.AppVar.App.RoutePattern.Page["job"]),
+			}
+			w.WriteHeader(resp.HttpStatusCode())
+			b, _ := json.Marshal(resp)
+			w.Write(b)
+			return
+		}
 	}
 
 	err := req.ParseForm()
 	if err != nil {
 		global.Logger.Error().Err(err).Msg("Failed to parse form")
-		resp.WithEcError(ec.MustGetEcErr(ec.ECBadRequest).
-			WithDetails("Failed to parse form", err.Error()))
-		resp.Error.RedirectURL = global.AppVar.App.RoutePattern.ErrorPage["bad-request"]
-		w.WriteHeader(resp.Error.Code)
+		resp.WithEcError(
+			ec.MustGetEcErr(ec.ECBadRequest).
+				WithMessage(err.Error()).
+				WithDetails("Failed to parse form")).
+			WithRedirectURL(global.AppVar.App.RoutePattern.ErrorPage["bad-request"])
+		w.WriteHeader(resp.HttpStatusCode())
 		b, _ := json.Marshal(resp)
 		w.Write(b)
 		return
@@ -82,9 +100,10 @@ func (repo APIRepo) PostAnalyzer(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		global.Logger.Error().Err(err).Msg("Failed to decode form")
 		resp.WithEcError(ec.MustGetEcErr(ec.ECBadRequest).
-			WithDetails("Failed to decode form", err.Error()))
-		resp.Error.RedirectURL = global.AppVar.App.RoutePattern.ErrorPage["bad-request"]
-		w.WriteHeader(resp.Error.Code)
+			WithMessage(err.Error()).
+			WithDetails("Failed to decode form")).
+			WithRedirectURL(global.AppVar.App.RoutePattern.ErrorPage["bad-request"])
+		w.WriteHeader(resp.HttpStatusCode())
 		b, _ := json.Marshal(resp)
 		w.Write(b)
 		return
@@ -94,37 +113,25 @@ func (repo APIRepo) PostAnalyzer(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		global.Logger.Error().Err(err).Msg("Failed to write cache")
 		resp.WithEcError(ec.MustGetEcErr(ec.ECGone).
-			WithDetails(err.Error()))
-		resp.Error.RedirectURL = global.AppVar.App.RoutePattern.ErrorPage["gone"]
-		w.WriteHeader(resp.Error.Code)
+			WithMessage(err.Error())).
+			WithRedirectURL(global.AppVar.App.RoutePattern.ErrorPage["gone"])
+		w.WriteHeader(resp.HttpStatusCode())
 		b, _ := json.Marshal(resp)
 		w.Write(b)
 		return
 	}
 
-	jid, err := repo.CacheToStore(pcid, aid, fdata.APIId)
-	if err != nil {
-		global.Logger.Error().Str("error", err.Error()).Msg("Failed to cache to store")
-		var ecErr *ec.Error
-		if ok := errors.As(err, &ecErr); !ok {
-			ecErr = ec.MustGetEcErr(ec.ECServerError)
-		}
-		resp.WithEcError(ecErr)
-		resp.Error.RedirectURL = global.AppVar.App.RoutePattern.ErrorPage["internal-server-error"]
+	jid, ecErr := repo.CacheToStore(pcid, aid, fdata.APIId)
+	if ecErr != nil {
+		resp.WithEcError(ecErr).
+			WithOutDetails().
+			WithOutMessage().
+			WithRedirectURL(global.AppVar.App.RoutePattern.ErrorPage["internal-server-error"])
 		w.WriteHeader(ecErr.HttpStatusCode)
-		w.WriteHeader(http.StatusInternalServerError)
 		b, _ := json.Marshal(resp)
 		w.Write(b)
 		return
 	}
-
-	global.Logger.Info().
-		Str("url", req.URL.String()).
-		Str("pcid", pcid).
-		Int("jid", jid).
-		Int("aid", aid).
-		Int("lid", fdata.APIId).
-		Msg("done")
 
 	resp.RedirectURL = fmt.Sprintf("/v1%s?jid=%d", global.AppVar.App.RoutePattern.Page["job"], jid)
 	w.WriteHeader(http.StatusOK)
@@ -133,14 +140,13 @@ func (repo APIRepo) PostAnalyzer(w http.ResponseWriter, req *http.Request) {
 	return
 }
 
-func (repo APIRepo) CacheToStore(pcid string, aid, lid int) (int, error) {
+func (repo APIRepo) CacheToStore(pcid string, aid, lid int) (int, *ec.Error) {
 	// save cache to premint storage
-	global.Logger.Info().Msg("read cache")
 	res, err := repo.Cache.JSONGet(pcid, ".")
 	if err != nil {
 		return 0, ec.MustGetEcErr(ec.ECBadRequest).
 			WithDetails("error while get cache").
-			WithDetails(err.Error())
+			WithMessage(err.Error())
 	}
 
 	global.Logger.Info().Msg("unmarshal cache")
@@ -149,7 +155,7 @@ func (repo APIRepo) CacheToStore(pcid string, aid, lid int) (int, error) {
 	if err != nil {
 		return 0, ec.MustGetEcErr(ec.ECBadRequest).
 			WithDetails("error while unmarshaling cache").
-			WithDetails(err.Error())
+			WithMessage(err.Error())
 	}
 
 	selectedItem := cache.SelectedItems()
@@ -161,7 +167,7 @@ func (repo APIRepo) CacheToStore(pcid string, aid, lid int) (int, error) {
 	if err != nil {
 		return 0, ec.MustGetEcErr(ec.ECBadRequest).
 			WithDetails("error while detect language").
-			WithDetails(err.Error())
+			WithMessage(err.Error())
 	}
 
 	go func(errChan <-chan error) {
@@ -180,7 +186,6 @@ func (repo APIRepo) CacheToStore(pcid string, aid, lid int) (int, error) {
 				Threshold: &thr,
 			}
 		}
-		global.Logger.Info().Msg("detect language req go run time done")
 	}(reqChan)
 
 	cnChan := make(chan *service.NewsCreateRequest, 10)
@@ -192,7 +197,6 @@ func (repo APIRepo) CacheToStore(pcid string, aid, lid int) (int, error) {
 		for resp := range respChan {
 			prev := selectedItem[resp.GetId()]
 			u, _ := url.Parse(prev.Link)
-			// guid := parser.GetDefaultParser().ToGUID(u)
 			_, guid, err := cli.GetGUID(context.TODO(), i, u.String())
 			if err != nil {
 				global.Logger.Error().
@@ -205,7 +209,6 @@ func (repo APIRepo) CacheToStore(pcid string, aid, lid int) (int, error) {
 			cnChan <- prev.ToNewsCreateRequest(guid, lang.String(), u.Host, nil)
 			i++
 		}
-		global.Logger.Info().Msg("create news req go run time done")
 	}(respChan, cnChan)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -219,13 +222,21 @@ func (repo APIRepo) CacheToStore(pcid string, aid, lid int) (int, error) {
 		cache.AnalyzerOptions.ToString("", ""), cnChan)
 
 	if err != nil {
-		return 0, err
+		if ecErr, ok := err.(*ec.Error); ok {
+			return 0, ecErr
+		} else {
+			return 0, ec.MustGetEcErr(ec.ECServerError).
+				WithMessage(err.Error()).
+				WithDetails("error while DoCacheToStoreTx")
+		}
 	}
 
-	_, err = repo.Cache.Del(context.Background(), pcid).Result()
+	repo.Cache.JSONSet(pcid, ".is_done", true)
+	_, err = repo.Cache.ExpireLT(context.Background(), pcid, 1*time.Minute).Result()
 	if err != nil {
-		global.Logger.Error().Err(err).Msg("Failed to delete cache")
-		return int(result.JobId), err
+		return int(result.JobId), ec.MustGetEcErr(ec.ECServerError).
+			WithMessage(err.Error()).
+			WithDetails("Failed to delete cache")
 	}
 	return int(result.JobId), nil
 }

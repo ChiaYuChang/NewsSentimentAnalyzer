@@ -16,7 +16,8 @@ func (srvc apikeyService) Create(ctx context.Context, req *APIKeyCreateRequest) 
 		return 0, err
 	}
 	params, _ := req.ToParams()
-	return srvc.store.CreateAPIKey(ctx, params)
+	id, err = srvc.store.CreateAPIKey(ctx, params)
+	return id, ParsePgxError(err)
 }
 
 func (srvc apikeyService) Delete(ctx context.Context, req *APIKeyDeleteRequest) (n int64, err error) {
@@ -24,7 +25,8 @@ func (srvc apikeyService) Delete(ctx context.Context, req *APIKeyDeleteRequest) 
 		return 0, err
 	}
 	params, _ := req.ToParams()
-	return srvc.store.DeleteAPIKey(ctx, params)
+	n, err = srvc.store.DeleteAPIKey(ctx, params)
+	return n, ParsePgxError(err)
 }
 
 func (srvc apikeyService) Get(ctx context.Context, r *APIKeyGetRequest) (*model.GetAPIKeyRow, error) {
@@ -32,23 +34,26 @@ func (srvc apikeyService) Get(ctx context.Context, r *APIKeyGetRequest) (*model.
 		return nil, err
 	}
 
-	return srvc.store.GetAPIKey(
+	row, err := srvc.store.GetAPIKey(
 		ctx,
 		&model.GetAPIKeyParams{
 			Owner: r.Owner,
 			ApiID: r.ApiID,
 		})
+	return row, ParsePgxError(err)
 }
 
 func (srvc apikeyService) List(ctx context.Context, owner uuid.UUID) ([]*model.ListAPIKeyRow, error) {
 	if err := srvc.validate.Var(owner, "not_uuid_nil,uuid4"); err != nil {
 		return nil, err
 	}
-	return srvc.store.ListAPIKey(ctx, owner)
+	rows, err := srvc.store.ListAPIKey(ctx, owner)
+	return rows, ParsePgxError(err)
 }
 
 func (srvc apikeyService) CleanUp(ctx context.Context) (n int64, err error) {
-	return srvc.store.CleanUpAPIKey(ctx)
+	n, err = srvc.store.CleanUpAPIKey(ctx)
+	return n, ParsePgxError(err)
 }
 
 func (srvc apikeyService) CreateOrUpdate(ctx context.Context, r *APIKeyCreateOrUpdateRequest) (*model.CreateOrUpdateAPIKeyTxResults, error) {

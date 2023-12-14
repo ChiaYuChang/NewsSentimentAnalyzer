@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"sort"
 	"strconv"
-	"time"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client"
@@ -159,7 +158,7 @@ func (repo APIRepo) PostPreview(w http.ResponseWriter, req *http.Request) {
 	} else {
 		repo.Cache.JSONSet(pcid, ".selected_nid", pf.Item)
 	}
-	repo.Cache.ExpireGT(context.Background(), pcid, 10*time.Minute)
+	repo.Cache.ExpireGT(context.Background(), pcid, global.CacheExpireDefault)
 
 	// reqChan := make(chan *languageDetector.LanguageDetectRequest)
 	// respChan, err, errChan := languagedetector.MustGetLanguageDetectorClient().DetectLanguage(context.TODO(), reqChan)
@@ -291,7 +290,7 @@ func (repo APIRepo) GetFetchNextPage(w http.ResponseWriter, req *http.Request) {
 			}
 		}
 	}
-	repo.Cache.ExpireGT(context.Background(), pcid, 5*time.Minute)
+	repo.Cache.ExpireGT(context.Background(), pcid, global.CacheExpireDefault)
 
 	for i := range prev {
 		prev[i].Content = ""

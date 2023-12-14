@@ -187,3 +187,30 @@ WHERE id = $1 AND owner = $2;
 -- name: CleanUpJobs :execrows
 
 DELETE FROM jobs WHERE deleted_at IS NOT NULL;
+
+-- name: GetOldestNCreatedJobsForEachUser :many
+
+WITH ranked_jobs AS (
+        SELECT
+            id,
+            owner,
+            llm_api_id,
+            llm_query,
+            ROW_NUMBER() OVER(
+                PARTITION BY owner
+                ORDER BY
+                    id ASC
+            ) as rn
+        FROM jobs
+        WHERE
+            deleted_at IS NULL
+            AND status = 'created'
+    )
+SELECT
+    id,
+    owner,
+    llm_api_id,
+    llm_query
+FROM ranked_jobs
+WHERE rn <= @n:: int
+ORDER BY id DESC;

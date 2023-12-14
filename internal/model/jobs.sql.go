@@ -557,6 +557,66 @@ func (q *Queries) GetLastJobId(ctx context.Context, owner uuid.UUID) ([]*GetLast
 	return items, nil
 }
 
+const getOldestNCreatedJobsForEachUser = `-- name: GetOldestNCreatedJobsForEachUser :many
+
+WITH ranked_jobs AS (
+        SELECT
+            id,
+            owner,
+            llm_api_id,
+            llm_query,
+            ROW_NUMBER() OVER(
+                PARTITION BY owner
+                ORDER BY
+                    id ASC
+            ) as rn
+        FROM jobs
+        WHERE
+            deleted_at IS NULL
+            AND status = 'created'
+    )
+SELECT
+    id,
+    owner,
+    llm_api_id,
+    llm_query
+FROM ranked_jobs
+WHERE rn <= $1:: int
+ORDER BY id DESC
+`
+
+type GetOldestNCreatedJobsForEachUserRow struct {
+	ID       int64     `json:"id"`
+	Owner    uuid.UUID `json:"owner"`
+	LlmApiID int16     `json:"llm_api_id"`
+	LlmQuery []byte    `json:"llm_query"`
+}
+
+func (q *Queries) GetOldestNCreatedJobsForEachUser(ctx context.Context, n int32) ([]*GetOldestNCreatedJobsForEachUserRow, error) {
+	rows, err := q.db.Query(ctx, getOldestNCreatedJobsForEachUser, n)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*GetOldestNCreatedJobsForEachUserRow
+	for rows.Next() {
+		var i GetOldestNCreatedJobsForEachUserRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Owner,
+			&i.LlmApiID,
+			&i.LlmQuery,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateJobByULID = `-- name: UpdateJobByULID :execrows
 
 UPDATE jobs

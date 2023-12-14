@@ -17,7 +17,8 @@ func (srvc endpointService) ListEndpointByOwner(ctx context.Context, owner uuid.
 	if err := srvc.validate.Var(owner, "required,uuid4"); err != nil {
 		return nil, err
 	}
-	return srvc.store.ListEndpointByOwner(ctx, owner)
+	rows, err := srvc.store.ListEndpointByOwner(ctx, owner)
+	return rows, ParsePgxError(err)
 }
 
 type EndpointCreateRequest struct {
@@ -43,14 +44,16 @@ func (srvc endpointService) Create(ctx context.Context, req *EndpointCreateReque
 		return 0, err
 	}
 	params, _ := req.ToParams()
-	return srvc.store.CreateEndpoint(ctx, params)
+	id, err := srvc.store.CreateEndpoint(ctx, params)
+	return id, ParsePgxError(err)
 }
 
 func (srvc endpointService) Delete(ctx context.Context, endpointId int32) (int64, error) {
 	if err := srvc.validate.Var(endpointId, "required,min=1"); err != nil {
 		return 0, err
 	}
-	return srvc.store.DeleteEndpoint(ctx, endpointId)
+	n, err := srvc.store.DeleteEndpoint(ctx, endpointId)
+	return n, ParsePgxError(err)
 }
 
 func (srvc endpointService) ListAll(ctx context.Context, limit int32, rowChan chan<- *model.ListAllEndpointRow) error {
@@ -66,7 +69,7 @@ func (srvc endpointService) ListAll(ctx context.Context, limit int32, rowChan ch
 			if errors.Is(err, pgx.ErrNoRows) {
 				break
 			}
-			return err
+			return ParsePgxError(err)
 		}
 		if len(rows) > 0 {
 			params.Next = rows[len(rows)-1].EndpointID

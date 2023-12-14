@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model"
@@ -261,7 +262,7 @@ func (srvc jobService) Get(ctx context.Context, owner uuid.UUID, jids []int32,
 			Ids:   jids,
 			N:     n,
 		}); err != nil {
-			return nil, err
+			return nil, ParsePgxError(err)
 		} else {
 			return ToJobRows(rs)
 		}
@@ -294,7 +295,8 @@ func (srvc jobService) Get(ctx context.Context, owner uuid.UUID, jids []int32,
 				},
 			); err != nil {
 				global.Logger.Debug().Err(err).Msg("error while calling ..getByOwnerWithStatusFilter method")
-				return nil, fmt.Errorf("error while calling .getByOwnerWithStatusFilter: %w", err)
+				return nil, ParsePgxError(err,
+					fmt.Sprintf("error while calling .getByOwnerWithStatusFilter: %s", err.Error()))
 			} else {
 				return ToJobRows(rs)
 			}
@@ -306,8 +308,8 @@ func (srvc jobService) Get(ctx context.Context, owner uuid.UUID, jids []int32,
 					N:     n,
 				},
 			); err != nil {
-				global.Logger.Debug().Err(err).Msg("error while calling .getByOwner method")
-				return nil, fmt.Errorf("error while calling .getByOwner: %w", err)
+				return nil, ParsePgxError(err,
+					fmt.Sprintf("error while calling .getByOwner: %s", err.Error()))
 			} else {
 				return ToJobRows(rs)
 			}
@@ -325,7 +327,8 @@ func (srvc jobService) Get(ctx context.Context, owner uuid.UUID, jids []int32,
 				JStatus: js,
 			},
 		); err != nil {
-			return nil, fmt.Errorf("error while calling .GetJobByOwnerFilterByJIdAndStatus: %w", err)
+			return nil, ParsePgxError(err,
+				fmt.Sprintf("error while calling .GetJobByOwnerFilterByJIdAndStatus: %s", err.Error()))
 		} else {
 			return ToJobRows(rs)
 		}
@@ -338,7 +341,8 @@ func (srvc jobService) Get(ctx context.Context, owner uuid.UUID, jids []int32,
 				N:     n,
 			},
 		); err != nil {
-			return nil, fmt.Errorf("error while calling .getByOwnerWithJIdRangeFilter: %w", err)
+			return nil, ParsePgxError(err,
+				fmt.Sprintf("error while calling .getByOwnerWithJIdRangeFilter: %s", err.Error()))
 		} else {
 			return ToJobRows(rs)
 		}
@@ -352,7 +356,8 @@ func (srvc jobService) getByOwner(ctx context.Context, req *JobGetByOwnerRequest
 	}
 
 	params, _ := req.ToParams()
-	return srvc.store.GetJobsByOwner(ctx, params)
+	rows, err := srvc.store.GetJobsByOwner(ctx, params)
+	return rows, ParsePgxError(err)
 }
 
 // get job within given job ids
@@ -363,18 +368,20 @@ func (srvc jobService) getByJobIds(ctx context.Context,
 	}
 
 	params, _ := req.ToParams()
-	return srvc.store.GetJobByOwnerFilterByJIds(ctx, params)
+	rows, err := srvc.store.GetJobByOwnerFilterByJIds(ctx, params)
+	return rows, ParsePgxError(err)
 }
 
 // get job id with job between [f_jid, t_jid]
 func (srvc jobService) getByOwnerWithJIdRangeFilter(ctx context.Context,
 	req *JobGetWithJIdRangeFilterRequest) ([]*model.GetJobByOwnerFilterByJIdRangeRow, error) {
 	if err := srvc.validate.Struct(req); err != nil {
-		return nil, err
+		return nil, ParsePgxError(err)
 	}
 
 	params, _ := req.ToParams()
-	return srvc.store.GetJobByOwnerFilterByJIdRange(ctx, params)
+	rows, err := srvc.store.GetJobByOwnerFilterByJIdRange(ctx, params)
+	return rows, ParsePgxError(err)
 }
 
 // get job id with job between [f_jid, t_jid] and job status = jstatus
@@ -385,7 +392,8 @@ func (srvc jobService) getByOwnerWithIdAndStatusFilter(ctx context.Context,
 	}
 
 	params, _ := req.ToParams()
-	return srvc.store.GetJobByOwnerFilterByJIdAndStatus(ctx, params)
+	rows, err := srvc.store.GetJobByOwnerFilterByJIdAndStatus(ctx, params)
+	return rows, ParsePgxError(err)
 }
 
 // get job id with job status = jstatus
@@ -396,7 +404,8 @@ func (srvc jobService) getByOwnerWithStatusFilter(ctx context.Context,
 	}
 
 	params, _ := req.ToParams()
-	return srvc.store.GetJobsByOwnerFilterByStatus(ctx, params)
+	rows, err := srvc.store.GetJobsByOwnerFilterByStatus(ctx, params)
+	return rows, ParsePgxError(err)
 }
 
 // get job details by job id
@@ -406,18 +415,20 @@ func (srvc jobService) GetDetails(ctx context.Context, req *JobGetByJobIdRequest
 	}
 
 	params, _ := req.ToParams()
-	return srvc.store.GetJobsByJobId(ctx, params)
+	rows, err := srvc.store.GetJobsByJobId(ctx, params)
+	return rows, ParsePgxError(err)
 }
 
 // update job status
 func (srvc jobService) UpdateStatus(ctx context.Context,
-	req *JobUpdateStatusRequest) (n int64, err error) {
+	req *JobUpdateStatusRequest) (int64, error) {
 	if err := srvc.validate.Struct(req); err != nil {
 		return 0, err
 	}
 
 	params, _ := req.ToParams()
-	return srvc.store.UpdateJobStatus(ctx, params)
+	n, err := srvc.store.UpdateJobStatus(ctx, params)
+	return n, ParsePgxError(err)
 }
 
 // clean job with deleted_at
@@ -427,5 +438,14 @@ func (srvc jobService) CleanUp(ctx context.Context) (n int64, err error) {
 
 // count job belong to given owner
 func (srvc jobService) Count(ctx context.Context, owner uuid.UUID) (*model.CountUserJobTxResult, error) {
-	return srvc.store.DoCountUserJobTx(ctx, owner)
+	result, err := srvc.store.DoCountUserJobTx(ctx, owner)
+	return result, ParsePgxError(err)
+}
+
+func (srvc jobService) GetOldestNCreatedJobsForEachUser(ctx context.Context, n int) ([]*model.GetOldestNCreatedJobsForEachUserRow, error) {
+	if n > math.MaxInt32 {
+		n = math.MaxInt32
+	}
+	rows, err := srvc.store.GetOldestNCreatedJobsForEachUser(ctx, int32(n))
+	return rows, ParsePgxError(err)
 }

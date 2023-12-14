@@ -739,6 +739,21 @@ func (mr *MockStoreMockRecorder) GetNewsPublishBetween(arg0, arg1 interface{}) *
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNewsPublishBetween", reflect.TypeOf((*MockStore)(nil).GetNewsPublishBetween), arg0, arg1)
 }
 
+// GetOldestNCreatedJobsForEachUser mocks base method.
+func (m *MockStore) GetOldestNCreatedJobsForEachUser(arg0 context.Context, arg1 int32) ([]*model.GetOldestNCreatedJobsForEachUserRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetOldestNCreatedJobsForEachUser", arg0, arg1)
+	ret0, _ := ret[0].([]*model.GetOldestNCreatedJobsForEachUserRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetOldestNCreatedJobsForEachUser indicates an expected call of GetOldestNCreatedJobsForEachUser.
+func (mr *MockStoreMockRecorder) GetOldestNCreatedJobsForEachUser(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOldestNCreatedJobsForEachUser", reflect.TypeOf((*MockStore)(nil).GetOldestNCreatedJobsForEachUser), arg0, arg1)
+}
+
 // GetUserAuth mocks base method.
 func (m *MockStore) GetUserAuth(arg0 context.Context, arg1 string) (*model.GetUserAuthRow, error) {
 	m.ctrl.T.Helper()

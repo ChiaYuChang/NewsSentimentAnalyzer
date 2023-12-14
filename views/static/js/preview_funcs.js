@@ -10,7 +10,8 @@ var itemCheckboxes = [];
 
 document.addEventListener("DOMContentLoaded", (event) => {
     masterCheckbox = document.getElementById('select-all');
-
+    panalAll = document.getElementById('panal-select-all')
+    
     initList();
     // Add an event listener to the master checkbox
     masterCheckbox.addEventListener('change', () => {
@@ -20,18 +21,26 @@ document.addEventListener("DOMContentLoaded", (event) => {
         });
     });
 
+    panalAll.addEventListener('click', () => {
+        masterCheckbox.click();
+    })
+
     getPreviewItems(pcid, true);
 })
 
 function initList() {
     function item_func(values) {
-        return `<tr>
-                    <td><input type='checkbox' class='pure-checkbox' id='${values["id"]}'></td>
+        return `<tr onclick="tableRowClick('${values["id"]}')">
+                    <td class="n">
+                        <input type='checkbox' class='pure-checkbox' id='${values["id"]}'>
+                    </td>
                     <td>
                         <a href=${values["link"]}><h5>${values["title"]}</h5></a>
                         <p>${values["description"]}</p>
                     </td>
-                    <td>${values["publication_date"]}</td>
+                    <td>
+                        ${values["publication_date"]}
+                    </td>
                 </tr>`;
     }
 
@@ -40,6 +49,14 @@ function initList() {
         item: item_func,
     };
     list = new List("item-table", options);
+}
+
+function tableRowClick(id) {
+    el = document.getElementById(id)
+    if (el === null) {
+        return
+    }
+    el.checked = !el.checked;
 }
 
 async function getPreviewItems(pcid, isFirstCall) {

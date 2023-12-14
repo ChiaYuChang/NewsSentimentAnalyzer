@@ -11,6 +11,7 @@ import (
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model/testtool"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/validator"
+	ec "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/errorCode"
 	val "github.com/go-playground/validator/v10"
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
@@ -291,7 +292,8 @@ func TestDeleteAPIKeyService(t *testing.T) {
 					require.NoError(t, err)
 					require.Equal(t, int64(1), n)
 				case NoRowError:
-					require.ErrorIs(t, err, pgx.ErrNoRows)
+					require.Equal(t, err,
+						ec.MustGetEcErr(ec.ECPgxErrNoRows))
 				}
 			},
 		)

@@ -254,49 +254,45 @@ type CacheToStoreTXParams struct {
 
 type CacheToStoreTXResult struct {
 	JobId                int64
-	JobCreateError       error
+	JobCreateError       *ec.Error
 	NewsJobCreateResults []NewsJobCreateResult
 }
 
 func (r *CacheToStoreTXResult) Error() error {
 	if err := r.JobCreateError; err != nil {
-		var pgErr *pgconn.PgError
-		var ecErr *ec.Error
-		if ok := errors.As(err, &pgErr); ok {
-			ecErr = ec.NewErrorFromPgErr(pgErr)
-		} else {
-			ecErr = ec.MustGetEcErr(ec.ECServerError).
-				WithDetails(err.Error())
-		}
-		ecErr.WithDetails("error while create job")
-		return ecErr
+		return r.JobCreateError
 	}
-
 	for _, r := range r.NewsJobCreateResults {
 		if err := r.Error; err != nil {
-			var pgErr *pgconn.PgError
-			if ok := errors.As(err, &pgErr); ok {
-				return ec.NewErrorFromPgErr(pgErr)
-			} else {
-				return ec.MustGetEcErr(ec.ECServerError).WithDetails(err.Error())
-			}
+			return err
 		}
 	}
-
 	return nil
 }
 
 type NewsJobCreateResult struct {
-	Md5Hash   string `json:"md5_hash"`
-	NewsID    int64  `json:"news_id"`
-	NewsJobId int64  `json:"news_job_id"`
-	Error     error  `json:"error"`
+	Md5Hash   string    `json:"md5_hash"`
+	NewsID    int64     `json:"news_id"`
+	NewsJobId int64     `json:"news_job_id"`
+	Error     *ec.Error `json:"error"`
 }
 
 func cacheToStoreTx(s Store, ctx context.Context, params *CacheToStoreTXParams) *CacheToStoreTXResult {
+	var err error
+
 	result := &CacheToStoreTXResult{}
-	result.JobId, result.JobCreateError = s.CreateJob(ctx, params.CreateJobParams)
-	if result.JobCreateError != nil {
+	result.JobId, err = s.CreateJob(ctx, params.CreateJobParams)
+	if err != nil {
+		var pgErr *pgconn.PgError
+		var ecErr *ec.Error
+		if errors.As(err, &pgErr) {
+			ecErr = ec.NewErrorFromPgErr(pgErr)
+		} else {
+			ecErr = ec.MustGetEcErr(ec.ECServerError).
+				WithMessage(err.Error())
+		}
+		ecErr.WithDetails("error while created job")
+		result.JobCreateError = ecErr
 		return result
 	}
 
@@ -311,7 +307,16 @@ func cacheToStoreTx(s Store, ctx context.Context, params *CacheToStoreTXParams) 
 		} else {
 			nid, err := s.CreateNews(ctx, param)
 			if err != nil {
-				r.Error = fmt.Errorf("error while CreateNews %w", err)
+				var pgErr *pgconn.PgError
+				var ecErr *ec.Error
+				if errors.As(err, &pgErr) {
+					ecErr = ec.NewErrorFromPgErr(pgErr)
+				} else {
+					ecErr = ec.MustGetEcErr(ec.ECServerError).
+						WithMessage(err.Error())
+				}
+				ecErr.WithDetails("error while CreateNews")
+				r.Error = ecErr
 			}
 			r.NewsID = nid
 		}
@@ -323,7 +328,16 @@ func cacheToStoreTx(s Store, ctx context.Context, params *CacheToStoreTXParams) 
 			if njId, err := s.CreateNewsJob(ctx, &CreateNewsJobParams{
 				NewsID: r.NewsID, JobID: int64(result.JobId),
 			}); err != nil {
-				result.NewsJobCreateResults[i].Error = fmt.Errorf("error while CreateNewsJob %w", err)
+				var pgErr *pgconn.PgError
+				var ecErr *ec.Error
+				if errors.As(err, &pgErr) {
+					ecErr = ec.NewErrorFromPgErr(pgErr)
+				} else {
+					ecErr = ec.MustGetEcErr(ec.ECServerError).
+						WithMessage(err.Error())
+				}
+				ecErr.WithDetails("error while CreateNewsJob")
+				result.NewsJobCreateResults[i].Error = ecErr
 			} else {
 				result.NewsJobCreateResults[i].NewsJobId = njId
 			}

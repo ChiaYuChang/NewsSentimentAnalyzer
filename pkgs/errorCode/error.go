@@ -31,7 +31,7 @@ func NewErrorFromErr(ec ErrorCode, status int, err error) *Error {
 }
 
 func NewErrorFromPgErr(pgErr *pgconn.PgError) *Error {
-	return NewError(ECPgxError, 500, fmt.Sprintf("%s (%s)", pgErr.Message)).
+	return NewError(ECPgxError, 500, fmt.Sprintf("%s (%s)", pgErr.Message, pgErr.Code)).
 		WithPgxCode(pgErr.Code).
 		WithDetails(
 			fmt.Sprintf("servity: %s", pgErr.Severity),
@@ -63,7 +63,12 @@ func (e *Error) Clone() *Error {
 
 func (e Error) Error() string {
 	sb := strings.Builder{}
-	sb.WriteString(fmt.Sprintf("code: %d, status: %d, msg: %s", e.ErrorCode, e.HttpStatusCode, e.Message))
+
+	if e.PgxCode != "" {
+		sb.WriteString(fmt.Sprintf("code: %d, pgx code: %s, status: %d, msg: %s", e.ErrorCode, e.PgxCode, e.HttpStatusCode, e.Message))
+	} else {
+		sb.WriteString(fmt.Sprintf("code: %d, status: %d, msg: %s", e.ErrorCode, e.HttpStatusCode, e.Message))
+	}
 
 	if len(e.Details) > 0 {
 		sb.WriteString(", details:\n")

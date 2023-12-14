@@ -67,8 +67,10 @@
                         </td>
                         <td>{{$api.Key}}</td>
                         <td>
-                            <button type="button" id="{{$api.ID}}" class="btn btn-tiny" 
-                            onclick="deleteAPIKey(id)">-</button>
+                            <button title="delete this key" type="button" id="{{$api.ID}}" class="btn btn-small" 
+                            onclick="deleteAPIKey(id)">
+                                <i class="fa-regular fa-trash-can fa-sm"></i>
+                            </button>
                         </td>
                     </tr>
                     {{end}}
@@ -82,8 +84,10 @@
                         </td>
                         <td>{{$api.Key}}</td>
                         <td>
-                            <button type="button" id="{{$api.ID}}" class="btn btn-tiny" 
-                            onclick="deleteAPIKey(id)">-</button>
+                            <button title="delete this key" type="button" id="{{$api.ID}}" class="btn btn-small" 
+                            onclick="deleteAPIKey(id)">
+                                <i class="fa-regular fa-trash-can fa-sm"></i>
+                            </button>
                         </td>
                     </tr>
                     {{end}}

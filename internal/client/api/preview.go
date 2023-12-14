@@ -50,6 +50,7 @@ func (a SortById) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a SortById) Less(i, j int) bool { return a[i].Id.String() < a[j].Id.String() }
 
 type PreviewCache struct {
+	IsDone          bool           `json:"is_done"          redis:"is_done"`
 	Query           CacheQuery     `json:"query"            redis:"query"`
 	CreatedAt       time.Time      `json:"created_at"       redis:"created_at"`
 	NewsItem        []NewsPreview  `json:"news_item"        redis:"news_item"`

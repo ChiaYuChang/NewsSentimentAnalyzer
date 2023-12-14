@@ -47,13 +47,15 @@ func (srvc keywordService) GetByNewsId(
 	if err := srvc.validate.Struct(r); err != nil {
 		return nil, err
 	}
-	return srvc.store.GetKeywordsByNewsId(ctx, r.NewsID)
+	ids, err := srvc.store.GetKeywordsByNewsId(ctx, r.NewsID)
+	return ids, ParsePgxError(err)
 }
 
 func (srvc keywordService) Delete(
-	ctx context.Context, r *KeywordDeleteRequest) (n int64, err error) {
+	ctx context.Context, r *KeywordDeleteRequest) (int64, error) {
 	if err := srvc.validate.Struct(r); err != nil {
 		return 0, err
 	}
-	return srvc.store.DeleteKeyword(ctx, r.Keyword)
+	n, err := srvc.store.DeleteKeyword(ctx, r.Keyword)
+	return n, ParsePgxError(err)
 }

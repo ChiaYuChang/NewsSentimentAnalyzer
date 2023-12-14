@@ -36,9 +36,10 @@ func (srvc otherService) CreateNewsJob(
 		return 0, err
 	}
 
-	return srvc.store.CreateNewsJob(ctx, &model.CreateNewsJobParams{
+	id, err = srvc.store.CreateNewsJob(ctx, &model.CreateNewsJobParams{
 		JobID: int64(r.JobID), NewsID: int64(r.NewsID),
 	})
+	return id, ParsePgxError(err)
 }
 
 func (srvc otherService) CreateEvent(
@@ -47,9 +48,10 @@ func (srvc otherService) CreateEvent(
 		return 0, err
 	}
 
-	return srvc.store.CreateLog(ctx, &model.CreateLogParams{
+	id, err := srvc.store.CreateLog(ctx, &model.CreateLogParams{
 		UserID:  r.UserID,
 		Type:    model.EventType(r.Type),
 		Message: r.Message,
 	})
+	return id, ParsePgxError(err)
 }

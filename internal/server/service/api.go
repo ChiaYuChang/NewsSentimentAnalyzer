@@ -2,8 +2,12 @@ package service
 
 import (
 	"context"
+	"errors"
 
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model"
+	ec "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/errorCode"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 func (srvc apiService) Service() Service {
@@ -83,4 +87,32 @@ func (req APIUpdateRequeset) ToParams() (*model.UpdateAPIParams, error) {
 		Type: model.ApiType(req.Type),
 		ID:   req.ID,
 	}, nil
+}
+
+func ParsePgxError(err error, details ...string) error {
+	if err == nil {
+		return nil
+	}
+
+	if errors.Is(err, pgx.ErrNoRows) {
+		return ec.MustGetEcErr(ec.ECPgxErrNoRows)
+	}
+
+	if errors.Is(err, pgx.ErrTxClosed) {
+		return ec.MustGetEcErr(ec.ECErrTxClosed)
+	}
+
+	if errors.Is(err, pgx.ErrTxCommitRollback) {
+		return ec.MustGetEcErr(ec.ECPgxErrTxCommitRollback)
+	}
+
+	var pgErr *pgconn.PgError
+	var ecErr *ec.Error
+	if errors.As(err, &pgErr) {
+		ecErr = ec.NewErrorFromPgErr(pgErr)
+	} else {
+		ecErr = ec.MustGetEcErr(ec.ECServerError).
+			WithDetails(err.Error())
+	}
+	return ecErr.WithDetails(details...)
 }

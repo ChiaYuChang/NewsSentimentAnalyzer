@@ -47,5 +47,8 @@ const (
 
 // PGX error
 const (
-	ECPgxError ErrorCode = 600 + iota
+	ECPgxError               ErrorCode = 600
+	ECPgxErrNoRows           ErrorCode = 601
+	ECPgxErrTxClosed         ErrorCode = 602
+	ECPgxErrTxCommitRollback ErrorCode = 603
 )

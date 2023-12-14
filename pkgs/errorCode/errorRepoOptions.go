@@ -1,6 +1,10 @@
 package errorcode
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/jackc/pgx/v5"
+)
 
 // Register Success to ErrorReop
 func WithSuccess() ErrorRepoOption {
@@ -72,9 +76,20 @@ func WithServerErr() ErrorRepoOption {
 
 func WithPgxError() ErrorRepoOption {
 	return func(repo ErrorRepo) error {
-		err := repo.RegisterErr(ECPgxError, http.StatusInternalServerError, "pgx error")
-		if err != nil {
-			return nil
+		for _, e := range []struct {
+			code   ErrorCode
+			status int
+			msg    string
+		}{
+			{ECPgxError, http.StatusInternalServerError, "pgx error"},
+			{ECPgxErrNoRows, http.StatusInternalServerError, pgx.ErrNoRows.Error()},
+			{ECPgxErrTxClosed, http.StatusInternalServerError, pgx.ErrTxClosed.Error()},
+			{ECPgxErrTxCommitRollback, http.StatusInternalServerError, pgx.ErrTxCommitRollback.Error()},
+		} {
+			err := repo.RegisterErr(e.code, e.status, e.msg)
+			if err != nil {
+				return err
+			}
 		}
 		return nil
 	}

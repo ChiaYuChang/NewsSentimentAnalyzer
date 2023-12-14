@@ -73,7 +73,8 @@ func (srvc newsService) Delete(ctx context.Context, r *NewsDeleteRequest) (n int
 	if err := srvc.validate.Struct(r); err != nil {
 		return 0, err
 	}
-	return srvc.store.DeleteNews(ctx, r.ID)
+	n, err = srvc.store.DeleteNews(ctx, r.ID)
+	return n, ParsePgxError(err)
 }
 
 type NewsDeletePublishBeforeRequest struct {
@@ -133,7 +134,8 @@ func (srvc newsService) Create(ctx context.Context, r *NewsCreateRequest) (id in
 	if err != nil {
 		return 0, err
 	}
-	return srvc.store.CreateNews(ctx, params)
+	id, err = srvc.store.CreateNews(ctx, params)
+	return id, ParsePgxError(err)
 }
 
 func (srvc newsService) DeletePublishBefore(
@@ -148,36 +150,41 @@ func (srvc newsService) GetByKeywords(ctx context.Context, r *NewsGetByKeywordsR
 	if err := srvc.validate.Struct(r); err != nil {
 		return nil, err
 	}
-	return srvc.store.GetNewsByKeywords(ctx, r.keywords)
+	rows, err := srvc.store.GetNewsByKeywords(ctx, r.keywords)
+	return rows, ParsePgxError(err)
 }
 
 func (srvc newsService) GetByPublishBetween(ctx context.Context, r *NewsGetByPublishBetweenRequest) ([]*model.GetNewsPublishBetweenRow, error) {
 	if err := srvc.validate.Struct(r); err != nil {
 		return nil, err
 	}
-	return srvc.store.GetNewsPublishBetween(ctx, &model.GetNewsPublishBetweenParams{
+	rows, err := srvc.store.GetNewsPublishBetween(ctx, &model.GetNewsPublishBetweenParams{
 		FromTime: convert.TimeTo(r.From).ToPgTimeStampZ(),
 		ToTime:   convert.TimeTo(r.To).ToPgTimeStampZ(),
 	})
+	return rows, ParsePgxError(err)
 }
 
 func (srvc newsService) GetByMD5Hash(ctx context.Context, r *NewsGetByMD5HashRequest) (*model.GetNewsByMD5HashRow, error) {
 	if err := srvc.validate.Struct(r); err != nil {
 		return nil, err
 	}
-	return srvc.store.GetNewsByMD5Hash(ctx, r.MD5Hash)
+	row, err := srvc.store.GetNewsByMD5Hash(ctx, r.MD5Hash)
+	return row, ParsePgxError(err)
 }
 
 func (srvc newsService) GetByMD5Hashs(ctx context.Context, r *NewsGetByMD5HashsRequest) ([]int64, error) {
 	if err := srvc.validate.Struct(r); err != nil {
 		return nil, err
 	}
-	return srvc.store.GetNewsByMD5Hashs(ctx, r.MD5Hash)
+	ids, err := srvc.store.GetNewsByMD5Hashs(ctx, r.MD5Hash)
+	return ids, ParsePgxError(err)
 }
 
 func (srvc newsService) ListRecentN(ctx context.Context, r *NewsListRequest) ([]*model.ListRecentNNewsRow, error) {
 	if err := srvc.validate.Struct(r); err != nil {
 		return nil, err
 	}
-	return srvc.store.ListRecentNNews(ctx, r.N)
+	rows, err := srvc.store.ListRecentNNews(ctx, r.N)
+	return rows, ParsePgxError(err)
 }

@@ -29,11 +29,31 @@ type PreviewPostResp struct {
 	RedirectURL string        `form:"url"   json:"url,omitempty"`
 }
 
-func (resp *PreviewPostResp) WithEcError(ecErr *ec.Error) {
+func (resp *PreviewPostResp) WithEcError(ecErr *ec.Error) *PreviewPostResp {
 	resp.Error = &PreviewError{
 		Code:    ecErr.HttpStatusCode,
 		PgxCode: ecErr.PgxCode,
 		Message: ecErr.Message,
 		Detail:  ecErr.Details,
 	}
+	return resp
+}
+
+func (resp PreviewPostResp) HttpStatusCode() int {
+	return resp.Error.Code
+}
+
+func (resp *PreviewPostResp) WithRedirectURL(url string) *PreviewPostResp {
+	resp.RedirectURL = url
+	return resp
+}
+
+func (resp *PreviewPostResp) WithOutDetails() *PreviewPostResp {
+	resp.Error.Detail = nil
+	return resp
+}
+
+func (resp *PreviewPostResp) WithOutMessage() *PreviewPostResp {
+	resp.Error.Message = ""
+	return resp
 }
