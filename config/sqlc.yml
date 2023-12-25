@@ -16,10 +16,20 @@ sql:
         json_tags_case_style: none
         output_db_file_name: db.go
         output_models_file_name: model.go
-        output_querier_file_name: querier.go
         overrides:
           - db_type: "uuid"
             go_type: "github.com/google/uuid.UUID"
           - db_type: "uuid"
             go_type: "github.com/google/uuid.UUID"
+            nullable: true
+          - db_type: "public.vector"
+            go_type:
+              package: "pgv"
+              import: "github.com/pgvector/pgvector-go"
+              type: "Vector"
+          - db_type: "public.vector"
+            go_type:
+              package: "pgv"
+              import: "github.com/pgvector/pgvector-go"
+              type: "Vector"
             nullable: true

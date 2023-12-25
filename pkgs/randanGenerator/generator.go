@@ -3,6 +3,7 @@ package randangenerator
 import (
 	"errors"
 	"fmt"
+	"net/url"
 	"sort"
 	"strings"
 	"time"
@@ -109,4 +110,20 @@ func GenRdnUnixTimes(n int, from, to time.Time) []int64 {
 	})
 
 	return rus
+}
+
+func GenRdnUrl() (*url.URL, error) {
+	schema := []string{"http", "https"}[mrand.Intn(2)]
+	hostSegs := make([]string, mrand.Intn(3)+2)
+	pathSegs := make([]string, mrand.Intn(5)+1)
+
+	for i := range hostSegs {
+		hostSegs[i] = Must(Alphabet.GenRdmString(mrand.Intn(10) + 3))
+	}
+
+	for i := range pathSegs {
+		pathSegs[i] = Must(Alphabet.GenRdmString(mrand.Intn(10) + 3))
+	}
+
+	return url.Parse(fmt.Sprintf("%s://%s/%s", schema, strings.Join(hostSegs, "."), strings.Join(pathSegs, "/")))
 }

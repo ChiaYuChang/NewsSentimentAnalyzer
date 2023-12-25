@@ -171,6 +171,21 @@ func (mr *MockStoreMockRecorder) CreateAPIKey(arg0, arg1 interface{}) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateAPIKey", reflect.TypeOf((*MockStore)(nil).CreateAPIKey), arg0, arg1)
 }
 
+// CreateEmbedding mocks base method.
+func (m *MockStore) CreateEmbedding(arg0 context.Context, arg1 *model.CreateEmbeddingParams) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateEmbedding", arg0, arg1)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateEmbedding indicates an expected call of CreateEmbedding.
+func (mr *MockStoreMockRecorder) CreateEmbedding(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateEmbedding", reflect.TypeOf((*MockStore)(nil).CreateEmbedding), arg0, arg1)
+}
+
 // CreateEndpoint mocks base method.
 func (m *MockStore) CreateEndpoint(arg0 context.Context, arg1 *model.CreateEndpointParams) (int32, error) {
 	m.ctrl.T.Helper()
@@ -512,6 +527,36 @@ func (m *MockStore) GetContentById(arg0 context.Context, arg1 []int32) ([]*model
 func (mr *MockStoreMockRecorder) GetContentById(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContentById", reflect.TypeOf((*MockStore)(nil).GetContentById), arg0, arg1)
+}
+
+// GetEmbeddingByJobId mocks base method.
+func (m *MockStore) GetEmbeddingByJobId(arg0 context.Context, arg1 int64) ([]*model.GetEmbeddingByJobIdRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetEmbeddingByJobId", arg0, arg1)
+	ret0, _ := ret[0].([]*model.GetEmbeddingByJobIdRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetEmbeddingByJobId indicates an expected call of GetEmbeddingByJobId.
+func (mr *MockStoreMockRecorder) GetEmbeddingByJobId(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetEmbeddingByJobId", reflect.TypeOf((*MockStore)(nil).GetEmbeddingByJobId), arg0, arg1)
+}
+
+// GetEmbeddingByNewsIdsAndModel mocks base method.
+func (m *MockStore) GetEmbeddingByNewsIdsAndModel(arg0 context.Context, arg1 *model.GetEmbeddingByNewsIdsAndModelParams) ([]*model.GetEmbeddingByNewsIdsAndModelRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetEmbeddingByNewsIdsAndModel", arg0, arg1)
+	ret0, _ := ret[0].([]*model.GetEmbeddingByNewsIdsAndModelRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetEmbeddingByNewsIdsAndModel indicates an expected call of GetEmbeddingByNewsIdsAndModel.
+func (mr *MockStoreMockRecorder) GetEmbeddingByNewsIdsAndModel(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetEmbeddingByNewsIdsAndModel", reflect.TypeOf((*MockStore)(nil).GetEmbeddingByNewsIdsAndModel), arg0, arg1)
 }
 
 // GetJobByOwnerFilterByJIdAndStatus mocks base method.

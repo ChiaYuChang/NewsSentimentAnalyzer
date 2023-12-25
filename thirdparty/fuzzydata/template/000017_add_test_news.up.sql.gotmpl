@@ -1,0 +1,5 @@
+INSERT INTO news (
+        id, md5_hash, guid, author, title, link, description, language, content, category, source, related_guid, publish_at
+) VALUES{{ range $i, $item := .Item }}{{ if $i }},{{end}}
+    ({{ add $i 1 }}, '{{$item.Md5Hash}}', '{{$item.Guid}}', {{$item.AuthorString}}, '{{$item.Title}}', '{{$item.Link}}', '{{$item.Description}}', '{{$item.Language}}', {{$item.ContentString}}, '{{$item.Category}}', '{{$item.Source}}', {{$item.RelatedGuidString}}, '{{$item.PublishAt.Format "2006-01-02 15:04:05"}}'){{ end }};
+ALTER SEQUENCE news_id_seq RESTART WITH {{.N}};

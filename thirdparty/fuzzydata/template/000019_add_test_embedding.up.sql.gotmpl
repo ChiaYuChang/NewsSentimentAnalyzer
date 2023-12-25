@@ -1,0 +1,5 @@
+INSERT INTO embeddings (
+        id, model, news_id, embedding, sentiment
+) VALUES{{ range $i, $row := .Rows }}{{ if $i }},{{end}}
+    ({{ add $i 1 }}, '{{$row.RowAttr "model"}}', {{$row.RowAttr "nid"}}, '{{$row.VectorString}}', '{{$row.RowAttr "sentiment"}}'){{ end }};
+ALTER SEQUENCE embeddings_id_seq RESTART WITH {{.NRow}};

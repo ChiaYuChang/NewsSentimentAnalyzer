@@ -9,6 +9,7 @@ import (
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/model"
 	"github.com/google/uuid"
+
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -442,10 +443,72 @@ func (srvc jobService) Count(ctx context.Context, owner uuid.UUID) (*model.Count
 	return result, ParsePgxError(err)
 }
 
-func (srvc jobService) GetOldestNCreatedJobsForEachUser(ctx context.Context, n int) ([]*model.GetOldestNCreatedJobsForEachUserRow, error) {
+func (srvc jobService) GetOldestNCreatedJobsForEachUser(ctx context.Context, n int) (
+	// []*model.GetOldestNCreatedJobsForEachUserRow, error) {
+	[]CreatedJobsRow, error) {
+
 	if n > math.MaxInt32 {
 		n = math.MaxInt32
 	}
 	rows, err := srvc.store.GetOldestNCreatedJobsForEachUser(ctx, int32(n))
-	return rows, ParsePgxError(err)
+	// return rows, ParsePgxError(err)
+
+	objs := make([]CreatedJobsRow, len(rows))
+	for i := range rows {
+		objs[i] = CreatedJobsRow{rows[i]}
+	}
+	return objs, ParsePgxError(err)
+}
+
+type CreatedJobsRow struct {
+	*model.GetOldestNCreatedJobsForEachUserRow
+}
+
+func (r CreatedJobsRow) String() string {
+
+	obj := struct {
+		model.GetOldestNCreatedJobsForEachUserRow
+		AnalyzerOption *AnalyzerOption `json:"llm_query"`
+	}{
+		GetOldestNCreatedJobsForEachUserRow: *r.GetOldestNCreatedJobsForEachUserRow,
+		AnalyzerOption:                      r.AnalyzerOptions(),
+	}
+
+	b, _ := json.MarshalIndent(obj, "", "    ")
+	return string(b)
+}
+
+func (r CreatedJobsRow) AnalyzerOptions() *AnalyzerOption {
+	var aopt *AnalyzerOption
+	json.Unmarshal(r.LlmQuery, &aopt)
+	return aopt
+}
+
+type AnalyzerOption struct {
+	IsTestData               bool   `                  json:"is_test_data,omitempty" redis:"is_test_data"`
+	APIName                  string `form:"api"        json:"api"                    redis:"api"`
+	APIId                    int    `form:"llm-api-id" json:"id,omitempty"           redis:"id"`
+	EmbeddingOptions         `json:"embedding-options,omitempty"                     redis:"embedding-options"`
+	SentimentAnalysisOptions `json:"sentiment-analysis-options,omitempty"            redis:"sentiment-analysis-options"`
+}
+
+func (opt AnalyzerOption) String() string {
+	return opt.ToString("", "    ")
+}
+
+func (opt AnalyzerOption) ToString(prefix, indent string) string {
+	b, _ := json.MarshalIndent(opt, prefix, indent)
+	return string(b)
+}
+
+type EmbeddingOptions struct {
+	Embedding      bool   `form:"do-embedding"    json:"embedding"             redis:"embedding"`
+	InputType      string `form:"input-type"      json:"input_type,omitempty" redis:"input_type"`
+	EmbeddingModel string `form:"embedding-model" json:"embedding_model"       redis:"embedding_model"`
+}
+
+type SentimentAnalysisOptions struct {
+	Sentiment bool   `form:"do-sentiment" json:"sentiment"              redis:"sentiment"`
+	MaxTokens int    `form:"max-tokens"   json:"max_tokens,omitempty"  redis:"max_tokens"`
+	Truncate  string `form:"truncate"     json:"truncate,omitempty"    redis:"truncate"`
 }

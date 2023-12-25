@@ -3,6 +3,8 @@ package openai
 import (
 	"fmt"
 	"strings"
+
+	pgv "github.com/pgvector/pgvector-go"
 )
 
 // See https://platform.openai.com/docs/api-reference/embeddings
@@ -46,10 +48,22 @@ type EmbeddingsResponseBody struct {
 	} `json:"usage"`
 }
 
+func (body EmbeddingsResponseBody) ToPgvVectors() <-chan pgv.Vector {
+	vecChan := make(chan pgv.Vector)
+	for _, embd := range body.Data {
+		vecChan <- embd.ToPgvVector()
+	}
+	return vecChan
+}
+
 type EmbeddingsObject struct {
 	Index     int       `json:"index"`
 	Object    string    `json:"object"`
 	Embedding []float32 `json:"embedding"`
+}
+
+func (body EmbeddingsObject) ToPgvVector() pgv.Vector {
+	return pgv.NewVector(body.Embedding)
 }
 
 func (body EmbeddingsObject) String() string {

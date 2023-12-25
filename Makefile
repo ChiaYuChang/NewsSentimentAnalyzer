@@ -52,6 +52,21 @@ docker-up-db:
 	@docker start ${APP_NAME}-postgres
 	@docker start ${APP_NAME}-redis
 
+docker-new-test-analyzer-container:
+	@docker run --name ${APP_NAME}-test-analyzer \
+	-p ${TEST_ANALYSER_PORT}:8002 \
+	-d \
+	${TEST_ANALYSER_PORT_IMAGE_NAME}:${TEST_ANALYSER_PORT_IMAGE_TAG} \
+	--seed ${TEST_ANALYSER_SEED} \
+	--debug ${TEST_ANALYSER_DEBUG_MODE} \
+	--port ${TEST_ANALYSER_PORT}
+
+docker-up-test-analyzer:
+	@docker start ${APP_NAME}-test-analyzer
+
+docker-down-test-analyzer:
+	@docker stop ${APP_NAME}-test-analyzer
+
 migrate-create:
 	@echo "Name of .sql?: "; \
     read FILENAME; \

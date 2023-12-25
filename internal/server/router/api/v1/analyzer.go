@@ -11,23 +11,29 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
+	// http client
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api"
 	cohere "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api/Cohere"
 	openai "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/client/api/OpenAI"
+
+	// grpc client
+	ldcli "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/grpc/languageDetector"
 	newsparser "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/grpc/newsParser"
+	ldpf "github.com/ChiaYuChang/NewsSentimentAnalyzer/proto/language_detector"
+
+	// http server
 	pageform "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/pageForm"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/service"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view"
 	"github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/server/view/object"
-	ec "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/errorCode"
 	"github.com/go-chi/chi/v5"
+
+	"github.com/ChiaYuChang/NewsSentimentAnalyzer/global"
+	ec "github.com/ChiaYuChang/NewsSentimentAnalyzer/pkgs/errorCode"
 	"github.com/jackc/pgerrcode"
 	"github.com/pemistahl/lingua-go"
 	"github.com/redis/go-redis/v9"
-
-	ldcli "github.com/ChiaYuChang/NewsSentimentAnalyzer/internal/grpc/languageDetector"
-	ldpf "github.com/ChiaYuChang/NewsSentimentAnalyzer/proto/language_detector"
+	// pgv "github.com/pgvector/pgvector-go"
 )
 
 func (repo APIRepo) GetAnalyzer(w http.ResponseWriter, req *http.Request) {
@@ -79,6 +85,7 @@ func (repo APIRepo) PostAnalyzer(w http.ResponseWriter, req *http.Request) {
 			w.Write(b)
 			return
 		}
+
 	}
 
 	err := req.ParseForm()
@@ -95,7 +102,7 @@ func (repo APIRepo) PostAnalyzer(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	var fdata api.AnalyzerOption
+	var fdata service.AnalyzerOption
 	err = repo.FormDecoder.Decode(&fdata, req.PostForm)
 	if err != nil {
 		global.Logger.Error().Err(err).Msg("Failed to decode form")
@@ -238,5 +245,6 @@ func (repo APIRepo) CacheToStore(pcid string, aid, lid int) (int, *ec.Error) {
 			WithMessage(err.Error()).
 			WithDetails("Failed to delete cache")
 	}
+
 	return int(result.JobId), nil
 }

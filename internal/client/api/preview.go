@@ -50,13 +50,13 @@ func (a SortById) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a SortById) Less(i, j int) bool { return a[i].Id.String() < a[j].Id.String() }
 
 type PreviewCache struct {
-	IsDone          bool           `json:"is_done"          redis:"is_done"`
-	Query           CacheQuery     `json:"query"            redis:"query"`
-	CreatedAt       time.Time      `json:"created_at"       redis:"created_at"`
-	NewsItem        []NewsPreview  `json:"news_item"        redis:"news_item"`
-	SelectedAll     bool           `json:"selected_all"     redis:"selected_all"`
-	SelectedNId     []string       `json:"selected_nid"     redis:"selected_nid"`
-	AnalyzerOptions AnalyzerOption `json:"analyzer_options" redis:"analyzer_options"`
+	IsDone          bool                   `json:"is_done"          redis:"is_done"`
+	Query           CacheQuery             `json:"query"            redis:"query"`
+	CreatedAt       time.Time              `json:"created_at"       redis:"created_at"`
+	NewsItem        []NewsPreview          `json:"news_item"        redis:"news_item"`
+	SelectedAll     bool                   `json:"selected_all"     redis:"selected_all"`
+	SelectedNId     []string               `json:"selected_nid"     redis:"selected_nid"`
+	AnalyzerOptions service.AnalyzerOption `json:"analyzer_options" redis:"analyzer_options"`
 }
 
 func (cache PreviewCache) String() string {
@@ -66,34 +66,6 @@ func (cache PreviewCache) String() string {
 func (cache PreviewCache) ToString(prefix, indent string) string {
 	b, _ := json.MarshalIndent(cache, prefix, indent)
 	return string(b)
-}
-
-type AnalyzerOption struct {
-	APIName                  string `form:"api"        json:"api"          redis:"api"`
-	APIId                    int    `form:"llm-api-id" json:"id,omitempty" redis:"id"`
-	EmbeddingOptions         `json:"embedding-options,omitempty"           redis:"embedding-options"`
-	SentimentAnalysisOptions `json:"sentiment-analysis-options,omitempty"  redis:"sentiment-analysis-options"`
-}
-
-func (opt AnalyzerOption) String() string {
-	return opt.ToString("", "    ")
-}
-
-func (opt AnalyzerOption) ToString(prefix, indent string) string {
-	b, _ := json.MarshalIndent(opt, prefix, indent)
-	return string(b)
-}
-
-type EmbeddingOptions struct {
-	Embedding      bool   `form:"do-embedding"    json:"embedding"             redis:"embedding"`
-	InputType      string `form:"input-type"      json:"input_type,omitempty" redis:"input_type"`
-	EmbeddingModel string `form:"embedding-model" json:"embedding_model"       redis:"embedding_model"`
-}
-
-type SentimentAnalysisOptions struct {
-	Sentiment bool   `form:"do-sentiment" json:"sentiment"              redis:"sentiment"`
-	MaxTokens int    `form:"max-tokens"   json:"max_tokens,omitempty"  redis:"max_tokens"`
-	Truncate  string `form:"truncate"     json:"truncate,omitempty"    redis:"truncate"`
 }
 
 func (cache *PreviewCache) AppendNewsItem(items ...NewsPreview) {

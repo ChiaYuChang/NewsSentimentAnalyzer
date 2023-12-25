@@ -1,0 +1,2 @@
+DELETE FROM news;
+ALTER SEQUENCE news_id_seq RESTART WITH 1;

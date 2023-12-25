@@ -99,7 +99,7 @@ func ParsePgxError(err error, details ...string) error {
 	}
 
 	if errors.Is(err, pgx.ErrTxClosed) {
-		return ec.MustGetEcErr(ec.ECErrTxClosed)
+		return ec.MustGetEcErr(ec.ECPgxErrTxClosed)
 	}
 
 	if errors.Is(err, pgx.ErrTxCommitRollback) {

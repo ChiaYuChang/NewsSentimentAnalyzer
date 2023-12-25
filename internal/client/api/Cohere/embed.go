@@ -1,9 +1,12 @@
 package cohere
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"unicode/utf8"
+
+	pgv "github.com/pgvector/pgvector-go"
 )
 
 func NewEmbedRequest(apikey string, text ...string) Request[EmbedRequestBody] {
@@ -45,6 +48,14 @@ type EmbedResponseBody struct {
 	Meta       Meta        `json:"meta"`
 }
 
+func (body EmbedResponseBody) ToPgvVectors() <-chan pgv.Vector {
+	vecChan := make(chan pgv.Vector)
+	for _, embd := range body.Embeddings {
+		vecChan <- pgv.NewVector(embd)
+	}
+	return vecChan
+}
+
 type Meta struct {
 	APIVersion struct {
 		Version string `json:"version"`
@@ -56,26 +67,37 @@ type Meta struct {
 }
 
 func (body EmbedResponseBody) Len() int {
-	return len(body.Texts)
+	return len(body.Embeddings)
 }
 
-func (body EmbedResponseBody) Unwind() []*EmbedItem {
-	items := make([]*EmbedItem, 0, body.Len())
+func (body EmbedResponseBody) Unwind() []*EmbedObject {
+	items := make([]*EmbedObject, 0, body.Len())
 	for i := 0; i < body.Len(); i++ {
-		items = append(items, &EmbedItem{
+		items = append(items, &EmbedObject{
 			Text:      body.Texts[i],
-			Embedding: body.Embeddings[i],
+			Embedding: pgv.NewVector(body.Embeddings[i]),
 		})
 	}
 	return items
 }
 
-type EmbedItem struct {
-	Text      string    `json:"text"`
-	Embedding []float32 `json:"embedding"`
+type EmbedObject struct {
+	Text      string     `json:"text"`
+	Embedding pgv.Vector `json:"embedding"`
 }
 
-func (item EmbedItem) String() string {
+func (obj EmbedObject) MarshalJSON() ([]byte, error) {
+	tmp := struct {
+		Text      string    `json:"text"`
+		Embedding []float32 `json:"embedding"`
+	}{
+		Text:      obj.Text,
+		Embedding: obj.Embedding.Slice(),
+	}
+	return json.Marshal(tmp)
+}
+
+func (item EmbedObject) String() string {
 	sb := strings.Builder{}
 	sb.WriteString("Cohere Embed Item:\n")
 
@@ -85,8 +107,8 @@ func (item EmbedItem) String() string {
 		txt = fmt.Sprintf("%s...(%d words)", txt[:40], txtLen-40)
 	}
 
-	embdLen := len(item.Embedding)
-	embd := item.Embedding
+	embdLen := len(item.Embedding.Slice())
+	embd := item.Embedding.Slice()
 	if len(embd) > 10 {
 		embd = embd[:10]
 	}

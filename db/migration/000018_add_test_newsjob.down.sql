@@ -1,0 +1,2 @@
+DELETE FROM newsjobs;
+ALTER SEQUENCE newsjobs_id_seq RESTART WITH 1;

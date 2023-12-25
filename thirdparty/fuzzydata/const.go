@@ -16,6 +16,8 @@ var (
 	NUM_USER     = 50
 	MAX_NUM_JOBS = 100
 	MIN_NUM_JOBS = 20
+	NUM_NEWSS    = 3000
+	AVG_EDGE     = 10
 )
 
 var (

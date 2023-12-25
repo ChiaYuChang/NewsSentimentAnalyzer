@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 15.3
--- Dumped by pg_dump version 15.4
+-- Dumped from database version 16.1
+-- Dumped by pg_dump version 16.1
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -15,6 +15,20 @@ SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
+
+--
+-- Name: vector; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA public;
+
+
+--
+-- Name: EXTENSION vector; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION vector IS 'vector data type and ivfflat and hnsw access methods';
+
 
 --
 -- Name: api_type; Type: TYPE; Schema: public; Owner: admin
@@ -70,6 +84,19 @@ CREATE TYPE public.role AS ENUM (
 
 ALTER TYPE public.role OWNER TO admin;
 
+--
+-- Name: sentiment; Type: TYPE; Schema: public; Owner: admin
+--
+
+CREATE TYPE public.sentiment AS ENUM (
+    'positive',
+    'neutral',
+    'negative'
+);
+
+
+ALTER TYPE public.sentiment OWNER TO admin;
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
@@ -104,7 +131,7 @@ CREATE SEQUENCE public.apikeys_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.apikeys_id_seq OWNER TO admin;
+ALTER SEQUENCE public.apikeys_id_seq OWNER TO admin;
 
 --
 -- Name: apikeys_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
@@ -145,13 +172,52 @@ CREATE SEQUENCE public.apis_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.apis_id_seq OWNER TO admin;
+ALTER SEQUENCE public.apis_id_seq OWNER TO admin;
 
 --
 -- Name: apis_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
 --
 
 ALTER SEQUENCE public.apis_id_seq OWNED BY public.apis.id;
+
+
+--
+-- Name: embeddings; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public.embeddings (
+    id bigint NOT NULL,
+    model character varying(32) NOT NULL,
+    news_id bigint NOT NULL,
+    embedding public.vector(1536),
+    sentiment public.sentiment NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    deleted_at timestamp with time zone
+);
+
+
+ALTER TABLE public.embeddings OWNER TO admin;
+
+--
+-- Name: embeddings_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public.embeddings_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.embeddings_id_seq OWNER TO admin;
+
+--
+-- Name: embeddings_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public.embeddings_id_seq OWNED BY public.embeddings.id;
 
 
 --
@@ -184,7 +250,7 @@ CREATE SEQUENCE public.endpoints_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.endpoints_id_seq OWNER TO admin;
+ALTER SEQUENCE public.endpoints_id_seq OWNER TO admin;
 
 --
 -- Name: endpoints_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
@@ -226,7 +292,7 @@ CREATE SEQUENCE public.jobs_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.jobs_id_seq OWNER TO admin;
+ALTER SEQUENCE public.jobs_id_seq OWNER TO admin;
 
 --
 -- Name: jobs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
@@ -260,7 +326,7 @@ CREATE SEQUENCE public.keywords_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.keywords_id_seq OWNER TO admin;
+ALTER SEQUENCE public.keywords_id_seq OWNER TO admin;
 
 --
 -- Name: keywords_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
@@ -296,7 +362,7 @@ CREATE SEQUENCE public.logs_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.logs_id_seq OWNER TO admin;
+ALTER SEQUENCE public.logs_id_seq OWNER TO admin;
 
 --
 -- Name: logs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
@@ -341,7 +407,7 @@ CREATE SEQUENCE public.news_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.news_id_seq OWNER TO admin;
+ALTER SEQUENCE public.news_id_seq OWNER TO admin;
 
 --
 -- Name: news_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
@@ -375,7 +441,7 @@ CREATE SEQUENCE public.newsjobs_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.newsjobs_id_seq OWNER TO admin;
+ALTER SEQUENCE public.newsjobs_id_seq OWNER TO admin;
 
 --
 -- Name: newsjobs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
@@ -429,6 +495,13 @@ ALTER TABLE ONLY public.apikeys ALTER COLUMN id SET DEFAULT nextval('public.apik
 --
 
 ALTER TABLE ONLY public.apis ALTER COLUMN id SET DEFAULT nextval('public.apis_id_seq'::regclass);
+
+
+--
+-- Name: embeddings id; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.embeddings ALTER COLUMN id SET DEFAULT nextval('public.embeddings_id_seq'::regclass);
 
 
 --
@@ -490,6 +563,14 @@ ALTER TABLE ONLY public.apis
 
 
 --
+-- Name: embeddings embeddings_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.embeddings
+    ADD CONSTRAINT embeddings_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: endpoints endpoints_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -503,6 +584,14 @@ ALTER TABLE ONLY public.endpoints
 
 ALTER TABLE ONLY public.jobs
     ADD CONSTRAINT jobs_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: jobs jobs_ulid_key; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.jobs
+    ADD CONSTRAINT jobs_ulid_key UNIQUE (ulid);
 
 
 --
@@ -574,6 +663,20 @@ ALTER TABLE ONLY public.users
 --
 
 CREATE INDEX apikeys_owner_api_id_idx ON public.apikeys USING btree (owner, api_id);
+
+
+--
+-- Name: embeddings_embedding_idx; Type: INDEX; Schema: public; Owner: admin
+--
+
+CREATE INDEX embeddings_embedding_idx ON public.embeddings USING hnsw (embedding public.vector_ip_ops);
+
+
+--
+-- Name: embeddings_model_sentiment_idx; Type: INDEX; Schema: public; Owner: admin
+--
+
+CREATE INDEX embeddings_model_sentiment_idx ON public.embeddings USING btree (model, sentiment);
 
 
 --
@@ -653,6 +756,14 @@ ALTER TABLE ONLY public.apikeys
 
 ALTER TABLE ONLY public.apikeys
     ADD CONSTRAINT apikeys_owner_fkey FOREIGN KEY (owner) REFERENCES public.users(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: embeddings embeddings_news_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.embeddings
+    ADD CONSTRAINT embeddings_news_id_fkey FOREIGN KEY (news_id) REFERENCES public.news(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --

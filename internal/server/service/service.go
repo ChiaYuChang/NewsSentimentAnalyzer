@@ -88,6 +88,12 @@ func (srvc Service) Endpoint() endpointService {
 	return endpointService(srvc)
 }
 
+type embeddingService Service
+
+func (srvc Service) Embedding() embeddingService {
+	return embeddingService(srvc)
+}
+
 type txService Service
 
 func (srvc Service) TX() txService {

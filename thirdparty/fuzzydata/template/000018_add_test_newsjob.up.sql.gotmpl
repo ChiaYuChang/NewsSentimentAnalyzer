@@ -1,0 +1,5 @@
+INSERT INTO newsjobs (
+        id, job_id, news_id
+) VALUES{{ range $i, $item := .Item }}{{ if $i }},{{end}}
+    ({{ add $i 1 }}, {{$item.JobId}}, {{$item.NewsId}}){{ end }};
+ALTER SEQUENCE newsjobs_id_seq RESTART WITH {{.N}};
